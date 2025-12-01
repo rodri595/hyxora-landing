@@ -1,36 +1,147 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# Hyxora Landing Page
 
-## Getting Started
+A modern, responsive landing page built with Next.js 16, React 19, and Tailwind CSS 4. Features a clean component architecture with dark mode support and smooth user interactions.
 
-First, run the development server:
+## ✨ Features
+
+- **⚡ Next.js 16** - Latest App Router architecture for optimal performance
+- **⚛️ React 19** - Cutting-edge React features and improvements
+- **🎨 Tailwind CSS 4** - Modern utility-first CSS framework with PostCSS integration
+- **🌓 Dark Mode** - Seamless theme switching with `next-themes`
+- **📱 Responsive Design** - Mobile-first approach that works on all devices
+- **🎯 Component-Based** - Modular and reusable component architecture
+- **🔧 TypeScript Support** - Type-safe development experience
+- **♿ Accessible** - Built with accessibility in mind using Headless UI
+
+## 🚀 Getting Started
+
+### Prerequisites
+
+- Node.js 18+ installed
+- pnpm (recommended) or npm/yarn
+
+### Installation
+
+1. Clone the repository:
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone https://github.com/rodri595/hyxora-landing.git
+cd hyxora-landing
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+2. Install dependencies:
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+```bash
+pnpm install
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+3. Run the development server:
 
-## Learn More
+```bash
+pnpm dev
+```
 
-To learn more about Next.js, take a look at the following resources:
+4. Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 📦 Available Scripts
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+| Command      | Description                        |
+| ------------ | ---------------------------------- |
+| `pnpm dev`   | Start the development server       |
+| `pnpm build` | Build the production application   |
+| `pnpm start` | Start the production server        |
+| `pnpm lint`  | Run ESLint for code quality checks |
 
-## Deploy on Vercel
+## 🏗️ Project Structure
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```
+hyxora-landing/
+├── app/                    # Next.js App Router
+│   ├── globals.css        # Global styles
+│   ├── layout.jsx         # Root layout component
+│   ├── page.jsx          # Home page
+│   └── providers.jsx     # Theme and context providers
+├── assets/                # Static assets (images, etc.)
+│   └── imgs/
+│       └── brand/        # Brand assets
+├── components/            # Reusable UI components
+│   ├── Button/           # Button component
+│   ├── Field/            # Form field component
+│   ├── Footer/           # Footer component
+│   ├── Header/           # Header/navigation
+│   ├── Icon/             # Icon component
+│   ├── Image/            # Optimized image component
+│   ├── Layout/           # Layout wrapper
+│   ├── Modal/            # Modal dialog
+│   ├── Select/           # Select dropdown
+│   ├── ThemeButton/      # Theme toggle button
+│   └── UpButton/         # Scroll to top button
+├── hooks/                 # Custom React hooks
+│   ├── index.js
+│   └── useScrollPosition.jsx
+└── templates/             # Page templates
+    └── HomePage/         # Home page template
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## 🛠️ Tech Stack
+
+- **Framework**: [Next.js 16](https://nextjs.org/)
+- **UI Library**: [React 19](https://react.dev/)
+- **Styling**: [Tailwind CSS 4](https://tailwindcss.com/)
+- **Headless Components**: [@headlessui/react](https://headlessui.com/)
+- **Theme Management**: [next-themes](https://github.com/pacocoursey/next-themes)
+- **Hooks Library**: [usehooks-ts](https://usehooks-ts.com/)
+- **Language**: JavaScript/TypeScript
+- **Package Manager**: pnpm
+
+## 🎨 Components
+
+### Core Components
+
+- **Button** - Versatile button component with multiple variants
+- **Field** - Form input field with validation support
+- **Header** - Navigation header with responsive menu
+- **Footer** - Site footer with links and information
+- **Modal** - Accessible modal dialog
+- **Select** - Custom select dropdown
+- **ThemeButton** - Dark/light mode toggle
+- **UpButton** - Scroll to top functionality
+- **Layout** - Main layout wrapper for pages
+
+### Custom Hooks
+
+- **useScrollPosition** - Track scroll position for UI interactions
+
+## 🎯 Development
+
+### Adding New Components
+
+1. Create a new folder in `components/` with your component name
+2. Add an `index.jsx` or `index.tsx` file
+3. Export your component as default
+4. Import and use in your pages or templates
+
+### Styling Guidelines
+
+This project uses Tailwind CSS 4. Follow these best practices:
+
+- Use utility classes for styling
+- Keep custom CSS minimal in `globals.css`
+- Use the theme configuration for consistent colors and spacing
+- Leverage dark mode classes (`dark:`) for theme support
+
+## 📝 License
+
+This project is private and proprietary.
+
+## 🤝 Contributing
+
+This is a private project. For contribution guidelines, please contact the repository owner.
+
+## 📧 Contact
+
+For questions or support, please reach out to the project maintainers.
+
+---
+
+Built with ❤️ by BlockImpulse

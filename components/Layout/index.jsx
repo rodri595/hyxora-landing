@@ -1,13 +1,13 @@
 import Header from "@/components/Header";
-// import Footer from "@/components/Footer";
-import ThemeButton from "@/components/ThemeButton";
+import Footer from "@/components/Footer";
+// import ThemeButton from "@/components/ThemeButton";
 import UpButton from "@/components/UpButton";
 const Layout = ({
   className,
   classContainer,
   isFixedHeader,
   isVisiblePlan,
-  // isHiddenFooter,
+  isHiddenFooter,
   children,
 }) => {
   return (
@@ -24,8 +24,8 @@ const Layout = ({
       )}
       <Header isFixed={isFixedHeader} />
       <div className={`grow ${classContainer || ""}`}>{children}</div>
-      {/* {!isHiddenFooter && <Footer />} */}
-      <ThemeButton className="fixed! left-5 bottom-5 z-5" />
+      {!isHiddenFooter && <Footer />}
+      {/* <ThemeButton className="fixed! left-5 bottom-5 z-5" /> */}
       <UpButton />
     </div>
   );

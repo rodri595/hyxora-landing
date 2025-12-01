@@ -193,18 +193,15 @@
 }
 
 @layer base {
-  html {
+  /* html {
     scrollbar-gutter: stable;
-  }
+  } */
   button {
     @apply cursor-pointer;
   }
 }
 
 @layer components {
-  .section {
-    @apply mb-40 max-xl:mb-32 max-lg:mb-20 max-md:mb-16;
-  }
 }
 
 .animate-rotate {
