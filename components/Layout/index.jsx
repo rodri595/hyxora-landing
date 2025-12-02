@@ -23,7 +23,7 @@ const Layout = ({
         </>
       )}
       <Header isFixed={isFixedHeader} />
-      <div className={`grow ${classContainer || ""}`}>{children}</div>
+      <div className={`${classContainer || ""}`}>{children}</div>
       {!isHiddenFooter && <Footer />}
       {/* <ThemeButton className="fixed! left-5 bottom-5 z-5" /> */}
       <UpButton />
