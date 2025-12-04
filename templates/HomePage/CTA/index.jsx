@@ -1,12 +1,11 @@
 "use client";
-import { useState, useEffect, useRef } from "react";
+import { useRef } from "react";
 import Image from "@/components/Image";
-import Button from "@/components/Button";
 import checkSVG from "@/assets/imgs/icons/check.svg";
 import gsap from "gsap";
+import { useGSAP } from "@gsap/react";
 
 const CTA = () => {
-  const [email, setEmail] = useState("");
   const marqueeRef = useRef(null);
 
   const features = [
@@ -15,7 +14,7 @@ const CTA = () => {
     "Airdrop & whitelist alerts",
   ];
 
-  useEffect(() => {
+  useGSAP(() => {
     const marquee = marqueeRef.current;
     if (!marquee) return;
 
@@ -28,22 +27,21 @@ const CTA = () => {
     tl.to(marquee, {
       x: -marqueeWidth,
       duration: 20,
-      ease: "none",
-    }).set(marquee, { x: 0 });
+      // ease: "none",
+      ease: "linear",
+      repeat: -1,
+    });
 
     return () => {
       tl.kill();
     };
   }, []);
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    // Handle newsletter subscription
-    console.log("Subscribing:", email);
-  };
-
   return (
-    <section className="flex flex-col gap-10 items-center w-full py-20 max-w-[886px] mx-auto">
+    <section
+      className="flex flex-col gap-10 items-center w-full py-20 max-w-[886px] mx-auto"
+      data-cursor-text="Join Now"
+    >
       {/* Text Section */}
       <div className="flex flex-col gap-7 items-center text-center w-full max-w-[495px]">
         <h2 className="font-medium text-[40px] leading-normal tracking-[-1.6px] text-[#19363f]">
@@ -63,7 +61,7 @@ const CTA = () => {
           className="flex gap-6 items-center will-change-transform"
         >
           {/* First set of features */}
-          <div className="flex gap-6 items-center shrink-0">
+          <div className="flex gap-6 items-center shrink-0 ">
             {features.map((feature, index) => (
               <div
                 key={`first-${index}`}
@@ -119,25 +117,6 @@ const CTA = () => {
           }}
         />
       </div>
-
-      {/* Form Section */}
-      <form
-        onSubmit={handleSubmit}
-        className="bg-[rgba(25,54,63,0.02)] border-[0.7px] border-[rgba(25,54,63,0.02)] border-solid flex items-center justify-between px-5 pr-4 py-4 rounded-[16px] w-full  relative"
-        style={{ boxShadow: "0px 0px 4px 0px inset rgba(25,54,63,0.04)" }}
-      >
-        <input
-          type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          placeholder="Enter your email..."
-          className="font-normal text-[16px] leading-[24px] tracking-[-0.32px] text-[rgba(25,54,63,0.5)] bg-transparent border-none outline-none flex-1 placeholder:text-[rgba(25,54,63,0.5)]"
-          required
-        />
-        <Button type="submit" isPrimary>
-          Subscribe
-        </Button>
-      </form>
     </section>
   );
 };

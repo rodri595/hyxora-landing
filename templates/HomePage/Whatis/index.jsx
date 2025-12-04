@@ -2,7 +2,7 @@ import Video from "@/components/Video";
 
 const Whatis = () => {
   return (
-    <section className="flex  w-full ">
+    <section className="flex  w-full " data-cursor-text="Made with love">
       <div className="flex flex-col gap-[44px] items-start  max-w-[1240px] w-full mx-auto">
         {/* Text Header */}
         <div className="flex items-end justify-between w-full">

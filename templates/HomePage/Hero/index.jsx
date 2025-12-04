@@ -56,7 +56,9 @@ const Hero = () => {
           </p>
         </div>
         {/* Get Started Button */}
-        <Button isPrimary>Get Started</Button>
+        <Button isPrimary data-cursor-text="Join Now">
+          Get Started
+        </Button>
       </div>
       {/* Hero Image Section */}
       <HeroImage />

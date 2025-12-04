@@ -30,7 +30,7 @@ const Button = ({
           ? "backdrop-blur-[10px] bg-[rgba(25,54,63,0.01)] border-[rgba(255,255,255,0.2)] text-white fill-white shadow-[0px_0px_10px_0px_inset_rgba(255,255,255,0.1)] hover:shadow-[0px_0px_15px_0px_inset_rgba(255,255,255,0.15)]"
           : ""
       } ${isCircle ? "gap-0! w-[38px] h-[38px] px-0!" : ""} ${className || ""}`}
-      {...(isLink ? props : props)}
+      {...props}
     >
       {icon && <Icon className="mr-2 fill-inherit" name={icon} />}
       {children}
