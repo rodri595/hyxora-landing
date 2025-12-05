@@ -2,7 +2,7 @@
 
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
-import { useRef, useState, useCallback } from "react";
+import { useRef, useState } from "react";
 import { useMediaQuery } from "usehooks-ts";
 
 export default function CustomCursor() {
@@ -13,7 +13,7 @@ export default function CustomCursor() {
   const [cursorText, setCursorText] = useState("");
   const timelineRef = useRef(null);
   const marqueeTimelineRef = useRef(null);
-  useGSAP(
+  const { contextSafe } = useGSAP(
     () => {
       const cursor = cursorRef.current;
       if (!cursor) return;
@@ -38,7 +38,8 @@ export default function CustomCursor() {
     }
   );
 
-  const handleMouseEnter = useCallback((e) => {
+  // eslint-disable-next-line react-hooks/refs
+  const handleMouseEnter = contextSafe((e) => {
     const target = e.currentTarget;
     const text = target.getAttribute("data-cursor-text") || "";
     const cursorContainer = cursorTextContainerRef?.current;
@@ -79,8 +80,8 @@ export default function CustomCursor() {
         }
       });
   }, []);
-
-  const handleMouseLeave = useCallback(() => {
+  // eslint-disable-next-line react-hooks/refs
+  const handleMouseLeave = contextSafe(() => {
     const cursorContainer = cursorTextContainerRef?.current;
 
     if (timelineRef.current) {
