@@ -9,13 +9,18 @@ import FAQ from "./FAQ";
 import CTA from "./CTA";
 const HomePage = () => {
   return (
-    <Layout isFixedHeader classContainer="flex flex-col gap-[130px]">
+    <Layout
+      isFixedHeader
+      classContainer="flex flex-col gap-[130px] maxmd:gap-[80px]"
+    >
       <Hero />
       <Whatis />
       <Info />
       <Why />
       <FAQ />
       <CTA />
+      {/*
+       */}
     </Layout>
   );
 };

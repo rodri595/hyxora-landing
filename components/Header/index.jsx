@@ -6,6 +6,7 @@ import trendingIcon from "@/assets//imgs/icons/trending.png";
 import newListingsIcon from "@/assets/imgs/icons/newlisting.png";
 import topGainersIcon from "@/assets/imgs/icons/topgainer.png";
 import learningCenterIcon from "@/assets/imgs/icons/learning.png";
+import menuIcon from "@/assets/imgs/icons/menu.svg";
 import bannerImage from "@/assets/imgs/brand/tokens.gif";
 
 const MenuItem = ({ children, href = "#" }) => {
@@ -160,17 +161,12 @@ const Header = ({ isFixed }) => {
           isFixed ? "fixed! top-0 left-0 right-0" : ""
         }`}
       >
-        <div className="box-borde max-w-[1440px] w-full flex items-center justify-between h-[52px] px-[50px] py-[12px] mx-auto">
+        <div className="box-border max-w-[1440px] w-full flex items-center justify-between h-[52px] px-[50px] py-3 mx-auto max-md:px-4 max-md:py-[10px]">
           {/* Logo */}
-          <Link href="/" className="flex gap-2 items-center shrink-0">
+          <Link href="/" className="flex gap-2 items-center shrink-0  ">
             <div className="relative shrink-0 size-6">
               <Image
                 className="w-full h-full object-contain"
-                style={{
-                  filter:
-                    "drop-shadow(0px 6px 8px rgba(27, 95, 253, 0.15)) drop-shadow(0px 2px 4px rgba(27, 95, 253, 0.15))",
-                  boxShadow: "inset 0px 0px 3px rgba(255, 255, 255, 0.4)",
-                }}
                 src={brandIMG}
                 width={24}
                 height={24}
@@ -183,7 +179,7 @@ const Header = ({ isFixed }) => {
           </Link>
 
           {/* Navigation Menu */}
-          <nav className="flex gap-[18px] items-center">
+          <nav className="flex gap-[18px] items-center max-md:hidden">
             <ExploreDropdown />
             <MenuItem href="#marketplace">Marketplace</MenuItem>
             <MenuItem href="#docs">Docs</MenuItem>
@@ -192,11 +188,14 @@ const Header = ({ isFixed }) => {
 
           {/* Connect Wallet Button */}
           <Button
-            className="!h-[28px] !px-[16px] !py-2 !text-[14px] !leading-normal min-w-[128px]"
+            className="!h-[28px] !px-[16px] !py-2 !text-[14px] !leading-normal min-w-[128px] max-md:hidden"
             isPrimary
           >
             Connect Wallet
           </Button>
+          <button className="hidden max-md:flex rounded-[8px] border-[0.7px] border-[rgba(25,54,63,0.02)] bg-[rgba(25,54,63,0.04)] shadow-[0px_0px_4px_0px_inset_rgba(25,54,63,0.04)]   justify-center items-center shrink-0    !h-[32px] !w-[32px]">
+            <Image src={menuIcon} alt="Menu" className="w-[16px] h-[16px]" />
+          </button>
         </div>
       </div>
     </>
