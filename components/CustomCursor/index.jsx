@@ -3,11 +3,8 @@
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import { useRef, useState } from "react";
-import { useMediaQuery } from "usehooks-ts";
 
 export default function CustomCursor() {
-  const isTablet = useMediaQuery("(max-width: 1023px)");
-
   const cursorRef = useRef(null);
   const cursorTextContainerRef = useRef(null);
   const [cursorText, setCursorText] = useState("");
@@ -133,12 +130,12 @@ export default function CustomCursor() {
     { dependencies: [handleMouseEnter, handleMouseLeave] }
   );
 
-  if (isTablet) return null;
-
   return (
     <div
       ref={cursorRef}
-      className="pointer-events-none fixed top-0 left-0 z-3 flex size-3 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full  bg-blue-600 text-sm font-medium text-white"
+      className={
+        "pointer-events-none fixed top-0 left-0 z-3 flex size-3 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full  bg-blue-600 text-sm font-medium text-white max-md:hidden"
+      }
     >
       <div
         ref={cursorTextContainerRef}

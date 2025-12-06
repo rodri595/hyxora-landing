@@ -7,7 +7,7 @@ import newListingsIcon from "@/assets/imgs/icons/newlisting.png";
 import topGainersIcon from "@/assets/imgs/icons/topgainer.png";
 import learningCenterIcon from "@/assets/imgs/icons/learning.png";
 import menuIcon from "@/assets/imgs/icons/menu.svg";
-import bannerImage from "@/assets/imgs/brand/tokens.gif";
+import bannerImage from "@/assets/imgs/brand/tokens.webp";
 
 const MenuItem = ({ children, href = "#" }) => {
   return (

@@ -6,7 +6,7 @@ import mouseSVG from "@/assets/imgs/icons/mouse.svg";
 import HeroImage from "./HeroImage";
 const Hero = () => {
   return (
-    <div className="flex flex-col items-center pt-[136px] max-md:pt-[92px] pb-0 px-0 relative w-full max-md:overflow-hidden max-md:min-h-dvh">
+    <div className="flex flex-col items-center pt-[136px] max-md:pt-[92px] pb-0 px-0 relative w-full max-md:overflow-hidden ">
       {/* Content */}
       <div className="flex flex-col gap-[38px] items-center relative w-[657px] max-w-full max-md:gap-[34px] max-md:w-[305px]">
         {/* Text Content */}
