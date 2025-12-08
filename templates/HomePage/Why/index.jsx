@@ -8,7 +8,7 @@ const Why = () => {
   return (
     <section className="flex w-full  max-md:px-[16px]">
       <div
-        className="flex flex-col gap-[10px] items-center pb-[70px] pt-[90px] px-[57px] relative rounded-2xl w-full overflow-hidden max-w-[1440px] mx-auto h-[898px] max-md:pb-[30px] max-md:pt-[40px] max-md:px-[16px] max-md:h-auto"
+        className="flex flex-col gap-[10px] items-center pb-[70px] pt-[90px] px-[57px] relative rounded-2xl w-full overflow-hidden max-w-[1440px] mx-auto  max-md:pb-[30px] max-md:pt-[40px] max-md:px-[16px] max-md:h-auto"
         style={{
           borderRadius: "16px",
           background:

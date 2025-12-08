@@ -5,6 +5,8 @@ import Hero from "./Hero";
 import Whatis from "./Whatis";
 import Info from "./Info";
 import Why from "./Why";
+import Finance from "./Finance";
+import Founders from "./Founders";
 import FAQ from "./FAQ";
 import CTA from "./CTA";
 const HomePage = () => {
@@ -17,6 +19,8 @@ const HomePage = () => {
       <Whatis />
       <Info />
       <Why />
+      <Finance />
+      <Founders />
       <FAQ />
       <CTA />
       {/*
