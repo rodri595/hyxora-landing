@@ -15,20 +15,30 @@ export default function CustomCursor() {
       const cursor = cursorRef.current;
       if (!cursor) return;
 
-      const xTo = gsap.quickTo(cursor, "x", { duration: 0.6, ease: "power3" });
-      const yTo = gsap.quickTo(cursor, "y", { duration: 0.6, ease: "power3" });
+      const mm = gsap.matchMedia();
 
-      const handleMouseMove = (e) => {
-        const { clientX, clientY } = e;
-        xTo(clientX);
-        yTo(clientY);
-      };
+      mm.add("(min-width: 768px)", () => {
+        const xTo = gsap.quickTo(cursor, "x", {
+          duration: 0.6,
+          ease: "power3",
+        });
+        const yTo = gsap.quickTo(cursor, "y", {
+          duration: 0.6,
+          ease: "power3",
+        });
 
-      window.addEventListener("mousemove", handleMouseMove);
+        const handleMouseMove = (e) => {
+          const { clientX, clientY } = e;
+          xTo(clientX);
+          yTo(clientY);
+        };
 
-      return () => {
-        window.removeEventListener("mousemove", handleMouseMove);
-      };
+        window.addEventListener("mousemove", handleMouseMove);
+
+        return () => {
+          window.removeEventListener("mousemove", handleMouseMove);
+        };
+      });
     },
     {
       scope: cursorRef,
@@ -114,18 +124,22 @@ export default function CustomCursor() {
 
   useGSAP(
     () => {
-      const elements = document.querySelectorAll("[data-cursor-text]");
-      elements.forEach((el) => {
-        el.addEventListener("mouseenter", handleMouseEnter);
-        el.addEventListener("mouseleave", handleMouseLeave);
-      });
+      const mm = gsap.matchMedia();
 
-      return () => {
+      mm.add("(min-width: 768px)", () => {
+        const elements = document.querySelectorAll("[data-cursor-text]");
         elements.forEach((el) => {
-          el.removeEventListener("mouseenter", handleMouseEnter);
-          el.removeEventListener("mouseleave", handleMouseLeave);
+          el.addEventListener("mouseenter", handleMouseEnter);
+          el.addEventListener("mouseleave", handleMouseLeave);
         });
-      };
+
+        return () => {
+          elements.forEach((el) => {
+            el.removeEventListener("mouseenter", handleMouseEnter);
+            el.removeEventListener("mouseleave", handleMouseLeave);
+          });
+        };
+      });
     },
     { dependencies: [handleMouseEnter, handleMouseLeave] }
   );

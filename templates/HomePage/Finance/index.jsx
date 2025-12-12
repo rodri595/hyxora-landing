@@ -1,5 +1,6 @@
 import Image from "@/components/Image";
-import financeIMG from "@/assets/imgs/brand/tokens.webp";
+import financeIMG from "@/assets/imgs/misc/02 - IPHONE.png";
+// import financeIMG from "@/assets/imgs/misc/02 - IPHONE.png";
 import FinanceGridItem from "./FinanceGridItem";
 
 const Finance = () => {
@@ -18,7 +19,7 @@ const Finance = () => {
         </div>
 
         {/* Main Heading */}
-        <h2 className="font-medium text-[50px] text-[#19363f] text-center tracking-[-2.16px] leading-[normal] w-full">
+        <h2 className="font-medium text-[40px] leading-[38px] tracking-[-0.04em]  text-[#19363f] text-center w-full max-md:text-[20px] max-md:leading-normal max-md:tracking-[-0.8px] ">
           Finanzas descentralizadas DeFi
         </h2>
 
@@ -29,21 +30,26 @@ const Finance = () => {
       </div>
 
       {/* Content Section */}
-      <div className="flex gap-4 items-stretch w-full max-w-[1220px] ">
+      <div className="flex gap-4 items-stretch w-full max-w-[1220px] max-lg:flex-col max-lg:items-center">
         {/* Left Column */}
-        <Image
-          className="bg-[rgba(25,54,63,0.02)] border-[0.7px] border-[rgba(25,54,63,0.02)] border-solid  rounded-2xl  w-[529px] object-cover"
+        <div
+          className="flex-1 flex items-center justify-center bg-[rgba(25,54,63,0.02)] border-[0.7px] border-[rgba(25,54,63,0.02)] rounded-2xl border-solid overflow-hidden p-2 max-lg:w-full"
           style={{ boxShadow: "0px 0px 4px 0px inset rgba(25,54,63,0.04)" }}
-          src={financeIMG}
-          alt="Finance Image"
-        />
+        >
+          <Image
+            className=" w-auto h-full max-h-[700px] max-lg:max-h-[400px] object-contain "
+            src={financeIMG}
+            alt="Finance Image"
+          />
+        </div>
+
         {/* Right Column - Payment Options */}
         <div
-          className="bg-[rgba(25,54,63,0.02)] border-[0.7px] border-[rgba(25,54,63,0.02)] border-solid flex flex-col gap-10 overflow-hidden p-[30px] rounded-2xl w-[691px]"
+          className="bg-[rgba(25,54,63,0.02)] border-[0.7px] border-[rgba(25,54,63,0.02)] border-solid flex flex-col gap-10 overflow-hidden p-[30px] rounded-2xl w-[691px] max-lg:w-full max-lg:p-1"
           style={{ boxShadow: "0px 0px 4px 0px inset rgba(25,54,63,0.04)" }}
         >
           {/*  Grid */}
-          <div className="flex flex-col gap-[14px] ">
+          <div className="flex flex-col gap-[14px]  max-lg:gap-1">
             <FinanceGridItem
               title="Staking"
               description="Haz que tu dinero trabaje por ti. Consigue rendimientos e ingresos pasivos sólo por el hecho de mantener tu capital en Hyxora"

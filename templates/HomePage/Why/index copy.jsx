@@ -3,7 +3,6 @@ import Image from "@/components/Image";
 import shieldCheckSVG from "@/assets/imgs/icons/shield-check.svg";
 import eyeSVG from "@/assets/imgs/icons/eye.svg";
 import sparklesSVG from "@/assets/imgs/icons/sparkles.svg";
-// import buycryptoSVG from "@/assets/imgs/icons/buycrypto.svg";
 
 const Why = () => {
   return (
@@ -19,13 +18,13 @@ const Why = () => {
         {/* Content */}
         <div className="flex flex-col gap-[50px] items-center relative w-full max-w-[1240px] max-md:gap-[34px] max-md:max-w-full">
           {/* Title */}
-          <h2 className="font-medium text-[40px] leading-[38px] tracking-[-0.04em] text-center text-white w-[540px] max-md:text-[20px] max-md:leading-normal max-md:tracking-[-0.8px] max-md:w-full max-md:max-w-[306px]">
+          <h2 className="font-medium text-[40px] leading-[38px] tracking-[-0.04em] text-center text-white w-[540px] max-md:text-[20px] max-md:leading-normal max-md:tracking-[-0.8px] max-md:w-[307px]">
             <span className="text-[rgba(255,255,255,0.6)]">Una plataforma</span>{" "}
             financiera creada por y para el usuario
           </h2>
 
           {/* Cards Container */}
-          <div className="grid grid-cols-4 max-lg:grid-cols-2 max-md:grid-cols-1  gap-5 items-stretch w-full  max-md:gap-[10px]">
+          <div className="flex gap-5 items-stretch w-full max-md:flex-col max-md:gap-[10px]">
             {/* Card 1 - True Ownership */}
             <div
               className="backdrop-blur-[25px] bg-[rgba(255,255,255,0.06)] border-[0.7px] border-[rgba(255,255,255,0.02)] flex flex-col gap-2 flex-1 px-[16px] py-[24px] rounded-2xl relative overflow-hidden max-md:gap-[24px] max-md:pt-[16px]"
@@ -48,14 +47,16 @@ const Why = () => {
               </div>
               <div className="flex flex-col gap-2 items-start w-full max-md:gap-[14px]">
                 <p className="font-medium text-[20px] leading-normal text-white tracking-[-0.04em] whitespace-nowrap max-md:text-[16px] max-md:leading-[22px] max-md:tracking-[-0.64px] max-md:whitespace-normal">
-                  Comité Consultivo
+                  Seguridad y Transparencia
                 </p>
                 <p className="font-normal text-[16px] leading-[20px] text-[rgba(255,255,255,0.7)] tracking-[-0.02em] w-full max-md:text-[12px] max-md:tracking-[-0.24px]">
-                  Todos los usuarios se sienten partícipes de la evolución de
-                  Hyxora. Consultas sobre funcionalidades, cambios y estrategia.
+                  Autocustodia y blockchain. Sin intermediarios pero con
+                  servicio de recuperación de contraseñas. Tus activos en tu
+                  poder.
                 </p>
               </div>
             </div>
+
             {/* Card 2 - Transparency */}
             <div
               className="backdrop-blur-[25px] bg-[rgba(255,255,255,0.06)] border-[0.7px] border-[rgba(255,255,255,0.02)] flex flex-col gap-2 flex-1 px-[16px] py-[24px] rounded-2xl relative overflow-hidden max-md:gap-[24px] max-md:pt-[16px]"
@@ -78,11 +79,11 @@ const Why = () => {
               </div>
               <div className="flex flex-col gap-2 items-start w-full max-md:gap-[14px]">
                 <p className="font-medium text-[20px] leading-normal text-white tracking-[-0.04em] w-full max-md:text-[16px] max-md:leading-[22px] max-md:tracking-[-0.64px]">
-                  Academia
+                  Sencillez y usabilidad{" "}
                 </p>
                 <p className="font-normal text-[16px] leading-[20px] text-[rgba(255,255,255,0.7)] tracking-[-0.02em] w-full max-md:text-[12px] max-md:tracking-[-0.24px]">
-                  Formación necesaria para que entiendas y aproveches al máximo
-                  tus recursos en finanzas, sea cual sea tu nivel.
+                  Interfaz sencilla, creada y desarrollada para el usuario y
+                  diferenciada según el plan en el que te encuentres.
                 </p>
               </div>
             </div>
@@ -109,43 +110,12 @@ const Why = () => {
               </div>
               <div className="flex flex-col gap-2 items-start w-full max-md:gap-[14px]">
                 <p className="font-medium text-[20px] leading-normal text-white tracking-[-0.04em] w-full max-md:text-[16px] max-md:leading-[22px] max-md:tracking-[-0.64px]">
-                  Experiencia Usuario
+                  Nuevas oportunidades DeFi
                 </p>
                 <p className="font-normal text-[16px] leading-[20px] text-[rgba(255,255,255,0.7)] tracking-[-0.02em] w-full max-md:text-[12px] max-md:tracking-[-0.24px]">
-                  App rápida, sencilla y personalizada según tu plan. Encuentra
-                  todo lo que necesitas fácil y rápido con una estética
-                  atractiva.
-                </p>
-              </div>
-            </div>
-            {/* Card 4 - IA personalizada */}
-            <div
-              className="backdrop-blur-[25px] bg-[rgba(255,255,255,0.06)] border-[0.7px] border-[rgba(255,255,255,0.02)] flex flex-col gap-2 flex-1 px-[16px] py-[24px] rounded-2xl relative overflow-hidden max-md:gap-[24px] max-md:pt-[16px]"
-              style={{
-                boxShadow:
-                  "0px 6px 4px -4px rgba(0,0,0,0.05), 0px 12px 8px -4px rgba(0,0,0,0.05), 0px 0px 4px 0px inset rgba(255,255,255,0.04)",
-              }}
-            >
-              <div
-                className="bg-[rgba(255,255,255,0.3)] border-[0.6px] border-[rgba(255,255,255,0.1)] flex items-center justify-center p-[14px] max-md:p-[9px] rounded-[14px] w-12 h-12 shrink-0 relative max-md:w-[38px] max-md:h-[38px] max-md:rounded-[10px]"
-                style={{
-                  boxShadow:
-                    "0px 6px 8px -4px rgba(0,0,0,0.08), 0px 6px 4px -4px rgba(0,0,0,0.04), 0px 0px 6px 0px inset rgba(255,255,255,0.2)",
-                }}
-              >
-                <Image
-                  src={sparklesSVG}
-                  alt="AI Icon"
-                  className="w-[20px] h-[20px]"
-                />
-              </div>
-              <div className="flex flex-col gap-2 items-start w-full max-md:gap-[14px]">
-                <p className="font-medium text-[20px] leading-normal text-white tracking-[-0.04em] w-full max-md:text-[16px] max-md:leading-[22px] max-md:tracking-[-0.64px]">
-                  IA personalizada
-                </p>
-                <p className="font-normal text-[16px] leading-[20px] text-[rgba(255,255,255,0.7)] tracking-[-0.02em] w-full max-md:text-[12px] max-md:tracking-[-0.24px]">
-                  IA personalizada que indica la mejor estrategia según tus
-                  objetivos, riesgos y capital.
+                  Inversión, ingresos pasivos.. las oportunidades del nuevo
+                  ecosistema financiero descentralizado en tus manos y a golpe
+                  de click
                 </p>
               </div>
             </div>
