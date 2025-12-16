@@ -1,6 +1,7 @@
 import Button from "@/components/Button";
 import Video from "@/components/Video";
 import FounderBenefit from "./FounderBenefit";
+import posterIMG from "./poster.jpg";
 
 const Founders = () => {
   return (
@@ -82,11 +83,14 @@ const Founders = () => {
           </div>
           {/* Right Side - founder Card */}
           <Video
-            className=" h-[365px] !object-contain max-md:w-full max-md:h-[300px]"
+            className=" h-[365px] !object-contain  max-md:h-[300px] rounded-xl overflow-hidden  "
             src={"/videos/key_card_2.webm"}
+            poster={posterIMG}
+            type="video"
+            playsInline
             autoPlay
-            loop
             muted
+            loop
           />
         </div>{" "}
         {/* </div> */}

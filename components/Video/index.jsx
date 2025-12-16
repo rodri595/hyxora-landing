@@ -13,7 +13,7 @@ const VideoComponent = ({ src, type, className, ...props }) => {
     >
       <source
         src={src}
-        type={type || "video/mp4"}
+        // type={type || "video/mp4"}
         // type="video/mp4"
       />
     </video>

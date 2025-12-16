@@ -45,7 +45,7 @@ const CTA = () => {
     >
       {/* Text Section */}
       <div className="flex flex-col gap-7 items-center text-center w-full max-w-[495px]">
-        <h2 className="font-medium text-[40px] leading-normal tracking-[-1.6px] text-[#19363f]">
+        <h2 className="font-medium text-[40px] leading-[40px] tracking-[-1.6px] text-[#19363f]">
           <span className="text-[rgba(25,54,63,0.6)]">
             Mantente al día con{" "}
           </span>
@@ -104,7 +104,7 @@ const CTA = () => {
 
         {/* Left blur */}
         <div
-          className="absolute left-0 top-1/2 -translate-y-1/2 w-[140px] h-10 pointer-events-none z-1"
+          className="absolute left-0 top-1/2 -translate-y-1/2 w-[140px]  max-md:w-[70px] h-10 pointer-events-none z-1"
           style={{
             backdropFilter: "blur(2px)",
             background:
@@ -113,7 +113,7 @@ const CTA = () => {
         />
         {/* Right blur */}
         <div
-          className="absolute right-0 top-1/2 -translate-y-1/2 w-[140px] h-10 pointer-events-none z-1"
+          className="absolute right-0 top-1/2 -translate-y-1/2 w-[140px]  max-md:w-[70px] h-10 pointer-events-none z-1"
           style={{
             backdropFilter: "blur(2px)",
             background:

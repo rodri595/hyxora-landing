@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import { useState } from "react";
 import Button from "@/components/Button";
 import Icon from "@/components/Icon";
 
@@ -118,7 +118,7 @@ const Plans = () => {
         </div>
 
         {/* Plans Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-2 w-full">
+        <div className="grid grid-cols-4  max-lg:grid-cols-2 max-sm:grid-cols-1 gap-2 w-full">
           {plans.map((plan) => (
             <div
               key={plan.name}
