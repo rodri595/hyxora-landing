@@ -8,39 +8,38 @@ import AnimateHeight from "react-animate-height";
 const faqItems = [
   {
     id: 1,
-    question: "What is Web3?",
-    answer:
-      "Web3 is the next evolution of the internet, built on blockchain technology. It enables decentralized applications, digital ownership, and peer-to-peer transactions without intermediaries.",
+    question: "¿Es Hyxora un banco o una app de criptomonedas?",
+    answer: `Ninguna de las dos cosas por separado. Es un proveedor de emisión de criptoactivos regulado que combina lo mejor de la banca tradicional (IBAN, SEPA gratis, tarjeta) con lo mejor de las finanzas descentralizadas (DeFi). Piensa en Hyxora como "el puente" entre tu banco de toda la vida y las finanzas del futuro.`,
   },
   {
     id: 2,
-    question: "What can I own in Web3?",
+    question: "¿Tengo que saber de cripto para usar Hyxora?",
     answer:
-      "In Web3, you can own digital assets like cryptocurrencies, NFTs (non-fungible tokens), domain names, and virtual land. These assets are secured by blockchain technology and can be freely traded.",
+      "No. Todo está pensado para que empieces desde cero. En pocos minutos eres capaz de tener tu IBAN, hacer swaps y generar ganancias sin tecnicismos.",
   },
   {
     id: 3,
-    question: "How do I get started?",
+    question: "¿Mi dinero está seguro en Hyxora?",
     answer:
-      "To get started with Web3, you'll need a digital wallet like MetaMask, some cryptocurrency, and a basic understanding of blockchain technology. Start small and learn as you go.",
+      "Sí. El dinero fiat está en cuentas segregadas en entidades reguladas europeas. Los criptoactivos están en wallets de autocustodia (tú tienes las claves pero en caso de pérdida, desde la app puedes recuperarla).",
   },
   {
     id: 4,
-    question: "Do I need technical knowledge?",
+    question: "¿Puedo tener un IBAN normal como en mi banco de toda la vida?",
     answer:
-      "While some technical knowledge helps, it's not required to get started. Many Web3 platforms are designed to be user-friendly. You can learn the basics through tutorials and practice.",
+      "Sí. Recibes un IBAN europeo personal a tu nombre. Puedes domiciliar nómina, recibos y hacer/recibe transferencias SEPA totalmente gratis.",
   },
   {
     id: 5,
-    question: "Are my assets safe?",
-    answer:
-      "Your assets are as safe as your security practices. Use strong passwords, enable two-factor authentication, never share your private keys, and use reputable wallets and platforms.",
+    question: "¿Puedo probar Hyxora antes de pagar?",
+    answer: `Sí. El "Camino Prueba" cuesta solo 1,99 € (plan Basic) y si en 15 días no te convence, te devolvemos el 100 % automáticamente. Sin preguntas.`,
   },
   {
     id: 6,
-    question: "Can I use my assets outside this site?",
+    question:
+      "¿Qué ventaja tengo al pagar 9,99 € de Premium frente a quedarme en el Basic de 1,80 €?",
     answer:
-      "Yes! That's one of the key benefits of Web3. Your assets are stored on the blockchain and can be used across different compatible platforms and applications.",
+      "Por sólo 9,99 € tienes: Plan Basic completo, Fees de swap/intercambios al 0,5 % (vs 0,9 %) → ahorras dinero cada vez que mueves dinero, Acceso a todas las cestas DeFi, Soporte prioritario y nuevas funcionalidades, Academia Premium. La mayoría de usuarios que prueban Premium recuperan la cuota el primer mes solo con lo que ahorran en fees.",
   },
 ];
 
@@ -129,15 +128,15 @@ const FAQ = () => {
       <div className="flex flex-col gap-[50px] items-center w-full max-w-[659px]">
         {/* Title */}
         <h2 className="font-inter font-medium text-[40px] leading-[40px] tracking-[-1.6px] text-center max-w-[379px]">
-          <span className="text-[rgba(25,54,63,0.6)]">Got Questions? </span>
-          <span className="text-[#19363f]">We&apos;ve Got Answers</span>
+          <span className="text-[rgba(25,54,63,0.6)]">¿Tienes dudas? </span>
+          <span className="text-[#19363f]">Aquí las resolvemos</span>
         </h2>
 
         {/* Content */}
         <div className="flex flex-col gap-[30px] items-center w-full">
           {/* Subtitle */}
           <p className="font-inter font-medium text-[16px] leading-[24px] tracking-[-0.64px] text-[#19363f] text-center">
-            Crypto FAQ, AI-Powered for Speed & Clarity
+            Preguntas frecuentes sobre Hyxora
           </p>
 
           {/* FAQ Items */}

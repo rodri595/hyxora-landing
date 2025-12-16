@@ -1,8 +1,7 @@
 import Image from "@/components/Image";
 import financeIMG from "@/assets/imgs/misc/02 - IPHONE.png";
-// import financeIMG from "@/assets/imgs/misc/02 - IPHONE.png";
 import FinanceGridItem from "./FinanceGridItem";
-
+// import financeIMG from "@/assets/imgs/misc/02 - IPHONE.png";
 const Finance = () => {
   return (
     <div className="flex flex-col gap-[70px] items-center w-full px-4">
@@ -28,7 +27,6 @@ const Finance = () => {
           Las oportunidades del nuevo mundo financiero en tus manos
         </p>
       </div>
-
       {/* Content Section */}
       <div className="flex gap-4 items-stretch w-full max-w-[1220px] max-lg:flex-col max-lg:items-center">
         {/* Left Column */}

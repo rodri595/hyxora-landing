@@ -1,6 +1,7 @@
 "use client";
 import { useRef } from "react";
 import Image from "@/components/Image";
+import Button from "@/components/Button";
 import checkSVG from "@/assets/imgs/icons/check.svg";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
@@ -9,9 +10,9 @@ const CTA = () => {
   const marqueeRef = useRef(null);
 
   const features = [
-    "Early access to marketplace launches",
-    "Weekly insights from our research team",
-    "Airdrop & whitelist alerts",
+    "Acceso anticipado a nuevas funcionalidades",
+    "Análisis semanal del mercado cripto",
+    "Alertas de oportunidades DeFi",
   ];
 
   useGSAP(() => {
@@ -45,12 +46,15 @@ const CTA = () => {
       {/* Text Section */}
       <div className="flex flex-col gap-7 items-center text-center w-full max-w-[495px]">
         <h2 className="font-medium text-[40px] leading-normal tracking-[-1.6px] text-[#19363f]">
-          <span className="text-[rgba(25,54,63,0.6)]">Stay Ahead in </span>
-          <span className="text-[#19363f]">Web3</span>
+          <span className="text-[rgba(25,54,63,0.6)]">
+            Mantente al día con{" "}
+          </span>
+          <span className="text-[#19363f]">Hyxora</span>
         </h2>
         <p className="font-normal text-[16px] leading-[24px] tracking-[-0.32px] text-[rgba(25,54,63,0.7)]">
-          Subscribe to our newsletter and get the latest updates, alpha drops,
-          and crypto trends — straight to your inbox.
+          Suscríbete a nuestra newsletter y recibe las últimas novedades,
+          tendencias cripto y oportunidades exclusivas directamente en tu
+          correo.
         </p>
       </div>
 
@@ -100,7 +104,7 @@ const CTA = () => {
 
         {/* Left blur */}
         <div
-          className="absolute left-0 top-1/2 -translate-y-1/2 w-[140px] h-10 pointer-events-none z-10"
+          className="absolute left-0 top-1/2 -translate-y-1/2 w-[140px] h-10 pointer-events-none z-1"
           style={{
             backdropFilter: "blur(2px)",
             background:
@@ -109,7 +113,7 @@ const CTA = () => {
         />
         {/* Right blur */}
         <div
-          className="absolute right-0 top-1/2 -translate-y-1/2 w-[140px] h-10 pointer-events-none z-10"
+          className="absolute right-0 top-1/2 -translate-y-1/2 w-[140px] h-10 pointer-events-none z-1"
           style={{
             backdropFilter: "blur(2px)",
             background:
@@ -117,6 +121,7 @@ const CTA = () => {
           }}
         />
       </div>
+      <Button isPrimary>Únete</Button>
     </section>
   );
 };
