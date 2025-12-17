@@ -1,6 +1,64 @@
+import checkSVG from "@/assets/imgs/icons/check.svg";
+import Year from "./year";
+import Image from "@/components/Image";
+import fireSVG from "@/assets/imgs/icons/fire.svg";
+import { useGSAP } from "@gsap/react";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { CustomEase } from "gsap/CustomEase";
+import { useRef } from "react";
+
+gsap.registerPlugin(ScrollTrigger, CustomEase);
+
+CustomEase.create(
+  "hop",
+  "M0,0 C0.29,0 0.348,0.05 0.422,0.134 0.494,0.217 0.484,0.355 0.5,0.5 0.518,0.662 0.515,0.793 0.596,0.876 0.701,0.983 0.72,0.987 1,1 "
+);
+
 const Roadmap = () => {
+  const containerRef = useRef(null);
+
+  useGSAP(
+    () => {
+      if (!containerRef.current) return;
+
+      const tl = gsap.timeline({
+        scrollTrigger: {
+          trigger: containerRef.current,
+          start: "top 80%",
+          toggleActions: "play none none none",
+        },
+      });
+
+      // Animate years from left to right with stagger
+      tl.from(".roadmap-year", {
+        opacity: 0,
+        x: -50,
+        duration: 1,
+        stagger: 0.25,
+        ease: "hop",
+        clearProps: "all",
+      });
+
+      // Animate lines with clip-path
+      tl.from(
+        ".roadmap-line",
+        {
+          clipPath: "inset(0 100% 0 0)",
+          duration: 1.2,
+          ease: "hop",
+        },
+        "-=0.7"
+      );
+    },
+    { scope: containerRef }
+  );
+
   return (
-    <section className="flex flex-col gap-[70px] items-center w-full px-4">
+    <section
+      ref={containerRef}
+      className="flex flex-col gap-[70px] items-center w-full px-4 max-lg:hidden"
+    >
       {/* Header Text Section */}
       <div className="flex flex-col gap-2 items-center justify-center w-full max-w-[700px]">
         {/* Main Heading */}
@@ -13,147 +71,181 @@ const Roadmap = () => {
           estate atento a las noticias del lanzamiento
         </p>
       </div>
-      <div className="flex flex-col lg:flex-row gap-8 items-start justify-between ">
-        {/* Left Side - Content */}
-        <div className="flex flex-col gap-12 w-[300px] ">
-          {/* Header */}
-          <div className="flex flex-col gap-7">
-            <h2 className="font-medium text-4xl lg:text-[40px] leading-tight tracking-[-0.04em] text-[#19363f]">
-              <span className="text-[rgba(25,54,63,0.6)]">Hyxora</span>
-            </h2>
+      <div className="flex flex-col items-center justify-center max-w-[1220px] gap-12">
+        {/* First Row */}
+        <div className="relative w-full p-4  pl-[212px] flex rounded-[16px] border-[0.7px] border-[rgba(25,54,63,0.02)] bg-[rgba(25,54,63,0.02)] shadow-[inset_0px_0px_4px_0px_rgba(25,54,63,0.04)]">
+          {/* Hot Badge */}
+          <div
+            className="backdrop-blur-sm bg-[rgba(25,54,63,0.02)] border-[0.7px] border-[rgba(25,54,63,0.02)] border-solid flex gap-[10px] items-center px-[12px] py-0 absolute rounded-[32px] left-[8px] top-[-32px]"
+            style={{ boxShadow: "0px 0px 4px 0px inset rgba(25,54,63,0.04)" }}
+          >
+            <p className="font-bold text-[10px] text-[rgba(25,54,63,0.7)] tracking-tight whitespace-nowrap  ">
+              Hyxora
+            </p>
           </div>
+          <div
+            className="roadmap-line will-change-[clip-path] w-[calc(100%-460px)] h-0.5 absolute left-[236px] top-[34px]"
+            style={{
+              backgroundImage: `
+                linear-gradient(to right, 
+                  rgba(25, 54, 63, 1) 0%,
+                  rgba(25, 54, 63, 1) 15%,
+                  rgba(25, 54, 63, 0.16) 28%,
+                  rgba(25, 54, 63, 0.16) 72%,
+                  rgba(25, 54, 63, 1) 85%,
+                  rgba(25, 54, 63, 1) 100%
+                ),
+                repeating-linear-gradient(to right, 
+                  transparent, 
+                  transparent 8px, 
+                  rgba(25, 54, 63, 1) 8px, 
+                  rgba(25, 54, 63, 1) 16px
+                )
+              `,
+              backgroundSize: "100% 100%, 16px 100%",
+              WebkitMaskImage:
+                "repeating-linear-gradient(to right, black 0px, black 8px, transparent 8px, transparent 16px)",
+              maskImage:
+                "repeating-linear-gradient(to right, black 0px, black 8px, transparent 8px, transparent 16px)",
+            }}
+          />
 
-          {/* Steps */}
-          <div className="flex flex-col gap-11 relative">
-            {/* Vertical Line */}
-            <div className="absolute left-[15px] top-[30px] bottom-[30px] w-px bg-gradient-to-b from-transparent via-[rgba(25,54,63,0.15)] to-transparent hidden md:block" />
-            {/* Step 01 */}
-            <div className="flex gap-[18px] items-start">
-              <div className="relative flex items-center justify-center w-[30px] h-[30px] rounded-full bg-[#19363f] border border-[rgba(255,255,255,0.2)] shadow-[0px_6px_4px_-4px_rgba(25,54,63,0.15),0px_12px_8px_-4px_rgba(25,54,63,0.15)] shrink-0">
-                <span className="text-white text-xs font-medium tracking-[-0.04em] text-center">
-                  1
-                </span>
-                <div className="absolute inset-0 rounded-full shadow-[inset_0px_0px_10px_0px_rgba(255,255,255,0.4)] pointer-events-none" />
-              </div>
-              <div className="flex flex-col gap-3.5 flex-1">
-                <h3 className="text-base font-bold tracking-[-0.04em] text-[#19363f]">
-                  2026
-                </h3>
-                <p className="text-base leading-6 tracking-[-0.02em] text-[rgba(25,54,63,0.7)]">
-                  Lanzamiento 1º trimestre
-                </p>
-              </div>
-            </div>
-            {/* Step 02 */}
-            <div className="flex gap-[18px] items-start">
-              <div className="relative flex items-center justify-center w-[30px] h-[30px] rounded-2xl bg-[#f6f7f8] border-[0.7px] border-[rgba(25,54,63,0.04)] shrink-0">
-                <span className="text-[#19363f] text-xs font-medium tracking-[-0.04em] text-center">
-                  02
-                </span>
-                <div className="absolute inset-0 rounded-2xl shadow-[inset_0px_0px_4px_0px_rgba(25,54,63,0.04)] pointer-events-none" />
-              </div>
-              <div className="flex flex-col gap-3.5 flex-1">
-                <h3 className="text-base font-bold tracking-[-0.04em] text-[#19363f]">
-                  2027
-                </h3>
-                <p className="text-base leading-6 tracking-[-0.02em] text-[rgba(25,54,63,0.7)]">
-                  Modelo Pymes
-                  <br />
-                  Nuevas funcionalidades DeFi
-                  <br />
-                  Internacionalización - Latam
-                </p>
-              </div>
-            </div>
-            {/* Step 03 */}
-            <div className="flex gap-[18px] items-start">
-              <div className="relative flex items-center justify-center w-[30px] h-[30px] rounded-2xl bg-[#f6f7f8] border-[0.7px] border-[rgba(25,54,63,0.04)] shrink-0">
-                <span className="text-[#19363f] text-xs font-medium tracking-[-0.04em] text-center">
-                  03
-                </span>
-                <div className="absolute inset-0 rounded-2xl shadow-[inset_0px_0px_4px_0px_rgba(25,54,63,0.04)] pointer-events-none" />
-              </div>
-              <div className="flex flex-col gap-3.5 flex-1">
-                <h3 className="text-base font-bold tracking-[-0.04em] text-[#19363f]">
-                  2028
-                </h3>
-                <p className="text-base leading-6 tracking-[-0.02em] text-[rgba(25,54,63,0.7)]">
-                  Crecimiento
-                </p>
-              </div>
-            </div>
-          </div>
+          <Year
+            className="roadmap-year"
+            year="2026"
+            rightItems={[
+              {
+                icon: checkSVG,
+                text: "Lanzamiento 1º trimestre",
+              },
+            ]}
+          />
+
+          <Year
+            className="roadmap-year"
+            year="2027"
+            rightItems={[
+              {
+                icon: checkSVG,
+                text: "Modelo Pymes",
+              },
+              {
+                icon: checkSVG,
+                text: "Nuevas funcionalidades DeFi",
+              },
+              {
+                icon: checkSVG,
+                text: "Internacionalización - Latam",
+              },
+            ]}
+          />
+
+          <Year
+            className="roadmap-year"
+            year="2028"
+            rightItems={[
+              {
+                icon: checkSVG,
+                text: "Crecimiento",
+              },
+            ]}
+          />
         </div>
-        {/* Right Side - Content */}
-        <div className="flex flex-col gap-12 w-[300px] ">
-          {/* Header */}
-          <div className="flex flex-col gap-7">
-            <h2 className="font-medium text-4xl lg:text-[40px] leading-tight tracking-[-0.04em] text-[#19363f]">
-              <span className="text-[rgba(25,54,63,0.6)]">
-                <span className="text-sm">NFT</span> Founders
-              </span>
-            </h2>
+        {/* Second Row */}
+        <div className="relative w-full  p-4 flex rounded-[16px] border-[0.7px] border-[rgba(25,54,63,0.02)] bg-[rgba(25,54,63,0.02)] shadow-[inset_0px_0px_4px_0px_rgba(25,54,63,0.04)]">
+          {/* Hot Badge */}
+          <div
+            className=" backdrop-blur-sm bg-[rgba(25,54,63,0.02)] border-[0.7px] border-[rgba(25,54,63,0.02)] border-solid flex gap-[10px] items-center pr-[12px] pl-0 py-0 absolute rounded-[32px] left-[8px] top-[-32px]"
+            style={{ boxShadow: "0px 0px 4px 0px inset rgba(25,54,63,0.04)" }}
+          >
+            {/* Hot Button */}
+            <div className="bg-[#1b5ffd] h-[17px] border border-[rgba(255,255,255,0.2)] border-solid  relative rounded-[100px]">
+              <div className="flex gap-[3px] h-[17px]  items-center justify-center overflow-hidden px-[4px] relative rounded-[inherit]">
+                <Image
+                  src={fireSVG}
+                  alt="Fire Icon"
+                  className="relative w-[10px] h-[10px] "
+                />
+                <p className="font-medium text-[8px] text-[#f7f8f8] tracking-tight whitespace-nowrap">
+                  NFT
+                </p>
+              </div>
+              <div
+                className="absolute inset-0 pointer-events-none"
+                style={{
+                  boxShadow: "0px 0px 10px 0px inset rgba(255,255,255,0.4)",
+                }}
+              />
+            </div>
+            <p className="font-bold text-[10px] text-[rgba(25,54,63,0.7)] tracking-tight whitespace-nowrap">
+              Founders
+            </p>
           </div>
-          {/* Steps */}
-          <div className="flex flex-col gap-11 relative">
-            {/* Vertical Line */}
+          <div
+            className="roadmap-line will-change-[clip-path] w-[calc(100%-460px)] h-0.5 absolute left-[236px] top-[34px]"
+            style={{
+              backgroundImage: `
+                linear-gradient(to right, 
+                  rgba(25, 54, 63, 1) 0%,
+                  rgba(25, 54, 63, 1) 15%,
+                  rgba(25, 54, 63, 0.16) 28%,
+                  rgba(25, 54, 63, 0.16) 72%,
+                  rgba(25, 54, 63, 1) 85%,
+                  rgba(25, 54, 63, 1) 100%
+                ),
+                repeating-linear-gradient(to right, 
+                  transparent, 
+                  transparent 8px, 
+                  rgba(25, 54, 63, 1) 8px, 
+                  rgba(25, 54, 63, 1) 16px
+                )
+              `,
+              backgroundSize: "100% 100%, 16px 100%",
+              WebkitMaskImage:
+                "repeating-linear-gradient(to right, black 0px, black 8px, transparent 8px, transparent 16px)",
+              maskImage:
+                "repeating-linear-gradient(to right, black 0px, black 8px, transparent 8px, transparent 16px)",
+            }}
+          />
 
-            <div className="absolute left-[15px] top-[30px] bottom-[30px] w-px bg-gradient-to-b from-transparent via-[rgba(25,54,63,0.15)] to-transparent hidden md:block" />
-            {/* Step 01 */}
-            <div className="flex gap-[18px] items-start">
-              <div className="relative flex items-center justify-center w-[30px] h-[30px] rounded-full bg-[#19363f] border border-[rgba(255,255,255,0.2)] shadow-[0px_6px_4px_-4px_rgba(25,54,63,0.15),0px_12px_8px_-4px_rgba(25,54,63,0.15)] shrink-0">
-                <span className="text-white text-xs font-medium tracking-[-0.04em] text-center">
-                  01
-                </span>
-                <div className="absolute inset-0 rounded-full shadow-[inset_0px_0px_10px_0px_rgba(255,255,255,0.4)] pointer-events-none" />
-              </div>
-              <div className="flex flex-col gap-3.5 flex-1">
-                <h3 className="text-base font-bold tracking-[-0.04em] text-[#19363f]">
-                  2026
-                </h3>
-                <p className="text-base leading-6 tracking-[-0.02em] text-[rgba(25,54,63,0.7)]">
-                  Lanzamiento 350 und
-                </p>
-              </div>
-            </div>
-            {/* Step 02 */}
-            <div className="flex gap-[18px] items-start">
-              <div className="relative flex items-center justify-center w-[30px] h-[30px] rounded-2xl bg-[#f6f7f8] border-[0.7px] border-[rgba(25,54,63,0.04)] shrink-0">
-                <span className="text-[#19363f] text-xs font-medium tracking-[-0.04em] text-center">
-                  02
-                </span>
-                <div className="absolute inset-0 rounded-2xl shadow-[inset_0px_0px_4px_0px_rgba(25,54,63,0.04)] pointer-events-none" />
-              </div>
-              <div className="flex flex-col gap-3.5 flex-1">
-                <p className="text-base leading-6 tracking-[-0.02em] text-[rgba(25,54,63,0.7)]">
-                  Lanzamiento 50 und
-                </p>
-                <h3 className="text-base font-bold tracking-[-0.04em] text-[#19363f]">
-                  2027
-                </h3>
-                <p className="text-base leading-6 tracking-[-0.02em] text-[rgba(25,54,63,0.7)]">
-                  Lanzamiento 600 und
-                </p>
-              </div>
-            </div>
-            {/* Step 03 */}
-            <div className="flex gap-[18px] items-start mt-[10px]">
-              <div className="relative flex items-center justify-center w-[30px] h-[30px] rounded-2xl bg-[#f6f7f8] border-[0.7px] border-[rgba(25,54,63,0.04)] shrink-0">
-                <span className="text-[#19363f] text-xs font-medium tracking-[-0.04em] text-center">
-                  03
-                </span>
-                <div className="absolute inset-0 rounded-2xl shadow-[inset_0px_0px_4px_0px_rgba(25,54,63,0.04)] pointer-events-none" />
-              </div>
-              <div className="flex flex-col gap-3.5 flex-1">
-                <h3 className="text-base font-bold tracking-[-0.04em] text-[#19363f]">
-                  2028
-                </h3>
-                <p className="text-base leading-6 tracking-[-0.02em] text-[rgba(25,54,63,0.7)]">
-                  Marketplace NFT abierto
-                </p>
-              </div>
-            </div>
-          </div>
+          <Year
+            className="roadmap-year items-center!"
+            year="2026"
+            leftItems={[
+              {
+                icon: checkSVG,
+                text: "Lanzamiento 50 und",
+              },
+            ]}
+            rightItems={[
+              {
+                icon: checkSVG,
+                text: "Lanzamiento 350 und",
+              },
+            ]}
+          />
+
+          <Year
+            className="roadmap-year"
+            year="2027"
+            rightItems={[
+              {
+                icon: checkSVG,
+                text: "Lanzamiento 600 und",
+              },
+            ]}
+          />
+
+          <Year
+            className="roadmap-year"
+            year="2028"
+            rightItems={[
+              {
+                icon: checkSVG,
+                text: "Marketplace NFT abierto",
+              },
+            ]}
+          />
         </div>
       </div>
     </section>

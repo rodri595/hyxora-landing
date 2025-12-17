@@ -104,7 +104,7 @@ const Info = () => {
           {leftSectionData.steps.map((leftStep, index) => {
             const rightStep = rightSectionData.steps[index];
             const stepNumber = String(index + 1).padStart(2, "0");
-            const isActive = index === 0;
+            const isActive = true;
 
             return (
               <div key={index} className="grid grid-cols-2 gap-[102px]">
@@ -206,7 +206,7 @@ const Info = () => {
         <div className="hidden max-lg:flex flex-col gap-6 mb-[24px] ">
           {[...leftSectionData.steps].map((step, index) => {
             const stepNumber = String(index + 1).padStart(2, "0");
-            const isActive = index === 0;
+            const isActive = true;
 
             return (
               <div key={index} className="flex gap-[18px] items-start w-full">
@@ -246,7 +246,7 @@ const Info = () => {
                   <p className="font-medium text-[14px] leading-[22px] text-[#19363f] tracking-[-0.56px] w-full">
                     {step.title}
                   </p>
-                  <p className="font-normal text-[12px] leading-[20px] text-[rgba(25,54,63,0.7)] tracking-[-0.24px] w-full">
+                  <p className="font-normal text-[12px] leading-[20px] text-[rgba(25,54,63,0.7)] tracking-[-0.24px] w-full max-lg:hidden">
                     {step.description}
                   </p>
                 </div>
@@ -269,7 +269,7 @@ const Info = () => {
         <div className="hidden max-lg:flex flex-col gap-6 max-lg:flex">
           {[...rightSectionData.steps].map((step, index) => {
             const stepNumber = String(index + 1).padStart(2, "0");
-            const isActive = index === 0;
+            const isActive = true;
 
             return (
               <div key={index} className="flex gap-[18px] items-start w-full">
@@ -309,7 +309,7 @@ const Info = () => {
                   <p className="font-medium text-[14px] leading-[22px] text-[#19363f] tracking-[-0.56px] w-full">
                     {step.title}
                   </p>
-                  <p className="font-normal text-[12px] leading-[20px] text-[rgba(25,54,63,0.7)] tracking-[-0.24px] w-full">
+                  <p className="font-normal text-[12px] leading-[20px] text-[rgba(25,54,63,0.7)] tracking-[-0.24px] w-full max-lg:hidden">
                     {step.description}
                   </p>
                 </div>

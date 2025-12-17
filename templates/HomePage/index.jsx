@@ -6,7 +6,8 @@ import Whatis from "./Whatis";
 import Info from "./Info";
 import Why from "./Why";
 import Finance from "./Finance";
-import Founders from "./Founders";
+// import Founders from "./Founders";
+import Foundersv2 from "./Foundersv2";
 import FAQ from "./FAQ";
 import CTA from "./CTA";
 import Roadmap from "./Roadmap";
@@ -22,7 +23,7 @@ const HomePage = () => {
       <Info />
       <Why />
       <Finance />
-      <Founders />
+      <Foundersv2 />
       <Roadmap />
       <Plans />
       <FAQ />

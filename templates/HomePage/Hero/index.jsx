@@ -5,6 +5,7 @@ import chevronSVG from "@/assets/imgs/icons/chevron.svg";
 import mouseSVG from "@/assets/imgs/icons/mouse.svg";
 import appleIMG from "@/assets/imgs/misc/apple.svg";
 import googleIMG from "@/assets/imgs/misc/google.svg";
+import cursorIMG from "@/assets/imgs/icons/cursor.svg";
 import app1IMG from "@/assets/imgs/misc/01 - IPHONE.png";
 import app2IMG from "@/assets/imgs/misc/02 - IPHONE.png";
 import item1IMG from "@/assets/imgs/misc/swap.png";
@@ -107,7 +108,7 @@ const Hero = () => {
                     className="relative w-[10px] h-[10px]"
                   />
                   <p className="font-medium text-[12px] text-[#f7f8f8] tracking-[-0.48px] whitespace-nowrap">
-                    New
+                    Proximamente
                   </p>
                 </div>
                 <div
@@ -118,7 +119,7 @@ const Hero = () => {
                 />
               </div>
               <p className="font-normal text-[12px] text-[rgba(25,54,63,0.7)] tracking-[-0.48px] whitespace-nowrap max-md:tracking-[-0.24px] max-md:leading-[20px]">
-                El futuro de las finanzas digitales
+                Quieres unirte a Hyxora?
               </p>
               <Image
                 src={chevronSVG}
@@ -127,8 +128,20 @@ const Hero = () => {
               />
             </div>
             {/* Main Heading */}
-            <h1 className="font-medium text-[50px] text-[#19363f] text-center tracking-[-3.16px] leading-[normal] w-full max-md:text-[28px] max-md:tracking-[-1.12px]">
-              Tu dinero. Tu control
+            <h1 className="flex items-center  gap-2 font-medium text-[50px] text-[#19363f] text-center tracking-[-3.16px] leading-[normal] max-md:text-[28px] max-md:tracking-[-1.12px]">
+              Tu dinero.
+              <div className="flex items-center h-[40px] aspect-square bg-gradient-to-b from-[#1b5ffd] to-[#1b5ffd] rounded-[8px] shadow-[0px_6.08px_1.52px_0px_rgba(25,54,65,0.01),0px_3.8px_1.52px_0px_rgba(25,54,65,0.07),0px_2.28px_1.52px_0px_rgba(25,54,65,0.24),0px_0.76px_0.76px_0px_rgba(25,54,65,0.42),0px_0px_0.76px_0px_rgba(25,54,65,0.48)] flex items-center justify-center shrink-0">
+                <Image
+                  src={cursorIMG}
+                  alt="Location"
+                  className="size-[16px]"
+                  style={{
+                    filter:
+                      "drop-shadow(0 0.76px 2.28px rgba(0, 0, 0, 0.10)) drop-shadow(0 3.8px 3.8px rgba(0, 0, 0, 0.09)) drop-shadow(0 9.12px 5.32px rgba(0, 0, 0, 0.05)) drop-shadow(0 15.96px 6.84px rgba(0, 0, 0, 0.01)) drop-shadow(0 25.08px 6.84px rgba(0, 0, 0, 0.00))",
+                  }}
+                />
+              </div>
+              Tu control
             </h1>
             {/* Description */}
             <p className="font-normal text-[16px] leading-[24px] text-[rgba(25,54,63,0.7)] text-center tracking-[-0.32px] whitespace-nowrap max-md:text-[12px] max-md:tracking-[-0.24px] max-md:leading-[20px] max-md:whitespace-normal">
@@ -138,7 +151,7 @@ const Hero = () => {
           </div>
 
           {/* Download buttons stores */}
-          <div className="flex gap-2 items-center justify-center ">
+          <div className="flex gap-2 items-center justify-center opacity-60 cursor-not-allowed ">
             <Image
               alt="Download on the App Store"
               src={appleIMG}

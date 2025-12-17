@@ -96,7 +96,7 @@ const Footer = () => {
       </div>
 
       {/* Outer shadow effect */}
-      <div className="absolute inset-0 pointer-events-none shadow-[0px_0px_4px_0px_inset_rgba(25,54,63,0.04)]" />
+      <div className="absolute  inset-0 pointer-events-none shadow-[0px_0px_4px_0px_inset_rgba(25,54,63,0.04)]" />
     </footer>
   );
 };
