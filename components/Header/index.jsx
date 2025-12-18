@@ -8,12 +8,14 @@ import topGainersIcon from "@/assets/imgs/icons/topgainer.png";
 import learningCenterIcon from "@/assets/imgs/icons/learning.png";
 import menuIcon from "@/assets/imgs/icons/menu.svg";
 import bannerImage from "@/assets/imgs/brand/tokens.webp";
+import fireSVG from "@/assets/imgs/icons/fire.svg";
 
-const MenuItem = ({ children, href = "#" }) => {
+const MenuItem = ({ children, href = "#", ...props }) => {
   return (
     <Link
       href={href}
       className="box-border flex h-[28px] items-center justify-center p-[2px] relative rounded-[6px] shrink-0 hover:bg-[rgba(25,54,63,0.04)] transition-all"
+      {...props}
     >
       <div className="box-border flex gap-[10px] items-center justify-center px-2 py-[6px] relative shrink-0">
         <span className="font-inter font-medium leading-6 text-[#19363f] text-[16px] whitespace-nowrap tracking-[-0.64px]">
@@ -23,12 +25,11 @@ const MenuItem = ({ children, href = "#" }) => {
     </Link>
   );
 };
-
 const ExploreMenuItem = ({ icon, title, description, href = "#" }) => {
   return (
     <Link
       href={href}
-      className="box-border flex gap-[15px] items-center p-[6px] relative rounded-[12px] shrink-0 w-[217px] hover:bg-[rgba(25,54,63,0.02)] transition-all h-[46px]"
+      className="box-border flex gap-[15px] items-center p-[6px] relative rounded-[12px] shrink-0 max-w-[217px] hover:bg-[rgba(25,54,63,0.02)] transition-all max-h-[46px]"
     >
       <div className="bg-[rgba(25,54,63,0.04)] border-[0.7px] border-[rgba(25,54,63,0.02)] border-solid overflow-clip relative rounded-[8px] shrink-0 size-[34px] shadow-[0px_0px_4px_0px_inset_rgba(25,54,63,0.04)]">
         <div className="absolute left-1/2 size-[16px] top-1/2 -translate-x-1/2 -translate-y-1/2">
@@ -41,25 +42,24 @@ const ExploreMenuItem = ({ icon, title, description, href = "#" }) => {
           />
         </div>
       </div>
-      <div className="flex flex-col gap-[8px] items-start">
-        <p className="font-inter font-medium text-[#19363f] text-[14px] tracking-[-0.56px]">
+      <div className="flex flex-col gap-[8px] items-start ">
+        <p className="font-inter font-medium text-[#19363f] text-[14px] tracking-[-0.56px] leading-[14px]">
           {title}
         </p>
-        <p className="font-inter font-normal text-[12px] text-[rgba(25,54,63,0.7)] tracking-[-0.24px] whitespace-nowrap">
+        <p className="font-inter font-normal text-[12px] text-[rgba(25,54,63,0.7)] tracking-[-0.24px] whitespace-nowrap  leading-[12px]">
           {description}
         </p>
       </div>
     </Link>
   );
 };
-
 const ExploreDropdown = () => {
   return (
     <div className="group relative">
       <button className="box-border flex h-[28px] items-center justify-center gap-2 p-[2px] relative rounded-[6px] shrink-0 hover:bg-[rgba(25,54,63,0.04)] transition-all">
         <div className="box-border flex gap-[10px] items-center justify-center px-2 py-[6px] relative shrink-0">
           <span className="font-inter font-medium leading-6 text-[#19363f] text-[16px] whitespace-nowrap tracking-[-0.64px]">
-            Explore
+            Hxyora
           </span>
         </div>
       </button>
@@ -72,29 +72,29 @@ const ExploreDropdown = () => {
             <div className="flex flex-col gap-[14px] flex-1">
               <ExploreMenuItem
                 icon={trendingIcon}
-                title="Trending Tokens"
-                description="Top tokens right now"
+                title="Hyxora"
+                description="Un neobanco hecho para ti"
                 href="#trending"
               />
               <ExploreMenuItem
                 icon={newListingsIcon}
-                title="New Listings"
-                description="New coins released"
-                href="#new-listings"
+                title="Comité Consultivo"
+                description="Accede a las Consultas"
+                href="#trending"
               />
             </div>
             {/* Column 2 */}
             <div className="flex flex-col gap-[14px] flex-1">
               <ExploreMenuItem
-                icon={topGainersIcon}
-                title="Top Gainers"
-                description="Daily rise and fall of tokens"
+                icon={learningCenterIcon}
+                title="Academia"
+                description="Formate en Hyxora"
                 href="#top-gainers"
               />
               <ExploreMenuItem
-                icon={learningCenterIcon}
-                title="Learning Center"
-                description="Complete crypto guide"
+                icon={topGainersIcon}
+                title="Founders NFT"
+                description="Espacio exclusivo"
                 href="#learning-center"
               />
             </div>
@@ -122,9 +122,9 @@ const ExploreDropdown = () => {
                 <div className="relative z-10 flex items-center justify-between w-full">
                   <p className="font-inter font-normal text-[12px] text-white tracking-[-0.48px] w-[149px] leading-normal">
                     <span className="text-[rgba(255,255,255,0.6)]">
-                      Connect your
+                      Unete a tu
                     </span>
-                    <span> wallet to Unlock Full Features</span>
+                    <span> Hyxora neobanco</span>
                   </p>
                   <div className="backdrop-blur-[25px] bg-[rgba(255,255,255,0.06)] border-[0.7px] border-[rgba(255,255,255,0.02)] border-solid rounded-[16px] shadow-[0px_6px_4px_-4px_rgba(0,0,0,0.05),0px_12px_8px_-4px_rgba(0,0,0,0.05)] shadow-[0px_0px_4px_0px_inset_rgba(255,255,255,0.04)] size-[20px] flex items-center justify-center">
                     <svg
@@ -152,7 +152,42 @@ const ExploreDropdown = () => {
     </div>
   );
 };
+const OportunityDropdown = () => {
+  return (
+    <div className="group relative">
+      <button className="box-border flex h-[28px] items-center justify-center gap-2 p-[2px] relative rounded-[6px] shrink-0 hover:bg-[rgba(25,54,63,0.04)] transition-all">
+        <div className="box-border flex gap-[10px] items-center justify-center px-2 py-[6px] relative shrink-0">
+          <span className="font-inter font-medium leading-6 text-[#19363f] text-[16px] whitespace-nowrap tracking-[-0.64px]">
+            Oportunidades DeFi
+          </span>
+        </div>
+      </button>
 
+      {/* <div className="absolute top-full left-1/2  pt-4 -translate-x-1/2 transition-all group-hover:opacity-100 group-hover:visible "> */}
+      <div className="absolute top-full left-1/2  pt-4 -translate-x-1/2 invisible opacity-0 transition-all group-hover:opacity-100 group-hover:visible pointer-events-none group-hover:pointer-events-auto">
+        <div className="relative backdrop-blur-[15px] bg-[rgba(250,251,251)] border-[0.7px] border-[rgba(25,54,63,0.02)] border-solid flex flex-col gap-[10px] items-start overflow-clip p-[14px] rounded-[16px] shadow-[0px_3px_4px_-4px_rgba(25,54,63,0.05),0px_8px_8px_-4px_rgba(25,54,63,0.1)] shadow-[0px_0px_4px_0px_inset_rgba(25,54,63,0.04)]">
+          <div className="flex gap-[20px] items-stretch w-full h-[106px]">
+            {/* Column 1 */}
+            <div className="flex flex-col gap-[14px] flex-1">
+              <ExploreMenuItem
+                icon={trendingIcon}
+                title="DeFi"
+                description="Qué es DeFi"
+                href="#trending"
+              />
+              <ExploreMenuItem
+                icon={topGainersIcon}
+                title="Oportunidades"
+                description="Oportunidades en Hyxora"
+                href="#learning-center"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
 const Header = ({ isFixed }) => {
   return (
     <>
@@ -181,18 +216,53 @@ const Header = ({ isFixed }) => {
           {/* Navigation Menu */}
           <nav className="flex gap-[18px] items-center max-md:hidden">
             <ExploreDropdown />
-            <MenuItem href="#marketplace">Marketplace</MenuItem>
-            <MenuItem href="#docs">Docs</MenuItem>
-            <MenuItem href="#community">Community</MenuItem>
+            <MenuItem
+              href="https://nft.hyxora.com/"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              NFT Founders
+            </MenuItem>
+            <OportunityDropdown />
+            {/* <MenuItem href="#docs"></MenuItem> */}
+            <MenuItem href="/planes">Planes</MenuItem>
+            <MenuItem href="/faq">FAQ</MenuItem>
           </nav>
 
           {/* Connect Wallet Button */}
-          <Button
-            className="!h-[28px] !px-[16px] !py-2 !text-[14px] !leading-normal min-w-[128px] max-md:hidden"
-            isPrimary
-          >
-            Connect Wallet
-          </Button>
+          <div className="flex items-center justify-end gap-[8px] ">
+            <Button
+              className="!h-[28px] !px-[16px] !py-2 !text-[14px] !leading-normal min-w-[128px] max-md:hidden "
+              isSecondary
+              disabled
+            >
+              Registro
+            </Button>
+            {/* Hot Button */}
+            <Link
+              href="https://nft.hyxora.com/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="bg-[#1b5ffd] border border-[rgba(255,255,255,0.2)] border-solid h-[30px] relative rounded-[100px] cursor-pointer"
+            >
+              <div className="flex gap-[3px] h-[30px] items-center justify-center overflow-hidden p-[8px] relative rounded-[inherit]">
+                <Image
+                  src={fireSVG}
+                  alt="Fire Icon"
+                  className="relative w-[10px] h-[10px]"
+                />
+                <p className="font-medium text-[12px] text-[#f7f8f8] tracking-[-0.48px] whitespace-nowrap">
+                  NFT Founder
+                </p>
+              </div>
+              <div
+                className="absolute inset-0 pointer-events-none"
+                style={{
+                  boxShadow: "0px 0px 10px 0px inset rgba(255,255,255,0.4)",
+                }}
+              />
+            </Link>
+          </div>
           <button className="hidden max-md:flex rounded-[8px] border-[0.7px] border-[rgba(25,54,63,0.02)] bg-[rgba(25,54,63,0.04)] shadow-[0px_0px_4px_0px_inset_rgba(25,54,63,0.04)]   justify-center items-center shrink-0    !h-[32px] !w-[32px]">
             <Image src={menuIcon} alt="Menu" className="w-[16px] h-[16px]" />
           </button>

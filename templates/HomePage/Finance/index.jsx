@@ -1,42 +1,70 @@
+import { useState } from "react";
 import Image from "@/components/Image";
 import Button from "@/components/Button";
-import phoneIMG from "@/assets/imgs/misc/demo.png";
 import WalletItem from "./item";
 import triangleIMG from "@/assets/imgs/icons/triangle.svg";
-import xIMG from "@/assets/imgs/icons/x.svg";
 import circleIMG from "@/assets/imgs/icons/circle.svg";
-import squareIMG from "@/assets/imgs/icons/square.svg";
-import { useRef } from "react";
-import gsap from "gsap";
-import { useGSAP } from "@gsap/react";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-
-gsap.registerPlugin(ScrollTrigger);
+// ///
+import stakeIMG from "./stake.png";
+import swapIMG from "./swap.png";
+import sendIMG from "./send.png";
+import FundsIMG from "./funds.png";
+import soonIMG from "./soon.png";
 
 const Finance = () => {
-  const phoneRef = useRef(null);
-  const containerRef = useRef(null);
+  const [activeIndex, setActiveIndex] = useState(0);
 
-  useGSAP(
-    () => {
-      gsap.to(phoneRef.current, {
-        y: -50,
-        scrollTrigger: {
-          trigger: phoneRef.current,
-          start: "top bottom",
-          end: "bottom top",
-          scrub: 1.5,
-        },
-      });
+  const walletItems = [
+    {
+      id: 0,
+      title: "Staking",
+      description:
+        "Consigue rendimientos e ingresos pasivos sólo por el hecho de mantener tu capital en Hyxora",
+      iconSrc: circleIMG,
+      imageSrc: stakeIMG,
     },
-    { scope: containerRef }
-  );
+    {
+      id: 1,
+      title: "Swaps",
+      description:
+        "Realiza cambios entre Fiat y Criptp en un solo click. Maximiza la rentabilidad de tu dinero",
+      iconSrc: circleIMG,
+      imageSrc: swapIMG,
+    },
+    {
+      id: 2,
+      title: "Remesas internacionales",
+      description:
+        "Envía dinero a otros usuarios en cualquier parte del mundo en segundos y sin coste",
+      iconSrc: circleIMG,
+      imageSrc: sendIMG,
+    },
+    {
+      id: 3,
+      title: "Fondos Indexados mixtos",
+      description:
+        "Invierte en fondos indexados con las mayores rentabilidades que ambos mundos financieros pueden ofrecerte en conjunto.",
+      iconSrc: circleIMG,
+      imageSrc: FundsIMG,
+    },
+    {
+      id: 4,
+      title: "Proximamente",
+      description: "Pools de liquidez, Lending, etc. etc….",
+      iconSrc: triangleIMG,
+      imageSrc: soonIMG,
+    },
+  ];
+
+  const handleItemInteraction = (index) => {
+    setActiveIndex(index);
+  };
 
   return (
-    <section ref={containerRef} className="flex w-full overflow-hidden">
-      <div className="flex flex-col lg:flex-row items-start justify-center gap-2 lg:gap-12 max-w-[1240px] w-full mx-auto px-4 md:px-8 xl:px-8">
+    <section className="w-full h-full  ">
+      <div className="flex relative  flex-col lg:flex-row items-start justify-center gap-2 lg:gap-12 max-w-[1240px] w-full mx-auto ">
         {/* Left Section - Empty for customization */}
-        <div className="flex flex-col gap-[40px] items-start pt-[40px] w-full lg:w-[486px] lg:shrink-0 xl:w-[486px]">
+        <div className="flex flex-col gap-[40px] items-start pt-[40px] w-full lg:w-[486px] lg:shrink-0 xl:w-[486px pl-4  lg:pl-12">
           {/* Text Section */}
           <div className="flex flex-col gap-[24px] items-start w-full lg:w-[471px]">
             {/* Badge */}
@@ -61,46 +89,26 @@ const Finance = () => {
 
           {/* Wallet List Section */}
           <div className="flex flex-col gap-[10.913px] w-full">
-            <WalletItem
-              title="Staking"
-              description="Consigue rendimientos e ingresos pasivos sólo por el hecho de mantener tu capital en Hyxora"
-              iconSrc={circleIMG}
-            />
-
-            <WalletItem
-              title="Swaps"
-              description="Realiza cambios entre Fiat y Criptp en un solo click. Maximiza la rentabilidad de tu dinero"
-              iconSrc={squareIMG}
-            />
-
-            <WalletItem
-              title="Remesas internacionales"
-              description="Envía dinero a otros usuarios en cualquier parte del mundo en segundos y sin coste"
-              iconSrc={triangleIMG}
-            />
-
-            <WalletItem
-              title="Fondos Indexados mixtos"
-              description="Invierte en fondos indexados con las mayores rentabilidades que ambos mundos financieros pueden ofrecerte en conjunto. 
-              "
-              iconSrc={xIMG}
-            />
-
-            <WalletItem
-              title="Proximamente"
-              description="Pools de liquidez, Lending, etc. etc…."
-              iconSrc={circleIMG}
-            />
-            <Button isPrimary>Get Started</Button>
+            {walletItems.map((item, index) => (
+              <WalletItem
+                key={item.id}
+                title={item.title}
+                description={item.description}
+                iconSrc={item.iconSrc}
+                isActive={activeIndex === index}
+                onHover={() => handleItemInteraction(index)}
+                onClick={() => handleItemInteraction(index)}
+              />
+            ))}
+            <Button isPrimary>Empezamos</Button>
           </div>
         </div>
         {/* Right Section -  */}
-        <div className="w-full hidden lg:flex relative items-center justify-center rounded-[16px] flex-1 min-h-[746px] ">
+        <div className="w-full  hidden lg:flex relative items-center justify-center rounded-[16px] flex-1 min-h-[746px]">
           <Image
-            ref={phoneRef}
-            src={phoneIMG}
-            alt="Finance Demo"
-            className="min-w-[497px] max-w-[497px] h-[746px] absolute left-1/2 lg:left-[calc(50%-150px)] top-[10%] -translate-x-1/2 lg:translate-x-0"
+            src={walletItems[activeIndex].imageSrc}
+            alt={walletItems[activeIndex].title}
+            className="min-w-[497px] max-w-[497px] h-[746px] absolute left-[25%] top-[10%] max-2xl:left-[20%] max-xl:left-[20%]  max-xl:min-w-[revert] max-xl:max-w-[revert] max-xl:w-auto max-xl:top-[15%]  max-xl:h-[546px]  "
           />
         </div>
       </div>

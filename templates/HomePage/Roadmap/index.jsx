@@ -76,10 +76,10 @@ const Roadmap = () => {
         <div className="relative w-full p-4  pl-[212px] flex rounded-[16px] border-[0.7px] border-[rgba(25,54,63,0.02)] bg-[rgba(25,54,63,0.02)] shadow-[inset_0px_0px_4px_0px_rgba(25,54,63,0.04)]">
           {/* Hot Badge */}
           <div
-            className="backdrop-blur-sm bg-[rgba(25,54,63,0.02)] border-[0.7px] border-[rgba(25,54,63,0.02)] border-solid flex gap-[10px] items-center px-[12px] py-0 absolute rounded-[32px] left-[8px] top-[-32px]"
+            className="backdrop-blur-sm bg-[rgba(25,54,63,0.02)] border-[0.7px] border-[rgba(25,54,63,0.02)] border-solid flex gap-[10px] items-center px-[14px] py-0 absolute rounded-[32px] left-[8px] top-[-32px]"
             style={{ boxShadow: "0px 0px 4px 0px inset rgba(25,54,63,0.04)" }}
           >
-            <p className="font-bold text-[10px] text-[rgba(25,54,63,0.7)] tracking-tight whitespace-nowrap  ">
+            <p className="font-bold text-[12px] text-[rgba(25,54,63,0.7)] tracking-tight whitespace-nowrap  ">
               Hyxora
             </p>
           </div>
@@ -109,7 +109,6 @@ const Roadmap = () => {
                 "repeating-linear-gradient(to right, black 0px, black 8px, transparent 8px, transparent 16px)",
             }}
           />
-
           <Year
             className="roadmap-year"
             year="2026"
@@ -155,18 +154,18 @@ const Roadmap = () => {
         <div className="relative w-full  p-4 flex rounded-[16px] border-[0.7px] border-[rgba(25,54,63,0.02)] bg-[rgba(25,54,63,0.02)] shadow-[inset_0px_0px_4px_0px_rgba(25,54,63,0.04)]">
           {/* Hot Badge */}
           <div
-            className=" backdrop-blur-sm bg-[rgba(25,54,63,0.02)] border-[0.7px] border-[rgba(25,54,63,0.02)] border-solid flex gap-[10px] items-center pr-[12px] pl-0 py-0 absolute rounded-[32px] left-[8px] top-[-32px]"
+            className=" backdrop-blur-sm bg-[rgba(25,54,63,0.02)] border-[0.7px] border-[rgba(25,54,63,0.02)] border-solid flex gap-[10px] items-center pr-[14px] pl-0 py-0 absolute rounded-[32px] left-[8px] top-[-32px]"
             style={{ boxShadow: "0px 0px 4px 0px inset rgba(25,54,63,0.04)" }}
           >
             {/* Hot Button */}
-            <div className="bg-[#1b5ffd] h-[17px] border border-[rgba(255,255,255,0.2)] border-solid  relative rounded-[100px]">
-              <div className="flex gap-[3px] h-[17px]  items-center justify-center overflow-hidden px-[4px] relative rounded-[inherit]">
+            <div className="bg-[#1b5ffd] h-[19px] border border-[rgba(255,255,255,0.2)] border-solid  relative rounded-[100px]">
+              <div className="flex gap-[3px] h-[19px]  items-center justify-center overflow-hidden px-[4px] relative rounded-[inherit]">
                 <Image
                   src={fireSVG}
                   alt="Fire Icon"
-                  className="relative w-[10px] h-[10px] "
+                  className="relative w-[12px] h-[12px] "
                 />
-                <p className="font-medium text-[8px] text-[#f7f8f8] tracking-tight whitespace-nowrap">
+                <p className="font-medium text-[10px] text-[#f7f8f8] tracking-tight whitespace-nowrap">
                   NFT
                 </p>
               </div>
@@ -177,7 +176,7 @@ const Roadmap = () => {
                 }}
               />
             </div>
-            <p className="font-bold text-[10px] text-[rgba(25,54,63,0.7)] tracking-tight whitespace-nowrap">
+            <p className="font-bold text-[12px] text-[rgba(25,54,63,0.7)] tracking-tight whitespace-nowrap">
               Founders
             </p>
           </div>
@@ -214,13 +213,23 @@ const Roadmap = () => {
             leftItems={[
               {
                 icon: checkSVG,
-                text: "Lanzamiento 50 und",
+                text: (
+                  <>
+                    Lanzamiento <span className="font-bold">50 und</span>{" "}
+                    <span className="font-light">2000€/und</span>
+                  </>
+                ),
               },
             ]}
             rightItems={[
               {
                 icon: checkSVG,
-                text: "Lanzamiento 350 und",
+                text: (
+                  <>
+                    Lanzamiento <span className="font-bold">350 und</span>
+                    <span className="font-light">3000€/und</span>
+                  </>
+                ),
               },
             ]}
           />
@@ -231,7 +240,12 @@ const Roadmap = () => {
             rightItems={[
               {
                 icon: checkSVG,
-                text: "Lanzamiento 600 und",
+                text: (
+                  <>
+                    Lanzamiento <span className="font-bold">600 und</span>{" "}
+                    <span className="font-light">6000€/und</span>
+                  </>
+                ),
               },
             ]}
           />
@@ -242,7 +256,12 @@ const Roadmap = () => {
             rightItems={[
               {
                 icon: checkSVG,
-                text: "Marketplace NFT abierto",
+                text: (
+                  <>
+                    Marketplace abierto
+                    <span className="font-light">Transmisibilidad de NFT</span>
+                  </>
+                ),
               },
             ]}
           />

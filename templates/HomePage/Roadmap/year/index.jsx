@@ -64,7 +64,7 @@ const Year = ({ year, leftItems = [], rightItems = [], className = "" }) => {
               >
                 <Image src={item.icon} alt="Icon" className="relative size-3" />
                 <p className="font-medium text-[10px] tracking-tight leading-[10px] text-[#19363f]">
-                  {item.text}
+                  {typeof item.text === "string" ? item.text : item.text}
                 </p>
               </div>
             ))}
@@ -89,7 +89,7 @@ const Year = ({ year, leftItems = [], rightItems = [], className = "" }) => {
               >
                 <Image src={item.icon} alt="Icon" className="relative size-3" />
                 <p className="font-medium text-[10px] tracking-tight leading-[10px] text-[#19363f]">
-                  {item.text}
+                  {typeof item.text === "string" ? item.text : item.text}
                 </p>
               </div>
             ))}

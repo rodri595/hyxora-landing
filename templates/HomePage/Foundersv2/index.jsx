@@ -1,6 +1,7 @@
 import Button from "@/components/Button";
+import Image from "@/components/Image";
 import Item from "./item";
-import posterIMG from "./poster.jpg";
+import posterIMG from "@/assets/imgs/brand/poster.jpeg";
 import Video from "@/components/Video";
 const Foundersv2 = () => {
   return (
@@ -8,8 +9,14 @@ const Foundersv2 = () => {
       <div className="flex flex-col lg:flex-row items-start justify-center gap-12 max-md:gap-2  max-w-[1240px] w-full mx-auto px-4 ">
         {/* Left Section - Empty for customization */}
         <div className="w-full flex relative items-center justify-center rounded-[16px] h-full ">
+          <Image
+            src={posterIMG}
+            className="h-[365px] w-auto rounded-[16px] hidden! max-md:flex!"
+            alt="Item Option"
+            priority
+          />
           <Video
-            className="h-[365px]"
+            className="h-[465px] max-md:hidden rounded-[16px]"
             src={"/videos/key_card_2.webm"}
             poster={posterIMG}
             type="video"

@@ -37,9 +37,9 @@ const faqItems = [
   {
     id: 6,
     question:
-      "¿Qué ventaja tengo al pagar 9,99 € de Premium frente a quedarme en el Basic de 1,80 €?",
+      "¿Qué ventaja tengo al pagar 9,99 € de Premium frente a quedarme en el Basic de 1,99 €?",
     answer:
-      "Por sólo 9,99 € tienes: Plan Basic completo, Fees de swap/intercambios al 0,5 % (vs 0,9 %) → ahorras dinero cada vez que mueves dinero, Acceso a todas las cestas DeFi, Soporte prioritario y nuevas funcionalidades, Academia Premium. La mayoría de usuarios que prueban Premium recuperan la cuota el primer mes solo con lo que ahorran en fees.",
+      "Por sólo 9,99 € tienes: Plan Basic completo, Fees de swap/intercambios al 0,5 % (vs 0,9 %), ahorras dinero cada vez que mueves dinero, Acceso a todas las cestas DeFi, Soporte prioritario y nuevas funcionalidades, Academia Premium. La mayoría de usuarios que prueban Premium recuperan la cuota el primer mes solo con lo que ahorran en fees.",
   },
 ];
 
