@@ -2,6 +2,10 @@ import { usePathname } from "next/navigation";
 import Button from "@/components/Button";
 import Icon from "@/components/Icon";
 import { useScrollPosition } from "@/hooks";
+import gsap from "gsap";
+import { ScrollToPlugin } from "gsap/ScrollToPlugin";
+
+gsap.registerPlugin(ScrollToPlugin);
 
 const UpButton = () => {
   const scrollPosition = useScrollPosition();
@@ -9,9 +13,13 @@ const UpButton = () => {
   const pathname = usePathname();
 
   const goTop = () => {
-    window.scrollTo({
-      top: 0,
-      behavior: "smooth",
+    gsap.to(window, {
+      scrollTo: {
+        y: 0,
+        autoKill: true,
+      },
+      duration: 1.2,
+      ease: "power3.inOut",
     });
   };
 

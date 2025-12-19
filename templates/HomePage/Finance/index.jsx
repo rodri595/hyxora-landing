@@ -64,7 +64,7 @@ const Finance = () => {
     <section className="w-full h-full  ">
       <div className="flex relative  flex-col lg:flex-row items-start justify-center gap-2 lg:gap-12 max-w-[1240px] w-full mx-auto ">
         {/* Left Section - Empty for customization */}
-        <div className="flex flex-col gap-[40px] items-start pt-[40px] w-full lg:w-[486px] lg:shrink-0 xl:w-[486px pl-4  lg:pl-12">
+        <div className="flex flex-col gap-[40px] items-start pt-[40px] w-full lg:w-[486px] lg:shrink-0 px-4  lg:pl-12">
           {/* Text Section */}
           <div className="flex flex-col gap-[24px] items-start w-full lg:w-[471px]">
             {/* Badge */}

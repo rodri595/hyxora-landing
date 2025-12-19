@@ -1,13 +1,17 @@
 import Link from "next/link";
 import Image from "@/components/Image";
-import Icon from "@/components/Icon";
+// import Icon from "@/components/Icon";
 import brandIMG from "@/assets/imgs/brand/logo.svg";
+import twitterIMG from "@/assets/imgs/icons/twitter.svg";
+import discordIMG from "@/assets/imgs/icons/discord.svg";
+import telegramIMG from "@/assets/imgs/icons/telegram.svg";
 
-const MenuItem = ({ children, href = "#" }) => {
+const MenuItem = ({ children, href = "#", ...props }) => {
   return (
     <Link
       href={href}
       className="font-inter font-medium leading-6 text-[#19363f] text-[16px] whitespace-nowrap tracking-[-0.64px] transition-opacity hover:opacity-70"
+      {...props}
     >
       {children}
     </Link>
@@ -18,14 +22,14 @@ const SocialLink = ({ icon }) => {
   return (
     <Link
       href={"#"}
-      className="relative shrink-0 size-6 transition-opacity hover:opacity-70"
+      className="relative shrink-0 transition-opacity hover:opacity-70 flex items-center  justify-center"
       style={{
         filter:
           "drop-shadow(0px 6px 8px rgba(27, 95, 253, 0.15)) drop-shadow(0px 2px 4px rgba(27, 95, 253, 0.15))",
         boxShadow: "inset 0px 0px 3px rgba(255, 255, 255, 0.4)",
       }}
     >
-      <Icon name={icon} className="w-full h-full" />
+      <Image src={icon} className="size-6 " alt="Social Icon" />
     </Link>
   );
 };
@@ -54,17 +58,23 @@ const Footer = () => {
 
           {/* Menu - Hidden on mobile */}
           <nav className="hidden lg:flex gap-[34px] items-center">
-            <MenuItem href="#explore">Explore</MenuItem>
-            <MenuItem href="#marketplace">Marketplace</MenuItem>
-            <MenuItem href="#docs">Docs</MenuItem>
-            <MenuItem href="#community">Community</MenuItem>
+            <MenuItem href="/">Hyxora</MenuItem>
+            <MenuItem
+              href="https://founder.hyxora.com/"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              NFT Founders
+            </MenuItem>
+            <MenuItem href="/plans">Planes</MenuItem>
+            <MenuItem href="/faq">FAQ</MenuItem>
           </nav>
 
           {/* Social Media */}
           <div className="flex gap-2.5 max-md:gap-2.5 items-center">
-            <SocialLink icon="verification" />
-            <SocialLink icon="verification" />
-            <SocialLink icon="verification" />
+            <SocialLink icon={twitterIMG} />
+            <SocialLink icon={discordIMG} />
+            <SocialLink icon={telegramIMG} />
           </div>
         </div>
 

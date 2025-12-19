@@ -3,6 +3,7 @@ import Image from "@/components/Image";
 import shieldCheckSVG from "@/assets/imgs/icons/shield-check.svg";
 import eyeSVG from "@/assets/imgs/icons/eye.svg";
 import sparklesSVG from "@/assets/imgs/icons/sparkles.svg";
+import listSVG from "@/assets/imgs/icons/list.svg";
 // import buycryptoSVG from "@/assets/imgs/icons/buycrypto.svg";
 
 const Why = () => {
@@ -134,7 +135,7 @@ const Why = () => {
                 }}
               >
                 <Image
-                  src={sparklesSVG}
+                  src={listSVG}
                   alt="AI Icon"
                   className="w-[20px] h-[20px]"
                 />

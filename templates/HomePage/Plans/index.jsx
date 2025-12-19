@@ -115,7 +115,7 @@ const Plans = () => {
   const [isYearly, setIsYearly] = useState(false);
 
   return (
-    <section className="w-full py-16 md:py-24 px-4">
+    <section className="w-full py-16 md:py-24 px-4 ">
       <div className="max-w-[1400px] mx-auto">
         {/* Header */}
         <div className="flex flex-col items-center gap-8 mb-12">

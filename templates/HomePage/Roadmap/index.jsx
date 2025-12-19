@@ -1,4 +1,4 @@
-import checkSVG from "@/assets/imgs/icons/check.svg";
+import checkSVG from "@/assets/imgs/icons/topgainer.png";
 import Year from "./year";
 import Image from "@/components/Image";
 import fireSVG from "@/assets/imgs/icons/fire.svg";
@@ -57,7 +57,8 @@ const Roadmap = () => {
   return (
     <section
       ref={containerRef}
-      className="flex flex-col gap-[70px] items-center w-full px-4 max-lg:hidden"
+      className="flex flex-col gap-[70px] items-center w-full px-4 "
+      id="roadmap"
     >
       {/* Header Text Section */}
       <div className="flex flex-col gap-2 items-center justify-center w-full max-w-[700px]">
@@ -71,20 +72,20 @@ const Roadmap = () => {
           estate atento a las noticias del lanzamiento
         </p>
       </div>
-      <div className="flex flex-col items-center justify-center max-w-[1220px] gap-12">
+      <div className="flex flex-col items-center justify-center max-w-[1220px] gap-12 max-lg:flex-row max-lg:items-start max-md:flex-col max-md:gap-24">
         {/* First Row */}
-        <div className="relative w-full p-4  pl-[212px] flex rounded-[16px] border-[0.7px] border-[rgba(25,54,63,0.02)] bg-[rgba(25,54,63,0.02)] shadow-[inset_0px_0px_4px_0px_rgba(25,54,63,0.04)]">
+        <div className="relative w-full p-4  pl-[212px] flex rounded-[16px] border-[0.7px] border-[rgba(25,54,63,0.02)] bg-[rgba(25,54,63,0.02)] shadow-[inset_0px_0px_4px_0px_rgba(25,54,63,0.04)] max-lg:flex-col max-lg:pl-4  max-lg:w-min">
           {/* Hot Badge */}
           <div
-            className="backdrop-blur-sm bg-[rgba(25,54,63,0.02)] border-[0.7px] border-[rgba(25,54,63,0.02)] border-solid flex gap-[10px] items-center px-[14px] py-0 absolute rounded-[32px] left-[8px] top-[-32px]"
+            className="backdrop-blur-sm bg-[rgba(25,54,63,0.02)] border-[0.7px] border-[rgba(25,54,63,0.02)] border-solid flex gap-[10px] items-center px-[14px] py-0 absolute rounded-[32px]  top-[-32px] max-lg:left-0"
             style={{ boxShadow: "0px 0px 4px 0px inset rgba(25,54,63,0.04)" }}
           >
-            <p className="font-bold text-[12px] text-[rgba(25,54,63,0.7)] tracking-tight whitespace-nowrap  ">
+            <p className="font-bold text-[14px] text-[rgba(25,54,63,0.7)] tracking-tight whitespace-nowrap  ">
               Hyxora
             </p>
           </div>
           <div
-            className="roadmap-line will-change-[clip-path] w-[calc(100%-460px)] h-0.5 absolute left-[236px] top-[34px]"
+            className="roadmap-line will-change-[clip-path] w-full h-0.5 absolute left-0 top-[34px] max-lg:hidden"
             style={{
               backgroundImage: `
                 linear-gradient(to right, 
@@ -107,6 +108,32 @@ const Roadmap = () => {
                 "repeating-linear-gradient(to right, black 0px, black 8px, transparent 8px, transparent 16px)",
               maskImage:
                 "repeating-linear-gradient(to right, black 0px, black 8px, transparent 8px, transparent 16px)",
+            }}
+          />
+          <div
+            className="roadmap-line will-change-[clip-path] w-0.5 h-full absolute left-[36px] top-[0px] hidden max-lg:flex"
+            style={{
+              backgroundImage: `
+                linear-gradient(to bottom, 
+                  rgba(25, 54, 63, 1) 0%,
+                  rgba(25, 54, 63, 1) 15%,
+                  rgba(25, 54, 63, 0.16) 28%,
+                  rgba(25, 54, 63, 0.16) 72%,
+                  rgba(25, 54, 63, 1) 85%,
+                  rgba(25, 54, 63, 1) 100%
+                ),
+                repeating-linear-gradient(to bottom, 
+                  transparent, 
+                  transparent 8px, 
+                  rgba(25, 54, 63, 1) 8px, 
+                  rgba(25, 54, 63, 1) 16px
+                )
+              `,
+              backgroundSize: "100% 100%, 16px 100%",
+              WebkitMaskImage:
+                "repeating-linear-gradient(to bottom, black 0px, black 8px, transparent 8px, transparent 16px)",
+              maskImage:
+                "repeating-linear-gradient(to bottom, black 0px, black 8px, transparent 8px, transparent 16px)",
             }}
           />
           <Year
@@ -151,15 +178,15 @@ const Roadmap = () => {
           />
         </div>
         {/* Second Row */}
-        <div className="relative w-full  p-4 flex rounded-[16px] border-[0.7px] border-[rgba(25,54,63,0.02)] bg-[rgba(25,54,63,0.02)] shadow-[inset_0px_0px_4px_0px_rgba(25,54,63,0.04)]">
+        <div className="relative w-full  p-4 flex rounded-[16px] border-[0.7px] border-[rgba(25,54,63,0.02)] bg-[rgba(25,54,63,0.02)] shadow-[inset_0px_0px_4px_0px_rgba(25,54,63,0.04)] max-lg:flex-col  max-lg:w-min">
           {/* Hot Badge */}
           <div
-            className=" backdrop-blur-sm bg-[rgba(25,54,63,0.02)] border-[0.7px] border-[rgba(25,54,63,0.02)] border-solid flex gap-[10px] items-center pr-[14px] pl-0 py-0 absolute rounded-[32px] left-[8px] top-[-32px]"
+            className=" backdrop-blur-sm bg-[rgba(25,54,63,0.02)] border-[0.7px] border-[rgba(25,54,63,0.02)] border-solid flex gap-[10px] items-center pr-[14px] pl-0 py-0 absolute rounded-[32px] left-[8px] top-[-32px] max-lg:left-0"
             style={{ boxShadow: "0px 0px 4px 0px inset rgba(25,54,63,0.04)" }}
           >
             {/* Hot Button */}
-            <div className="bg-[#1b5ffd] h-[19px] border border-[rgba(255,255,255,0.2)] border-solid  relative rounded-[100px]">
-              <div className="flex gap-[3px] h-[19px]  items-center justify-center overflow-hidden px-[4px] relative rounded-[inherit]">
+            <div className="bg-[#1b5ffd] h-[20px] border border-[rgba(255,255,255,0.2)] border-solid flex items-center relative rounded-[100px]">
+              <div className="flex gap-[3px] h-full  items-center justify-center overflow-hidden px-[4px] relative rounded-[inherit]">
                 <Image
                   src={fireSVG}
                   alt="Fire Icon"
@@ -176,12 +203,12 @@ const Roadmap = () => {
                 }}
               />
             </div>
-            <p className="font-bold text-[12px] text-[rgba(25,54,63,0.7)] tracking-tight whitespace-nowrap">
+            <p className="font-bold text-[14px] text-[rgba(25,54,63,0.7)] tracking-tight whitespace-nowrap">
               Founders
             </p>
           </div>
           <div
-            className="roadmap-line will-change-[clip-path] w-[calc(100%-460px)] h-0.5 absolute left-[236px] top-[34px]"
+            className="roadmap-line will-change-[clip-path] w-full h-0.5 absolute left-0 top-[34px] max-lg:hidden"
             style={{
               backgroundImage: `
                 linear-gradient(to right, 
@@ -204,6 +231,32 @@ const Roadmap = () => {
                 "repeating-linear-gradient(to right, black 0px, black 8px, transparent 8px, transparent 16px)",
               maskImage:
                 "repeating-linear-gradient(to right, black 0px, black 8px, transparent 8px, transparent 16px)",
+            }}
+          />
+          <div
+            className="roadmap-line will-change-[clip-path] w-0.5 h-full absolute left-[36px] top-[0px] hidden max-lg:flex"
+            style={{
+              backgroundImage: `
+                linear-gradient(to bottom, 
+                  rgba(25, 54, 63, 1) 0%,
+                  rgba(25, 54, 63, 1) 15%,
+                  rgba(25, 54, 63, 0.16) 28%,
+                  rgba(25, 54, 63, 0.16) 72%,
+                  rgba(25, 54, 63, 1) 85%,
+                  rgba(25, 54, 63, 1) 100%
+                ),
+                repeating-linear-gradient(to bottom, 
+                  transparent, 
+                  transparent 8px, 
+                  rgba(25, 54, 63, 1) 8px, 
+                  rgba(25, 54, 63, 1) 16px
+                )
+              `,
+              backgroundSize: "100% 100%, 16px 100%",
+              WebkitMaskImage:
+                "repeating-linear-gradient(to bottom, black 0px, black 8px, transparent 8px, transparent 16px)",
+              maskImage:
+                "repeating-linear-gradient(to bottom, black 0px, black 8px, transparent 8px, transparent 16px)",
             }}
           />
 

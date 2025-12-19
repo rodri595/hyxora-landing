@@ -1,14 +1,13 @@
 import Link from "next/link";
-import Button from "@/components/Button";
 import Image from "@/components/Image";
 import brandIMG from "@/assets/imgs/brand/logo.svg";
 import trendingIcon from "@/assets//imgs/icons/trending.png";
 import newListingsIcon from "@/assets/imgs/icons/newlisting.png";
 import topGainersIcon from "@/assets/imgs/icons/topgainer.png";
 import learningCenterIcon from "@/assets/imgs/icons/learning.png";
-import menuIcon from "@/assets/imgs/icons/menu.svg";
 import bannerImage from "@/assets/imgs/brand/tokens.webp";
 import fireSVG from "@/assets/imgs/icons/fire.svg";
+import Menu from "./Menu";
 
 const MenuItem = ({ children, href = "#", ...props }) => {
   return (
@@ -25,11 +24,17 @@ const MenuItem = ({ children, href = "#", ...props }) => {
     </Link>
   );
 };
-const ExploreMenuItem = ({ icon, title, description, href = "#" }) => {
+export const ExploreMenuItem = ({
+  icon,
+  title,
+  description,
+  href = "#",
+  className = "",
+}) => {
   return (
     <Link
       href={href}
-      className="box-border flex gap-[15px] items-center p-[6px] relative rounded-[12px] shrink-0 max-w-[217px] hover:bg-[rgba(25,54,63,0.02)] transition-all max-h-[46px]"
+      className={`box-border flex gap-[15px] items-center p-[6px] relative rounded-[12px] shrink-0 max-w-[217px] hover:bg-[rgba(25,54,63,0.02)] transition-all max-h-[46px] ${className}`}
     >
       <div className="bg-[rgba(25,54,63,0.04)] border-[0.7px] border-[rgba(25,54,63,0.02)] border-solid overflow-clip relative rounded-[8px] shrink-0 size-[34px] shadow-[0px_0px_4px_0px_inset_rgba(25,54,63,0.04)]">
         <div className="absolute left-1/2 size-[16px] top-1/2 -translate-x-1/2 -translate-y-1/2">
@@ -122,9 +127,10 @@ const ExploreDropdown = () => {
                 <div className="relative z-10 flex items-center justify-between w-full">
                   <p className="font-inter font-normal text-[12px] text-white tracking-[-0.48px] w-[149px] leading-normal">
                     <span className="text-[rgba(255,255,255,0.6)]">
-                      Unete a tu
+                      Unete a tu neobanco
                     </span>
-                    <span> Hyxora neobanco</span>
+                    <br />
+                    <span>Hyxora</span>
                   </p>
                   <div className="backdrop-blur-[25px] bg-[rgba(255,255,255,0.06)] border-[0.7px] border-[rgba(255,255,255,0.02)] border-solid rounded-[16px] shadow-[0px_6px_4px_-4px_rgba(0,0,0,0.05),0px_12px_8px_-4px_rgba(0,0,0,0.05)] shadow-[0px_0px_4px_0px_inset_rgba(255,255,255,0.04)] size-[20px] flex items-center justify-center">
                     <svg
@@ -192,32 +198,34 @@ const Header = ({ isFixed }) => {
   return (
     <>
       <div
-        className={`relative z-2 backdrop-blur-[10px] bg-[rgba(255,255,255,0.8)] border-b border-white box-border   w-full ${
+        className={`relative z-20 backdrop-blur-[10px] bg-[rgba(255,255,255,0.8)] border-b border-white box-border   w-full ${
           isFixed ? "fixed! top-0 left-0 right-0" : ""
         }`}
       >
-        <div className="box-border max-w-[1440px] w-full flex items-center justify-between h-[52px] px-[50px] py-3 mx-auto max-md:px-4 max-md:py-[10px]">
+        <div className="box-border max-w-[1440px] w-full flex items-center h-[52px] px-[50px] py-3 mx-auto max-md:px-4 max-md:py-[10px]">
           {/* Logo */}
-          <Link href="/" className="flex gap-2 items-center shrink-0  ">
-            <div className="relative shrink-0 size-6">
-              <Image
-                className="w-full h-full object-contain"
-                src={brandIMG}
-                width={24}
-                height={24}
-                alt="Logo"
-              />
-            </div>
-            <span className="font-inter font-semibold leading-6 text-[#19363f] text-[18px] whitespace-nowrap tracking-[-0.72px]">
-              Hyxora
-            </span>
-          </Link>
+          <div className="flex items-center justify-start gap-2 flex-1">
+            <Link href="/" className="flex gap-2 items-center shrink-0  ">
+              <div className="relative shrink-0 size-6">
+                <Image
+                  className="w-full h-full object-contain"
+                  src={brandIMG}
+                  width={24}
+                  height={24}
+                  alt="Logo"
+                />
+              </div>
+              <span className="font-inter font-semibold leading-6 text-[#19363f] text-[18px] whitespace-nowrap tracking-[-0.72px]">
+                Hyxora
+              </span>
+            </Link>
+          </div>
 
           {/* Navigation Menu */}
-          <nav className="flex gap-[18px] items-center max-md:hidden">
+          <nav className="flex gap-[18px] items-center justify-center flex-1 max-md:hidden">
             <ExploreDropdown />
             <MenuItem
-              href="https://nft.hyxora.com/"
+              href="https://founder.hyxora.com/"
               target="_blank"
               rel="noopener noreferrer"
             >
@@ -225,22 +233,15 @@ const Header = ({ isFixed }) => {
             </MenuItem>
             <OportunityDropdown />
             {/* <MenuItem href="#docs"></MenuItem> */}
-            <MenuItem href="/planes">Planes</MenuItem>
+            <MenuItem href="/plans">Planes</MenuItem>
             <MenuItem href="/faq">FAQ</MenuItem>
           </nav>
 
           {/* Connect Wallet Button */}
-          <div className="flex items-center justify-end gap-[8px] ">
-            <Button
-              className="!h-[28px] !px-[16px] !py-2 !text-[14px] !leading-normal min-w-[128px] max-md:hidden "
-              isSecondary
-              disabled
-            >
-              Registro
-            </Button>
+          <div className="flex items-center justify-end gap-[8px] flex-1 max-md:hidden ">
             {/* Hot Button */}
             <Link
-              href="https://nft.hyxora.com/"
+              href="https://founder.hyxora.com/"
               target="_blank"
               rel="noopener noreferrer"
               className="bg-[#1b5ffd] border border-[rgba(255,255,255,0.2)] border-solid h-[30px] relative rounded-[100px] cursor-pointer"
@@ -263,9 +264,7 @@ const Header = ({ isFixed }) => {
               />
             </Link>
           </div>
-          <button className="hidden max-md:flex rounded-[8px] border-[0.7px] border-[rgba(25,54,63,0.02)] bg-[rgba(25,54,63,0.04)] shadow-[0px_0px_4px_0px_inset_rgba(25,54,63,0.04)]   justify-center items-center shrink-0    !h-[32px] !w-[32px]">
-            <Image src={menuIcon} alt="Menu" className="w-[16px] h-[16px]" />
-          </button>
+          <Menu />
         </div>
       </div>
     </>
