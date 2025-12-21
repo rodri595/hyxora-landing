@@ -19,7 +19,6 @@ const HomePage = () => {
       classContainer="flex flex-col gap-[130px] maxmd:gap-[80px]"
     >
       <Hero />
-   //   <Whatis />
       <Info />
       <Why />
       <Finance />
