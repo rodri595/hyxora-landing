@@ -2,7 +2,7 @@
 
 import Layout from "@/components/Layout";
 import Hero from "./Hero";
-import Whatis from "./Whatis";
+// import Whatis from "./Whatis";
 import Info from "./Info";
 import Why from "./Why";
 import Finance from "./Finance";
@@ -19,7 +19,7 @@ const HomePage = () => {
       classContainer="flex flex-col gap-[130px] maxmd:gap-[80px]"
     >
       <Hero />
-      <Whatis />
+      {/* <Whatis /> */}
       <Info />
       <Why />
       <Finance />
