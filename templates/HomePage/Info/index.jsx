@@ -68,7 +68,7 @@ const Info = () => {
   };
 
   return (
-    <section className="flex w-full">
+    <section className="flex w-full" id="opportunities-section">
       <div className="max-w-[1240px] mx-auto w-full  max-xl:px-[32px] max-md:px-[16px]">
         {/* Headers Row */}
         <div className="grid grid-cols-2 max-lg:grid-cols-1 gap-[102px] max-lg:gap-[32px] mb-[50px] max-lg:mb-[24px] items-start ">

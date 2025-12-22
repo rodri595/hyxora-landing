@@ -16,6 +16,7 @@ import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
 import layerIMG from "./layer.png";
+import Link from "next/link";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -94,7 +95,10 @@ const Hero = () => {
         <div className="flex flex-col gap-[38px] w-full items-center  max-md:gap-[16px]  ">
           <div className="flex flex-col gap-7 items-center justify-center relative w-full max-md:gap-[16px]">
             {/* Hot Badge */}
-            <div
+            <Link
+              target="_blank"
+              href="https://founder.hyxora.com/"
+              rel="noopener noreferrer"
               className="backdrop-blur-sm bg-[rgba(25,54,63,0.02)] border-[0.7px] border-[rgba(25,54,63,0.02)] border-solid flex gap-[10px] items-center pr-[12px] pl-0 py-0 relative rounded-[32px]"
               style={{ boxShadow: "0px 0px 4px 0px inset rgba(25,54,63,0.04)" }}
             >
@@ -107,7 +111,7 @@ const Hero = () => {
                     className="relative w-[10px] h-[10px]"
                   />
                   <p className="font-medium text-[12px] text-[#f7f8f8] tracking-[-0.48px] whitespace-nowrap">
-                    Proximamente
+                    NFT Holder
                   </p>
                 </div>
                 <div
@@ -118,14 +122,15 @@ const Hero = () => {
                 />
               </div>
               <p className="font-normal text-[12px] text-[rgba(25,54,63,0.7)] tracking-[-0.48px] whitespace-nowrap max-md:tracking-[-0.24px] max-md:leading-[20px]">
-                Quieres unirte a Hyxora?
+                Próximamente
+                {/* Quieres unirte a Hyxora? */}
               </p>
               <Image
                 src={chevronSVG}
                 alt="Chevron Icon"
                 className="relative w-[12px] h-[12px]"
               />
-            </div>
+            </Link>
             {/* Main Heading */}
             <h1 className="flex items-center  gap-2 font-medium text-[50px] text-[#19363f] text-center tracking-[-4.16px] leading-[normal] max-md:text-[28px] max-md:tracking-[-1.12px]">
               Tu dinero. Tu control

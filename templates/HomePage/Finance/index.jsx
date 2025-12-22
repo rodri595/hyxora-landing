@@ -10,7 +10,7 @@ import swapIMG from "./swap.png";
 import sendIMG from "./send.png";
 import FundsIMG from "./funds.png";
 import soonIMG from "./soon.png";
-
+import Link from "next/link";
 const Finance = () => {
   const [activeIndex, setActiveIndex] = useState(0);
 
@@ -100,7 +100,13 @@ const Finance = () => {
                 onClick={() => handleItemInteraction(index)}
               />
             ))}
-            <Button isPrimary>Empezamos</Button>
+            <Link
+              target="_blank"
+              href="https://founder.hyxora.com/"
+              rel="noopener noreferrer"
+            >
+              <Button isPrimary>Empezamos</Button>
+            </Link>
           </div>
         </div>
         {/* Right Section -  */}

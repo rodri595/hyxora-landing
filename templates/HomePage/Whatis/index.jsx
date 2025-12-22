@@ -2,7 +2,7 @@ import FeatureCard from "@/components/FeatureCard";
 
 const Whatis = () => {
   return (
-    <section className="flex w-full">
+    <section className="flex w-full" id="porque">
       <div className="flex flex-col gap-[44px] max-md:gap-[34px] items-start  max-w-[1240px] w-full mx-auto max-md:max-none  max-xl:px-[32px] max-md:px-[16px]">
         {/* Text Header */}
         <div className="flex items-end justify-between w-full max-md:flex-col max-md:items-start max-md:gap-[24px]">

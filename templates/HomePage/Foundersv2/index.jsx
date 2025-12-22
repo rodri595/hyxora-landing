@@ -3,6 +3,7 @@ import Image from "@/components/Image";
 import Item from "./item";
 import posterIMG from "@/assets/imgs/brand/poster.jpeg";
 import Video from "@/components/Video";
+import Link from "next/link";
 const Foundersv2 = () => {
   return (
     <section className="flex w-full overflow-hidden">
@@ -79,7 +80,13 @@ const Foundersv2 = () => {
               title="Diferenciación"
               description="Reconocimiento especial en app y eventos"
             />
-            <Button isPrimary>Acceso</Button>
+            <Link
+              target="_blank"
+              href="https://founder.hyxora.com/"
+              rel="noopener noreferrer"
+            >
+              <Button isPrimary>Acceso</Button>
+            </Link>
           </div>
         </div>
       </div>

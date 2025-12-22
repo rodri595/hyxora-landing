@@ -13,6 +13,7 @@ import { useEffect, useState, useRef } from "react";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import { ScrollToPlugin } from "gsap/ScrollToPlugin";
+import fireSVG from "@/assets/imgs/icons/fire.svg";
 
 gsap.registerPlugin(ScrollToPlugin);
 
@@ -27,6 +28,7 @@ const MenuItem = ({
   onClick,
   disabled = false,
   className = "",
+  ...props
 }) => {
   const content = (
     <>
@@ -83,23 +85,14 @@ const MenuItem = ({
   }
 
   // If external link, use anchor tag
-  if (external && href) {
+  if (external || href) {
     return (
-      <a
+      <Link
         href={href}
-        target="_blank"
         rel="noopener noreferrer"
         className={baseClassName}
+        {...props}
       >
-        {content}
-      </a>
-    );
-  }
-
-  // Default: internal link using Next.js Link
-  if (href) {
-    return (
-      <Link href={href} className={baseClassName}>
         {content}
       </Link>
     );
@@ -122,19 +115,16 @@ const MenuComponent = () => {
   const handleSmoothScroll = (sectionId) => {
     // Close menu
     setIsActive(false);
-
     // Wait for menu animation to complete before scrolling
     setTimeout(() => {
       const element = document.querySelector(sectionId);
       if (element) {
-        gsap.to(window, {
-          scrollTo: {
-            y: element,
-            offsetY: 100,
-            autoKill: true,
-          },
-          duration: 1.5,
-          ease: "power3.inOut",
+        const offsetY = 100;
+        const elementPosition =
+          element.getBoundingClientRect().top + window.pageYOffset;
+        window.scrollTo({
+          top: elementPosition - offsetY,
+          behavior: "smooth",
         });
       }
     }, 400);
@@ -155,6 +145,18 @@ const MenuComponent = () => {
       if (lenis) lenis.start();
     };
   }, [isActive, lenis]);
+
+  // Close menu when screen resizes above mobile breakpoint
+  useEffect(() => {
+    const handleResize = () => {
+      if (isActive && window.innerWidth >= 768) {
+        setIsActive(false);
+      }
+    };
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, [isActive]);
 
   // GSAP animation for menu
   useGSAP(() => {
@@ -201,7 +203,7 @@ const MenuComponent = () => {
   }, [isActive]);
 
   return (
-    <div className="relative">
+    <div className="relative ">
       <button
         onClick={toggleMenu}
         type="button"
@@ -227,64 +229,82 @@ const MenuComponent = () => {
           <Image src={menuIcon} alt="Menu" className="w-[16px] h-[16px]" />
         )}
       </button>
-
       <div
         ref={menuRef}
         data-lenis-prevent
         className="fixed top-[52px] left-0 bottom-0 right-0 z-10 hidden flex-col w-full min-h-[calc(100vh-52px)] border-[0.7px] border-[rgba(25,54,63,0.02)] bg-[rgba(250,251,251)] focus:outline-none"
-        style={{ display: "none" }}
       >
         <div
           ref={contentRef}
-          data-lenis-prevent
           className="flex flex-col grow overflow-auto scroll-smooth scrollbar-none pb-6 px-4 pt-6"
         >
+          <Link
+            href="https://founder.hyxora.com/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="bg-[#1b5ffd] border border-[rgba(255,255,255,0.2)] border-solid h-[30px] relative rounded-[100px] cursor-pointer mb-2"
+          >
+            <div className="flex gap-[3px] h-[30px] items-center justify-center overflow-hidden p-[8px] relative rounded-[inherit]">
+              <Image
+                src={fireSVG}
+                alt="Fire Icon"
+                className="relative w-[10px] h-[10px]"
+              />
+              <p className="font-medium text-[12px] text-[#f7f8f8] tracking-[-0.48px] whitespace-nowrap">
+                NFT Founder
+              </p>
+            </div>
+            <div
+              className="absolute inset-0 pointer-events-none"
+              style={{
+                boxShadow: "0px 0px 10px 0px inset rgba(255,255,255,0.4)",
+              }}
+            />
+          </Link>
           {/* Explorar Section */}
           <div className="flex items-center justify-start py-0 mb-4">
             <p className="font-inter font-medium text-[#19363f] text-[16px] tracking-[-0.64px]">
               Explorar
             </p>
           </div>
-
           <div className="flex flex-col space-y-2 mb-6">
             <MenuItem
               image={trendingIcon}
               title="Hyxora"
               description="Un neobanco hecho para ti"
-              //   onClick={() => handleSmoothScroll("#trending")}
               className="w-full max-w-none"
+              href={"/"}
             />
             <MenuItem
               image={newListingsIcon}
               title="Comité Consultivo"
               description="Accede a las Consultas"
-              //   onClick={() => handleSmoothScroll("#comite")}
               className="w-full max-w-none"
+              disabled
             />
             <MenuItem
               image={learningCenterIcon}
               title="Academia"
               description="Formate en Hyxora"
-              //   href="https://academia.hyxora.com"
-              //   external
               className="w-full max-w-none"
+              disabled
             />
             <MenuItem
               image={topGainersIcon}
               title="Founders NFT"
               description="Espacio exclusivo"
-              //   onClick={() => handleSmoothScroll("#founders")}
               className="w-full max-w-none"
+              external
+              href="https://founder.hyxora.com"
+              target="_blank"
             />
           </div>
-
           {/* Información Section */}
           <div className="flex items-center justify-start py-0 mb-4">
             <p className="font-inter font-medium text-[#19363f] text-[16px] tracking-[-0.64px]">
               Información
             </p>
           </div>
-
           <div className="flex flex-col space-y-2 mb-6">
             <MenuItem
               image={newListingsIcon}
@@ -305,14 +325,12 @@ const MenuComponent = () => {
               className="w-full max-w-none"
             />
           </div>
-
           {/* Recursos Section */}
           <div className="flex items-center justify-start py-0 mb-4">
             <p className="font-inter font-medium text-[#19363f] text-[16px] tracking-[-0.64px]">
               Recursos
             </p>
           </div>
-
           <div className="flex flex-col space-y-2">
             <MenuItem
               icon={<Icon name="verification" className="w-[16px] h-[16px] " />}
@@ -333,10 +351,9 @@ const MenuComponent = () => {
               className="w-full max-w-none"
             />
           </div>
-
           <div className="flex flex-col mt-auto pt-4 border-t space-y-1">
             <p className="font-normal text-[12px] leading-[18px] text-[rgba(25,54,63,0.7)] tracking-[-0.24px]">
-              <span>Al conectar tu billetera, aceptas nuestros </span>
+              {/* <span>Al conectar tu billetera, aceptas nuestros </span> */}
               <Link href="/terms" className="font-medium text-[#19363f]">
                 Términos de Uso
               </Link>

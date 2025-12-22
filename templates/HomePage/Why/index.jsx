@@ -1,5 +1,6 @@
 import Button from "@/components/Button";
 import Image from "@/components/Image";
+import Link from "next/link";
 import shieldCheckSVG from "@/assets/imgs/icons/shield-check.svg";
 import eyeSVG from "@/assets/imgs/icons/eye.svg";
 import sparklesSVG from "@/assets/imgs/icons/sparkles.svg";
@@ -155,8 +156,12 @@ const Why = () => {
           {/* CTA Section */}
           <div className="flex flex-col gap-[30px] items-center w-[477px] max-md:w-full">
             <div className="flex gap-[10px] items-center max-md:flex-col max-md:w-full">
-              <Button isSecondary>Ir a FAQs</Button>
-              <Button isStroke>Ir a planes</Button>
+              <Link href="/faq">
+                <Button isSecondary>Ir a FAQs</Button>
+              </Link>
+              <Link href="/plans">
+                <Button isStroke>Ir a planes</Button>
+              </Link>
             </div>
             <p className="font-medium text-base leading-6 text-center text-white tracking-[-0.04em] w-full max-md:text-[14px] max-md:leading-[22px] max-md:tracking-[-0.56px] max-md:w-[317px]">
               Hyxora convierte la complejidad del ecosistema DeFi en una

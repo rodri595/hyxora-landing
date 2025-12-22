@@ -1,0 +1,17 @@
+# robots.txt for Hyxora
+User-agent: *
+Allow: /
+Disallow: /api/
+
+# Specific bot rules
+User-agent: Googlebot
+Allow: /
+
+User-agent: Bingbot
+Allow: /
+
+# Sitemap location
+Sitemap: https://hyxora.com/sitemap.xml
+
+# Crawl delay (optional)
+Crawl-delay: 0

@@ -8,7 +8,11 @@ import learningCenterIcon from "@/assets/imgs/icons/learning.png";
 import bannerImage from "@/assets/imgs/brand/tokens.webp";
 import fireSVG from "@/assets/imgs/icons/fire.svg";
 import Menu from "./Menu";
+// import Icon from "@/components/Icon";
+import gsap from "gsap";
+import { ScrollToPlugin } from "gsap/ScrollToPlugin";
 
+gsap.registerPlugin(ScrollToPlugin);
 const MenuItem = ({ children, href = "#", ...props }) => {
   return (
     <Link
@@ -24,39 +28,88 @@ const MenuItem = ({ children, href = "#", ...props }) => {
     </Link>
   );
 };
-export const ExploreMenuItem = ({
+const ExploreMenuItem = ({
   icon,
+  image,
   title,
   description,
-  href = "#",
+  href,
+  external = false,
+  onClick,
+  disabled = false,
   className = "",
+  ...props
 }) => {
-  return (
-    <Link
-      href={href}
-      className={`box-border flex gap-[15px] items-center p-[6px] relative rounded-[12px] shrink-0 max-w-[217px] hover:bg-[rgba(25,54,63,0.02)] transition-all max-h-[46px] ${className}`}
-    >
-      <div className="bg-[rgba(25,54,63,0.04)] border-[0.7px] border-[rgba(25,54,63,0.02)] border-solid overflow-clip relative rounded-[8px] shrink-0 size-[34px] shadow-[0px_0px_4px_0px_inset_rgba(25,54,63,0.04)]">
-        <div className="absolute left-1/2 size-[16px] top-1/2 -translate-x-1/2 -translate-y-1/2">
-          <Image
-            src={icon}
-            alt={title}
-            width={16}
-            height={16}
-            className="size-full object-cover"
-          />
+  const content = (
+    <>
+      {(icon || image) && (
+        <div className="bg-[rgba(25,54,63,0.04)] border-[0.7px] border-[rgba(25,54,63,0.02)] border-solid  rounded-[8px] shrink-0 size-[34px] shadow-[0px_0px_4px_0px_inset_rgba(25,54,63,0.04)] flex justify-center items-center">
+          {icon ? (
+            icon
+          ) : image ? (
+            <Image
+              src={image}
+              alt={title}
+              width={16}
+              height={16}
+              className="size-[16px] "
+            />
+          ) : null}
         </div>
-      </div>
-      <div className="flex flex-col gap-[8px] items-start ">
-        <p className="font-inter font-medium text-[#19363f] text-[14px] tracking-[-0.56px] leading-[14px]">
+      )}
+      <div className="flex flex-col gap-[8px] items-start">
+        <p
+          className={`font-inter font-medium text-[14px] tracking-[-0.56px] leading-[14px] ${
+            disabled ? "text-[rgba(25,54,63,0.4)]" : "text-[#19363f]"
+          }`}
+        >
           {title}
         </p>
-        <p className="font-inter font-normal text-[12px] text-[rgba(25,54,63,0.7)] tracking-[-0.24px] whitespace-nowrap  leading-[12px]">
-          {description}
-        </p>
+        {description && (
+          <p className="font-inter font-normal text-[12px] text-[rgba(25,54,63,0.7)] tracking-[-0.24px] whitespace-nowrap leading-[12px]">
+            {description}
+          </p>
+        )}
       </div>
-    </Link>
+    </>
   );
+
+  const baseClassName = `box-border flex gap-[15px] items-center p-[6px] relative rounded-[12px] shrink-0 ${
+    disabled
+      ? "cursor-not-allowed opacity-50"
+      : "hover:bg-[rgba(25,54,63,0.02)] transition-all"
+  } max-h-[46px] ${className}`;
+
+  // If disabled, render as div
+  if (disabled) {
+    return <div className={baseClassName}>{content}</div>;
+  }
+
+  // If onClick is provided, render as button
+  if (onClick) {
+    return (
+      <button onClick={onClick} className={baseClassName}>
+        {content}
+      </button>
+    );
+  }
+
+  // If external link, use anchor tag
+  if (external || href) {
+    return (
+      <Link
+        href={href}
+        rel="noopener noreferrer"
+        className={baseClassName}
+        {...props}
+      >
+        {content}
+      </Link>
+    );
+  }
+
+  // Fallback: render as div
+  return <div className={baseClassName}>{content}</div>;
 };
 const ExploreDropdown = () => {
   return (
@@ -69,38 +122,39 @@ const ExploreDropdown = () => {
         </div>
       </button>
 
-      {/* <div className="absolute top-full left-1/2  pt-4 -translate-x-1/2 transition-all group-hover:opacity-100 group-hover:visible "> */}
-      <div className="absolute top-full left-1/2  pt-4 -translate-x-1/2 invisible opacity-0 transition-all group-hover:opacity-100 group-hover:visible pointer-events-none group-hover:pointer-events-auto">
+      {/* <div className="absolute top-full left-1/2  pt-4 -translate-x-1/2 transition-all group-hover:opacity-100 group-hover:visible  max-xl:left-[200px]"> */}
+      <div className="absolute top-full left-1/2  pt-4 -translate-x-1/2 invisible opacity-0 transition-all group-hover:opacity-100 group-hover:visible pointer-events-none group-hover:pointer-events-auto max-xl:left-[200px]">
         <div className="relative backdrop-blur-[15px] bg-[rgba(250,251,251)] border-[0.7px] border-[rgba(25,54,63,0.02)] border-solid flex flex-col gap-[10px] items-start overflow-clip p-[14px] rounded-[16px] shadow-[0px_3px_4px_-4px_rgba(25,54,63,0.05),0px_8px_8px_-4px_rgba(25,54,63,0.1)] shadow-[0px_0px_4px_0px_inset_rgba(25,54,63,0.04)]">
           <div className="flex gap-[20px] items-stretch w-full h-[106px]">
             {/* Column 1 */}
             <div className="flex flex-col gap-[14px] flex-1">
               <ExploreMenuItem
-                icon={trendingIcon}
+                image={trendingIcon}
                 title="Hyxora"
                 description="Un neobanco hecho para ti"
-                href="#trending"
+                href="/"
               />
               <ExploreMenuItem
-                icon={newListingsIcon}
+                image={newListingsIcon}
                 title="Comité Consultivo"
                 description="Accede a las Consultas"
-                href="#trending"
+                disabled
               />
             </div>
             {/* Column 2 */}
             <div className="flex flex-col gap-[14px] flex-1">
               <ExploreMenuItem
-                icon={learningCenterIcon}
+                image={learningCenterIcon}
                 title="Academia"
                 description="Formate en Hyxora"
-                href="#top-gainers"
+                disabled
               />
               <ExploreMenuItem
-                icon={topGainersIcon}
+                image={topGainersIcon}
                 title="Founders NFT"
                 description="Espacio exclusivo"
-                href="#learning-center"
+                external
+                href="https://founder.hyxora.com/"
               />
             </div>
             {/* Banner */}
@@ -159,6 +213,20 @@ const ExploreDropdown = () => {
   );
 };
 const OportunityDropdown = () => {
+  const handleSmoothScroll = (sectionId) => {
+    const element = document.querySelector(sectionId);
+    if (element) {
+      gsap.to(window, {
+        scrollTo: {
+          y: element,
+          offsetY: 100,
+          autoKill: true,
+        },
+        duration: 1.5,
+        ease: "power3.inOut",
+      });
+    }
+  };
   return (
     <div className="group relative">
       <button className="box-border flex h-[28px] items-center justify-center gap-2 p-[2px] relative rounded-[6px] shrink-0 hover:bg-[rgba(25,54,63,0.04)] transition-all">
@@ -176,16 +244,16 @@ const OportunityDropdown = () => {
             {/* Column 1 */}
             <div className="flex flex-col gap-[14px] flex-1">
               <ExploreMenuItem
-                icon={trendingIcon}
+                image={trendingIcon}
                 title="DeFi"
                 description="Qué es DeFi"
-                href="#trending"
+                onClick={() => handleSmoothScroll("#opportunities-section")}
               />
               <ExploreMenuItem
-                icon={topGainersIcon}
+                image={topGainersIcon}
                 title="Oportunidades"
                 description="Oportunidades en Hyxora"
-                href="#learning-center"
+                onClick={() => handleSmoothScroll("#opportunities-section")}
               />
             </div>
           </div>
@@ -232,7 +300,6 @@ const Header = ({ isFixed }) => {
               NFT Founders
             </MenuItem>
             <OportunityDropdown />
-            {/* <MenuItem href="#docs"></MenuItem> */}
             <MenuItem href="/plans">Planes</MenuItem>
             <MenuItem href="/faq">FAQ</MenuItem>
           </nav>

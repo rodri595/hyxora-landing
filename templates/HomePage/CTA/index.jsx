@@ -5,6 +5,7 @@ import Button from "@/components/Button";
 import checkSVG from "@/assets/imgs/icons/check.svg";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
+import Link from "next/link";
 
 const CTA = () => {
   const marqueeRef = useRef(null);
@@ -121,7 +122,13 @@ const CTA = () => {
           }}
         />
       </div>
-      <Button isPrimary>Únete</Button>
+      <Link
+        target="_blank"
+        href="https://founder.hyxora.com/"
+        rel="noopener noreferrer"
+      >
+        <Button isPrimary>Únete</Button>
+      </Link>
     </section>
   );
 };
