@@ -117,7 +117,7 @@ const ExploreDropdown = () => {
       <button className="box-border flex h-[28px] items-center justify-center gap-2 p-[2px] relative rounded-[6px] shrink-0 hover:bg-[rgba(25,54,63,0.04)] transition-all">
         <div className="box-border flex gap-[10px] items-center justify-center px-2 py-[6px] relative shrink-0">
           <span className="font-inter font-medium leading-6 text-[#19363f] text-[16px] whitespace-nowrap tracking-[-0.64px]">
-            Hxyora
+            Hyxora
           </span>
         </div>
       </button>
