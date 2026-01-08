@@ -138,7 +138,7 @@ const Hero = () => {
             {/* Description */}
             <p className="font-normal text-[16px] leading-[24px] text-[rgba(25,54,63,0.7)] text-center tracking-[-0.32px] whitespace-nowrap max-md:text-[12px] max-md:tracking-[-0.24px] max-md:leading-[20px] max-md:whitespace-normal">
               Hyxora es el puente entre la banca tradicional y las finanzas del
-              futuro
+              presente.
             </p>
           </div>
 
