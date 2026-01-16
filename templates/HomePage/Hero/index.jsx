@@ -26,9 +26,43 @@ const Hero = () => {
   const leftItemRef = useRef(null);
   const topLeftItemRef = useRef(null);
   const bottomRightItemRef = useRef(null);
+  const cursorRef = useRef(null);
+  const cursorTextContainerRef = useRef(null);
+  const marqueeTimelineRef = useRef(null);
 
   useGSAP(
     () => {
+      // Marquee animation
+      const cursorContainer = cursorTextContainerRef?.current;
+
+      const enterTl = gsap.timeline();
+      enterTl
+        .to(cursorContainer, {
+          clipPath: "inset(0% round 50em)",
+          duration: 0.3,
+          ease: "cubic-bezier(.75, 0, .25, 1)",
+        })
+        .to(
+          ".cursor-content",
+          {
+            opacity: 1,
+            duration: 0.3,
+            ease: "cubic-bezier(.75, 0, .25, 1)",
+          },
+          0
+        )
+        .add(() => {
+          const marqueeInner = document.querySelector(".marquee-inner");
+          if (marqueeInner) {
+            marqueeTimelineRef.current = gsap.to(marqueeInner, {
+              x: "-100%",
+              duration: 3,
+              ease: "linear",
+              repeat: -1,
+            });
+          }
+        });
+
       // Only apply parallax effects on desktop (screens larger than 1024px)
       const mm = gsap.matchMedia();
 
@@ -122,8 +156,7 @@ const Hero = () => {
                 />
               </div>
               <p className="font-normal text-[12px] text-[rgba(25,54,63,0.7)] tracking-[-0.48px] whitespace-nowrap max-md:tracking-[-0.24px] max-md:leading-[20px]">
-                Próximamente
-                {/* Quieres unirte a Hyxora? */}
+                ¡Únete ahora!
               </p>
               <Image
                 src={chevronSVG}
@@ -143,86 +176,112 @@ const Hero = () => {
           </div>
 
           {/* Download buttons stores */}
-          <div className="flex gap-2 items-center justify-center opacity-60 cursor-not-allowed ">
-            <Image
-              alt="Download on the App Store"
-              src={appleIMG}
-              className="h-[44px] w-auto max-md:h-[40px]"
-            />
+          <div className="flex flex-col gap-3 items-center justify-center">
+            <div
+              ref={cursorRef}
+              className={
+                "pointer-events-none  z-3 flex size-3  items-center justify-center rounded-full text-[11px] text-[rgba(25,54,63,0.6)]  tracking-[-0.22px]  whitespace-nowrap "
+              }
+            >
+              <div
+                ref={cursorTextContainerRef}
+                className="cursor-text-container marquee absolute flex w-fit items-center justify-center overflow-hidden  text-nowrap bg-[rgba(25,54,63,0.08)] backdrop-blur-sm bg-[rgba(25,54,63,0.04)]"
+                style={{
+                  clipPath: "inset(50% round 50em)",
+                  willChange: "clip-path",
+                }}
+              >
+                <div className="marquee-inner relative flex gap-4 will-change-transform">
+                  <span className="cursor-content px-2 py-1 opacity-0">
+                    Proximamente
+                  </span>
+                  <span className="cursor-content absolute left-full px-2 py-1 opacity-0">
+                    Proximamente
+                  </span>
+                </div>
+              </div>
+            </div>
+            <div className="flex gap-2 items-center justify-center opacity-60 cursor-not-allowed">
+              <Image
+                alt="Download on the App Store"
+                src={appleIMG}
+                className="h-[44px] w-auto max-md:h-[40px]"
+              />
 
+              <Image
+                src={googleIMG}
+                alt="Get it on Google Play"
+                className="h-[44px] w-auto max-md:h-[40px]"
+              />
+            </div>
+          </div>
+          <div className="flex items-start justify-center relative mx-auto gap-2 pb-[80px] max-md:gap-1 max-md:pb-[40px] max-md:h-[500px] max-md:overflow-hidden">
             <Image
-              src={googleIMG}
-              alt="Get it on Google Play"
-              className="h-[44px] w-auto max-md:h-[40px]"
+              src={app1IMG}
+              alt="App Landing"
+              priority
+              className="w-[280px] h-auto max-md:w-[220px]"
+            />
+            <Image
+              src={app2IMG}
+              alt="App Landing"
+              priority
+              className="w-[280px] h-auto mt-[80px] max-md:mt-[30px] max-md:w-[220px]"
+            />
+            <Image
+              ref={rightItemRef}
+              src={item2IMG}
+              alt="Item Option"
+              priority
+              className="absolute top-[80px] right-[-240px]  w-auto h-[300px] rotate-0.1! max-lg:hidden"
+            />
+            <Image
+              ref={leftItemRef}
+              src={item3IMG}
+              alt="Item Option"
+              priority
+              className="absolute bottom-[130px] left-[-320px] h-[200px] w-auto z-1 -rotate-0.1! max-lg:hidden"
+            />
+            <Image
+              ref={topLeftItemRef}
+              src={item1IMG}
+              alt="Item Option"
+              priority
+              className="absolute top-[50px] left-[-400px] h-[80px] w-auto max-lg:hidden"
+            />
+            <Image
+              ref={bottomRightItemRef}
+              src={item4IMG}
+              alt="Item Option"
+              priority
+              className="absolute bottom-[100px] right-[-500px]  h-[200px] w-auto max-lg:hidden"
+            />
+            <Image
+              src={layerIMG}
+              alt="layer blue Animation"
+              priority
+              className="w-full h-56 absolute bottom-0 blur-[2px] max-md:h-[15%] max-md:bottom-[-10px]"
+              style={{
+                background:
+                  "linear-gradient(180deg, rgba(255, 255, 255, 0) 0%, white 100%)",
+              }}
             />
           </div>
         </div>
-        <div className="flex items-start justify-center relative mx-auto gap-2 pb-[80px] max-md:gap-1 max-md:pb-[40px] max-md:h-[500px] max-md:overflow-hidden">
+        {/* Scroll Down Indicator */}
+        <div
+          data-cursor-text="Scroll Down"
+          className="backdrop-blur-[10px] bg-[rgba(25,54,63,0.02)] border-[0.7px] border-[rgba(25,54,63,0.02)] border-solid flex gap-[6px] items-center pl-[9px] pr-[12px] py-[8px] relative rounded-[32px] max-h-[34px] max-md:py-[9px]"
+        >
           <Image
-            src={app1IMG}
-            alt="App Landing"
-            priority
-            className="w-[280px] h-auto max-md:w-[220px]"
+            src={mouseSVG}
+            alt="Mouse Icon"
+            className="relative w-[12px] h-[15px] max-md:w-[16px] max-md:h-[16px]"
           />
-          <Image
-            src={app2IMG}
-            alt="App Landing"
-            priority
-            className="w-[280px] h-auto mt-[80px] max-md:mt-[30px] max-md:w-[220px]"
-          />
-          <Image
-            ref={rightItemRef}
-            src={item2IMG}
-            alt="Item Option"
-            priority
-            className="absolute top-[80px] right-[-240px]  w-auto h-[300px] rotate-0.1! max-lg:hidden"
-          />
-          <Image
-            ref={leftItemRef}
-            src={item3IMG}
-            alt="Item Option"
-            priority
-            className="absolute bottom-[130px] left-[-320px] h-[200px] w-auto z-1 -rotate-0.1! max-lg:hidden"
-          />
-          <Image
-            ref={topLeftItemRef}
-            src={item1IMG}
-            alt="Item Option"
-            priority
-            className="absolute top-[50px] left-[-400px] h-[80px] w-auto max-lg:hidden"
-          />
-          <Image
-            ref={bottomRightItemRef}
-            src={item4IMG}
-            alt="Item Option"
-            priority
-            className="absolute bottom-[100px] right-[-500px]  h-[200px] w-auto max-lg:hidden"
-          />
-          <Image
-            src={layerIMG}
-            alt="layer blue Animation"
-            priority
-            className="w-full h-56 absolute bottom-0 blur-[2px] max-md:h-[15%] max-md:bottom-[-10px]"
-            style={{
-              background:
-                "linear-gradient(180deg, rgba(255, 255, 255, 0) 0%, white 100%)",
-            }}
-          />
+          <p className="font-normal text-[12px] text-[#19363f] tracking-[-0.48px] whitespace-nowrap">
+            Scroll down for more
+          </p>
         </div>
-      </div>
-      {/* Scroll Down Indicator */}
-      <div
-        data-cursor-text="Scroll Down"
-        className="backdrop-blur-[10px] bg-[rgba(25,54,63,0.02)] border-[0.7px] border-[rgba(25,54,63,0.02)] border-solid flex gap-[6px] items-center pl-[9px] pr-[12px] py-[8px] relative rounded-[32px] max-h-[34px] max-md:py-[9px]"
-      >
-        <Image
-          src={mouseSVG}
-          alt="Mouse Icon"
-          className="relative w-[12px] h-[15px] max-md:w-[16px] max-md:h-[16px]"
-        />
-        <p className="font-normal text-[12px] text-[#19363f] tracking-[-0.48px] whitespace-nowrap">
-          Scroll down for more
-        </p>
       </div>
     </div>
   );
