@@ -12,7 +12,7 @@ gsap.registerPlugin(ScrollTrigger, CustomEase);
 
 CustomEase.create(
   "hop",
-  "M0,0 C0.29,0 0.348,0.05 0.422,0.134 0.494,0.217 0.484,0.355 0.5,0.5 0.518,0.662 0.515,0.793 0.596,0.876 0.701,0.983 0.72,0.987 1,1 "
+  "M0,0 C0.29,0 0.348,0.05 0.422,0.134 0.494,0.217 0.484,0.355 0.5,0.5 0.518,0.662 0.515,0.793 0.596,0.876 0.701,0.983 0.72,0.987 1,1 ",
 );
 
 const Roadmap = () => {
@@ -48,10 +48,10 @@ const Roadmap = () => {
           duration: 1.2,
           ease: "hop",
         },
-        "-=0.7"
+        "-=0.7",
       );
     },
-    { scope: containerRef }
+    { scope: containerRef },
   );
 
   return (
@@ -178,7 +178,7 @@ const Roadmap = () => {
           />
         </div>
         {/* Second Row */}
-        <div className="relative w-full  p-4 flex rounded-[16px] border-[0.7px] border-[rgba(25,54,63,0.02)] bg-[rgba(25,54,63,0.02)] shadow-[inset_0px_0px_4px_0px_rgba(25,54,63,0.04)] max-lg:flex-col  max-lg:w-min">
+        <div className="relative w-full p-4  pl-[212px] flex rounded-[16px] border-[0.7px] border-[rgba(25,54,63,0.02)] bg-[rgba(25,54,63,0.02)] shadow-[inset_0px_0px_4px_0px_rgba(25,54,63,0.04)] max-lg:flex-col max-lg:pl-4  max-lg:w-min">
           {/* Hot Badge */}
           <div
             className=" backdrop-blur-sm bg-[rgba(25,54,63,0.02)] border-[0.7px] border-[rgba(25,54,63,0.02)] border-solid flex gap-[10px] items-center pr-[14px] pl-0 py-0 absolute rounded-[32px] left-[8px] top-[-32px] max-lg:left-0"
@@ -261,9 +261,10 @@ const Roadmap = () => {
           />
 
           <Year
-            className="roadmap-year items-center!"
+            className="roadmap-year "
             year="2026"
-            leftItems={[
+            leftItems={[]}
+            rightItems={[
               {
                 icon: checkSVG,
                 text: (
@@ -273,8 +274,6 @@ const Roadmap = () => {
                   </>
                 ),
               },
-            ]}
-            rightItems={[
               {
                 icon: checkSVG,
                 text: (

@@ -60,10 +60,10 @@ const CTA = () => {
       </div>
 
       {/* Features Section  */}
-      <div className="relative w-full overflow-hidden">
+      <div className="relative w-full overflow-hidden  [mask-image:linear-gradient(to_right,transparent,#000_10%_90%,transparent)]">
         <div
           ref={marqueeRef}
-          className="flex gap-6 items-center will-change-transform"
+          className="flex gap-6 items-center will-change-transform "
         >
           {/* First set of features */}
           <div className="flex gap-6 items-center shrink-0 ">
@@ -102,25 +102,6 @@ const CTA = () => {
             ))}
           </div>
         </div>
-
-        {/* Left blur */}
-        <div
-          className="absolute left-0 top-1/2 -translate-y-1/2 w-[140px]  max-md:w-[70px] h-10 pointer-events-none z-1"
-          style={{
-            backdropFilter: "blur(2px)",
-            background:
-              "linear-gradient(90deg, #FFF 0%, rgba(255, 255, 255, 0.00) 100%)",
-          }}
-        />
-        {/* Right blur */}
-        <div
-          className="absolute right-0 top-1/2 -translate-y-1/2 w-[140px]  max-md:w-[70px] h-10 pointer-events-none z-1"
-          style={{
-            backdropFilter: "blur(2px)",
-            background:
-              "linear-gradient(270deg, #FFF 0%, rgba(255, 255, 255, 0.00) 100%)",
-          }}
-        />
       </div>
       <Link
         target="_blank"
