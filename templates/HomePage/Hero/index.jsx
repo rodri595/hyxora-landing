@@ -145,7 +145,7 @@ const Hero = () => {
                     className="relative w-[10px] h-[10px]"
                   />
                   <p className="font-medium text-[12px] text-[#f7f8f8] tracking-[-0.48px] whitespace-nowrap">
-                    NFT Foundr
+                    NFT Founder
                   </p>
                 </div>
                 <div
