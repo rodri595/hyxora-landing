@@ -49,7 +49,7 @@ const Hero = () => {
             duration: 0.3,
             ease: "cubic-bezier(.75, 0, .25, 1)",
           },
-          0
+          0,
         )
         .add(() => {
           const marqueeInner = document.querySelector(".marquee-inner");
@@ -116,7 +116,7 @@ const Hero = () => {
         });
       });
     },
-    { scope: containerRef }
+    { scope: containerRef },
   );
 
   return (
@@ -271,7 +271,7 @@ const Hero = () => {
         {/* Scroll Down Indicator */}
         <div
           data-cursor-text="Scroll Down"
-          className="backdrop-blur-[10px] bg-[rgba(25,54,63,0.02)] border-[0.7px] border-[rgba(25,54,63,0.02)] border-solid flex gap-[6px] items-center pl-[9px] pr-[12px] py-[8px] relative rounded-[32px] max-h-[34px] max-md:py-[9px]"
+          className="backdrop-blur-[10px] bg-[rgba(25,54,63,0.02)] border-[0.7px] border-[rgba(25,54,63,0.02)] border-solid flex gap-[6px] items-center pl-[9px] pr-[12px] py-[8px] relative rounded-[32px] max-h-[34px] max-md:py-[9px] max-w-[300px] mx-auto"
         >
           <Image
             src={mouseSVG}

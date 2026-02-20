@@ -39,12 +39,13 @@ const Year = ({ year, leftItems = [], rightItems = [], className = "" }) => {
           {leftItems.map((item, index) => (
             <div
               key={index}
-              className="flex gap-2 items-center justify-start shrink-0 bg-[rgba(25,54,63,0.02)] border-[0.7px] border-[rgba(25,54,63,0.02)] px-[8px] py-[6px] rounded-lg"
+              className="flex gap-2 items-center justify-start shrink-0 bg-[rgba(25,54,63,0.02)] border-[0.7px] border-[rgba(25,54,63,0.02)] px-[8px] py-[6px] rounded-lg relative"
             >
               <Image src={item.icon} alt="Icon" className="relative size-3" />
               <p className="font-medium text-[10px] tracking-tight leading-[10px] text-[#19363f]">
                 {typeof item.text === "string" ? item.text : item.text}
               </p>
+              {item?.extra}
             </div>
           ))}
         </div>
@@ -59,12 +60,13 @@ const Year = ({ year, leftItems = [], rightItems = [], className = "" }) => {
           {rightItems.map((item, index) => (
             <div
               key={index}
-              className="flex gap-2 items-center justify-start shrink-0 bg-[rgba(25,54,63,0.02)] border-[0.7px] border-[rgba(25,54,63,0.02)] px-[8px] py-[6px] rounded-lg"
+              className="flex gap-2 items-center justify-start shrink-0 bg-[rgba(25,54,63,0.02)] border-[0.7px] border-[rgba(25,54,63,0.02)] px-[8px] py-[6px] rounded-lg relative "
             >
               <Image src={item.icon} alt="Icon" className="relative size-3" />
               <p className="font-medium text-[10px] tracking-tight leading-[10px] text-[#19363f]">
                 {typeof item.text === "string" ? item.text : item.text}
               </p>
+              {item?.extra}
             </div>
           ))}
         </div>

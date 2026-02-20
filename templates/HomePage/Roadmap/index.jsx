@@ -273,6 +273,26 @@ const Roadmap = () => {
                     <span className="font-light">2000€/und</span>
                   </>
                 ),
+                extra: (
+                  // <div className=" border-6 bg-transparent text-red-500 uppercase font-[900] p-2 rounded absolute -rotate-10 top-[15%] text-[40px] font-inter">
+                  //   SOLD OUT
+                  // </div>
+                  <div
+                    className=" backdrop-blur-sm bg-[rgba(25,54,63,0.02)] border-[0.7px] border-[rgba(25,54,63,0.02)] border-solid flex gap-[10px] items-center pr-[14px] pl-0 py-0 absolute rounded-[32px] left-[8px] top-[-32px] max-lg:left-0"
+                    style={{
+                      boxShadow: "0px 0px 4px 0px inset rgba(25,54,63,0.04)",
+                    }}
+                  >
+                    {/* Hot Button */}
+                    <div className="bg-red-500 h-[20px] border border-[rgba(255,255,255,0.2)] border-solid flex items-center absolute rounded-[100px] -rotate-12 left-[-20px] top-[20px]">
+                      <div className="flex gap-[3px] h-full  items-center justify-center overflow-hidden px-[4px] relative rounded-[inherit]">
+                        <p className="font-medium text-[10px] text-white tracking-tight whitespace-nowrap">
+                          SOLD OUT
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                ),
               },
               {
                 icon: checkSVG,

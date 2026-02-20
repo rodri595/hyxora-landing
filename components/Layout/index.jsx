@@ -1,6 +1,7 @@
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import UpButton from "@/components/UpButton";
+import ChatWidget from "@/components/ChatWidget";
 const Layout = ({
   className,
   classContainer,
@@ -26,6 +27,7 @@ const Layout = ({
       <div className={`${classContainer || ""}`}>{children}</div>
       {!isHiddenFooter && <Footer />}
       <UpButton />
+      <ChatWidget />
     </div>
   );
 };
