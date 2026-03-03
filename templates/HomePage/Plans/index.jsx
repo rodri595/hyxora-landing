@@ -21,10 +21,7 @@ const plans = [
       "Transferencias/Remesas internacionales",
       "Tarjeta de débito",
       "Wallet autocustodia",
-      <>
-        Intercambios Fiat-Crypto / Swaps{" "}
-        <span className="text-[12px] font-light">(0,9% fee)</span>
-      </>,
+      <>Intercambios Fiat-Crypto / Swaps </>,
       "Recompenses / Staking",
       "Academia 1.0",
     ],
@@ -45,15 +42,9 @@ const plans = [
     isPrimary: true,
     features: [
       "Plan BASIC",
-      <>
-        Intercambios Fiat-Crypto / Swaps{" "}
-        <span className="text-[12px] font-light">(0,5% fee)</span>
-      </>,
+      <>Intercambios Fiat-Crypto / Swaps </>,
       <>
         Fondos Indexados Defi <br />
-        <span className="text-[12px] font-light">
-          (2% entrada y 5% si beneficio Fee)
-        </span>
       </>,
       "Ingresos pasivos",
       "Academia 2.0",
