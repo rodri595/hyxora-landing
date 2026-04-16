@@ -1,92 +1,63 @@
-import { useState } from "react";
+import Link from "next/link";
 import Icon from "@/components/Icon";
 
 const Field = ({
   className,
   classInput,
   label,
-  isTextarea,
+  children,
+  textarea,
   type,
-  onResetPassword,
-  isLarge,
-  currency,
+  validated,
+  forgotPassword,
   ...inputProps
 }) => {
-  const [isPasswordVisible, setIsPasswordVisible] = useState(false);
-  const error = false;
-
   return (
-    <div
-      className={`relative ${
-        label ? `${isLarge ? "pt-2.25" : "pt-1.5"}` : ""
-      } ${className || ""}`}
-    >
+    <div className={`${className || ""}`}>
       {label && (
-        <div
-          className={`absolute top-0 left-6 z-2 px-1 bg-b-surface1 text-t-primary font-medium pointer-events-none ${
-            isLarge ? "text-hairline" : "text-small"
-          }`}
-        >
-          {label}
+        <div className="flex items-center mb-2 font-inter">
+          <div className="mr-auto text-[12px] font-medium tracking-[-0.12px] ">
+            {label}
+          </div>
+          {forgotPassword && (
+            <Link
+              className="text-[12px] text-secondary transition-colors hover:text-primary"
+              href="/reset-password"
+            >
+              Forgot password?
+            </Link>
+          )}
         </div>
       )}
-      <div className={`relative ${isTextarea ? "flex" : ""}`}>
-        {isTextarea ? (
+      <div className={`relative ${textarea ? "text-0" : ""}`}>
+        {children}
+        {textarea ? (
           <textarea
-            className={`w-full px-6.5 py-4 border-[1.5px] border-stroke1 text-t-primary font-medium transition-colors resize-none outline-0 placeholder:text-t-tertiary focus:border-[#A8A8A8]/50! max-md:text-[1rem] ${
-              error ? "border-primary3!" : ""
-            } ${
-              isLarge
-                ? "h-77 rounded-2xl text-heading-thin tracking-normal! max-md:h-65"
-                : "h-32 rounded-3xl text-input"
-            } ${classInput || ""}`}
+            className={`w-full h-20 px-5.5 py-4 border-[1.5px] border-s-01 rounded-xl text-[13px] text-primary transition-colors resize-none outline-0 focus:border-s-02 ${
+              validated ? "pr-10" : ""
+            }  ${classInput || ""}`}
             {...inputProps}
           ></textarea>
         ) : (
           <input
-            className={`w-full px-6.5 border-[1.5px] border-stroke1 text-t-primary font-medium transition-colors outline-0 placeholder:text-t-tertiary focus:border-[#A8A8A8]/50! max-md:text-[1rem] ${
-              error ? "!border-primary3!" : ""
-            } ${onResetPassword || type === "password" ? "pr-12" : ""} ${
-              isLarge
-                ? "h-16 rounded-2xl text-heading-thin tracking-normal!"
-                : "h-12 rounded-3xl text-input"
-            } ${currency ? "pl-10" : ""} ${classInput || ""}`}
-            type={
-              type === "password"
-                ? isPasswordVisible
-                  ? "text"
-                  : "password"
-                : type
-            }
+            className={`w-full h-12 px-5.5 border-[1.5px] border-s-01 rounded-xl text-[13px] text-primary transition-colors outline-0 focus:border-s-02 ${
+              validated ? "pr-10" : ""
+            } ${classInput || ""}`}
+            type={type || "text"}
             {...inputProps}
           />
         )}
-        {onResetPassword && (
-          <button
-            className="absolute top-1/2 right-4 -translate-y-1/2 text-0 fill-t-tertiary transition-colors hover:fill-t-secondary"
-            onClick={onResetPassword}
-          >
-            <Icon className="fill-inherit" name="question-circle" fill="" />
-          </button>
-        )}
-        {!onResetPassword && type === "password" && (
-          <button
-            className="group absolute top-1/2 right-5 -translate-y-1/2"
-            type="button"
-            onClick={() => setIsPasswordVisible(!isPasswordVisible)}
-          >
-            <Icon
-              className="fill-t-tertiary transition-colors group-hover:fill-t-primary"
-              name={isPasswordVisible ? "eye" : "eye-hide"}
-            />
-          </button>
-        )}
-        {currency && (
-          <div className="absolute top-1/2 left-7 -translate-y-1/2 text-button text-t-tertiary pointer-events-none">
-            {currency}
-          </div>
+        {validated && (
+          <Icon
+            className="absolute top-1/2 right-3.5 -translate-y-1/2   fill-secondary"
+            name="check"
+            // size={24}
+          />
         )}
       </div>
+      {/* <div className="mt-2 text-body-sm text-red">
+        Please enter an email address.
+      </div> */}
     </div>
   );
 };

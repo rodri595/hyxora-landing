@@ -1,5 +1,8 @@
+"use client";
 import Link from "next/link";
 import Image from "@/components/Image";
+import Button from "@/components/Button";
+import RegistrationModal from "@/components/RegistrationModal";
 import brandIMG from "@/assets/imgs/brand/logo.svg";
 import trendingIcon from "@/assets//imgs/icons/trending.png";
 import newListingsIcon from "@/assets/imgs/icons/newlisting.png";
@@ -8,9 +11,9 @@ import learningCenterIcon from "@/assets/imgs/icons/learning.png";
 import bannerImage from "@/assets/imgs/brand/tokens.webp";
 import fireSVG from "@/assets/imgs/icons/fire.svg";
 import Menu from "./Menu";
-// import Icon from "@/components/Icon";
 import gsap from "gsap";
 import { ScrollToPlugin } from "gsap/ScrollToPlugin";
+import { useState } from "react";
 
 gsap.registerPlugin(ScrollToPlugin);
 const MenuItem = ({ children, href = "#", ...props }) => {
@@ -263,6 +266,7 @@ const OportunityDropdown = () => {
   );
 };
 const Header = ({ isFixed }) => {
+  const [isModalOpen, setIsModalOpen] = useState(false);
   return (
     <>
       <div
@@ -330,10 +334,22 @@ const Header = ({ isFixed }) => {
                 }}
               />
             </Link>
+            <Button
+              isSecondary
+              className="max-h-[30px]"
+              onClick={() => setIsModalOpen(true)}
+            >
+              Registro
+            </Button>
           </div>
-          <Menu />
+          <Menu openRegister={isModalOpen} openRegisterState={setIsModalOpen} />
         </div>
       </div>
+
+      <RegistrationModal
+        open={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+      />
     </>
   );
 };

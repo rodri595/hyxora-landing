@@ -36,15 +36,50 @@
   --color-accent: #f52495;
   --color-accent2: #a444f3;
 
-  --box-shadow-hover: 0px 2.15px 0.5px -2px rgba(0, 0, 0, 0.25),
+  --box-shadow-hover:
+    0px 2.15px 0.5px -2px rgba(0, 0, 0, 0.25),
     0px 24px 24px -16px rgba(8, 8, 8, 0.04), 0px 6px 13px rgba(8, 8, 8, 0.03),
     0px 6px 4px -4px rgba(8, 8, 8, 0.05), 0px 5px 1.5px -4px rgba(8, 8, 8, 0.09);
   --box-shadow-active: inset 0px 1px 2px 1px rgba(18, 18, 18, 0.05);
 
-  --gradient-horizontal: to right, transparent 0%, rgba(168, 168, 168, 0.1) 15%,
+  --gradient-horizontal:
+    to right, transparent 0%, rgba(168, 168, 168, 0.1) 15%,
     rgba(168, 168, 168, 0.1) 85%, transparent 100%;
-  --gradient-vertical: to top, transparent 0%, rgba(168, 168, 168, 0.1) 15%,
+  --gradient-vertical:
+    to top, transparent 0%, rgba(168, 168, 168, 0.1) 15%,
     rgba(168, 168, 168, 0.1) 85%, transparent 100%;
+  --shade-01: #fcfcfc;
+  --shade-01_95: rgba(252, 252, 252, 0.95);
+  --shade-02: #f8f7f7;
+  --shade-03: #f1f1f1;
+  --shade-04: #ececec;
+  --shade-05: #e2e2e2;
+  --shade-06: #7b7b7b;
+  --shade-06_30: rgba(123, 123, 123, 0.3);
+  --shade-06_50: rgba(123, 123, 123, 0.5);
+  --shade-07: #323232;
+  --shade-07_05: rgba(50, 50, 50, 0.05);
+  --shade-07_10: rgba(50, 50, 50, 0.1);
+  --shade-08: #222222;
+  --shade-08_05: rgba(34, 34, 34, 0.05);
+  --shade-08_10: rgba(34, 34, 34, 0.1);
+  --shade-09: #121212;
+  --shade-09_05: rgba(18, 18, 18, 0.05);
+  --shade-09_10: rgba(18, 18, 18, 0.1);
+  --shade-09_35: rgba(18, 18, 18, 0.35);
+
+  --box-shadow-toolbar:
+    0px 1px 4px -4px rgba(0, 0, 0, 0.075),
+    0px 8px 16px -12px rgba(0, 0, 0, 0.125);
+  --box-shadow-prompt-input:
+    inset 0 2px 0 0 #ffffff, 0px 18px 24px -20px rgba(0, 0, 0, 0.125),
+    0px 8px 16px -12px rgba(0, 0, 0, 0.075);
+  --box-shadow-depth-01:
+    0 6px 3px 0 rgba(0, 0, 0, 0.01), 0 3px 3px 0 rgba(0, 0, 0, 0.02),
+    0 1px 1px 0 rgba(0, 0, 0, 0.02);
+  --box-shadow-popover:
+    0 153px 61px 0 rgba(0, 0, 0, 0.01), 0 86px 52px 0 rgba(0, 0, 0, 0.04),
+    0 38px 38px 0 rgba(0, 0, 0, 0.06), 0 10px 21px 0 rgba(0, 0, 0, 0.07);
 }
 [data-theme="dark"] {
   --color-bg-surface1: #1b1b1b;
@@ -80,15 +115,18 @@
   --color-accent: #f52495;
   --color-accent2: #d29aff;
 
-  --box-shadow-hover: 0px 2.15px 0.5px -2px rgba(0, 0, 0, 0.25),
+  --box-shadow-hover:
+    0px 2.15px 0.5px -2px rgba(0, 0, 0, 0.25),
     0px 24px 24px -16px rgba(8, 8, 8, 0.04),
     0px 6px 13px 0px rgba(8, 8, 8, 0.03), 0px 6px 4px -4px rgba(8, 8, 8, 0.05),
     0px 5px 1.5px -4px rgba(8, 8, 8, 0.09);
   --box-shadow-active: inset 0px 2px 4px 1px rgba(18, 18, 18, 0.35);
 
-  --gradient-horizontal: to right, transparent 0%, rgba(168, 168, 168, 0.05) 15%,
+  --gradient-horizontal:
+    to right, transparent 0%, rgba(168, 168, 168, 0.05) 15%,
     rgba(168, 168, 168, 0.05) 85%, transparent 100%;
-  --gradient-vertical: to top, transparent 0%, rgba(168, 168, 168, 0.05) 15%,
+  --gradient-vertical:
+    to top, transparent 0%, rgba(168, 168, 168, 0.05) 15%,
     rgba(168, 168, 168, 0.05) 85%, transparent 100%;
 }
 
@@ -129,6 +167,27 @@
   --color-primary3: var(--color-primary3);
   --color-accent: var(--color-accent);
   --color-accent2: var(--color-accent2);
+  --color-shade-01: var(--shade-01);
+  --color-shade-02: var(--shade-02);
+  --color-shade-03: var(--shade-03);
+  --color-shade-04: var(--shade-04);
+  --color-shade-05: var(--shade-05);
+  --color-shade-06: var(--shade-06);
+  --color-shade-07: var(--shade-07);
+  --color-shade-08: var(--shade-08);
+  --color-shade-09: var(--shade-09);
+  --color-surface-01: var(--shade-01);
+  --color-surface-02: var(--shade-02);
+  --color-surface-03: var(--shade-03);
+  --color-primary: var(--shade-09);
+  --color-secondary: var(--shade-06);
+  --color-tertiary: #a8a8a8;
+  --color-s-01: var(--shade-04);
+  --color-s-02: var(--shade-05);
+  --shadow-toolbar: var(--box-shadow-toolbar);
+  --shadow-prompt-input: var(--box-shadow-prompt-input);
+  --shadow-depth-01: var(--box-shadow-depth-01);
+  --shadow-popover: var(--box-shadow-popover);
   --radius-4xl: 2rem;
   --radius-5xl: 2.5rem;
   --default-transition-duration: 0.2s;
@@ -190,6 +249,11 @@
   --text-small--font-weight: 400;
   --shadow-hover: var(--box-shadow-hover);
   --shadow-active: var(--box-shadow-active);
+
+  --text-body-sm: 0.6875rem;
+  --text-body-sm--line-height: 1rem;
+  --text-body-sm--letter-spacing: -0.01em;
+  --text-body-sm--font-weight: 500;
 }
 
 @layer base {
@@ -232,7 +296,8 @@ html[data-theme="dark"] .dropdown-arrow-up:before {
 
 /* mask */
 .mask-middle {
-  mask-image: linear-gradient(to left, black 90%, transparent 100%),
+  mask-image:
+    linear-gradient(to left, black 90%, transparent 100%),
     linear-gradient(to right, black 90%, transparent 100%);
   mask-composite: intersect;
 }

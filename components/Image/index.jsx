@@ -11,6 +11,7 @@ const Image = ({ className, ...props }) => {
       } ${className || ""}`}
       onLoad={() => setLoaded(true)}
       {...props}
+      draggable={false}
     />
   );
 };

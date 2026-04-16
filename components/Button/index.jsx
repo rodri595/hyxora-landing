@@ -17,7 +17,7 @@ const Button = ({
 
   return (
     <Component
-      className={`inline-flex items-center font-inter justify-center h-[38px] px-6 border border-solid rounded-[100px] font-medium text-[16px] leading-6 tracking-[-0.64px] transition-all cursor-pointer disabled:pointer-events-none relative ${
+      className={`inline-flex items-center font-inter justify-center h-[38px] px-6 border border-solid rounded-[100px] font-medium text-[16px] leading-6 tracking-[-0.64px] transition-all cursor-pointer disabled:pointer-events-none disabled:opacity-50 relative ${
         isPrimary
           ? "bg-[#19363f] border-[rgba(255,255,255,0.2)] text-white fill-white shadow-[0px_0px_10px_0px_inset_rgba(255,255,255,0.4)] hover:shadow-[0px_0px_15px_0px_inset_rgba(255,255,255,0.5)]"
           : ""

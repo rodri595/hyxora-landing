@@ -3,6 +3,7 @@
 import menuIcon from "@/assets/imgs/icons/menu.svg";
 import Image from "@/components/Image";
 import Icon from "@/components/Icon";
+import Button from "@/components/Button";
 import trendingIcon from "@/assets//imgs/icons/trending.png";
 import newListingsIcon from "@/assets/imgs/icons/newlisting.png";
 import learningCenterIcon from "@/assets/imgs/icons/learning.png";
@@ -102,7 +103,7 @@ const MenuItem = ({
   return <div className={baseClassName}>{content}</div>;
 };
 
-const MenuComponent = () => {
+const MenuComponent = ({ openRegister, openRegisterState }) => {
   const [isActive, setIsActive] = useState(false);
   const lenis = useLenis();
   const menuRef = useRef(null);
@@ -128,6 +129,10 @@ const MenuComponent = () => {
         });
       }
     }, 400);
+  };
+  const openRegisterModal = () => {
+    openRegisterState(true);
+    setIsActive(false);
   };
 
   // Prevent body scroll and stop Lenis when menu is open
@@ -173,7 +178,7 @@ const MenuComponent = () => {
           opacity: 1,
           duration: 0.5,
           ease: "power3.out",
-        }
+        },
       );
       gsap.fromTo(
         contentRef.current,
@@ -187,7 +192,7 @@ const MenuComponent = () => {
           duration: 0.4,
           delay: 0.2,
           ease: "power2.out",
-        }
+        },
       );
     } else if (menuRef.current) {
       gsap.to(menuRef.current, {
@@ -261,6 +266,13 @@ const MenuComponent = () => {
               }}
             />
           </Link>
+          <Button
+            isSecondary
+            className="max-h-[30px] mb-4"
+            onClick={() => openRegisterModal()}
+          >
+            Registro
+          </Button>
           {/* Explorar Section */}
           <div className="flex items-center justify-start py-0 mb-4">
             <p className="font-inter font-medium text-[#19363f] text-[16px] tracking-[-0.64px]">
