@@ -339,7 +339,7 @@ const Header = ({ isFixed }) => {
               className="max-h-[30px]"
               onClick={() => setIsModalOpen(true)}
             >
-              Registro
+              Apuntate
             </Button>
           </div>
           <Menu openRegister={isModalOpen} openRegisterState={setIsModalOpen} />

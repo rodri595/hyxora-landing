@@ -103,7 +103,7 @@ const MenuItem = ({
   return <div className={baseClassName}>{content}</div>;
 };
 
-const MenuComponent = ({ openRegister, openRegisterState }) => {
+const MenuComponent = ({ openRegisterState }) => {
   const [isActive, setIsActive] = useState(false);
   const lenis = useLenis();
   const menuRef = useRef(null);
@@ -271,7 +271,7 @@ const MenuComponent = ({ openRegister, openRegisterState }) => {
             className="max-h-[30px] mb-4"
             onClick={() => openRegisterModal()}
           >
-            Registro
+            Apuntate
           </Button>
           {/* Explorar Section */}
           <div className="flex items-center justify-start py-0 mb-4">

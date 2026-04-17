@@ -1,76 +1,25 @@
 "use client";
 import { useState } from "react";
-import RegistrationOption from "@/components/RegistrationOption";
 import Button from "@/components/Button";
 import Image from "@/components/Image";
+import Icon from "@/components/Icon";
 import userIMG from "./users.svg";
 import Modal from "@/components/Modal";
-import MVPAccessModal from "@/components/MVPAccessModal";
-import NFTFoundersModal from "@/components/NFTFoundersModal";
-
-const registrationOptions = [
-  {
-    id: "register-only",
-    title: "Simple",
-    description: "Quiero sólo registrarme",
-    badgeText: "Registro",
-    badgeVariant: "green",
-    icon: "verification",
-  },
-  {
-    id: "mvp-access",
-    title: "Acceso MVP",
-    description: "Quiero que me aviséis para tener acceso al MVP de Hyxora",
-    badgeText: "Registro",
-    badgeVariant: "green",
-    icon: "cube",
-  },
-  {
-    id: "nft-founders",
-    title: "NFT Founders",
-    description:
-      "Quiero que me informéis cuando esté disponible la fase de compra de NFTs Founders para pertenecer al proyecto",
-    badgeText: "Registro",
-    badgeVariant: "green",
-    icon: "envelope",
-  },
-];
+import Field from "@/components/Field";
 
 const RegistrationModal = ({ open, onClose }) => {
-  const [selectedOption, setSelectedOption] = useState(null);
   const [activeSubModal, setActiveSubModal] = useState(null);
-
-  const handleSubmit = () => {
-    if (selectedOption === "mvp-access") {
-      setActiveSubModal("mvp-access");
-    }
-    if (selectedOption === "nft-founders") {
-      setActiveSubModal("nft-founders");
-    }
-  };
-
-  const handleBack = () => {
-    setActiveSubModal(null);
-  };
+  const [email, setEmail] = useState("");
+  const [accepted, setAccepted] = useState(false);
+  const handleSubmit = () => {};
 
   const handleClose = () => {
     setActiveSubModal(null);
-    setSelectedOption(null);
     onClose();
   };
 
   return (
     <>
-      <MVPAccessModal
-        open={activeSubModal === "mvp-access"}
-        onClose={handleClose}
-        onBack={handleBack}
-      />
-      <NFTFoundersModal
-        open={activeSubModal === "nft-founders"}
-        onClose={handleClose}
-        onBack={handleBack}
-      />
       <Modal
         open={open && activeSubModal === null}
         onClose={handleClose}
@@ -84,36 +33,69 @@ const RegistrationModal = ({ open, onClose }) => {
           />
           {/* Title */}
           <p className="px-[20px] w-full font-medium leading-normal text-[24px] tracking-[-4%] text-left">
-            Registrate en Hyxora
+            Mantente al día con Hyxora
           </p>
-          {/* Registration Options */}
-          <div className="flex flex-col gap-[8px] items-start px-[14px] relative shrink-0 w-full">
-            {registrationOptions.map((option) => (
-              <RegistrationOption
-                key={option.id}
-                title={option.title}
-                description={option.description}
-                badgeText={option.badgeText}
-                badgeVariant={option.badgeVariant}
-                icon={option.icon}
-                onClick={() => setSelectedOption(option.id)}
-                selected={selectedOption === option.id}
-              />
+          {/* Bullet points */}
+          <div className="flex flex-col gap-2 px-[20px] w-full">
+            <p className="font-inter font-medium text-[12px] text-[rgba(25,54,63,0.5)] uppercase tracking-[0.06em]">
+              Te mantendremos informado:
+            </p>
+            {[
+              "La fecha de lanzamiento del MVP Beta de Hyxora",
+              "La apertura de la Fase 1 de venta de NFTs Founders (sólo 350 unidades disponibles para 2026). Forma parte del proyecto",
+              "Noticias relevantes: avances del proyecto, newsletter y nuestro nuevo podcast",
+            ].map((item, i) => (
+              <div key={i} className="flex items-center gap-2">
+                <div className="shrink-0 w-4 h-4 flex items-center justify-center">
+                  <Icon name="check" className="w-4 h-4 fill-primary2" />
+                </div>
+                <p className="text-[13px] tracking-[-0.01em] leading-[1.5] text-[#19363f]">
+                  {item}
+                </p>
+              </div>
             ))}
           </div>
+          <div className="px-5 w-full">
+            <Field
+              label="Email"
+              type="email"
+              placeholder="tu@email.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              // validated={true}
+            />
+          </div>
+
+          {/* Consent checkbox */}
+          <div className="px-5 w-full flex items-start gap-3">
+            <input
+              id="mvp-consent"
+              type="checkbox"
+              checked={accepted}
+              onChange={(e) => setAccepted(e.target.checked)}
+              className="mt-[2px] shrink-0 accent-[#19363f] cursor-pointer w-4 h-4"
+            />
+            <label
+              htmlFor="mvp-consent"
+              className="font-normal text-[12px] text-[rgba(25,54,63,0.7)] leading-[18px] cursor-pointer"
+            >
+              Acepto que HYXORA FINANCE SL se ponga en contacto conmigo para
+              fines informativos y promocionales.
+            </label>
+          </div>
+
           {/* Submit Button */}
           <div className="flex items-center justify-center px-[20px] relative shrink-0 w-full mt-[16px]">
             <Button
               isPrimary
               onClick={handleSubmit}
-              disabled={!selectedOption}
               className="w-full max-w-[300px]"
             >
-              Continuar
+              Solo con tu Email
             </Button>
           </div>
           {/* Footer text */}
-          <div className="flex items-center justify-center px-[20px] relative shrink-0">
+          <div className="flex items-start flex-col justify-center px-[20px] relative shrink-0">
             <p className="font-inter font-normal text-[12px] text-[rgba(25,54,63,0.7)] tracking-[-0.24px] leading-[18px] text-center">
               Al registrarte, aceptas nuestros{" "}
               <span className="font-inter font-medium text-[#19363f]">
@@ -122,6 +104,12 @@ const RegistrationModal = ({ open, onClose }) => {
               y{" "}
               <span className="font-inter font-medium text-[#19363f]">
                 Política de Privacidad
+              </span>
+            </p>
+            <p className="font-inter font-normal text-[12px] text-[rgba(25,54,63,0.7)] tracking-[-0.24px] leading-[18px] text-center">
+              Contact con nosotros en{" "}
+              <span className="font-inter font-medium text-[#19363f]">
+                future@hyxora.com
               </span>
             </p>
           </div>
