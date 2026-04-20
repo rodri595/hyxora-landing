@@ -3,6 +3,9 @@
 import { useEffect, useState } from "react";
 import { ReactLenis } from "lenis/react";
 import { ThemeProvider } from "next-themes";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+
+const queryClient = new QueryClient();
 
 const Providers = ({ children }) => {
   const [isMobile, setIsMobile] = useState(false);
@@ -48,11 +51,13 @@ const Providers = ({ children }) => {
       };
 
   return (
-    <ThemeProvider defaultTheme="light" disableTransitionOnChange>
-      <ReactLenis root options={scrollSettings}>
-        {children}
-      </ReactLenis>
-    </ThemeProvider>
+    <QueryClientProvider client={queryClient}>
+      <ThemeProvider defaultTheme="light" disableTransitionOnChange>
+        <ReactLenis root options={scrollSettings}>
+          {children}
+        </ReactLenis>
+      </ThemeProvider>
+    </QueryClientProvider>
   );
 };
 

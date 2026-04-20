@@ -6,15 +6,24 @@ import Icon from "@/components/Icon";
 import userIMG from "./users.svg";
 import Modal from "@/components/Modal";
 import Field from "@/components/Field";
+import { useLoopsContact } from "@/hooks/useLoopsContact";
 
 const RegistrationModal = ({ open, onClose }) => {
   const [activeSubModal, setActiveSubModal] = useState(null);
   const [email, setEmail] = useState("");
   const [accepted, setAccepted] = useState(false);
-  const handleSubmit = () => {};
+  const { submit, loading, error, success, reset } = useLoopsContact();
+
+  const handleSubmit = async () => {
+    if (!email || !accepted) return;
+    await submit({ email, source: "Landing page" });
+  };
 
   const handleClose = () => {
     setActiveSubModal(null);
+    reset();
+    setEmail("");
+    setAccepted(false);
     onClose();
   };
 
@@ -84,14 +93,36 @@ const RegistrationModal = ({ open, onClose }) => {
             </label>
           </div>
 
+          {/* Error message */}
+          {error && (
+            <div className="px-5 w-full">
+              <p className="text-[12px] text-red-500 leading-[1.4]">{error}</p>
+            </div>
+          )}
+
+          {/* Success message */}
+          {success && (
+            <div className="px-5 w-full flex items-center gap-2">
+              <Icon name="check" className="w-4 h-4 fill-primary2 shrink-0" />
+              <p className="text-[13px] text-[#19363f] font-medium leading-[1.4]">
+                ¡Listo! Te avisaremos cuando haya novedades.
+              </p>
+            </div>
+          )}
+
           {/* Submit Button */}
           <div className="flex items-center justify-center px-[20px] relative shrink-0 w-full mt-[16px]">
             <Button
               isPrimary
               onClick={handleSubmit}
-              className="w-full max-w-[300px]"
+              disabled={loading || !email || !accepted || success}
+              className="w-full max-w-[300px] disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Solo con tu Email
+              {loading
+                ? "Registrando..."
+                : success
+                  ? "¡Registrado!"
+                  : "Solo con tu Email"}
             </Button>
           </div>
           {/* Footer text */}
