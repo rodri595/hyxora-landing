@@ -271,7 +271,7 @@ const MenuComponent = ({ openRegisterState }) => {
             className="max-h-[30px] mb-4"
             onClick={() => openRegisterModal()}
           >
-            Apuntate
+            Apúntate
           </Button>
           {/* Explorar Section */}
           <div className="flex items-center justify-start py-0 mb-4">
