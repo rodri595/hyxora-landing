@@ -13,13 +13,17 @@ import { base, arbitrum, baseSepolia } from "viem/chains";
 import { Web3Provider } from "@/context/Web3Provider";
 
 const queryClient = new QueryClient();
-// Polyfill Buffer for Privy/viem compatibility
-window.Buffer = Buffer;
 const appId = process.env.NEXT_PUBLIC_PRIVY_APP_ID;
 const clientId = process.env.NEXT_PUBLIC_PRIVY_CLIENT_ID;
 
 const Providers = ({ children }) => {
   const [isMobile, setIsMobile] = useState(false);
+  useEffect(() => {
+    // Polyfill Buffer for Privy/viem compatibility
+    if (typeof window !== "undefined") {
+      window.Buffer = Buffer;
+    }
+  }, []);
   useEffect(() => {
     const checkMobile = () => {
       setIsMobile(window.innerWidth <= 1000);
