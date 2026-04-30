@@ -103,7 +103,7 @@ const MenuItem = ({
   return <div className={baseClassName}>{content}</div>;
 };
 
-const MenuComponent = ({ openRegisterState }) => {
+const MenuComponent = ({}) => {
   const [isActive, setIsActive] = useState(false);
   const lenis = useLenis();
   const menuRef = useRef(null);
@@ -131,7 +131,6 @@ const MenuComponent = ({ openRegisterState }) => {
     }, 400);
   };
   const openRegisterModal = () => {
-    openRegisterState(true);
     setIsActive(false);
   };
 
@@ -266,11 +265,7 @@ const MenuComponent = ({ openRegisterState }) => {
               }}
             />
           </Link>
-          <Button
-            isSecondary
-            className="max-h-[30px] mb-4"
-            onClick={() => openRegisterModal()}
-          >
+          <Button isSecondary className="max-h-[30px] mb-4">
             Apúntate
           </Button>
           {/* Explorar Section */}

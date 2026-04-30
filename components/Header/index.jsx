@@ -2,7 +2,6 @@
 import Link from "next/link";
 import Image from "@/components/Image";
 import Button from "@/components/Button";
-import RegistrationModal from "@/components/RegistrationModal";
 import brandIMG from "@/assets/imgs/brand/logo.svg";
 import trendingIcon from "@/assets//imgs/icons/trending.png";
 import newListingsIcon from "@/assets/imgs/icons/newlisting.png";
@@ -13,7 +12,7 @@ import fireSVG from "@/assets/imgs/icons/fire.svg";
 import Menu from "./Menu";
 import gsap from "gsap";
 import { ScrollToPlugin } from "gsap/ScrollToPlugin";
-import { useState } from "react";
+import { useLogin } from "@privy-io/react-auth";
 
 gsap.registerPlugin(ScrollToPlugin);
 const MenuItem = ({ children, href = "#", ...props }) => {
@@ -266,7 +265,8 @@ const OportunityDropdown = () => {
   );
 };
 const Header = ({ isFixed }) => {
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const { login } = useLogin();
+
   return (
     <>
       <div
@@ -337,19 +337,15 @@ const Header = ({ isFixed }) => {
             <Button
               isSecondary
               className="max-h-[30px]"
-              onClick={() => setIsModalOpen(true)}
+              type="button"
+              onClick={() => login()}
             >
               Apúntate
             </Button>
           </div>
-          <Menu openRegister={isModalOpen} openRegisterState={setIsModalOpen} />
+          <Menu />
         </div>
       </div>
-
-      <RegistrationModal
-        open={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-      />
     </>
   );
 };

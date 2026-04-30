@@ -81,7 +81,7 @@ const Footer = () => {
         {/* Bottom section with copyright and links */}
         <div className="bg-[rgba(25,54,63,0.02)] border-[0.7px] border-[rgba(25,54,63,0.02)] flex items-center justify-between px-5 max-md:px-4 py-4 max-md:py-4 rounded-2xl max-md:rounded-none w-full relative">
           <p className="font-inter font-normal text-[12px] text-[rgba(25,54,63,0.7)] tracking-[-0.24px] leading-normal max-md:w-[138px]">
-            © 2025 Hyxora — Empowering the Future
+            © 2026 Hyxora - Derechos reservados
           </p>
 
           <div className="flex gap-3.5 max-md:gap-2 items-center">
