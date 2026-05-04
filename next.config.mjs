@@ -1,7 +1,32 @@
+import path from "path";
+import { fileURLToPath } from "url";
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   transpilePackages: ["@privy-io/react-auth"],
-  serverExternalPackages: ["pino", "thread-stream"],
+  serverExternalPackages: ["pino", "pino-pretty", "thread-stream", "sonic-boom", "pino-std-serializers"],
+
+  turbopack: {
+    resolveAlias: {
+      "pino": "./lib/empty-module.js",
+      "thread-stream": "./lib/empty-module.js",
+    },
+  },
+
+  webpack: (config, { isServer }) => {
+    if (isServer) {
+      config.externals = [...(config.externals || []), "pino", "thread-stream"];
+    } else {
+      config.resolve.alias = {
+        ...config.resolve.alias,
+        "pino": path.resolve(__dirname, "lib/empty-module.js"),
+        "thread-stream": path.resolve(__dirname, "lib/empty-module.js"),
+      };
+    }
+    return config;
+  },
 
   devIndicators: false,
 
