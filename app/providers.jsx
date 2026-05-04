@@ -92,6 +92,9 @@ const Providers = ({ children }) => {
                 createOnLogin: "users-without-wallets",
               },
             },
+            externalWallets: {
+              disableAllExternalWallets: true,
+            },
           }}
         >
           <SmartWalletsProvider>

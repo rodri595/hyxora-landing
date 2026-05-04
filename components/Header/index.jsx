@@ -1,7 +1,9 @@
 "use client";
+import { useState } from "react";
 import Link from "next/link";
 import Image from "@/components/Image";
 import Button from "@/components/Button";
+import WelcomeModal from "./WelcomeModal";
 import brandIMG from "@/assets/imgs/brand/logo.svg";
 import trendingIcon from "@/assets//imgs/icons/trending.png";
 import newListingsIcon from "@/assets/imgs/icons/newlisting.png";
@@ -268,6 +270,14 @@ const OportunityDropdown = () => {
 const Header = ({ isFixed }) => {
   const { login } = useLogin();
   const { authenticated } = usePrivy();
+  const [welcomeOpen, setWelcomeOpen] = useState(false);
+
+  const handleApuntate = () => setWelcomeOpen(true);
+
+  const handleLogin = () => {
+    setWelcomeOpen(false);
+    login();
+  };
 
   return (
     <>
@@ -341,7 +351,7 @@ const Header = ({ isFixed }) => {
                 isSecondary
                 className="max-h-[30px]"
                 type="button"
-                onClick={() => login()}
+                onClick={handleApuntate}
               >
                 Apúntate
               </Button>
@@ -349,9 +359,15 @@ const Header = ({ isFixed }) => {
               <User />
             )}
           </div>
-          <Menu />
+          <Menu onApuntate={handleApuntate} />
         </div>
       </div>
+
+      <WelcomeModal
+        open={welcomeOpen}
+        onClose={() => setWelcomeOpen(false)}
+        onLogin={handleLogin}
+      />
     </>
   );
 };

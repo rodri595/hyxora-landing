@@ -10,16 +10,16 @@
   },
   "dependencies": {
     "@gsap/react": "^2.1.2",
-    "@headlessui/react": "^2.2.9",
-    "@privy-io/react-auth": "^3.22.2",
+    "@headlessui/react": "^2.2.10",
+    "@privy-io/react-auth": "^3.23.1",
     "@sentry/react": "^10.51.0",
     "@sentry/vite-plugin": "^5.2.1",
-    "@tanstack/react-query": "^5.100.6",
-    "axios": "^1.15.2",
+    "@tanstack/react-query": "^5.100.9",
+    "axios": "^1.16.0",
     "buffer": "^6.0.3",
     "clsx": "^2.1.1",
-    "gsap": "^3.13.0",
-    "lenis": "^1.3.15",
+    "gsap": "^3.15.0",
+    "lenis": "^1.3.23",
     "next": "16.0.7",
     "next-themes": "^0.4.6",
     "permissionless": "^0.3.5",
@@ -30,15 +30,15 @@
     "react-tooltip": "^6.0.0",
     "recharts": "^3.8.1",
     "tailwind-merge": "^3.5.0",
-    "viem": "^2.48.4",
+    "viem": "^2.48.8",
     "web-haptics": "^0.0.6"
   },
   "devDependencies": {
-    "@tailwindcss/postcss": "^4",
+    "@tailwindcss/postcss": "^4.2.4",
     "@types/node": "24.10.1",
     "@types/react": "19.2.7",
-    "eslint": "^9",
+    "eslint": "^9.39.4",
     "eslint-config-next": "16.0.6",
-    "tailwindcss": "^4"
+    "tailwindcss": "^4.2.4"
   }
 }
