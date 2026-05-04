@@ -1,5 +1,8 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  transpilePackages: ["@privy-io/react-auth"],
+  serverExternalPackages: ["pino", "thread-stream"],
+
   devIndicators: false,
 
   // Compress responses
