@@ -12,7 +12,8 @@ import fireSVG from "@/assets/imgs/icons/fire.svg";
 import Menu from "./Menu";
 import gsap from "gsap";
 import { ScrollToPlugin } from "gsap/ScrollToPlugin";
-import { useLogin } from "@privy-io/react-auth";
+import { useLogin, usePrivy } from "@privy-io/react-auth";
+import User from "./User";
 
 gsap.registerPlugin(ScrollToPlugin);
 const MenuItem = ({ children, href = "#", ...props }) => {
@@ -266,6 +267,7 @@ const OportunityDropdown = () => {
 };
 const Header = ({ isFixed }) => {
   const { login } = useLogin();
+  const { authenticated } = usePrivy();
 
   return (
     <>
@@ -334,14 +336,18 @@ const Header = ({ isFixed }) => {
                 }}
               />
             </Link>
-            <Button
-              isSecondary
-              className="max-h-[30px]"
-              type="button"
-              onClick={() => login()}
-            >
-              Apúntate
-            </Button>
+            {!authenticated ? (
+              <Button
+                isSecondary
+                className="max-h-[30px]"
+                type="button"
+                onClick={() => login()}
+              >
+                Apúntate
+              </Button>
+            ) : (
+              <User />
+            )}
           </div>
           <Menu />
         </div>

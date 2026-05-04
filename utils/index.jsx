@@ -41,9 +41,9 @@ export const copyToClipboard = (text) => {
     document.body.removeChild(el);
   }
 
-  toast.success("Copied", {
-    icon: "✅",
-    time: 2000,
+  toast.success("Copiado", {
+    // icon: "✅",
+    duration: 2000,
     position: "top-right",
   });
 };

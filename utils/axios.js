@@ -1,16 +1,16 @@
 import axios from "axios";
 
-const isLocalhost = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
+const isDev = process.env.NODE_ENV === "development";
 
 const apiClient = axios.create({
   baseURL: process.env.NEXT_PUBLIC_HYXORA_API,
-  withCredentials: !isLocalhost,
+  withCredentials: !isDev,
 });
 
-// Add request interceptor to include JWT token for localhost
+// Add request interceptor to include JWT token in development
 apiClient.interceptors.request.use(
   (config) => {
-    if (isLocalhost) {
+    if (isDev) {
       const jwt = sessionStorage.getItem("jwt");
       if (jwt) {
         config.headers.Authorization = `Bearer ${jwt}`;

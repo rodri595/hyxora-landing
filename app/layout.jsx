@@ -1,6 +1,7 @@
 import { Inter } from "next/font/google";
 import Providers from "./providers";
 import "./globals.css";
+import { Toaster } from "react-hot-toast";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -138,6 +139,16 @@ export default function RootLayout({ children }) {
       <body
         className={`${inter.variable} bg-b-surface1 font-inter text-[1rem]  antialiased`}
       >
+        <Toaster
+          toastOptions={{
+            duration: 5000,
+            className: `
+            rounder=d-md! border-[#24292D]! bg-[#0D0D0D]!
+            text-[14px]! font-inter! font-bold! text-[#FFF]! leading-[normal]! tracking-[-0.56px]!
+              `,
+          }}
+        />
+
         <Providers>{children}</Providers>
       </body>
     </html>
