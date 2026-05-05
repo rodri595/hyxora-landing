@@ -281,6 +281,7 @@ const MenuComponent = () => {
                 }}
               />
             </Link>
+
             {!authenticated ? (
               <Button
                 isSecondary
@@ -291,15 +292,17 @@ const MenuComponent = () => {
                 Apúntate
               </Button>
             ) : (
-              <div
+              <Button
+                type="button"
+                className="max-h-[30px] mb-4"
+                isSecondary
                 onClick={() => copyToClipboard(smartWalletAddress)}
-                className="flex items-center font-inter justify-center size-[30px] border border-solid rounded-[100px] cursor-pointer outline-0 transition-all bg-white border-[rgba(25,54,63,0.2)] text-[#19363f] fill-[#19363f] shadow-[0px_0px_10px_0px_inset_rgba(25,54,63,0.4)] hover:shadow-[0px_0px_15px_0px_inset_rgba(25,54,63,0.5)] max-md:w-full "
               >
                 <Icon name="profile" className="size-3! max-md:size-4!" />
                 <span className="font-bold text-[12px]  tracking-[-0.48px] whitespace-nowrap">
                   {shortenAddress(smartWalletAddress)}
                 </span>
-              </div>
+              </Button>
             )}
             {/* Explorar Section */}
             <div className="flex items-center justify-start py-0 mb-4">
