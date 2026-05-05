@@ -17,8 +17,9 @@ import { ScrollToPlugin } from "gsap/ScrollToPlugin";
 import fireSVG from "@/assets/imgs/icons/fire.svg";
 
 import { useLogin, usePrivy } from "@privy-io/react-auth";
-import User from "../User";
 import WelcomeModal from "../WelcomeModal";
+import { useWeb3 } from "@/context/Web3Provider";
+import { shortenAddress, copyToClipboard } from "@/utils";
 
 gsap.registerPlugin(ScrollToPlugin);
 
@@ -107,7 +108,9 @@ const MenuItem = ({
   return <div className={baseClassName}>{content}</div>;
 };
 
-const MenuComponent = ({}) => {
+const MenuComponent = () => {
+  const { logout, smartWalletAddress } = useWeb3();
+
   const [isActive, setIsActive] = useState(false);
   const [welcomeOpen, setWelcomeOpen] = useState(false);
   const { login } = useLogin();
@@ -119,6 +122,11 @@ const MenuComponent = ({}) => {
     setWelcomeOpen(false);
     login();
   };
+  const handleApuntate = () => {
+    setIsActive(false);
+    setWelcomeOpen(true);
+  };
+
   const toggleMenu = () => {
     setIsActive((prev) => !prev);
   };
@@ -274,11 +282,24 @@ const MenuComponent = ({}) => {
               />
             </Link>
             {!authenticated ? (
-              <Button isSecondary className="max-h-[30px] mb-4">
+              <Button
+                isSecondary
+                className="max-h-[30px] mb-4"
+                type="button"
+                onClick={handleApuntate}
+              >
                 Apúntate
               </Button>
             ) : (
-              <User />
+              <div
+                onClick={() => copyToClipboard(smartWalletAddress)}
+                className="flex items-center font-inter justify-center size-[30px] border border-solid rounded-[100px] cursor-pointer outline-0 transition-all bg-white border-[rgba(25,54,63,0.2)] text-[#19363f] fill-[#19363f] shadow-[0px_0px_10px_0px_inset_rgba(25,54,63,0.4)] hover:shadow-[0px_0px_15px_0px_inset_rgba(25,54,63,0.5)] max-md:w-full "
+              >
+                <Icon name="profile" className="size-3! max-md:size-4!" />
+                <span className="font-bold text-[12px]  tracking-[-0.48px] whitespace-nowrap">
+                  {shortenAddress(smartWalletAddress)}
+                </span>
+              </div>
             )}
             {/* Explorar Section */}
             <div className="flex items-center justify-start py-0 mb-4">
@@ -350,7 +371,7 @@ const MenuComponent = ({}) => {
                 Recursos
               </p>
             </div>
-            <div className="flex flex-col space-y-2">
+            <div className="flex flex-col space-y-2 mb-6">
               <MenuItem
                 icon={
                   <Icon name="verification" className="w-[16px] h-[16px] " />
@@ -376,7 +397,25 @@ const MenuComponent = ({}) => {
                 className="w-full max-w-none"
               />
             </div>
-            <div className="flex flex-col mt-auto pt-4 border-t space-y-1">
+            {authenticated && (
+              <>
+                {/* Wallet Section */}
+                <div className="flex items-center justify-start py-0 mb-4">
+                  <p className="font-inter font-medium text-[#19363f] text-[16px] tracking-[-0.64px]">
+                    Mi Billetera
+                  </p>
+                </div>
+                <div className="flex flex-col space-y-2 mb-6">
+                  <MenuItem
+                    icon={<Icon name="logout" className="w-[16px] h-[16px] " />}
+                    title="Sign out"
+                    className="w-full max-w-none"
+                    onClick={() => logout()}
+                  />
+                </div>
+              </>
+            )}
+            <div className="flex flex-col mt-auto pt-4 border-t space-y-1 pl-12">
               <p className="font-normal text-[12px] leading-[18px] text-[rgba(25,54,63,0.7)] tracking-[-0.24px]">
                 {/* <span>Al conectar tu billetera, aceptas nuestros </span> */}
                 <Link href="/terms" className="font-medium text-[#19363f]">
