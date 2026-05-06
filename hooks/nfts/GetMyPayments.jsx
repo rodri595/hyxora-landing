@@ -1,0 +1,21 @@
+import { useQuery } from "@tanstack/react-query";
+import apiClient from "@/utils/axios";
+import { usePrivy } from "@privy-io/react-auth";
+import { useWeb3 } from "@/context/Web3Provider";
+
+export const GetMyPayments = (props) => {
+  const { smartWalletAddress } = useWeb3();
+  const { authenticated, ready } = usePrivy();
+  return useQuery({
+    queryKey: ["myPayments", smartWalletAddress],
+    refetchInterval: props?.refetchInterval,
+    queryFn: async () => {
+      const response = await apiClient.get("/payment/list");
+      return response?.data?.data || [];
+    },
+    enabled:
+      typeof props === "undefined"
+        ? true
+        : props.enabled && !!smartWalletAddress && authenticated && ready,
+  });
+};

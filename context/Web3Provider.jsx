@@ -1,9 +1,11 @@
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import { usePrivy, useWallets, useLogout } from "@privy-io/react-auth";
 import { useSmartWallets } from "@privy-io/react-auth/smart-wallets";
+import { useQuery } from "@tanstack/react-query";
 import { createPublicClient, http } from "viem";
 import { base } from "viem/chains";
 import { useAuth } from "@/hooks/useAuth";
+import { useSessionSync } from "@/hooks/useSessionSync";
 
 const Web3Context = createContext({
   logout: async () => {},
@@ -17,87 +19,48 @@ const Web3Context = createContext({
 
 export const Web3Provider = ({ children }) => {
   const { logout: privyLogout } = useLogout();
-  const { authenticated, ready, user, getAccessToken } = usePrivy();
+  const { authenticated, ready, user } = usePrivy();
   const { client: smartWalletClient, getClientForChain } = useSmartWallets();
   const { wallets } = useWallets();
-  const { authenticate, invalidateSession } = useAuth();
+  const { invalidateSession } = useAuth();
 
   const [currentChain, setCurrentChain] = useState(base);
-  const [walletAddress, setWalletAddress] = useState(null);
-  const [smartWalletAddress, setSmartWalletAddress] = useState(null);
-  const [manualSmartWalletClient, setManualSmartWalletClient] = useState(null);
-  const [publicClient, setPublicClient] = useState(null);
 
-  // Setup public client
-  useEffect(() => {
-    const pClient = createPublicClient({
-      chain: currentChain,
-      transport: http(),
-    });
-    setPublicClient(pClient);
-  }, [currentChain]);
+  const { data: manualSmartWalletClient } = useQuery({
+    queryKey: ["smart-wallet-client", currentChain.id],
+    queryFn: () => getClientForChain({ id: currentChain.id }),
+    enabled: authenticated && ready && !smartWalletClient,
+    retry: true,
+    retryDelay: 2_000,
+    staleTime: Infinity,
+  });
 
-  // Sync wallet addresses from Privy
-  useEffect(() => {
-    if (!authenticated || !ready) return;
+  const publicClient = useMemo(
+    () => createPublicClient({ chain: currentChain, transport: http() }),
+    [currentChain],
+  );
 
-    if (wallets.length > 0) {
-      setWalletAddress(wallets[0].address);
-    }
+  const walletAddress = useMemo(() => {
+    if (!authenticated || !ready || wallets.length === 0) return null;
+    return wallets[0].address;
+  }, [authenticated, ready, wallets]);
 
+  const smartWalletAddress = useMemo(() => {
     const client = smartWalletClient || manualSmartWalletClient;
-    const address = client?.account?.address;
-    if (address) {
-      setSmartWalletAddress(address);
-    }
-  }, [
-    authenticated,
-    ready,
-    wallets,
-    smartWalletClient,
-    manualSmartWalletClient,
-  ]);
+    return client?.account?.address ?? null;
+  }, [smartWalletClient, manualSmartWalletClient]);
 
-  // Retry getting smart wallet client until available
-  useEffect(() => {
-    if (!authenticated || !ready) return;
-    if (smartWalletClient || manualSmartWalletClient) return;
-
-    let intervalId = null;
-
-    const tryGetClient = async () => {
-      try {
-        const newClient = await getClientForChain({ id: currentChain.id });
-        setManualSmartWalletClient(newClient);
-        clearInterval(intervalId);
-      } catch (error) {
-        console.log("Error getting smart wallet client:", error);
-      }
-    };
-
-    tryGetClient();
-    intervalId = setInterval(tryGetClient, 2_000);
-
-    return () => clearInterval(intervalId);
-  }, [
-    authenticated,
-    ready,
-    smartWalletClient,
-    manualSmartWalletClient,
-    currentChain,
-    getClientForChain,
-  ]);
   // Deploy smart wallet if not yet on-chain
   useEffect(() => {
     if (!user || user.smartWallet) return;
 
     const client = smartWalletClient || manualSmartWalletClient;
-    if (!client?.account || client.account.deployed) return;
+    if (!client?.account || client?.account?.deployed) return;
 
     const deploy = async () => {
       try {
         const txHash = await client.sendTransaction(
-          { to: client.account.address, value: 0n, data: "0x" },
+          { to: client?.account?.address, value: 0n, data: "0x" },
           {
             uiOptions: {
               title: "Activate Your Smart Wallet",
@@ -116,26 +79,7 @@ export const Web3Provider = ({ children }) => {
     deploy();
   }, [user, smartWalletClient, manualSmartWalletClient]);
   // Sync backend session when Privy is authenticated but session cookie is absent
-  useEffect(() => {
-    if (!ready || !authenticated) return;
-
-    const hasSessionCookie = document.cookie
-      .split(";")
-      .some((c) => c.trim().startsWith("session="));
-
-    if (!hasSessionCookie) {
-      const sync = async () => {
-        try {
-          const accessToken = await getAccessToken();
-          await authenticate(accessToken);
-        } catch (error) {
-          console.log("Session sync failed:", error);
-        }
-      };
-      void sync();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [authenticated, ready]);
+  useSessionSync();
 
   const logout = async () => {
     try {
@@ -143,9 +87,6 @@ export const Web3Provider = ({ children }) => {
     } catch (error) {
       console.log("Logout error:", error);
     }
-    setWalletAddress(null);
-    setSmartWalletAddress(null);
-    setManualSmartWalletClient(null);
     await privyLogout();
     window.location.reload();
   };

@@ -110,7 +110,6 @@ const MenuItem = ({
 
 const MenuComponent = () => {
   const { logout, smartWalletAddress } = useWeb3();
-
   const [isActive, setIsActive] = useState(false);
   const [welcomeOpen, setWelcomeOpen] = useState(false);
   const { login } = useLogin();

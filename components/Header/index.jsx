@@ -16,6 +16,7 @@ import gsap from "gsap";
 import { ScrollToPlugin } from "gsap/ScrollToPlugin";
 import { useLogin, usePrivy } from "@privy-io/react-auth";
 import User from "./User";
+import { cn } from "@/utils";
 
 gsap.registerPlugin(ScrollToPlugin);
 const MenuItem = ({ children, href = "#", ...props }) => {
@@ -282,11 +283,11 @@ const Header = ({ isFixed }) => {
   return (
     <>
       <div
-        className={`relative z-20 backdrop-blur-[10px] bg-[rgba(255,255,255,0.8)] border-b border-white box-border   w-full ${
+        className={`relative z-20 backdrop-blur-[10px] bg-[rgba(255,255,255,0.8)] border-b border-white box-border  w-full ${
           isFixed ? "fixed! top-0 left-0 right-0" : ""
         }`}
       >
-        <div className="box-border max-w-[1440px] w-full flex items-center h-[52px] px-[50px] py-3 mx-auto max-md:px-4 max-md:py-[10px]">
+        <div className="box-border max-w-[1440px] w-full flex items-center h-[52px] px-[50px] py-3 mx-auto max-lg:px-4  max-md:px-4  max-md:py-[10px]">
           {/* Logo */}
           <div className="flex items-center justify-start gap-2 flex-1">
             <Link href="/" className="flex gap-2 items-center shrink-0  ">
@@ -306,7 +307,7 @@ const Header = ({ isFixed }) => {
           </div>
 
           {/* Navigation Menu */}
-          <nav className="flex gap-[18px] items-center justify-center flex-1 max-md:hidden">
+          <nav className="flex gap-[18px] items-center justify-center flex-1 max-md:hidden max-lg:gap-[8px]">
             <ExploreDropdown />
             <MenuItem
               href="https://founder.hyxora.com/"
@@ -327,7 +328,10 @@ const Header = ({ isFixed }) => {
               href="https://founder.hyxora.com/"
               target="_blank"
               rel="noopener noreferrer"
-              className="bg-[#1b5ffd] border border-[rgba(255,255,255,0.2)] border-solid h-[30px] relative rounded-[100px] cursor-pointer"
+              className={cn(
+                "bg-[#1b5ffd] border border-[rgba(255,255,255,0.2)] border-solid h-[30px] relative rounded-[100px] cursor-pointer",
+                !authenticated && "max-lg:hidden",
+              )}
             >
               <div className="flex gap-[3px] h-[30px] items-center justify-center overflow-hidden p-[8px] relative rounded-[inherit]">
                 <Image
@@ -349,7 +353,10 @@ const Header = ({ isFixed }) => {
             {!authenticated ? (
               <Button
                 isSecondary
-                className="max-h-[30px]"
+                className={cn(
+                  "max-h-[30px]",
+                  !authenticated && "max-lg:px-[8px]",
+                )}
                 type="button"
                 onClick={handleApuntate}
               >
@@ -359,7 +366,7 @@ const Header = ({ isFixed }) => {
               <User />
             )}
           </div>
-          <Menu onApuntate={handleApuntate} />
+          <Menu />
         </div>
       </div>
 

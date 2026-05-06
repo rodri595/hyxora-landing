@@ -1,7 +1,6 @@
 import axios from "axios";
 
 const isDev = process.env.NODE_ENV === "development";
-
 const apiClient = axios.create({
   baseURL: process.env.NEXT_PUBLIC_HYXORA_API,
   withCredentials: !isDev,
