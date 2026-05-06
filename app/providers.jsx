@@ -77,25 +77,45 @@ const Providers = ({ children }) => {
           clientId={clientId}
           config={{
             appearance: {
+              theme: "light",
               accentColor: "#1b5ffd",
-              theme: "#FFFFFF",
-              showWalletLoginFirst: false,
-              logo: logoIMG.src,
               walletChainType: "ethereum-only",
+              walletList: [
+                "metamask",
+                "rabby_wallet",
+                "coinbase_wallet",
+                "detected_wallets",
+              ],
             },
-            loginMethods: ["google", "twitter", "email"],
             defaultChain: base,
             supportedChains: [baseSepolia, base, arbitrum],
             embeddedWallets: {
-              showWalletUIs: true,
               ethereum: {
                 createOnLogin: "users-without-wallets",
               },
             },
-            externalWallets: {
-              disableAllExternalWallets: true,
-            },
           }}
+          // config={{
+          //   appearance: {
+          //     accentColor: "#1b5ffd",
+          //     theme: "#FFFFFF",
+          //     showWalletLoginFirst: false,
+          //     logo: logoIMG.src,
+          //     walletChainType: "ethereum-only",
+          //   },
+          //   loginMethods: ["google", "twitter", "email"],
+          //   defaultChain: base,
+          //   supportedChains: [baseSepolia, base, arbitrum],
+          //   embeddedWallets: {
+          //     showWalletUIs: true,
+          //     ethereum: {
+          //       createOnLogin: "users-without-wallets",
+          //     },
+          //   },
+          //   externalWallets: {
+          //     disableAllExternalWallets: true,
+          //   },
+          // }}
         >
           <SmartWalletsProvider>
             <Web3Provider>

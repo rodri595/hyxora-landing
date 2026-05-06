@@ -154,37 +154,37 @@ const User = () => {
       ),
       onClick: () => copyToClipboard(smartWalletAddress || ""),
     },
-    {
-      id: 3,
-      title: "Mi Perfil",
-      description: "Tu perfil personal",
-      icon: (
-        <Icon name="profile" className="size-[16px] aspect-square" size={20} />
-      ),
-      href: "/profile",
-    },
-    {
-      id: 4,
-      title: "Comitee",
-      description: "Únete al comité",
-      icon: <Icon name="documents" className="size-[16px] aspect-square" />,
-      href: "/comite",
-    },
-    {
-      id: 5,
-      title: "Mis NFTs",
-      description: "Tus NFTs coleccionables",
-      icon: (
-        <Icon name="sparkle" className="size-[16px] aspect-square" size={20} />
-      ),
-      href: "/nfts",
-    },
+    // {
+    //   id: 3,
+    //   title: "Mi Perfil",
+    //   description: "Tu perfil personal",
+    //   icon: (
+    //     <Icon name="profile" className="size-[16px] aspect-square" size={20} />
+    //   ),
+    //   href: "/profile",
+    // },
+    // {
+    //   id: 4,
+    //   title: "Comitee",
+    //   description: "Únete al comité",
+    //   icon: <Icon name="documents" className="size-[16px] aspect-square" />,
+    //   href: "/comite",
+    // },
+    // {
+    //   id: 5,
+    //   title: "Mis NFTs",
+    //   description: "Tus NFTs coleccionables",
+    //   icon: (
+    //     <Icon name="sparkle" className="size-[16px] aspect-square" size={20} />
+    //   ),
+    //   href: "/nfts",
+    // },
     {
       id: 6,
       title: "Founders",
       description: "Programa de fundadores",
       image: trendingIcon,
-      href: "https://founder.hyxora.com/",
+      href: "https://founder.hyxora.com/profile",
       target: "_blank",
       rel: "noopener noreferrer",
     },
@@ -272,13 +272,13 @@ const User = () => {
           )}
           <div className="flex p-[0_20px] justify-center items-center gap-[10px]">
             <span className=" text-[rgba(25, 54, 63, 0.70)] leading-[18px] font-inter text-[12px] font-normal tracking-[-0.24px]">
-              By connecting your wallet, you agree to our{" "}
-              <Link href="/terms" className="text-[#19363F] font-bold">
-                Terms of Use
+              Al usar la plataforma aceptas nuestros{" "}
+              <Link href="/#" className="text-[#19363F] font-bold">
+                Términos de Uso
               </Link>{" "}
-              and{" "}
-              <Link href="/privacy" className="text-[#19363F] font-bold">
-                Privacy Policy
+              y nuestra{" "}
+              <Link href="/#" className="text-[#19363F] font-bold">
+                Política de Privacidad
               </Link>
             </span>
           </div>

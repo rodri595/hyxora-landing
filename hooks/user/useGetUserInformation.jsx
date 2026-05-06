@@ -22,7 +22,7 @@ export const useGetUserInformation = () => {
     gcTime: false,
     refetchOnWindowFocus: true,
     refetchOnMount: false,
-    retry: false,
+    retry: 2,
     enabled: Boolean(smartWalletAddress) && authenticated && ready,
   });
 };
