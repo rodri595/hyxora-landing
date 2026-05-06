@@ -2,11 +2,15 @@
 
 import Icon from "@/components/Icon";
 import Image from "@/components/Image";
+import Spinner from "@/components/Spinner";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/utils";
 import { useWeb3 } from "@/context/Web3Provider";
 import trendingIcon from "@/assets//imgs/icons/trending.png";
+import { useGetUserInformation } from "@/hooks/user/useGetUserInformation";
+import { useMemo } from "react";
+import { roleNames } from "@/constants/roles";
 
 const MenuItemButton = ({
   title = "Title",
@@ -26,7 +30,7 @@ const MenuItemButton = ({
         {...props}
         rel="noopener noreferrer"
         className={cn(
-          "group flex flex-1 p-[6px] px-[8px] justify-between items-center cursor-pointer w-full rounded-[12px] border-[1px] border-solid transition-colors border-transparent transition duration-200 ease-out ",
+          "group flex  p-[6px] px-[8px] justify-between items-center cursor-pointer w-full rounded-[12px] border-[1px] border-solid transition-colors border-transparent transition duration-200 ease-out ",
           "hover:border-[rgba(25,54,63,0.02)] hover:bg-[rgba(25,54,63,0.04)] hover:box-shadow-[0_0_4px_0_rgba(25,54,63,0.04)_inset] ",
           disabled && "cursor-not-allowed opacity-50",
           active &&
@@ -125,16 +129,15 @@ const MenuItemButton = ({
 const Sidebar = () => {
   const { logout } = useWeb3();
   const pathname = usePathname();
+  const { data: userInformation, isLoading: isLoadingUserInformation } =
+    useGetUserInformation();
+  const isAdmin = useMemo(() => {
+    return (
+      userInformation?.information?.role?.includes(roleNames?.admin ?? "") ??
+      false
+    );
+  }, [userInformation]);
   const navigation = [
-    {
-      id: 1,
-      title: "Admin Panel",
-      description: "Gestionar plataforma",
-      icon: (
-        <Icon name="diamond" className="size-[16px] aspect-square" size={20} />
-      ),
-      href: "/admin",
-    },
     {
       id: 2,
       title: "Mi Perfil",
@@ -169,26 +172,39 @@ const Sidebar = () => {
       target: "_blank",
       rel: "noopener noreferrer",
     },
-    {
-      id: 6,
-      title: "Sign out",
-      description: "Cerrar sesión",
-      icon: (
-        <Icon fill="red" name="logout" className="size-[16px] aspect-square" />
-      ),
-      onClick: () => logout(),
-    },
   ];
   return (
-    <aside className="flex flex-col w-[250px] py-[24px] items-start justify-start gap-[8px] bg-[#F5F7F9]">
-      {/*  */}
-      <div className="flex items-center justify-start px-[16px] mb-2">
+    <aside className="flex flex-col max-w-[250px] py-[24px] items-start justify-start gap-[8px] bg-[#F5F7F9]  flex-1 overflow-hidden h-full">
+      {/*TOP SECTION  */}
+      <div className="flex items-center justify-start px-[16px] mb-2 shrink-0">
         <p className="font-inter text-[#19363F] text-[12px] tracking-[-0.56px] leading-[14px] font-bold ">
           Explorar
         </p>
       </div>
-      {/* ////////////////////// */}
-      <div className="flex flex-col gap-2 mb-6 w-full px-[8px]">
+      {/*MIDDLE SECTION SCROLLABLE  */}
+      <div
+        className="flex flex-col gap-2 w-full px-[8px] flex-1  overflow-auto h-full   min-h-0"
+        data-lenis-prevent
+      >
+        {isLoadingUserInformation ? (
+          <Spinner />
+        ) : (
+          isAdmin && (
+            <MenuItemButton
+              title="Admin Panel"
+              description="Gestionar plataforma"
+              icon={
+                <Icon
+                  name="diamond"
+                  className="size-[16px] aspect-square"
+                  size={20}
+                />
+              }
+              href="/admin"
+              active={pathname === "/admin"}
+            />
+          )
+        )}
         {navigation?.map((item) => (
           <MenuItemButton
             key={item.id}
@@ -196,6 +212,22 @@ const Sidebar = () => {
             active={!!item.href && pathname === item.href}
           />
         ))}
+      </div>
+      {/*BOTTOM SECTION PINNED  */}
+      <div className="w-full px-[8px] mt-auto shrink-0">
+        <MenuItemButton
+          title="Sign out"
+          description="Cerrar sesión"
+          icon={
+            <Icon
+              fill="red"
+              name="logout"
+              className="size-[16px] aspect-square"
+            />
+          }
+          onClick={() => logout()}
+          className="shrink-0"
+        />
       </div>
       {/*  */}
     </aside>

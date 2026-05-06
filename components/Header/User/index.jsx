@@ -219,7 +219,7 @@ const User = () => {
 
         <MenuItems
           className={cn(
-            "[--anchor-gap:0.75rem] [--anchor-offset:0.5rem] origin-top transition duration-200 ease-out outline-none shadow-popover after:absolute after:inset-0  after:pointer-events-none  data-[closed]:scale-95 data-[closed]:opacity-0",
+            "[--anchor-gap:1rem] [--anchor-offset:0.5rem] origin-top transition duration-200 ease-out outline-none shadow-popover after:absolute after:inset-0  after:pointer-events-none  data-[closed]:scale-95 data-[closed]:opacity-0",
             "flex w-[307px] flex-col items-start gap-[0px] rounded-[16px] py-[16px] border-[0.7px] border-solid border-[rgba(25,54,63,0.02)]",
             "bg-[rgba(250, 251, 251, 0.80)] box-shadow-[0_3px_4px_-4px_rgba(25,54,63,0.05),0_8px_8px_-4px_rgba(25,54,63,0.10),0_0_4px_0_rgba(25,54,63,0.04)_inset] backdrop-blur-[15px]",
             "overflow-y-auto scrollbar-thin scrollbar-thumb-[rgba(25,54,63,0.10)] scrollbar-track-transparent scrollbar-thumb-rounded-full ",
@@ -271,7 +271,7 @@ const User = () => {
             </div>
           )}
           <div className="flex p-[0_20px] justify-center items-center gap-[10px]">
-            <span className=" text-[rgba(25, 54, 63, 0.70)] leading-[18px] font-inter text-[12px] font-normal tracking-[-0.24px]">
+            <span className=" text-[rgba(25,54,63,0.70)] leading-[18px] font-inter text-[12px] font-normal tracking-[-0.24px]">
               Al usar la plataforma aceptas nuestros{" "}
               <Link href="/#" className="text-[#19363F] font-bold">
                 Términos de Uso

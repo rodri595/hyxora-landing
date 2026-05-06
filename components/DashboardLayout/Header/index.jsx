@@ -7,10 +7,10 @@ import brandIMG from "@/assets/imgs/brand/logo.svg";
 import User from "./User";
 const Header = ({ extraNav = false }) => {
   return (
-    <header className="flex flex-col items-start justify-start w-full shrink-0  border-b border-[#E0E3E6] max-h-[110px] px-[40px]">
-      <div className="w-full flex justify-start items-center py-[12px]">
+    <header className="flex flex-col items-start justify-start w-full shrink-0  border-b border-[#E0E3E6] max-h-[110px] px-[16px]">
+      <div className="w-full flex justify-start items-center py-[12px] gap-[24px]">
         {/* left side */}
-        <div className="flex items-center justify-center  gap-[24px]">
+        <div className="flex items-center justify-start gap-[24px]  flex-1">
           <Link href="/" className="flex gap-2 items-center shrink-0 ">
             <div className="relative shrink-0 size-6">
               <Image
@@ -23,10 +23,10 @@ const Header = ({ extraNav = false }) => {
               Hyxora
             </span>
           </Link>
-          <Field type="search" placeholder="Search" />
+          <Field type="search" placeholder="Search" className="w-full" />
         </div>
         {/* right side */}
-        <div className="flex ml-auto justify-center items-center gap-[24px]">
+        <div className="flex ml-auto justify-end items-center gap-[24px] flex-1">
           {/* / */}
           <ul className="flex gap-[8px] items-center justify-center ">
             <li className="">

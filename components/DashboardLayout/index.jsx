@@ -51,12 +51,12 @@ const DashboardLayout = ({ children }) => {
   return (
     <div
       className={cn(
-        "min-h-screen flex flex-col flex-1 justify-start items-start ",
+        "h-screen overflow-hidden flex flex-col flex-1 justify-start items-start ",
         "bg-[#FFF]",
       )}
     >
       <Header />
-      <div className="flex flex-1 w-full">
+      <div className="flex flex-1 w-full h-full">
         <Sidebar />
         <div className="flex-1 flex overflow-hidden">{children}</div>
       </div>
