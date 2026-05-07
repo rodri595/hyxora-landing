@@ -126,7 +126,7 @@ const MenuItemButton = ({
   );
 };
 
-const Sidebar = () => {
+const Sidebar = ({ isSidebarOpen, setIsSidebarOpen }) => {
   const { logout } = useWeb3();
   const pathname = usePathname();
   const { data: userInformation, isLoading: isLoadingUserInformation } =
@@ -174,7 +174,12 @@ const Sidebar = () => {
     },
   ];
   return (
-    <aside className="flex flex-col max-w-[250px] py-[24px] items-start justify-start gap-[8px] bg-[#F5F7F9]  flex-1 overflow-hidden h-full">
+    <aside
+      className={cn(
+        "flex flex-col max-w-[250px] py-[24px] items-start justify-start gap-[8px] bg-[#F5F7F9]  flex-1 overflow-hidden h-full max-lg:hidden",
+        isSidebarOpen && "",
+      )}
+    >
       {/*TOP SECTION  */}
       <div className="flex items-center justify-start px-[16px] mb-2 shrink-0">
         <p className="font-inter text-[#19363F] text-[12px] tracking-[-0.56px] leading-[14px] font-bold ">

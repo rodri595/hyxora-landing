@@ -115,12 +115,21 @@ const MenuItemButton = ({
     </div>
   );
 };
-const Tab = ({ icon, title, description, to, onClick, ...props }) => {
+const Tab = ({
+  icon,
+  title,
+  description,
+  to,
+  onClick,
+  className,
+  ...props
+}) => {
   return (
     <div
       className={cn(
         "flex h-[56px] w-[288px] items-center justify-start relative flex-1",
         "rounded-[8px] bg-[#F5F7F9] hover:bg-[#E6E6E6] transition-colors duration-200 ease-out cursor-pointer",
+        className,
       )}
     >
       <MenuItemButton

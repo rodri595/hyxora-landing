@@ -1,21 +1,10 @@
 "use client";
-import { useState, useEffect } from "react";
 import Icon from "@/components/Icon";
+import Image from "@/components/Image";
+import { useOgData } from "@/hooks/useOgData";
 
 export default function NewsItem({ item }) {
-  const [ogData, setOgData] = useState(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    if (!item?.url) return;
-    fetch(`https://api.microlink.io/?url=${encodeURIComponent(item.url)}`)
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.status === "success") setOgData(data.data);
-      })
-      .catch(() => {})
-      .finally(() => setLoading(false));
-  }, [item?.url]);
+  const { ogData, loading } = useOgData(item?.url);
 
   let hostname = "";
   try {
@@ -37,9 +26,11 @@ export default function NewsItem({ item }) {
         {loading ? (
           <div className="w-full h-full animate-pulse bg-[#E4E9EF]" />
         ) : imageUrl ? (
-          <img
+          <Image
             src={imageUrl}
             alt={item.title}
+            width={100}
+            height={100}
             className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-300"
           />
         ) : (

@@ -5,6 +5,7 @@ const ShareContent = () => {
   return (
     <div className="flex w-full items-start justify-between gap-[16px] flex-row! flex-wrap">
       <Tab
+        className="w-full"
         icon={
           <Icon
             name={"pencil"}
@@ -17,6 +18,7 @@ const ShareContent = () => {
         disabled
       />
       <Tab
+        className="w-full"
         icon={
           <Icon
             name={"message"}
@@ -30,6 +32,7 @@ const ShareContent = () => {
         target="_blank"
       />
       <Tab
+        className="w-full"
         icon={
           <Icon
             name={"checkmark"}
@@ -43,6 +46,7 @@ const ShareContent = () => {
         disabled
       />
       <Tab
+        className="w-full"
         icon={
           <Icon
             name={"add-document"}

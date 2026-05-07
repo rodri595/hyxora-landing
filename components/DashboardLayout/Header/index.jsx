@@ -2,7 +2,7 @@
 import Link from "next/link";
 import Image from "@/components/Image";
 // import Button from "@/components/Button";
-import Field from "@/components/Field";
+// import Field from "@/components/Field";
 import Icon from "@/components/Icon";
 import brandIMG from "@/assets/imgs/brand/logo.svg";
 import fireSVG from "@/assets/imgs/icons/fire.svg";
@@ -10,14 +10,44 @@ import { cn } from "@/utils";
 //
 import appleIMG from "@/assets/imgs/misc/apple.svg";
 import googleIMG from "@/assets/imgs/misc/google.svg";
+import menuIcon from "@/assets/imgs/icons/menu.svg";
+
 //
 import User from "./User";
-const Header = ({ extraNav = true }) => {
+const Header = ({ isSidebarOpen, setIsSidebarOpen, extraNav = true }) => {
+  const toggleMenu = () => {
+    setIsSidebarOpen((prev) => !prev);
+  };
   return (
-    <header className="flex flex-col items-start justify-start w-full shrink-0  border-b border-[#E0E3E6] max-h-[110px] px-[16px]">
+    <header className="flex flex-col items-start justify-start w-full shrink-0  border-b border-[#E0E3E6]  px-[16px]">
       <div className="w-full flex justify-between items-center py-[12px] gap-[24px]">
         {/* left side */}
-        <div className="flex items-center justify-start gap-[24px]  flex-1">
+        <div className="flex items-center justify-start gap-[24px]  flex-1 max-lg:gap-[8px]">
+          <button
+            onClick={toggleMenu}
+            type="button"
+            className="group hidden max-lg:flex rounded-[8px] border-[0.7px] border-[rgba(25,54,63,0.02)] bg-[rgba(25,54,63,0.04)] shadow-[0px_0px_4px_0px_inset_rgba(25,54,63,0.04)] justify-center items-center shrink-0 !h-[24px] !w-[24px] focus:outline-none"
+          >
+            {isSidebarOpen ? (
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 16 16"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M12 4L4 12M4 4L12 12"
+                  stroke="#19363f"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            ) : (
+              <Image src={menuIcon} alt="Menu" className="w-[12px] h-[12px]" />
+            )}
+          </button>
           <Link href="/" className="flex gap-2 items-center shrink-0 ">
             <div className="relative shrink-0 size-6">
               <Image
@@ -30,12 +60,12 @@ const Header = ({ extraNav = true }) => {
               Hyxora
             </span>
           </Link>
-          <Field type="search" placeholder="Search" className="w-full" />
+          {/* <Field type="search" placeholder="Search" className="w-full" /> */}
         </div>
         {/* right side */}
         <div className="flex justify-end items-center gap-[24px] flex-1">
           {/* / */}
-          <ul className="flex gap-[8px] items-center justify-center ">
+          <ul className="flex gap-[8px] items-center justify-center  max-md:hidden">
             <li className=" opacity-50 hover:opacity-100 transition-opacity cursor-not-allowed">
               <svg
                 width="24"
@@ -94,14 +124,14 @@ const Header = ({ extraNav = true }) => {
                 target="_blank"
                 rel="noopener noreferrer"
                 className={cn(
-                  "bg-[#1b5ffd] border border-[rgba(255,255,255,0.2)] border-solid h-[30px] relative rounded-[100px] cursor-pointer",
+                  "bg-[#1b5ffd] border border-[rgba(255,255,255,0.2)] border-solid h-[30px] relative rounded-[100px] cursor-pointer max-md:h-[24px]",
                 )}
               >
-                <div className="flex gap-[3px] h-[30px] items-center justify-center overflow-hidden p-[8px_16px] relative rounded-[inherit]">
+                <div className="flex gap-[3px] h-[30px] max-md:h-[24px] items-center justify-center overflow-hidden p-[8px_16px] max-md:p-[8px_12px]  relative rounded-[inherit]">
                   <Image
                     src={fireSVG}
                     alt="Fire Icon"
-                    className="relative w-[10px] h-[10px]"
+                    className="relative size-[10px] max-md:size-[8px]"
                   />
                   <p className="font-medium text-[12px] text-[#f7f8f8] tracking-[-0.48px] whitespace-nowrap">
                     Comprar NFT
@@ -123,7 +153,7 @@ const Header = ({ extraNav = true }) => {
                   data-tooltip-content="Próximamente"
                   alt="Download on the App Store"
                   src={appleIMG}
-                  className="h-[24px] w-auto max-md:h-[40px]"
+                  className="h-[24px] w-auto max-lg:h-[20px]"
                 />
 
                 <Image
@@ -131,7 +161,7 @@ const Header = ({ extraNav = true }) => {
                   data-tooltip-content="Próximamente"
                   src={googleIMG}
                   alt="Get it on Google Play"
-                  className="h-[24px] w-auto max-md:h-[40px]"
+                  className="h-[24px] w-auto max-lg:h-[20px]"
                 />
               </div>
             </div>

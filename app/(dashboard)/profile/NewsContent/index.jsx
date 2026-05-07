@@ -1,6 +1,5 @@
 "use client";
 import Card from "../Card";
-// import Icon from "@/components/Icon";
 import Error from "@/components/Error";
 import Button from "@/components/Button";
 import Spinner from "@/components/Spinner";
@@ -9,7 +8,6 @@ import NewsItem from "./NewsItem";
 import { useMemo } from "react";
 import { GetMyPayments } from "@/hooks/nfts/GetMyPayments";
 import { useGetAllPolls } from "@/hooks/poll/useGetAllPolls";
-// import { cn } from "@/utils";
 
 const newsData = [
   {
@@ -40,8 +38,8 @@ const NewsContent = () => {
     error: pollsData_error,
   } = useGetAllPolls();
   return (
-    <div className="flex w-full h-full gap-[16px] justify-start items-start ">
-      <Card className="h-full">
+    <div className="flex w-full h-full gap-[16px] justify-start items-start max-md:flex-col-reverse">
+      <Card className="h-full max-md:w-full">
         <Error
           error={pollsData_error}
           message={
@@ -56,7 +54,7 @@ const NewsContent = () => {
         <h3 className="text-[#8A9BB0] leading-[22px] font-inter text-[14px] font-medium tracking-[-0.42px]">
           Últimas consultas del comité consultivo
         </h3>
-        <div className="flex flex-1 flex-col gap-[8px] overflow-y-auto">
+        <div className="flex flex-1 flex-col gap-[8px] overflow-hidden  w-full">
           {pollsData_isLoading ? (
             <div className="flex flex-1 items-center justify-center">
               <Spinner />
@@ -77,7 +75,7 @@ const NewsContent = () => {
           </Button>
         )}
       </Card>
-      <Card className="h-full max-w-[300px]">
+      <Card className="h-full max-w-[300px] max-md:max-w-full">
         <h3 className="text-[#19363F] leading-[24px] font-inter text-[18px] font-semibold tracking-[-0.72px]">
           Noticias
         </h3>

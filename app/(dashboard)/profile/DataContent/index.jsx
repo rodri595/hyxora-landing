@@ -31,8 +31,8 @@ const DataContent = () => {
     return HasNfts[0]?.name || "";
   }, [HasNfts]);
   return (
-    <div className="flex gap-[16px] w-full flex-wrap">
-      <Card className={cn("p-[16px]")}>
+    <div className="flex gap-[16px] w-full flex-wrap max-md:flex-col">
+      <Card className={cn("p-[16px] max-lg:min-w-[250px] max-md:min-w-full")}>
         <div className="flex  w-full justify-between flex-1">
           {/* / */}
           <div className="flex gap-[8px] items-start justify-center ">
@@ -99,7 +99,9 @@ const DataContent = () => {
       </Card>
       {/*  */}
       <Card
-        className={cn("p-[16px] overflow-hidden relative")}
+        className={cn(
+          "p-[16px] max-lg:min-w-[250px] max-md:min-w-full overflow-hidden relative max-md:min-h-[120px]",
+        )}
         style={
           HasNfts
             ? {
@@ -235,7 +237,7 @@ const DataContent = () => {
         <div className="flex  w-full justify-between flex-1"></div>
       </Card>
       {/*  */}
-      <Card className={cn("p-[16px]")}>
+      <Card className={cn("p-[16px] max-lg:min-w-[250px] max-md:min-w-full")}>
         <div className="flex  w-full justify-between flex-1">
           {/* / */}
           <div className="flex gap-[8px] items-start justify-center ">

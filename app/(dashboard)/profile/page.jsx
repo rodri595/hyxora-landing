@@ -8,8 +8,11 @@ import NewsContent from "./NewsContent";
 const ProfilePage = () => {
   const { error: paymentsError } = GetMyPayments();
   return (
-    <section className="flex-1 flex gap-[16px] justify-start items-start p-4">
-      <div className="flex flex-col flex-1 gap-[16px] h-full ">
+    <section
+      className="flex-1 flex gap-[16px] justify-start items-start p-4  h-full  min-h-0 overflow-y-auto"
+      data-lenis-prevent
+    >
+      <div className="flex flex-col flex-1 gap-[16px] ">
         <Error
           error={paymentsError}
           message={

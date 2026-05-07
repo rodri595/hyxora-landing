@@ -2,12 +2,14 @@
 import Link from "next/link";
 import { useLogin, usePrivy } from "@privy-io/react-auth";
 import { cn } from "@/utils";
+import { useState } from "react";
 import Header from "./Header";
 import Sidebar from "./Sidebar";
+
 const DashboardLayout = ({ children }) => {
   const { login } = useLogin();
   const { authenticated, ready } = usePrivy();
-
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   if (!ready) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-[#f7f8f8] px-6">
@@ -51,14 +53,20 @@ const DashboardLayout = ({ children }) => {
   return (
     <div
       className={cn(
-        "h-screen overflow-hidden flex flex-col flex-1 justify-start items-start ",
+        "h-screen overflow-hidden flex flex-col flex-1 justify-start items-start  overflow-hidden",
         "bg-[#FFF]",
       )}
     >
-      <Header />
-      <div className="flex flex-1 w-full h-full">
-        <Sidebar />
-        <div className="flex-1 flex overflow-hidden">{children}</div>
+      <Header
+        isSidebarOpen={isSidebarOpen}
+        setIsSidebarOpen={setIsSidebarOpen}
+      />
+      <div className="flex flex-1 w-full min-h-0">
+        <Sidebar
+          isSidebarOpen={isSidebarOpen}
+          setIsSidebarOpen={setIsSidebarOpen}
+        />
+        <div className="flex flex-1 overflow-hidden">{children}</div>
       </div>
     </div>
   );
