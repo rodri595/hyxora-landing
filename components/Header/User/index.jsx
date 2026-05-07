@@ -154,15 +154,15 @@ const User = () => {
       ),
       onClick: () => copyToClipboard(smartWalletAddress || ""),
     },
-    // {
-    //   id: 3,
-    //   title: "Mi Perfil",
-    //   description: "Tu perfil personal",
-    //   icon: (
-    //     <Icon name="profile" className="size-[16px] aspect-square" size={20} />
-    //   ),
-    //   href: "/profile",
-    // },
+    {
+      id: 3,
+      title: "Mi Perfil",
+      description: "Tu perfil personal",
+      icon: (
+        <Icon name="profile" className="size-[16px] aspect-square" size={20} />
+      ),
+      href: "/profile",
+    },
     // {
     //   id: 4,
     //   title: "Comitee",
@@ -170,15 +170,15 @@ const User = () => {
     //   icon: <Icon name="documents" className="size-[16px] aspect-square" />,
     //   href: "/comite",
     // },
-    // {
-    //   id: 5,
-    //   title: "Mis NFTs",
-    //   description: "Tus NFTs coleccionables",
-    //   icon: (
-    //     <Icon name="sparkle" className="size-[16px] aspect-square" size={20} />
-    //   ),
-    //   href: "/nfts",
-    // },
+    {
+      id: 5,
+      title: "Mis NFTs",
+      description: "Tus NFTs coleccionables",
+      icon: (
+        <Icon name="sparkle" className="size-[16px] aspect-square" size={20} />
+      ),
+      href: "/nfts",
+    },
     {
       id: 6,
       title: "Founders",

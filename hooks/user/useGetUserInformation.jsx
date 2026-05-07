@@ -8,7 +8,7 @@ import { usePrivy } from "@privy-io/react-auth";
  * @param {Object}
  * @return {Object}
  */
-export const useGetUserInformation = () => {
+export const useGetUserInformation = (props) => {
   const { smartWalletAddress } = useWeb3();
   const { authenticated, ready } = usePrivy();
 
@@ -23,6 +23,12 @@ export const useGetUserInformation = () => {
     refetchOnWindowFocus: true,
     refetchOnMount: false,
     retry: 2,
-    enabled: Boolean(smartWalletAddress) && authenticated && ready,
+    enabled:
+      typeof props === "undefined"
+        ? true
+        : props.enabled &&
+          Boolean(smartWalletAddress) &&
+          authenticated &&
+          ready,
   });
 };

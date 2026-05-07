@@ -1,5 +1,5 @@
 import { cn } from "@/utils";
-const Card = ({ className }) => {
+const Card = ({ className, children, ...props }) => {
   return (
     <div
       className={cn(
@@ -8,8 +8,9 @@ const Card = ({ className }) => {
         "p-4",
         className,
       )}
+      {...props}
     >
-      Card
+      {children}
     </div>
   );
 };
