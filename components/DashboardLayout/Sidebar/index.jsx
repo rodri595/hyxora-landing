@@ -131,6 +131,9 @@ const Sidebar = ({ isSidebarOpen, setIsSidebarOpen }) => {
   const pathname = usePathname();
   const { data: userInformation, isLoading: isLoadingUserInformation } =
     useGetUserInformation();
+  const toggleMenu = () => {
+    setIsSidebarOpen((prev) => !prev);
+  };
   const isAdmin = useMemo(() => {
     return (
       userInformation?.information?.role?.includes(roleNames?.admin ?? "") ??
@@ -154,15 +157,15 @@ const Sidebar = ({ isSidebarOpen, setIsSidebarOpen }) => {
     //   icon: <Icon name="documents" className="size-[16px] aspect-square" />,
     //   href: "/comite",
     // },
-    {
-      id: 4,
-      title: "Mis NFTs",
-      description: "Tus NFTs coleccionables",
-      icon: (
-        <Icon name="sparkle" className="size-[16px] aspect-square" size={20} />
-      ),
-      href: "/nfts",
-    },
+    // {
+    //   id: 4,
+    //   title: "Mis NFTs",
+    //   description: "Tus NFTs coleccionables",
+    //   icon: (
+    //     <Icon name="sparkle" className="size-[16px] aspect-square" size={20} />
+    //   ),
+    //   href: "/nfts",
+    // },
     {
       id: 5,
       title: "Founders",
@@ -176,10 +179,33 @@ const Sidebar = ({ isSidebarOpen, setIsSidebarOpen }) => {
   return (
     <aside
       className={cn(
-        "flex flex-col max-w-[250px] py-[24px] items-start justify-start gap-[8px] bg-[#F5F7F9]  flex-1 overflow-hidden h-full max-lg:hidden",
-        isSidebarOpen && "",
+        "flex flex-col max-w-[250px] py-[24px] items-start justify-start gap-[8px] bg-[#F5F7F9]  flex-1 overflow-hidden h-full max-lg:fixed max-lg:inset-0 max-lg:z-50 max-lg:transition-transform max-lg:duration-300 max-lg:ease-out relative",
+        isSidebarOpen && "max-lg:translate-x-0",
+        !isSidebarOpen && "max-lg:-translate-x-full",
       )}
+      data-lenis-prevent
     >
+      <button
+        onClick={() => toggleMenu()}
+        type="button"
+        className="group hidden max-lg:flex rounded-[8px] border-[0.7px] border-[rgba(25,54,63,0.02)] bg-[rgba(25,54,63,0.04)] shadow-[0px_0px_4px_0px_inset_rgba(25,54,63,0.04)] justify-center items-center shrink-0 !h-[32px] !w-[32px] focus:outline-none absolute top-[16px] right-[16px] z-50"
+      >
+        <svg
+          width="16"
+          height="16"
+          viewBox="0 0 16 16"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M12 4L4 12M4 4L12 12"
+            stroke="#19363f"
+            strokeWidth="1.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
+      </button>
       {/*TOP SECTION  */}
       <div className="flex items-center justify-start px-[16px] mb-2 shrink-0">
         <p className="font-inter text-[#19363F] text-[12px] tracking-[-0.56px] leading-[14px] font-bold ">
