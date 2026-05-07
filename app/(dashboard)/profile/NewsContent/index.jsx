@@ -72,7 +72,7 @@ const NewsContent = () => {
           )}
         </div>
         {HasNfts && (
-          <Button isPrimary className="mt-auto">
+          <Button isPrimary className="mt-auto  mx-auto">
             Ir al Comité Consultivo
           </Button>
         )}

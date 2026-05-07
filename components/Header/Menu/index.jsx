@@ -409,6 +409,14 @@ const MenuComponent = () => {
                 </div>
                 <div className="flex flex-col space-y-2 mb-6">
                   <MenuItem
+                    icon={
+                      <Icon name="profile" className="w-[16px] h-[16px] " />
+                    }
+                    title="Mi Perfil"
+                    className="w-full max-w-none"
+                    href={"/profile"}
+                  />
+                  <MenuItem
                     icon={<Icon name="logout" className="w-[16px] h-[16px] " />}
                     title="Sign out"
                     className="w-full max-w-none"

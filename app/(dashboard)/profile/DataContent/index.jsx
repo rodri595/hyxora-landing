@@ -1,6 +1,8 @@
 "use client";
 import Card from "../Card";
 import Icon from "@/components/Icon";
+import Image from "@/components/Image";
+import tokensIMG from "@/assets//imgs/brand/tokens.webp";
 import { useMemo } from "react";
 import { GetMyPayments } from "@/hooks/nfts/GetMyPayments";
 import { cn } from "@/utils";
@@ -8,10 +10,7 @@ import { useGetUserInformation } from "@/hooks/user/useGetUserInformation";
 import Spinner from "@/components/Spinner";
 
 const DataContent = () => {
-  const {
-    data: payments,
-    // isLoading: isLoadingPayments,
-  } = GetMyPayments();
+  const { data: payments } = GetMyPayments();
   const HasNfts = useMemo(() => {
     if (!payments || payments.length === 0) return false;
     const filtered = payments.filter(
@@ -80,11 +79,11 @@ const DataContent = () => {
         <div className="flex  w-full justify-between flex-1">
           <div className="flex gap-[8px] items-center justify-center ml-[32px]">
             <div>
-              <p className="text-[11px] text-[#8A9BB0] font-medium leading-[15px]">
+              <p className="text-[18px] text-[#8A9BB0] font-medium leading-[22px]">
                 Hola
               </p>
               {UserName ? (
-                <p className="text-[13px] font-bold text-[#0D1B2A] leading-[15px]">
+                <p className="text-[24px] font-bold text-[#0D1B2A] leading-[26px]">
                   {UserName}
                 </p>
               ) : isLoadingUserInformation ? (
@@ -100,7 +99,7 @@ const DataContent = () => {
       </Card>
       {/*  */}
       <Card
-        className={cn("p-[16px]")}
+        className={cn("p-[16px] overflow-hidden relative")}
         style={
           HasNfts
             ? {
@@ -110,7 +109,17 @@ const DataContent = () => {
             : undefined
         }
       >
-        <div className="flex  w-full justify-between flex-1">
+        {HasNfts && (
+          <>
+            <Image
+              src={tokensIMG}
+              alt="Tokens"
+              className=" absolute w-[80%] h-full bottom-0 right-0 object-cover z-1"
+            />
+            <div className="absolute w-full h-full  left-0 top-0 z-1 backdrop-blur-[6px]" />
+          </>
+        )}
+        <div className="flex  w-full justify-between flex-1 relative z-1 ">
           {/* / */}
           <div className="flex gap-[8px] items-start justify-center ">
             <div className="relative flex items-center justify-center size-[24px] shrink-0 ">
@@ -178,53 +187,54 @@ const DataContent = () => {
             </div>
           </div>
           {/* / */}
-          <div className="flex justify-center items-center flex-col gap-[4px]">
-            <div className="flex shrink-0 justify-center items-center  size-[30px] p-[4px] bg-[#E4E9EF]  rounded-full">
-              <div className="flex shrink-0 justify-center items-center  size-full bg-[#fff]  rounded-full">
-                <Icon name="sparkle" size={20} className="size-[12px]" />
+          {!HasNfts && (
+            <div className="flex justify-center items-center flex-col gap-[4px]">
+              <div className="flex shrink-0 justify-center items-center  size-[30px] p-[4px] bg-[#E4E9EF]  rounded-full">
+                <div className="flex shrink-0 justify-center items-center  size-full bg-[#fff]  rounded-full">
+                  <Icon name="sparkle" size={20} className="size-[12px]" />
+                </div>
               </div>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="28"
+                height="9"
+                viewBox="0 0 28 9"
+                fill="none"
+              >
+                <g opacity="0.2" filter="url(#filter0_f_239_27441)">
+                  <ellipse cx="14" cy="4.5" rx="10" ry="0.5" fill="black" />
+                </g>
+                <defs>
+                  <filter
+                    id="filter0_f_239_27441"
+                    x="0"
+                    y="0"
+                    width="28"
+                    height="9"
+                    filterUnits="userSpaceOnUse"
+                    colorInterpolationFilters="sRGB"
+                  >
+                    <feFlood floodOpacity="0" result="BackgroundImageFix" />
+                    <feBlend
+                      mode="normal"
+                      in="SourceGraphic"
+                      in2="BackgroundImageFix"
+                      result="shape"
+                    />
+                    <feGaussianBlur
+                      stdDeviation="2"
+                      result="effect1_foregroundBlur_239_27441"
+                    />
+                  </filter>
+                </defs>
+              </svg>
             </div>
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="28"
-              height="9"
-              viewBox="0 0 28 9"
-              fill="none"
-            >
-              <g opacity="0.2" filter="url(#filter0_f_239_27441)">
-                <ellipse cx="14" cy="4.5" rx="10" ry="0.5" fill="black" />
-              </g>
-              <defs>
-                <filter
-                  id="filter0_f_239_27441"
-                  x="0"
-                  y="0"
-                  width="28"
-                  height="9"
-                  filterUnits="userSpaceOnUse"
-                  colorInterpolationFilters="sRGB"
-                >
-                  <feFlood floodOpacity="0" result="BackgroundImageFix" />
-                  <feBlend
-                    mode="normal"
-                    in="SourceGraphic"
-                    in2="BackgroundImageFix"
-                    result="shape"
-                  />
-                  <feGaussianBlur
-                    stdDeviation="2"
-                    result="effect1_foregroundBlur_239_27441"
-                  />
-                </filter>
-              </defs>
-            </svg>
-          </div>
+          )}
           {/* / */}
         </div>
         <div className="flex  w-full justify-between flex-1"></div>
       </Card>
       {/*  */}
-
       <Card className={cn("p-[16px]")}>
         <div className="flex  w-full justify-between flex-1">
           {/* / */}
@@ -239,10 +249,10 @@ const DataContent = () => {
             </div>
           </div>
           {/* / */}
-          <div className="flex justify-center items-center flex-col gap-[4px]">
+          <div className="flex justify-center items-center flex-col gap-[4px] animate-pulse">
             <div className="flex shrink-0 justify-center items-center  size-[30px] p-[4px] bg-[#E4E9EF]  rounded-full">
               <div className="flex shrink-0 justify-center items-center  size-full bg-[#fff]  rounded-full">
-                <Icon name="sparkle" size={20} className="size-[12px]" />
+                <Icon name="sparkle" size={20} className="size-[12px] " />
               </div>
             </div>
             <svg

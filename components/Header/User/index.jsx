@@ -6,7 +6,6 @@ import Error from "@/components/Error";
 import Link from "next/link";
 import { useWeb3 } from "@/context/Web3Provider";
 import { cn, shortenAddress, copyToClipboard } from "@/utils";
-import newListingIMG from "@/assets/imgs/icons/white-seeding.png";
 import trendingIcon from "@/assets//imgs/icons/trending.png";
 //
 import { useGetUserInformation } from "@/hooks/user/useGetUserInformation";
@@ -170,15 +169,15 @@ const User = () => {
     //   icon: <Icon name="documents" className="size-[16px] aspect-square" />,
     //   href: "/comite",
     // },
-    {
-      id: 5,
-      title: "Mis NFTs",
-      description: "Tus NFTs coleccionables",
-      icon: (
-        <Icon name="sparkle" className="size-[16px] aspect-square" size={20} />
-      ),
-      href: "/nfts",
-    },
+    // {
+    //   id: 5,
+    //   title: "Mis NFTs",
+    //   description: "Tus NFTs coleccionables",
+    //   icon: (
+    //     <Icon name="sparkle" className="size-[16px] aspect-square" size={20} />
+    //   ),
+    //   href: "/nfts",
+    // },
     {
       id: 6,
       title: "Founders",
@@ -203,11 +202,7 @@ const User = () => {
       <Menu className="relative" as="div">
         <MenuButton className="bg-[#1b5ffd] border border-[rgba(255,255,255,0.2)] border-solid h-[30px] relative rounded-[100px] cursor-pointer overflow-hidden aspect-square">
           <div className="flex gap-[3px] h-[30px] items-center justify-center overflow-hidden p-[8px] relative rounded-[inherit]">
-            <Image
-              src={newListingIMG}
-              alt="Fire Icon"
-              className="relative w-[10px] h-[10px]   "
-            />
+            <Icon name="profile" className="size-full" size={20} fill="#fff" />
           </div>
           <div
             className="absolute inset-0 pointer-events-none"

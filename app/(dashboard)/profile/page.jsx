@@ -6,11 +6,7 @@ import DataContent from "./DataContent";
 import ShareContent from "./ShareContent";
 import NewsContent from "./NewsContent";
 const ProfilePage = () => {
-  const {
-    data: payments,
-    // isLoading: isLoadingPayments,
-    error: paymentsError,
-  } = GetMyPayments();
+  const { error: paymentsError } = GetMyPayments();
   return (
     <section className="flex-1 flex gap-[16px] justify-start items-start p-4">
       <div className="flex flex-col flex-1 gap-[16px] h-full ">

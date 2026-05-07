@@ -69,7 +69,7 @@ const Providers = ({ children }) => {
     <>
       <Tooltip
         id="tooltip"
-        className="rounder=d-md! border-[#24292D]! bg-[#0D0D0D]! text-[14px]! font-inter! font-bold! text-[#FFF]! leading-[normal]! tracking-[-0.56px]!"
+        className="rounded-md! border-[#24292D]! bg-[#0D0D0D]! text-[14px]! font-inter! font-bold! text-[#FFF]! leading-[normal]! tracking-[-0.56px]! z-100!"
       />
       <QueryClientProvider client={queryClient}>
         <PrivyProvider

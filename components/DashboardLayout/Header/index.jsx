@@ -1,14 +1,21 @@
+"use client";
 import Link from "next/link";
 import Image from "@/components/Image";
+// import Button from "@/components/Button";
 import Field from "@/components/Field";
 import Icon from "@/components/Icon";
 import brandIMG from "@/assets/imgs/brand/logo.svg";
+import fireSVG from "@/assets/imgs/icons/fire.svg";
+import { cn } from "@/utils";
+//
+import appleIMG from "@/assets/imgs/misc/apple.svg";
+import googleIMG from "@/assets/imgs/misc/google.svg";
 //
 import User from "./User";
-const Header = ({ extraNav = false }) => {
+const Header = ({ extraNav = true }) => {
   return (
     <header className="flex flex-col items-start justify-start w-full shrink-0  border-b border-[#E0E3E6] max-h-[110px] px-[16px]">
-      <div className="w-full flex justify-start items-center py-[12px] gap-[24px]">
+      <div className="w-full flex justify-between items-center py-[12px] gap-[24px]">
         {/* left side */}
         <div className="flex items-center justify-start gap-[24px]  flex-1">
           <Link href="/" className="flex gap-2 items-center shrink-0 ">
@@ -26,10 +33,10 @@ const Header = ({ extraNav = false }) => {
           <Field type="search" placeholder="Search" className="w-full" />
         </div>
         {/* right side */}
-        <div className="flex ml-auto justify-end items-center gap-[24px] flex-1">
+        <div className="flex justify-end items-center gap-[24px] flex-1">
           {/* / */}
           <ul className="flex gap-[8px] items-center justify-center ">
-            <li className="">
+            <li className=" opacity-50 hover:opacity-100 transition-opacity cursor-not-allowed">
               <svg
                 width="24"
                 height="24"
@@ -52,7 +59,7 @@ const Header = ({ extraNav = false }) => {
                 />
               </svg>
             </li>
-            <li className="">
+            <li className=" opacity-50 hover:opacity-100 transition-opacity cursor-not-allowed">
               <Icon
                 name="notification"
                 fill="#8294AC"
@@ -64,7 +71,7 @@ const Header = ({ extraNav = false }) => {
                 />
               </Icon>
             </li>
-            <li className="">
+            <li className=" opacity-50 hover:opacity-100 transition-opacity cursor-not-allowed">
               <Icon
                 name="setting"
                 fill="#8294AC"
@@ -77,11 +84,57 @@ const Header = ({ extraNav = false }) => {
       </div>
       {extraNav && (
         <>
-          <div className="w-full h-[1px] bg-[#E0E3E6]" />
-          <div className="w-full flex justify-start items-center py-[12px]">
+          <div className="w-full shrink-0 h-[1px] bg-[#E0E3E6] " />
+          <div className="w-full flex justify-between items-center py-[12px] gap-[24px]">
             {/* left side */}
-            <div></div>
+            <div className="flex justify-start items-center gap-[24px] flex-1">
+              {/* Hot Button */}
+              <Link
+                href="https://founder.hyxora.com/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className={cn(
+                  "bg-[#1b5ffd] border border-[rgba(255,255,255,0.2)] border-solid h-[30px] relative rounded-[100px] cursor-pointer",
+                )}
+              >
+                <div className="flex gap-[3px] h-[30px] items-center justify-center overflow-hidden p-[8px_16px] relative rounded-[inherit]">
+                  <Image
+                    src={fireSVG}
+                    alt="Fire Icon"
+                    className="relative w-[10px] h-[10px]"
+                  />
+                  <p className="font-medium text-[12px] text-[#f7f8f8] tracking-[-0.48px] whitespace-nowrap">
+                    Comprar NFT
+                  </p>
+                </div>
+                <div
+                  className="absolute inset-0 pointer-events-none"
+                  style={{
+                    boxShadow: "0px 0px 10px 0px inset rgba(255,255,255,0.4)",
+                  }}
+                />
+              </Link>
+            </div>
             {/* right side */}
+            <div className="flex justify-end items-center gap-[24px] flex-1">
+              <div className="flex justify-end items-center gap-[16px] opacity-50 cursor-not-allowed">
+                <Image
+                  data-tooltip-id="tooltip"
+                  data-tooltip-content="Próximamente"
+                  alt="Download on the App Store"
+                  src={appleIMG}
+                  className="h-[24px] w-auto max-md:h-[40px]"
+                />
+
+                <Image
+                  data-tooltip-id="tooltip"
+                  data-tooltip-content="Próximamente"
+                  src={googleIMG}
+                  alt="Get it on Google Play"
+                  className="h-[24px] w-auto max-md:h-[40px]"
+                />
+              </div>
+            </div>
           </div>
         </>
       )}
