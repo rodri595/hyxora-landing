@@ -6,7 +6,6 @@ import Hero from "./Hero";
 import Info from "./Info";
 import Why from "./Why";
 import Finance from "./Finance";
-// import Founders from "./Founders";
 import Foundersv2 from "./Foundersv2";
 import FAQ from "./FAQ";
 import CTA from "./CTA";

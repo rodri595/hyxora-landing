@@ -15,11 +15,10 @@ import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import { ScrollToPlugin } from "gsap/ScrollToPlugin";
 import fireSVG from "@/assets/imgs/icons/fire.svg";
-
 import { useLogin, usePrivy } from "@privy-io/react-auth";
 import WelcomeModal from "../WelcomeModal";
 import { useWeb3 } from "@/context/Web3Provider";
-import { shortenAddress, copyToClipboard } from "@/utils";
+import { shortenAddress, copyToClipboard, cn } from "@/utils";
 
 gsap.registerPlugin(ScrollToPlugin);
 
@@ -251,11 +250,14 @@ const MenuComponent = () => {
         <div
           ref={menuRef}
           data-lenis-prevent
-          className="fixed top-[52px] left-0 bottom-0 right-0 z-10 hidden flex-col w-full min-h-[calc(100vh-52px)] border-[0.7px] border-[rgba(25,54,63,0.02)] bg-[rgba(250,251,251)] focus:outline-none"
+          className={cn(
+            "fixed top-[52px] left-0 bottom-0 right-0 z-10 hidden flex-col w-full  border-[0.7px]  grow border-[rgba(25,54,63,0.02)] bg-[rgba(250,251,251)] focus:outline-none ",
+            "min-h-[calc(100dvh-52px)] max-h-[calc(100dvh-52px)]",
+          )}
         >
           <div
             ref={contentRef}
-            className="flex flex-col grow overflow-auto scroll-smooth scrollbar-none pb-6 px-4 pt-6"
+            className="flex flex-col grow overflow-auto scroll-smooth scrollbar-none pb-3 px-4 pt-6 "
           >
             <Link
               href="https://founder.hyxora.com/"
@@ -425,9 +427,9 @@ const MenuComponent = () => {
                 </div>
               </>
             )}
-            <div className="flex flex-col mt-auto pt-4 border-t space-y-1 pl-12">
-              <p className="font-normal text-[12px] leading-[18px] text-[rgba(25,54,63,0.7)] tracking-[-0.24px]">
-                {/* <span>Al conectar tu billetera, aceptas nuestros </span> */}
+            <div className="flex flex-col mt-auto pt-2 border-t space-y-1 pl-12">
+              {/* <p className="font-normal text-[12px] leading-[18px] text-[rgba(25,54,63,0.7)] tracking-[-0.24px]">
+
                 <Link href="/terms" className="font-medium text-[#19363f]">
                   Términos de Uso
                 </Link>
@@ -435,7 +437,17 @@ const MenuComponent = () => {
                 <Link href="/privacy" className="font-medium text-[#19363f]">
                   Política de Privacidad
                 </Link>
-              </p>
+              </p> */}
+              <span className="text-[rgba(25,54,63,0.70)] leading-[18px] font-inter text-[12px] font-normal tracking-[-0.24px]">
+                Al usar la plataforma aceptas nuestros{" "}
+                <Link href="/#" className="text-[#19363F] font-bold">
+                  Términos de Uso
+                </Link>{" "}
+                y nuestra{" "}
+                <Link href="/#" className="text-[#19363F] font-bold">
+                  Política de Privacidad
+                </Link>
+              </span>
             </div>
           </div>
         </div>

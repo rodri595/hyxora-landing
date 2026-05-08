@@ -53,7 +53,7 @@ const DashboardLayout = ({ children }) => {
   return (
     <div
       className={cn(
-        "h-screen overflow-hidden flex flex-col flex-1 justify-start items-start  overflow-hidden",
+        "flex flex-col flex-1 justify-start items-start  overflow-hidden",
         "bg-[#FFF]",
       )}
     >
