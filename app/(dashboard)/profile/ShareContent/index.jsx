@@ -43,7 +43,6 @@ const ShareContent = () => {
         title="Terms & Conditions"
         description="Lee los términos y condiciones"
         to="/terms"
-        disabled
       />
       <Tab
         className="w-full"
@@ -57,7 +56,6 @@ const ShareContent = () => {
         title="Política de privacidad"
         description="Lee la política de privacidad"
         to="/privacy"
-        disabled
       />
     </div>
   );

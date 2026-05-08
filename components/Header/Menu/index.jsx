@@ -440,11 +440,11 @@ const MenuComponent = () => {
               </p> */}
               <span className="text-[rgba(25,54,63,0.70)] leading-[18px] font-inter text-[12px] font-normal tracking-[-0.24px]">
                 Al usar la plataforma aceptas nuestros{" "}
-                <Link href="/#" className="text-[#19363F] font-bold">
+                <Link href="/terms" className="text-[#19363F] font-bold">
                   Términos de Uso
                 </Link>{" "}
                 y nuestra{" "}
-                <Link href="/#" className="text-[#19363F] font-bold">
+                <Link href="/privacy" className="text-[#19363F] font-bold">
                   Política de Privacidad
                 </Link>
               </span>
