@@ -53,7 +53,7 @@ const DashboardLayout = ({ children }) => {
   return (
     <div
       className={cn(
-        "flex flex-col flex-1 justify-start items-start  overflow-hidden",
+        "flex flex-col flex-1 justify-start items-start  min-h-[100dvh]",
         "bg-[#FFF]",
       )}
     >
@@ -61,7 +61,7 @@ const DashboardLayout = ({ children }) => {
         isSidebarOpen={isSidebarOpen}
         setIsSidebarOpen={setIsSidebarOpen}
       />
-      <div className="flex flex-1 w-full min-h-0">
+      <div className="flex flex-1 w-full min-h-0 h-full justify-start items-stretch ">
         <Sidebar
           isSidebarOpen={isSidebarOpen}
           setIsSidebarOpen={setIsSidebarOpen}

@@ -179,7 +179,8 @@ const Sidebar = ({ isSidebarOpen, setIsSidebarOpen }) => {
   return (
     <aside
       className={cn(
-        "flex flex-col max-w-[250px] py-[24px] items-start justify-start gap-[8px] bg-[#F5F7F9]  flex-1 overflow-hidden h-full max-lg:fixed max-lg:inset-0 max-lg:z-50 max-lg:transition-transform max-lg:duration-300 max-lg:ease-out relative",
+        "flex flex-col items-start justify-start gap-[8px] max-w-[250px] py-[24px] bg-[#F5F7F9] flex-1 overflow-hidden ",
+        "max-lg:fixed max-lg:inset-0 max-lg:z-50 max-lg:transition-transform max-lg:duration-300 max-lg:ease-out relative",
         isSidebarOpen && "max-lg:translate-x-0",
         !isSidebarOpen && "max-lg:-translate-x-full",
       )}
