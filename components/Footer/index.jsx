@@ -87,16 +87,18 @@ const Footer = () => {
           <div className="flex gap-3.5 max-md:gap-2 items-center">
             <Link
               href="/privacy"
+              target="_blank"
               className="font-inter font-normal text-[12px] text-[rgba(25,54,63,0.7)] whitespace-nowrap tracking-[-0.24px] transition-opacity hover:opacity-70 leading-normal"
             >
-              Privacy Policy
+              Política de privacidad
             </Link>
             <div className="w-[0.5px] h-3.5 bg-[rgba(25,54,63,0.7)]" />
             <Link
               href="/terms"
+              target="_blank"
               className="font-inter font-normal text-[12px] text-[rgba(25,54,63,0.7)] whitespace-nowrap tracking-[-0.24px] transition-opacity hover:opacity-70 leading-normal"
             >
-              Terms of Use
+              Términos de uso
             </Link>
           </div>
 

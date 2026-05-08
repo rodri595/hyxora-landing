@@ -268,11 +268,19 @@ const User = () => {
           <div className="flex p-[0_20px] justify-center items-center gap-[10px]">
             <span className=" text-[rgba(25,54,63,0.70)] leading-[18px] font-inter text-[12px] font-normal tracking-[-0.24px]">
               Al usar la plataforma aceptas nuestros{" "}
-              <Link href="/terms" className="text-[#19363F] font-bold">
+              <Link
+                href="/terms"
+                target="_blank"
+                className="text-[#19363F] font-bold"
+              >
                 Términos de Uso
               </Link>{" "}
               y nuestra{" "}
-              <Link href="/privacy" className="text-[#19363F] font-bold">
+              <Link
+                href="/privacy"
+                target="_blank"
+                className="text-[#19363F] font-bold"
+              >
                 Política de Privacidad
               </Link>
             </span>

@@ -52,9 +52,9 @@ const Field = ({
         )}
         {validated && (
           <Icon
-            className="absolute top-1/2 right-3.5 -translate-y-1/2   fill-secondary"
+            className="absolute top-1/2 right-3.5 -translate-y-1/2  size-[20px]"
             name="check"
-            // size={24}
+            fill="green"
           />
         )}
       </div>

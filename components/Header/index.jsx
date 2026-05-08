@@ -324,12 +324,11 @@ const Header = ({ isFixed }) => {
           {/* Connect Wallet Button */}
           <div className="flex items-center justify-end gap-[8px] flex-1 max-md:hidden ">
             {/* Hot Button */}
-            <Link
-              href="https://founder.hyxora.com/"
-              target="_blank"
-              rel="noopener noreferrer"
+            <button
+              type="button"
+              onClick={() => login()}
               className={cn(
-                "bg-[#1b5ffd] border border-[rgba(255,255,255,0.2)] border-solid h-[30px] relative rounded-[100px] cursor-pointer",
+                "bg-[#1b5ffd] border border-[rgba(255,255,255,0.2)] border-solid h-[30px] relative rounded-[100px] cursor-pointer ",
                 !authenticated && "max-lg:hidden",
               )}
             >
@@ -340,7 +339,7 @@ const Header = ({ isFixed }) => {
                   className="relative w-[10px] h-[10px]"
                 />
                 <p className="font-medium text-[12px] text-[#f7f8f8] tracking-[-0.48px] whitespace-nowrap">
-                  NFT Founder
+                  Inicia Sesión
                 </p>
               </div>
               <div
@@ -349,7 +348,7 @@ const Header = ({ isFixed }) => {
                   boxShadow: "0px 0px 10px 0px inset rgba(255,255,255,0.4)",
                 }}
               />
-            </Link>
+            </button>
             {!authenticated ? (
               <Button
                 isSecondary

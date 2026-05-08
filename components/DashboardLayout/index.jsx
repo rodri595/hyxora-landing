@@ -1,16 +1,32 @@
 "use client";
-import Link from "next/link";
-import { useLogin, usePrivy } from "@privy-io/react-auth";
+import { useEffect, useMemo } from "react";
+import { useRouter, usePathname } from "next/navigation";
+import { usePrivy } from "@privy-io/react-auth";
 import { cn } from "@/utils";
 import { useState } from "react";
+
+const SPECIAL_URLS = ["/nfts"];
 import Header from "./Header";
 import Sidebar from "./Sidebar";
 
 const DashboardLayout = ({ children }) => {
-  const { login } = useLogin();
+  const router = useRouter();
+  const pathname = usePathname();
   const { authenticated, ready } = usePrivy();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  if (!ready) {
+
+  const isSpecialPage = useMemo(
+    () => SPECIAL_URLS.some((url) => pathname === url),
+    [pathname],
+  );
+
+  useEffect(() => {
+    if (ready && !authenticated) {
+      router.replace("/");
+    }
+  }, [ready, authenticated, router]);
+
+  if (!ready || !authenticated) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-[#f7f8f8] px-6">
         <p className="font-inter text-[14px] font-medium tracking-[-0.56px] text-[rgba(25,54,63,0.7)]">
@@ -20,50 +36,23 @@ const DashboardLayout = ({ children }) => {
     );
   }
 
-  if (!authenticated) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-[#f7f8f8] px-6">
-        <div className="max-w-[460px] rounded-[24px] border border-[rgba(25,54,63,0.08)] bg-white p-6 shadow-[0px_14px_30px_-20px_rgba(25,54,63,0.3)]">
-          <h1 className="font-inter text-[24px] font-semibold tracking-[-0.96px] text-[#19363f]">
-            Authentication required
-          </h1>
-          <p className="mt-3 font-inter text-[15px] leading-6 tracking-[-0.45px] text-[rgba(25,54,63,0.75)]">
-            You need to sign in to access this section.
-          </p>
-          <div className="mt-5 flex gap-3">
-            <button
-              type="button"
-              onClick={login}
-              className="rounded-[12px] bg-[#1b5ffd] px-5 py-3 font-inter text-[14px] font-semibold tracking-[-0.42px] text-white transition-all hover:bg-[#114fdf]"
-            >
-              Sign in
-            </button>
-            <Link
-              href="/"
-              className="rounded-[12px] border border-[rgba(25,54,63,0.12)] bg-white px-5 py-3 font-inter text-[14px] font-semibold tracking-[-0.42px] text-[#19363f] transition-all hover:bg-[rgba(25,54,63,0.04)]"
-            >
-              Back home
-            </Link>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div
       className={cn(
         "flex flex-col flex-1 justify-start items-start  min-h-[100dvh]",
         "bg-[#FFF]",
+        isSpecialPage && "bg-[#0D0D0D]",
       )}
     >
       <Header
+        isSpecialPage={isSpecialPage}
         isSidebarOpen={isSidebarOpen}
         setIsSidebarOpen={setIsSidebarOpen}
       />
       <div className="flex flex-1 w-full min-h-0 h-full justify-start items-stretch ">
         <Sidebar
           isSidebarOpen={isSidebarOpen}
+          isSpecialPage={isSpecialPage}
           setIsSidebarOpen={setIsSidebarOpen}
         />
         <div className="flex flex-1 overflow-hidden">{children}</div>

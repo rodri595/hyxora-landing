@@ -428,23 +428,21 @@ const MenuComponent = () => {
               </>
             )}
             <div className="flex flex-col mt-auto pt-2 border-t space-y-1 pl-12">
-              {/* <p className="font-normal text-[12px] leading-[18px] text-[rgba(25,54,63,0.7)] tracking-[-0.24px]">
-
-                <Link href="/terms" className="font-medium text-[#19363f]">
-                  Términos de Uso
-                </Link>
-                <span> y </span>
-                <Link href="/privacy" className="font-medium text-[#19363f]">
-                  Política de Privacidad
-                </Link>
-              </p> */}
               <span className="text-[rgba(25,54,63,0.70)] leading-[18px] font-inter text-[12px] font-normal tracking-[-0.24px]">
                 Al usar la plataforma aceptas nuestros{" "}
-                <Link href="/terms" className="text-[#19363F] font-bold">
+                <Link
+                  href="/terms"
+                  target="_blank"
+                  className="text-[#19363F] font-bold"
+                >
                   Términos de Uso
                 </Link>{" "}
                 y nuestra{" "}
-                <Link href="/privacy" className="text-[#19363F] font-bold">
+                <Link
+                  href="/privacy"
+                  target="_blank"
+                  className="text-[#19363F] font-bold"
+                >
                   Política de Privacidad
                 </Link>
               </span>
