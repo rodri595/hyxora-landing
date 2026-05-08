@@ -24,7 +24,7 @@ const MenuItemButton = ({
   isSpecialPage = false,
   ...props
 }) => {
-  if (href) {
+  if (href && !disabled) {
     return (
       <Link
         href={href}
@@ -33,7 +33,7 @@ const MenuItemButton = ({
         className={cn(
           "group flex  p-[6px] px-[8px] justify-between items-center cursor-pointer w-full rounded-[12px] border-[1px] border-solid transition-colors border-transparent transition duration-200 ease-out ",
           "hover:border-[rgba(25,54,63,0.02)] hover:bg-[rgba(25,54,63,0.04)] hover:box-shadow-[0_0_4px_0_rgba(25,54,63,0.04)_inset] ",
-          disabled && "cursor-not-allowed opacity-50",
+          disabled && "cursor-not-allowed opacity-50 pointer-events-none",
           active &&
             "bg-white! border-[rgba(25,54,63,0.04))]! shadow-[0px_1px_6px_0px_rgba(25,54,63,0.07)]! ",
           isSpecialPage &&
@@ -98,11 +98,11 @@ const MenuItemButton = ({
     <div
       {...props}
       className={cn(
-        "group flex flex-1 p-[6px] px-[8px] justify-between items-center cursor-pointer w-full rounded-[12px] border-[1px] border-solid transition-colors border-transparent transition duration-200 ease-out ",
+        "group flex  p-[6px] px-[8px] justify-between items-center cursor-pointer w-full rounded-[12px] border-[1px] border-solid transition-colors border-transparent transition duration-200 ease-out ",
         "hover:border-[rgba(25,54,63,0.02)] hover:bg-[rgba(25,54,63,0.04)] hover:box-shadow-[0_0_4px_0_rgba(25,54,63,0.04)_inset] ",
-        disabled && "cursor-not-allowed opacity-50",
+        disabled && "cursor-not-allowed opacity-50 pointer-events-none",
         active &&
-          "bg-[rgba(25,54,63,0.04)] border-[rgba(25,54,63,0.02)] shadow-[0px_1px_6px_0px_rgba(25,54,63,0.04)]",
+          "bg-white! border-[rgba(25,54,63,0.04))]! shadow-[0px_1px_6px_0px_rgba(25,54,63,0.07)]! ",
         isSpecialPage &&
           "hover:border-[rgba(255,255,255,0.1)] hover:bg-[rgba(255,255,255,0.1)] hover:shadow-[0px_0px_4px_0px_rgba(255,255,255,0.1)_inset] " +
             (active
@@ -193,22 +193,24 @@ const Sidebar = ({ isSpecialPage, isSidebarOpen, setIsSidebarOpen }) => {
       ),
       href: "/profile",
     },
-    // {
-    //   id: 3,
-    //   title: "Comitee",
-    //   description: "Únete al comité",
-    //   icon: <Icon name="documents" className="size-[16px] aspect-square" />,
-    //   href: "/comite",
-    // },
-    // {
-    //   id: 4,
-    //   title: "Mis NFTs",
-    //   description: "Tus NFTs coleccionables",
-    //   icon: (
-    //     <Icon name="sparkle" className="size-[16px] aspect-square" size={20} />
-    //   ),
-    //   href: "/nfts",
-    // },
+    {
+      id: 3,
+      title: "Comitee",
+      description: "Únete al comité",
+      icon: <Icon name="documents" className="size-[16px] aspect-square" />,
+      href: "/comite",
+      disabled: true,
+    },
+    {
+      id: 4,
+      title: "Mis NFTs",
+      description: "Tus NFTs coleccionables",
+      icon: (
+        <Icon name="sparkle" className="size-[16px] aspect-square" size={20} />
+      ),
+      href: "/nfts",
+      disabled: true,
+    },
   ];
   return (
     <aside
@@ -280,6 +282,7 @@ const Sidebar = ({ isSpecialPage, isSidebarOpen, setIsSidebarOpen }) => {
               }
               href="/admin"
               active={pathname === "/admin"}
+              disabled
             />
           )
         )}

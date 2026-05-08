@@ -106,8 +106,10 @@ const UserDashboard = ({ isSpecialPage }) => {
   const navigation = [
     {
       id: 0,
-      title: !!smartWalletAddress ? shortenAddress(smartWalletAddress) : "...",
-      description: "Tu Wallet",
+      title: "Mi Wallet",
+      description: !!smartWalletAddress
+        ? shortenAddress(smartWalletAddress)
+        : "...",
       icon: (
         <Icon
           name="wallet"
@@ -157,8 +159,8 @@ const UserDashboard = ({ isSpecialPage }) => {
       </MenuButton>
       <MenuItems
         className={cn(
-          "[--anchor-gap:1rem] [--anchor-offset:0.5rem] origin-top transition duration-200 ease-out outline-none shadow-popover data-[closed]:scale-95 data-[closed]:opacity-0",
-          "flex w-[260px] flex-col items-start gap-0 rounded-[16px] py-[16px] border-[0.7px] border-solid border-[rgba(25,54,63,0.02)]",
+          "[--anchor-gap:1.5rem] [--anchor-offset:1rem] origin-top transition duration-200 ease-out outline-none shadow-popover data-[closed]:scale-95 data-[closed]:opacity-0",
+          "flex w-[300px] flex-col items-start gap-0 rounded-[16px] py-[8px] border-[0.7px] border-solid border-[rgba(25,54,63,0.02)]",
           "bg-[rgba(250,251,251,0.80)] backdrop-blur-[15px]",
           isSpecialPage &&
             "bg-[rgba(255,255,255,0.06)]  border-[rgba(255,255,255,0.06)] shadow-[0_6px_14px_-4px_rgba(25,54,63,0.15),0_12px_20px_-4px_rgba(25,54,63,0.15)]",
@@ -178,7 +180,7 @@ const UserDashboard = ({ isSpecialPage }) => {
             Menu
           </label>
         </div>
-        <div className="flex p-[6px_14px] justify-center items-start gap-0 w-full flex-col">
+        <div className="flex p-[6px_12px] justify-center items-start gap-0 w-full flex-col">
           {navigation.map((item) => (
             <MenuItemButton
               isSpecialPage={isSpecialPage}

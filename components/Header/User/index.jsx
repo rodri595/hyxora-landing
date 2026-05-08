@@ -144,8 +144,10 @@ const User = () => {
   const navigation = [
     {
       id: 0,
-      title: !!smartWalletAddress ? shortenAddress(smartWalletAddress) : "...",
-      description: "Tu Wallet",
+      title: "Mi Wallet",
+      description: !!smartWalletAddress
+        ? shortenAddress(smartWalletAddress)
+        : "...",
       icon: !!smartWalletAddress ? (
         <Icon name="wallet" className="size-[16px] aspect-square" size={20} />
       ) : (
@@ -162,33 +164,26 @@ const User = () => {
       ),
       href: "/profile",
     },
-    // {
-    //   id: 4,
-    //   title: "Comitee",
-    //   description: "Únete al comité",
-    //   icon: <Icon name="documents" className="size-[16px] aspect-square" />,
-    //   href: "/comite",
-    // },
-    // {
-    //   id: 5,
-    //   title: "Mis NFTs",
-    //   description: "Tus NFTs coleccionables",
-    //   icon: (
-    //     <Icon name="sparkle" className="size-[16px] aspect-square" size={20} />
-    //   ),
-    //   href: "/nfts",
-    // },
     {
-      id: 6,
-      title: "Founders",
-      description: "Programa de fundadores",
-      image: trendingIcon,
-      href: "https://founder.hyxora.com/profile",
-      target: "_blank",
-      rel: "noopener noreferrer",
+      id: 4,
+      title: "Comité  Consultivo",
+      description: "Únete al comité",
+      icon: <Icon name="documents" className="size-[16px] aspect-square" />,
+      // href: "/comite",
+      disabled: true,
     },
     {
-      id: 2,
+      id: 5,
+      title: "Mis NFTs",
+      description: "Tus NFTs coleccionables",
+      icon: (
+        <Icon name="sparkle" className="size-[16px] aspect-square" size={20} />
+      ),
+      // href: "/nfts",
+      disabled: true,
+    },
+    {
+      id: 10,
       title: "Sign out",
       description: "Cerrar sesión",
       icon: (
@@ -245,7 +240,8 @@ const User = () => {
                       size={20}
                     />
                   }
-                  href="/admin"
+                  // href="/admin"
+                  disabled
                 />
               )
             )}
