@@ -22,7 +22,7 @@ const plans = [
       "Tarjeta de débito",
       "Wallet autocustodia",
       <>Intercambios Fiat-Crypto / Swaps </>,
-      "Recompenses / Staking",
+      "Ingresos pasivos / Depósitos",
       "Academia 1.0",
     ],
   },
@@ -42,13 +42,12 @@ const plans = [
     isPrimary: true,
     features: [
       "Plan BASIC",
-      <>Intercambios Fiat-Crypto / Swaps </>,
       <>
-        Fondos Indexados Defi <br />
+        ETFs DEFI <br />
       </>,
-      "Ingresos pasivos",
+      "Mayores rendimientos",
       "Academia 2.0",
-      "Comité Consultivo*",
+      "IA Personalizada",
       "Imagen diferenciada Premium",
     ],
   },
@@ -70,6 +69,7 @@ const plans = [
       "Multicuenta",
       "Tarjeta por usuario",
       "Sistema para modelos Internacionales",
+      "Multidivisa",
     ],
   },
   {
@@ -98,6 +98,7 @@ const plans = [
         <span className="text-[12px] font-light">(2028)</span>
       </>,
       "Imagen diferenciada Founder",
+      "Descuentos especiales y rendimientos máximos",
     ],
   },
 ];

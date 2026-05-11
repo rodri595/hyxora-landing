@@ -2,9 +2,9 @@ import Link from "next/link";
 import Image from "@/components/Image";
 // import Icon from "@/components/Icon";
 import brandIMG from "@/assets/imgs/brand/logo.svg";
-import twitterIMG from "@/assets/imgs/icons/twitter.svg";
-import discordIMG from "@/assets/imgs/icons/discord.svg";
-import telegramIMG from "@/assets/imgs/icons/telegram.svg";
+import linkedinIMG from "@/assets/imgs/icons/linkedin.svg";
+import instagramIMG from "@/assets/imgs/icons/instagram.svg";
+import whatsappIMG from "@/assets/imgs/icons/whatsapp.svg";
 
 const MenuItem = ({ children, href = "#", ...props }) => {
   return (
@@ -18,18 +18,15 @@ const MenuItem = ({ children, href = "#", ...props }) => {
   );
 };
 
-const SocialLink = ({ icon }) => {
+const SocialLink = ({ icon, href = "#" }) => {
   return (
     <Link
-      href={"#"}
-      className="relative shrink-0 transition-opacity hover:opacity-70 flex items-center  justify-center"
-      style={{
-        filter:
-          "drop-shadow(0px 6px 8px rgba(27, 95, 253, 0.15)) drop-shadow(0px 2px 4px rgba(27, 95, 253, 0.15))",
-        boxShadow: "inset 0px 0px 3px rgba(255, 255, 255, 0.4)",
-      }}
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="shrink-0 transition-opacity hover:opacity-70 flex items-center  justify-center bg-[#19363f] rounded-full size-[24px] border-[rgba(255,255,255,0.2)] text-white fill-white shadow-[0px_0px_10px_0px_inset_rgba(255,255,255,0.4)] hover:shadow-[0px_0px_15px_0px_inset_rgba(255,255,255,0.5)]"
     >
-      <Image src={icon} className="size-6 " alt="Social Icon" />
+      <Image src={icon} className="size-[12px] " alt="Social Icon" />
     </Link>
   );
 };
@@ -72,9 +69,18 @@ const Footer = () => {
 
           {/* Social Media */}
           <div className="flex gap-2.5 max-md:gap-2.5 items-center">
-            <SocialLink icon={twitterIMG} />
-            <SocialLink icon={discordIMG} />
-            <SocialLink icon={telegramIMG} />
+            <SocialLink
+              icon={linkedinIMG}
+              href="https://www.linkedin.com/company/110459565/"
+            />
+            <SocialLink
+              icon={instagramIMG}
+              href="https://www.instagram.com/hyxoraapp/"
+            />
+            <SocialLink
+              icon={whatsappIMG}
+              href="https://chat.whatsapp.com/DKPpMrawHta5hxNkjmBNxM"
+            />
           </div>
         </div>
 

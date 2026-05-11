@@ -179,7 +179,6 @@ const WelcomeModal = ({ open, onClose, onLogin }) => {
               Acceder
             </Button>
           )}
-          {console.log(isErrorNewsletter)}
           <Error
             error={isErrorNewsletter}
             message={

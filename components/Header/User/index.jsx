@@ -179,8 +179,8 @@ const User = () => {
       icon: (
         <Icon name="sparkle" className="size-[16px] aspect-square" size={20} />
       ),
-      // href: "/nfts",
-      disabled: true,
+      href: "/nfts",
+      // disabled: true,
     },
     {
       id: 10,

@@ -80,13 +80,18 @@ const Foundersv2 = () => {
               title="Diferenciación"
               description="Reconocimiento especial en app y eventos"
             />
-            <Link
-              target="_blank"
-              href="https://founder.hyxora.com/"
-              rel="noopener noreferrer"
-            >
-              <Button isPrimary>Acceso</Button>
-            </Link>
+            <div className="flex justify-start gap-2 items-center">
+              <Link
+                target="_blank"
+                href="https://founder.hyxora.com/"
+                rel="noopener noreferrer"
+              >
+                <Button isPrimary>Acceso</Button>
+              </Link>
+              <span className="text-xs font-bold *:text-[rgba(25,54,63,0.6)] tracking-[-0.32px]">
+                Fase Pública a partir del 15 de mayo
+              </span>
+            </div>
           </div>
         </div>
       </div>

@@ -21,9 +21,9 @@ const Info = () => {
           "Dispon de tus activos cuando desees desde tu tarjeta bancaria Hyxora Pagos, retiradas de efectivo en cajeros.",
       },
       {
-        title: "Transferencias internacionales sin coste",
+        title: "Transferencias nacionales e internacionales sin coste",
         description:
-          "Transfiere fondos a cualquier otro usuario del Hyxora en segundos, sin costes",
+          "Transfiere fondos entre usuarios sin coste o desde Hyxora a otras cuentas de forma inmediata.",
       },
       {
         title: "Servicios de calidad a costes mínimos",
@@ -40,9 +40,9 @@ const Info = () => {
       "No te quedes fuera de las oportunidades que ofrece DeFi por desconocimiento o miedos",
     steps: [
       {
-        title: "Ingresos pasivos y Staking",
+        title: "Ingresos pasivos y depósitos remunerados",
         description:
-          "Genera ingresos pasivos por ello Que el dinero trabaje por ti",
+          "Que el dinero trabaje por ti. Genera ingresos desde cualquiera de las opciones que Hyxora te ofrece.",
       },
       {
         title: "Oportunidades de inversión DEFI",
@@ -52,17 +52,17 @@ const Info = () => {
       {
         title: "Comité Consultivo",
         description:
-          "Hyxora se basa en la comunidad y escucha al usuario Participa activamente de las decisiones a tomar en Hyxora.",
+          "Hyxora se basa en la comunidad y escucha al usuario participa activamente de las decisiones a tomar en Hyxora.",
       },
       {
         title: "Founder de Hyxora",
         description:
-          "Al hacerte Founder, adquieres un % del Equity de Hyxora. Además de los propios privilegios de ser Founder, serás co-propietario de Hyxora. Date prisa, sólo habrá 1000 Foudners.",
+          "Al hacerte Founder, adquieres un % del Equity de Hyxora. Además de los propios privilegios de ser Founder, serás co-propietario de Hyxora. Date prisa, sólo habrá 1000 Founders.",
       },
       {
-        title: "Academia Hyxora",
+        title: "iA personalizada",
         description:
-          "No eres experto, precisamente por eso se nace Hyxora Videos, Faqs, blog, iA, Podcast, todo serán canales de información a tu servicio para que comprendas y aprendas desde cero todo lo que necesites",
+          "Cada usuario dispondrá de diferentes asistentes siendo uno de ellos, su asistente personal. Toda la capacidad de la iA sólo y únicamente para ti, para acompañarte en Hyxora desde el primer minuto.",
       },
     ],
   };

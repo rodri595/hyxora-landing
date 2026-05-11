@@ -35,12 +35,12 @@ const MenuItemButton = ({
           "hover:border-[rgba(25,54,63,0.02)] hover:bg-[rgba(25,54,63,0.04)] hover:box-shadow-[0_0_4px_0_rgba(25,54,63,0.04)_inset] ",
           disabled && "cursor-not-allowed opacity-50 pointer-events-none",
           active &&
-            "bg-white! border-[rgba(25,54,63,0.04))]! shadow-[0px_1px_6px_0px_rgba(25,54,63,0.07)]! ",
+            "bg-white border-[rgba(25,54,63,0.04))] shadow-[0px_1px_6px_0px_rgba(25,54,63,0.07)] ",
           isSpecialPage &&
-            "hover:border-[rgba(255,255,255,0.1)] hover:bg-[rgba(255,255,255,0.1)] hover:shadow-[0px_0px_4px_0px_rgba(255,255,255,0.1)_inset] " +
-              (active
-                ? "bg-[rgba(255,255,255,0.1)] border-[rgba(255,255,255,0.1)] shadow-[0px_1px_6px_0px_rgba(255,255,255,0.2)] "
-                : "border-transparent"),
+            "hover:border-[rgba(255,255,255,0.1)] hover:bg-[rgba(255,255,255,0.1)] hover:shadow-[0px_0px_4px_0px_rgba(255,255,255,0.1)_inset] ",
+          isSpecialPage && active
+            ? "bg-[rgba(255,255,255,0.1)] border-[rgba(255,255,255,0.1)] shadow-[0px_1px_6px_0px_rgba(255,255,255,0.2)]  "
+            : "border-transparent",
         )}
         onClick={onClick}
       >
@@ -69,9 +69,9 @@ const MenuItemButton = ({
           <div className="flex flex-col gap-[8px] items-start justify-center flex-1 ">
             <p
               className={cn(
-                "font-inter font-medium text-[12px] tracking-[-0.56px] leading-[10px]",
+                `font-inter font-medium text-[12px] tracking-[-0.56px] leading-[10px]`,
                 disabled && "text-[rgba(25,54,63,0.4)]",
-                !disabled && (isSpecialPage ? "text-[#fff]" : "text-[#19363F]"),
+                isSpecialPage && "text-[#fff]",
               )}
             >
               {title}
@@ -102,12 +102,12 @@ const MenuItemButton = ({
         "hover:border-[rgba(25,54,63,0.02)] hover:bg-[rgba(25,54,63,0.04)] hover:box-shadow-[0_0_4px_0_rgba(25,54,63,0.04)_inset] ",
         disabled && "cursor-not-allowed opacity-50 pointer-events-none",
         active &&
-          "bg-white! border-[rgba(25,54,63,0.04))]! shadow-[0px_1px_6px_0px_rgba(25,54,63,0.07)]! ",
+          "bg-white border-[rgba(25,54,63,0.04))] shadow-[0px_1px_6px_0px_rgba(25,54,63,0.07)] ",
         isSpecialPage &&
-          "hover:border-[rgba(255,255,255,0.1)] hover:bg-[rgba(255,255,255,0.1)] hover:shadow-[0px_0px_4px_0px_rgba(255,255,255,0.1)_inset] " +
-            (active
-              ? "bg-[rgba(255,255,255,0.1)] border-[rgba(255,255,255,0.1)] shadow-[0px_1px_6px_0px_rgba(255,255,255,0.2)] "
-              : "border-transparent"),
+          "hover:border-[rgba(255,255,255,0.1)] hover:bg-[rgba(255,255,255,0.1)] hover:shadow-[0px_0px_4px_0px_rgba(255,255,255,0.1)_inset] ",
+        isSpecialPage && active
+          ? "bg-[rgba(255,255,255,0.1)] border-[rgba(255,255,255,0.1)] shadow-[0px_1px_6px_0px_rgba(255,255,255,0.2)]  "
+          : "border-transparent",
       )}
       onClick={onClick}
     >
@@ -135,13 +135,11 @@ const MenuItemButton = ({
         )}
         <div className="flex flex-col gap-[8px] items-start justify-center flex-1 ">
           <p
-            className={`font-inter font-medium text-[12px] tracking-[-0.56px] leading-[10px] ${
-              disabled
-                ? "text-[rgba(25,54,63,0.4)]"
-                : isSpecialPage
-                  ? "text-[#fff]"
-                  : "text-[#19363f]"
-            }`}
+            className={cn(
+              `font-inter font-medium text-[12px] tracking-[-0.56px] leading-[10px]`,
+              disabled && "text-[rgba(25,54,63,0.4)]",
+              isSpecialPage && "text-[#fff]",
+            )}
           >
             {title}
           </p>
@@ -206,10 +204,14 @@ const Sidebar = ({ isSpecialPage, isSidebarOpen, setIsSidebarOpen }) => {
       title: "Mis NFTs",
       description: "Tus NFTs coleccionables",
       icon: (
-        <Icon name="sparkle" className="size-[16px] aspect-square" size={20} />
+        <Icon
+          name="sparkle"
+          className="size-[16px] aspect-square"
+          size={20}
+          fill={isSpecialPage ? "#fff" : "#19363F"}
+        />
       ),
       href: "/nfts",
-      disabled: true,
     },
   ];
   return (

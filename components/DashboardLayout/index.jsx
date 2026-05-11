@@ -8,6 +8,7 @@ import { useState } from "react";
 const SPECIAL_URLS = ["/nfts"];
 import Header from "./Header";
 import Sidebar from "./Sidebar";
+import PurchaseNFTModal from "@/components/PurchaseNFTModal";
 
 const DashboardLayout = ({ children }) => {
   const router = useRouter();
@@ -57,6 +58,7 @@ const DashboardLayout = ({ children }) => {
         />
         <div className="flex flex-1 overflow-hidden">{children}</div>
       </div>
+      <PurchaseNFTModal />
     </div>
   );
 };

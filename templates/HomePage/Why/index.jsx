@@ -80,11 +80,12 @@ const Why = () => {
               </div>
               <div className="flex flex-col gap-2 items-start w-full max-md:gap-[14px]">
                 <p className="font-medium text-[20px] leading-normal text-white tracking-[-0.04em] w-full max-md:text-[16px] max-md:leading-[22px] max-md:tracking-[-0.64px]">
-                  Academia
+                  Comunidad
                 </p>
                 <p className="font-normal text-[16px] leading-[20px] text-[rgba(255,255,255,0.7)] tracking-[-0.02em] w-full max-md:text-[12px] max-md:tracking-[-0.24px]">
-                  Formación necesaria para que entiendas y aproveches al máximo
-                  tus recursos en finanzas, sea cual sea tu nivel.
+                  La comunidad es uno de los pilares básicos de Hyxora. Existen
+                  diferentes canales de comunicación e interacción. Forma parte
+                  de Hyxora desde el inicio
                 </p>
               </div>
             </div>

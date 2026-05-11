@@ -17,7 +17,7 @@ const Finance = () => {
   const walletItems = [
     {
       id: 0,
-      title: "Staking",
+      title: "Depósito remunerado",
       description:
         "Consigue rendimientos e ingresos pasivos sólo por el hecho de mantener tu capital en Hyxora",
       iconSrc: circleIMG,
@@ -25,7 +25,7 @@ const Finance = () => {
     },
     {
       id: 1,
-      title: "Swaps",
+      title: "Intercambios de activos",
       description:
         "Realiza cambios entre Fiat y Criptp en un solo click. Maximiza la rentabilidad de tu dinero",
       iconSrc: circleIMG,
@@ -41,7 +41,7 @@ const Finance = () => {
     },
     {
       id: 3,
-      title: "Fondos Indexados mixtos",
+      title: "Fondos y ETFs",
       description:
         "Invierte en fondos indexados con las mayores rentabilidades que ambos mundos financieros pueden ofrecerte en conjunto.",
       iconSrc: circleIMG,

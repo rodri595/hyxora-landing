@@ -17,6 +17,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
 import layerIMG from "./layer.png";
 import Link from "next/link";
+import Countdown from "./Countdown";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -215,6 +216,8 @@ const Hero = () => {
               />
             </div>
           </div>
+          {/* Countdown timer */}
+          <Countdown />
           <div className="flex items-start justify-center relative mx-auto gap-2 pb-[80px] max-md:gap-1 max-md:pb-[40px] max-md:h-[500px] max-md:overflow-hidden">
             <Image
               src={app1IMG}

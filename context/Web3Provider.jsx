@@ -15,9 +15,12 @@ const Web3Context = createContext({
   publicClient: null,
   currentChain: base,
   setCurrentChain: () => {},
+  isModalPurchaseNFTOpen: false,
+  setIsModalPurchaseNFTOpen: () => {},
 });
 
 export const Web3Provider = ({ children }) => {
+  const [isModalPurchaseNFTOpen, setIsModalPurchaseNFTOpen] = useState(false);
   const { logout: privyLogout } = useLogout();
   const { authenticated, ready, user } = usePrivy();
   const { client: smartWalletClient, getClientForChain } = useSmartWallets();
@@ -101,6 +104,8 @@ export const Web3Provider = ({ children }) => {
         publicClient,
         currentChain,
         setCurrentChain,
+        isModalPurchaseNFTOpen,
+        setIsModalPurchaseNFTOpen,
       }}
     >
       {children}

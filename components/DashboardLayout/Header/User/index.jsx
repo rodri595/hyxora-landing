@@ -159,7 +159,7 @@ const UserDashboard = ({ isSpecialPage }) => {
       </MenuButton>
       <MenuItems
         className={cn(
-          "[--anchor-gap:1.5rem] [--anchor-offset:1rem] origin-top transition duration-200 ease-out outline-none shadow-popover data-[closed]:scale-95 data-[closed]:opacity-0",
+          "[--anchor-gap:1.5rem] [--anchor-offset:-0.1rem] origin-top transition duration-200 ease-out outline-none shadow-popover data-[closed]:scale-95 data-[closed]:opacity-0",
           "flex w-[300px] flex-col items-start gap-0 rounded-[16px] py-[8px] border-[0.7px] border-solid border-[rgba(25,54,63,0.02)]",
           "bg-[rgba(250,251,251,0.80)] backdrop-blur-[15px]",
           isSpecialPage &&
