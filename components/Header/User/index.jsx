@@ -11,6 +11,7 @@ import trendingIcon from "@/assets//imgs/icons/trending.png";
 import { useGetUserInformation } from "@/hooks/user/useGetUserInformation";
 import { useMemo } from "react";
 import { roleNames } from "@/constants/roles";
+import { GetMyPayments } from "@/hooks/nfts/GetMyPayments";
 const MenuItemButton = ({
   title = "Title",
   description = "Description",
@@ -141,6 +142,13 @@ const User = () => {
       false
     );
   }, [userInformation]);
+  const { data: paymentsData } = GetMyPayments();
+  const hasNft = useMemo(() => {
+    if (!paymentsData || paymentsData?.length === 0) return false;
+    return paymentsData.some(
+      (payment) => payment?.status === "completed" && payment?.tokenId,
+    );
+  }, [paymentsData]);
   const navigation = [
     {
       id: 0,
@@ -169,8 +177,8 @@ const User = () => {
       title: "Comité  Consultivo",
       description: "Únete al comité",
       icon: <Icon name="documents" className="size-[16px] aspect-square" />,
-      // href: "/comite",
-      disabled: true,
+      href: hasNft ? "/comite" : undefined,
+      disabled: !hasNft,
     },
     {
       id: 5,

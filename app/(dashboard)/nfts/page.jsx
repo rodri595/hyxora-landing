@@ -41,8 +41,12 @@ export default function NftsPage() {
   }, [paymentsData]);
 
   return (
-    <section className="flex-1 flex gap-[16px] justify-start items-start p-4  h-full  min-h-0 ">
+    <section
+      className="flex-1 flex gap-[16px] justify-start items-start p-4 h-full min-h-0 overflow-y-auto"
+      data-lenis-prevent
+    >
       <div className="flex flex-col flex-1 gap-[16px] ">
+        {" "}
         <Error
           error={paymentsError}
           message={
@@ -57,7 +61,10 @@ export default function NftsPage() {
         {paymentsPending ? (
           <Spinner />
         ) : !!PurchaseNfts ? (
-          <div className="grid grid-cols-3 gap-[56px_16px] items-center justify-center  max-md:grid-cols-2 max-sm:grid-cols-1 pb-[100px]">
+          <div
+            id="nft-grid"
+            className="grid grid-cols-3 gap-[56px_16px] items-center justify-center  max-md:grid-cols-2 max-sm:grid-cols-1 pb-[100px] flex-1 "
+          >
             {PurchaseNfts.map((payment) => (
               <NftCard
                 key={payment._id}

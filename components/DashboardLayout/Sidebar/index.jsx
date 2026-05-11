@@ -11,6 +11,7 @@ import trendingIcon from "@/assets//imgs/icons/trending.png";
 import { useGetUserInformation } from "@/hooks/user/useGetUserInformation";
 import { useMemo } from "react";
 import { roleNames } from "@/constants/roles";
+import { GetMyPayments } from "@/hooks/nfts/GetMyPayments";
 
 const MenuItemButton = ({
   title = "Title",
@@ -167,6 +168,13 @@ const Sidebar = ({ isSpecialPage, isSidebarOpen, setIsSidebarOpen }) => {
   const pathname = usePathname();
   const { data: userInformation, isLoading: isLoadingUserInformation } =
     useGetUserInformation();
+  const { data: paymentsData } = GetMyPayments();
+  const hasNft = useMemo(() => {
+    if (!paymentsData || paymentsData?.length === 0) return false;
+    return paymentsData.some(
+      (payment) => payment?.status === "completed" && payment?.tokenId,
+    );
+  }, [paymentsData]);
   const toggleMenu = () => {
     setIsSidebarOpen((prev) => !prev);
   };
@@ -195,9 +203,15 @@ const Sidebar = ({ isSpecialPage, isSidebarOpen, setIsSidebarOpen }) => {
       id: 3,
       title: "Comitee",
       description: "Únete al comité",
-      icon: <Icon name="documents" className="size-[16px] aspect-square" />,
+      icon: (
+        <Icon
+          name="documents"
+          className="size-[16px] aspect-square"
+          fill={isSpecialPage ? "#fff" : "#19363F"}
+        />
+      ),
       href: "/comite",
-      disabled: true,
+      disabled: !hasNft,
     },
     {
       id: 4,

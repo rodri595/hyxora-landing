@@ -10,7 +10,7 @@ import learningCenterIcon from "@/assets/imgs/icons/learning.png";
 import topGainersIcon from "@/assets/imgs/icons/topgainer.png";
 import Link from "next/link";
 import { useLenis } from "lenis/react";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useMemo } from "react";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import { ScrollToPlugin } from "gsap/ScrollToPlugin";
@@ -19,7 +19,8 @@ import { useLogin, usePrivy } from "@privy-io/react-auth";
 import WelcomeModal from "../WelcomeModal";
 import { useWeb3 } from "@/context/Web3Provider";
 import { shortenAddress, copyToClipboard, cn } from "@/utils";
-
+import podcastIMG from "@/assets/imgs/podcast//Logo fondo cuadrodo E Negro.png";
+import { GetMyPayments } from "@/hooks/nfts/GetMyPayments";
 gsap.registerPlugin(ScrollToPlugin);
 
 // MenuItem component for the mobile menu
@@ -108,6 +109,13 @@ const MenuItem = ({
 };
 
 const MenuComponent = () => {
+  const { data: paymentsData } = GetMyPayments();
+  const hasNft = useMemo(() => {
+    if (!paymentsData || paymentsData?.length === 0) return false;
+    return paymentsData.some(
+      (payment) => payment?.status === "completed" && payment?.tokenId,
+    );
+  }, [paymentsData]);
   const { logout, smartWalletAddress } = useWeb3();
   const [isActive, setIsActive] = useState(false);
   const [welcomeOpen, setWelcomeOpen] = useState(false);
@@ -324,7 +332,7 @@ const MenuComponent = () => {
                 title="Comité Consultivo"
                 description="Accede a las Consultas"
                 className="w-full max-w-none"
-                disabled
+                disabled={!hasNft}
               />
               <MenuItem
                 image={learningCenterIcon}
@@ -334,12 +342,12 @@ const MenuComponent = () => {
                 disabled
               />
               <MenuItem
-                image={topGainersIcon}
-                title="Founders NFT"
-                description="Espacio exclusivo"
+                title="Podcast de Hyxora"
+                description="El Elefante Desnudo"
                 className="w-full max-w-none"
                 external
-                href="https://founder.hyxora.com"
+                href="https://elefantedesnudo.com"
+                image={podcastIMG}
                 target="_blank"
               />
             </div>

@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import Link from "next/link";
 import Image from "@/components/Image";
 import Button from "@/components/Button";
@@ -11,12 +11,14 @@ import topGainersIcon from "@/assets/imgs/icons/topgainer.png";
 import learningCenterIcon from "@/assets/imgs/icons/learning.png";
 import bannerImage from "@/assets/imgs/brand/tokens.webp";
 import fireSVG from "@/assets/imgs/icons/fire.svg";
+import podcastIMG from "@/assets/imgs/podcast//Logo fondo cuadrodo E Negro.png";
 import Menu from "./Menu";
 import gsap from "gsap";
 import { ScrollToPlugin } from "gsap/ScrollToPlugin";
 import { useLogin, usePrivy } from "@privy-io/react-auth";
 import User from "./User";
 import { cn } from "@/utils";
+import { GetMyPayments } from "@/hooks/nfts/GetMyPayments";
 
 gsap.registerPlugin(ScrollToPlugin);
 const MenuItem = ({ children, href = "#", ...props }) => {
@@ -118,6 +120,13 @@ const ExploreMenuItem = ({
   return <div className={baseClassName}>{content}</div>;
 };
 const ExploreDropdown = () => {
+  const { data: paymentsData } = GetMyPayments();
+  const hasNft = useMemo(() => {
+    if (!paymentsData || paymentsData?.length === 0) return false;
+    return paymentsData.some(
+      (payment) => payment?.status === "completed" && payment?.tokenId,
+    );
+  }, [paymentsData]);
   return (
     <div className="group relative">
       <button className="box-border flex h-[28px] items-center justify-center gap-2 p-[2px] relative rounded-[6px] shrink-0 hover:bg-[rgba(25,54,63,0.04)] transition-all">
@@ -144,7 +153,8 @@ const ExploreDropdown = () => {
                 image={newListingsIcon}
                 title="Comité Consultivo"
                 description="Accede a las Consultas"
-                disabled
+                href="/comite"
+                disabled={!hasNft}
               />
             </div>
             {/* Column 2 */}
@@ -156,11 +166,11 @@ const ExploreDropdown = () => {
                 disabled
               />
               <ExploreMenuItem
-                image={topGainersIcon}
-                title="Founders NFT"
-                description="Espacio exclusivo"
+                title="Podcast de Hyxora"
+                description="El Elefante Desnudo"
                 external
-                href="https://founder.hyxora.com/"
+                href="https://elefantedesnudo.com"
+                image={podcastIMG}
               />
             </div>
             {/* Banner */}

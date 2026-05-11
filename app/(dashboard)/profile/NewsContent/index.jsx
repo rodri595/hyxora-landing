@@ -8,6 +8,7 @@ import NewsItem from "./NewsItem";
 import { useMemo } from "react";
 import { GetMyPayments } from "@/hooks/nfts/GetMyPayments";
 import { useGetAllPolls } from "@/hooks/poll/useGetAllPolls";
+import Link from "next/link";
 
 const newsData = [
   {
@@ -70,9 +71,11 @@ const NewsContent = () => {
           )}
         </div>
         {HasNfts && (
-          <Button isPrimary className="mt-auto  mx-auto">
-            Ir al Comité Consultivo
-          </Button>
+          <Link href="/comite" className="mt-auto  mx-auto">
+            <Button isPrimary className="mt-auto  mx-auto">
+              Ir al Comité Consultivo
+            </Button>
+          </Link>
         )}
       </Card>
       <Card className="h-full max-w-[300px] max-md:max-w-full">

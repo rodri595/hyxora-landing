@@ -40,7 +40,7 @@ const DashboardLayout = ({ children }) => {
   return (
     <div
       className={cn(
-        "flex flex-col flex-1 justify-start items-start  min-h-[100dvh]",
+        "flex flex-col justify-start items-start h-[100dvh] overflow-hidden",
         "bg-[#FFF]",
         isSpecialPage && "bg-[#0D0D0D]",
       )}
@@ -50,7 +50,7 @@ const DashboardLayout = ({ children }) => {
         isSidebarOpen={isSidebarOpen}
         setIsSidebarOpen={setIsSidebarOpen}
       />
-      <div className="flex flex-1 w-full min-h-0 h-full justify-start items-stretch ">
+      <div className="flex flex-1 w-full min-h-0 h-full justify-start items-stretch ]">
         <Sidebar
           isSidebarOpen={isSidebarOpen}
           isSpecialPage={isSpecialPage}

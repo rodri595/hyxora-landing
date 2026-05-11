@@ -44,7 +44,7 @@ function CountdownUnit({ value, label, digitRef }) {
 }
 
 const Countdown = () => {
-  const [time, setTime] = useState(getTimeLeft);
+  const [time, setTime] = useState(null);
 
   const containerRef = useRef(null);
   const daysRef = useRef(null);
@@ -52,16 +52,22 @@ const Countdown = () => {
   const minutesRef = useRef(null);
   const secondsRef = useRef(null);
 
+  // Populate time only on the client to avoid SSR/client hydration mismatch
+  useEffect(() => {
+    setTime(getTimeLeft());
+  }, []);
+
   // Tick every second
   useEffect(() => {
-    if (time.done) return;
+    if (!time || time.done) return;
     const id = setInterval(() => setTime(getTimeLeft()), 1000);
     return () => clearInterval(id);
-  }, [time.done]);
+  }, [time?.done]);
 
   // Slot-machine ticker: text slides in from above on each change
-  const prevTime = useRef(time);
+  const prevTime = useRef(null);
   useEffect(() => {
+    if (!time) return;
     const prev = prevTime.current;
     const ticker = (ref) => {
       if (!ref.current) return;
@@ -72,10 +78,10 @@ const Countdown = () => {
       );
     };
 
-    if (prev.seconds !== time.seconds) ticker(secondsRef);
-    if (prev.minutes !== time.minutes) ticker(minutesRef);
-    if (prev.hours !== time.hours) ticker(hoursRef);
-    if (prev.days !== time.days) ticker(daysRef);
+    if (prev && prev.seconds !== time.seconds) ticker(secondsRef);
+    if (prev && prev.minutes !== time.minutes) ticker(minutesRef);
+    if (prev && prev.hours !== time.hours) ticker(hoursRef);
+    if (prev && prev.days !== time.days) ticker(daysRef);
 
     prevTime.current = time;
   }, [time]);
@@ -103,7 +109,7 @@ const Countdown = () => {
     >
       {/* Label */}
       <p className="text-[11px] font-medium text-[rgba(25,54,63,0.55)] tracking-[-0.2px] text-center leading-snug">
-        {time.done
+        {time?.done
           ? "¡Fase Pública de NFT Founder abierta!"
           : "Fase Pública de NFT Founder abierta en"}{" "}
         <span className="text-[#1b5ffd] font-semibold whitespace-nowrap">
@@ -112,7 +118,7 @@ const Countdown = () => {
       </p>
 
       {/* Digits row */}
-      {!time.done && (
+      {time && !time.done && (
         <div className="flex items-center gap-1.5">
           <CountdownUnit value={time.days} label="Días" digitRef={daysRef} />
 
