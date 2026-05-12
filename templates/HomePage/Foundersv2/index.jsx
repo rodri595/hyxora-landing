@@ -88,7 +88,7 @@ const Foundersv2 = () => {
               >
                 <Button isPrimary>Acceso</Button>
               </Link>
-              <span className="text-xs font-bold *:text-[rgba(25,54,63,0.6)] tracking-[-0.32px]">
+              <span className="text-xs font-bold text-[#1b5ffd] tracking-[-0.32px]">
                 Fase Pública a partir del 15 de mayo
               </span>
             </div>

@@ -7,6 +7,8 @@ import Spinner from "@/components/Spinner";
 import Image from "@/components/Image";
 import Button from "@/components/Button";
 import NftCard from "@/components/NftCard";
+import VatReturnModal from "@/components/VatReturnModal";
+import { useState } from "react";
 const BulletPoint = () => {
   return (
     <div className="flex justify-start items-center gap-[10px] flex-1 ">
@@ -40,6 +42,9 @@ export default function NftsPage() {
     );
   }, [paymentsData]);
 
+  const [isOpen, setIsOpen] = useState(false);
+  const [tokenId, setTokenId] = useState(null);
+
   return (
     <section
       className="flex-1 flex gap-[16px] justify-start items-start p-4 h-full min-h-0 overflow-y-auto"
@@ -70,7 +75,8 @@ export default function NftsPage() {
                 key={payment._id}
                 payment={payment}
                 onVatRefund={(id) => {
-                  // TODO: open VAT refund dialog for id
+                  setIsOpen(true);
+                  setTokenId(id);
                 }}
               />
             ))}
@@ -121,6 +127,11 @@ export default function NftsPage() {
           </div>
         )}
       </div>
+      <VatReturnModal
+        open={isOpen}
+        onClose={() => setIsOpen(false)}
+        tokenId={tokenId}
+      />
     </section>
   );
 }

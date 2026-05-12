@@ -28,15 +28,15 @@ function getTimeLeft() {
 function CountdownUnit({ value, label, digitRef }) {
   return (
     <div className="unit flex flex-col items-center gap-[3px]">
-      <div className="flex items-center justify-center w-9 h-[30px] rounded-[8px] bg-[rgba(25,54,63,0.04)] border border-[rgba(25,54,63,0.07)] overflow-hidden">
+      <div className="flex items-center justify-center w-9 h-[30px] rounded-[8px] bg-[rgba(255,255,255,0.06)] border border-[rgba(255,255,255,0.06)] shadow-[inset_0_0_4px_0_rgba(25,54,63,0.04)] overflow-hidden">
         <span
           ref={digitRef}
-          className="font-medium text-[13px] text-[#19363f] tracking-[-0.5px] tabular-nums leading-none"
+          className="font-medium text-[13px] text-white tracking-[-0.5px] tabular-nums leading-none"
         >
           {String(value).padStart(2, "0")}
         </span>
       </div>
-      <span className="text-[9px] font-medium text-[rgba(25,54,63,0.4)] tracking-[0.4px] uppercase">
+      <span className="text-[9px] font-medium text-[rgba(255,255,255,0.40)] tracking-[0.4px] uppercase">
         {label}
       </span>
     </div>
@@ -52,17 +52,23 @@ const Countdown = () => {
   const minutesRef = useRef(null);
   const secondsRef = useRef(null);
 
-  // Populate time only on the client to avoid SSR/client hydration mismatch
+  // Init on client (avoids SSR hydration mismatch) + tick every second
   useEffect(() => {
-    setTime(getTimeLeft());
+    let id;
+    const tick = () => {
+      const next = getTimeLeft();
+      setTime(next);
+      if (next.done && id) clearInterval(id);
+    };
+    // setTimeout defers the first setState out of the effect body,
+    // avoiding the "synchronous setState in effect" lint warning.
+    const init = setTimeout(tick, 0);
+    id = setInterval(tick, 1000);
+    return () => {
+      clearTimeout(init);
+      clearInterval(id);
+    };
   }, []);
-
-  // Tick every second
-  useEffect(() => {
-    if (!time || time.done) return;
-    const id = setInterval(() => setTime(getTimeLeft()), 1000);
-    return () => clearInterval(id);
-  }, [time?.done]);
 
   // Slot-machine ticker: text slides in from above on each change
   const prevTime = useRef(null);
@@ -105,13 +111,14 @@ const Countdown = () => {
   return (
     <div
       ref={containerRef}
-      className="flex flex-col items-center gap-2 py-2.5 px-3.5 rounded-2xl bg-[rgba(25,54,63,0.03)] border border-[rgba(25,54,63,0.06)] max-w-fit mx-auto"
+      className="flex flex-col items-center gap-2 py-2.5 px-3.5 rounded-2xl bg-[#0D0D0D] border border-[#24292D] shadow-[inset_0_0_4px_0_rgba(25,54,63,0.04)] backdrop-blur-[8px] max-w-fit mx-auto"
     >
       {/* Label */}
-      <p className="text-[11px] font-medium text-[rgba(25,54,63,0.55)] tracking-[-0.2px] text-center leading-snug">
+      <p className="text-[11px] font-medium text-[rgba(255,255,255,0.55)] tracking-[-0.2px] text-center leading-snug">
         {time?.done
           ? "¡Fase Pública de NFT Founder abierta!"
           : "Fase Pública de NFT Founder abierta en"}{" "}
+        <br />
         <span className="text-[#1b5ffd] font-semibold whitespace-nowrap">
           (Sólo 350 und para todo 2026)
         </span>
@@ -122,13 +129,13 @@ const Countdown = () => {
         <div className="flex items-center gap-1.5">
           <CountdownUnit value={time.days} label="Días" digitRef={daysRef} />
 
-          <span className="text-[12px] font-medium text-[rgba(25,54,63,0.25)] mb-[13px] leading-none select-none">
+          <span className="text-[12px] font-medium text-[rgba(255,255,255,0.25)] mb-[13px] leading-none select-none">
             :
           </span>
 
           <CountdownUnit value={time.hours} label="Horas" digitRef={hoursRef} />
 
-          <span className="text-[12px] font-medium text-[rgba(25,54,63,0.25)] mb-[13px] leading-none select-none">
+          <span className="text-[12px] font-medium text-[rgba(255,255,255,0.25)] mb-[13px] leading-none select-none">
             :
           </span>
 
@@ -138,7 +145,7 @@ const Countdown = () => {
             digitRef={minutesRef}
           />
 
-          <span className="text-[12px] font-medium text-[rgba(25,54,63,0.25)] mb-[13px] leading-none select-none">
+          <span className="text-[12px] font-medium text-[rgba(255,255,255,0.25)] mb-[13px] leading-none select-none">
             :
           </span>
 

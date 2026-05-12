@@ -282,9 +282,7 @@ const Header = ({ isFixed }) => {
   const { login } = useLogin();
   const { authenticated } = usePrivy();
   const [welcomeOpen, setWelcomeOpen] = useState(false);
-
   const handleApuntate = () => setWelcomeOpen(true);
-
   const handleLogin = () => {
     setWelcomeOpen(false);
     login();

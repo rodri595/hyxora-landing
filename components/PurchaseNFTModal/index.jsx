@@ -23,6 +23,7 @@ const FEATURES = [
 
 const UNITS_AVAILABLE = 350;
 const PRICE = "3.000€";
+const PRICEIVA = "3.630€ (IVA incluido)";
 
 /* ─── Dark inline checkbox ─── */
 const DarkCheckbox = ({ checked, onChange, children }) => (
@@ -153,101 +154,103 @@ const PurchaseNFTModal = () => {
         <h2 className="text-white font-semibold text-[18px] tracking-[-0.54px] leading-tight">
           NFT Founder de Hyxora
         </h2>
+        {step !== 3 && (
+          <>
+            {/* ── Two-column: features + NFT image ── */}
+            <div className="grid grid-cols-2 gap-3">
+              {/* Features list */}
+              <div
+                className="flex flex-col justify-center gap-2.5 p-4 rounded-[14px] border"
+                style={{
+                  background: "rgba(255,255,255,0.03)",
+                  borderColor: "rgba(255,255,255,0.07)",
+                }}
+              >
+                {FEATURES.map((f) => (
+                  <div key={f} className="flex items-center gap-2">
+                    <span className="text-[#f5a623] text-[13px] leading-none">
+                      –
+                    </span>
+                    <span className="text-[rgba(255,255,255,0.80)] text-[12px] font-medium tracking-[-0.24px] leading-none">
+                      {f}
+                    </span>
+                  </div>
+                ))}
+              </div>
 
-        {/* ── Two-column: features + NFT image ── */}
-        <div className="grid grid-cols-2 gap-3">
-          {/* Features list */}
-          <div
-            className="flex flex-col justify-center gap-2.5 p-4 rounded-[14px] border"
-            style={{
-              background: "rgba(255,255,255,0.03)",
-              borderColor: "rgba(255,255,255,0.07)",
-            }}
-          >
-            {FEATURES.map((f) => (
-              <div key={f} className="flex items-center gap-2">
-                <span className="text-[#f5a623] text-[13px] leading-none">
-                  –
+              {/* NFT image with badge */}
+              <div className="relative rounded-[14px] overflow-hidden border border-[rgba(245,166,35,0.35)]">
+                {/* EDICIÓN LIMITADA badge */}
+                <div
+                  className="absolute top-2 left-1  z-10 px-2 py-1 rounded-full flex items-center gap-1"
+                  style={{
+                    background: "rgba(245,166,35,0.20)",
+                    border: "1px solid rgba(245,166,35,0.50)",
+                  }}
+                >
+                  <span className="text-[9px] font-bold text-[#f5a623] tracking-[0.5px] uppercase leading-none whitespace-nowrap">
+                    Edición Limitada
+                  </span>
+                </div>
+                <Image
+                  src={posterIMG}
+                  className="w-full h-full  hidden! max-md:flex!"
+                  alt="Item Option"
+                  priority
+                />
+                <Video
+                  className="w-full h-full   max-md:hidden"
+                  src={"/videos/key_card_2.webm"}
+                  poster={posterIMG}
+                  type="video"
+                  playsInline
+                  autoPlay
+                  muted
+                  loop
+                />
+              </div>
+            </div>
+
+            {/* ── Price / availability row ── */}
+            <div
+              className="grid grid-cols-2 gap-px rounded-[14px] overflow-hidden border"
+              style={{ borderColor: "rgba(255,255,255,0.07)" }}
+            >
+              {/* Units */}
+              <div
+                className="flex flex-col gap-1 px-4 py-3"
+                style={{ background: "rgba(255,255,255,0.03)" }}
+              >
+                <span className="text-[10px] text-[rgba(255,255,255,0.45)] tracking-[-0.2px] leading-none">
+                  Unidades disponibles
                 </span>
-                <span className="text-[rgba(255,255,255,0.80)] text-[12px] font-medium tracking-[-0.24px] leading-none">
-                  {f}
+                <span className="text-white font-semibold text-[16px] tracking-[-0.48px] leading-tight">
+                  {UNITS_AVAILABLE}
                 </span>
               </div>
-            ))}
-          </div>
 
-          {/* NFT image with badge */}
-          <div className="relative rounded-[14px] overflow-hidden border border-[rgba(245,166,35,0.35)]">
-            {/* EDICIÓN LIMITADA badge */}
-            <div
-              className="absolute top-2 left-1  z-10 px-2 py-1 rounded-full flex items-center gap-1"
-              style={{
-                background: "rgba(245,166,35,0.20)",
-                border: "1px solid rgba(245,166,35,0.50)",
-              }}
-            >
-              <span className="text-[9px] font-bold text-[#f5a623] tracking-[0.5px] uppercase leading-none whitespace-nowrap">
-                Edición Limitada
-              </span>
+              {/* Price */}
+              <div
+                className="flex flex-col gap-1 px-4 py-3 border-l"
+                style={{
+                  background: "rgba(255,255,255,0.03)",
+                  borderColor: "rgba(255,255,255,0.07)",
+                }}
+              >
+                <span className="text-[10px] text-[rgba(255,255,255,0.45)] tracking-[-0.2px] leading-none">
+                  Precio por NFT
+                </span>
+                <span className="text-white font-semibold text-[16px] tracking-[-0.48px] leading-tight">
+                  {PRICE}
+                </span>
+                <span className="text-[9px] text-[rgba(255,255,255,0.30)] leading-tight tracking-[-0.18px]">
+                  *Precio final con IVA (3.630€). La devolución del IVA
+                  dependerá de tu situación fiscal.
+                </span>
+              </div>
             </div>
-            <Image
-              src={posterIMG}
-              className="w-full h-full  hidden! max-md:flex!"
-              alt="Item Option"
-              priority
-            />
-            <Video
-              className="w-full h-full   max-md:hidden"
-              src={"/videos/key_card_2.webm"}
-              poster={posterIMG}
-              type="video"
-              playsInline
-              autoPlay
-              muted
-              loop
-            />
-          </div>
-        </div>
-
-        {/* ── Price / availability row ── */}
-        <div
-          className="grid grid-cols-2 gap-px rounded-[14px] overflow-hidden border"
-          style={{ borderColor: "rgba(255,255,255,0.07)" }}
-        >
-          {/* Units */}
-          <div
-            className="flex flex-col gap-1 px-4 py-3"
-            style={{ background: "rgba(255,255,255,0.03)" }}
-          >
-            <span className="text-[10px] text-[rgba(255,255,255,0.45)] tracking-[-0.2px] leading-none">
-              Unidades disponibles
-            </span>
-            <span className="text-white font-semibold text-[16px] tracking-[-0.48px] leading-tight">
-              {UNITS_AVAILABLE}
-            </span>
-          </div>
-
-          {/* Price */}
-          <div
-            className="flex flex-col gap-1 px-4 py-3 border-l"
-            style={{
-              background: "rgba(255,255,255,0.03)",
-              borderColor: "rgba(255,255,255,0.07)",
-            }}
-          >
-            <span className="text-[10px] text-[rgba(255,255,255,0.45)] tracking-[-0.2px] leading-none">
-              Precio por NFT
-            </span>
-            <span className="text-white font-semibold text-[16px] tracking-[-0.48px] leading-tight">
-              {PRICE}
-            </span>
-            <span className="text-[9px] text-[rgba(255,255,255,0.30)] leading-tight tracking-[-0.18px]">
-              *Precio final con IVA (3.630€). La devolución del IVA dependerá de
-              tu situación fiscal.
-            </span>
-          </div>
-        </div>
-
+          </>
+        )}
         {/* ── Step 1: form ── */}
         {step === 1 && (
           <>
@@ -661,60 +664,6 @@ const PurchaseNFTModal = () => {
         {/* ── Step 3: bank transfer details ── */}
         {step === 3 && (
           <>
-            {/* Badge */}
-            <div
-              className="flex items-center gap-1.5 self-start px-2.5 py-1.5 rounded-full border"
-              style={{
-                background: "rgba(27,95,253,0.15)",
-                borderColor: "rgba(27,95,253,0.35)",
-              }}
-            >
-              <svg width="10" height="10" viewBox="0 0 24 24" fill="none">
-                <path
-                  d="M3 10.5L12 4l9 6.5"
-                  stroke="#60a5fa"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-                <rect
-                  x="2"
-                  y="19"
-                  width="20"
-                  height="2"
-                  rx="1"
-                  fill="#60a5fa"
-                />
-                <rect
-                  x="5"
-                  y="11"
-                  width="3"
-                  height="8"
-                  rx="0.5"
-                  fill="#60a5fa"
-                />
-                <rect
-                  x="10.5"
-                  y="11"
-                  width="3"
-                  height="8"
-                  rx="0.5"
-                  fill="#60a5fa"
-                />
-                <rect
-                  x="16"
-                  y="11"
-                  width="3"
-                  height="8"
-                  rx="0.5"
-                  fill="#60a5fa"
-                />
-              </svg>
-              <span className="text-[11px] font-semibold text-[#60a5fa] tracking-[-0.22px] leading-none uppercase">
-                Transferencia Bancaria
-              </span>
-            </div>
-
             <h3 className="text-white font-semibold text-[15px] tracking-[-0.45px] leading-tight -mt-1">
               Finaliza tu compra mediante transferencia
             </h3>
@@ -748,7 +697,7 @@ const PurchaseNFTModal = () => {
                     • Importe:
                   </span>
                   <span className="text-[12px] font-semibold text-[#1b5ffd] tracking-[-0.24px]">
-                    {PRICE} (IVA incluido)
+                    {PRICEIVA}
                   </span>
                 </div>
                 <div className="flex flex-col gap-0.5">

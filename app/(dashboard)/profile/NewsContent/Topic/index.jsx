@@ -40,7 +40,12 @@ export default function Topic({ poll }) {
         <div className="flex items-center gap-1 shrink-0 ">
           {hasVoted && (
             <span className="px-2 py-0.5 rounded-full text-[10px] font-medium font-inter bg-[#000C1A] border border-[#FFD970]/30 flex items-center gap-0.5">
-              <Icon name="check" className="w-3 h-3 text-[#FFD970]" />
+              <Icon
+                name="check"
+                size={20}
+                className="size-[12px] "
+                fill={"#FFD970"}
+              />
               <span className="bg-gradient-to-r from-[#FFD970] to-[#A37800] bg-clip-text text-transparent">
                 Votado
               </span>

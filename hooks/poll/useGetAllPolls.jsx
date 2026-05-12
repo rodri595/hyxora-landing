@@ -2,12 +2,13 @@ import apiClient from "@/utils/axios";
 import { useWeb3 } from "@/context/Web3Provider";
 import { useQuery } from "@tanstack/react-query";
 import { usePrivy } from "@privy-io/react-auth";
+
 /**
  * Custom hook to fetch all polls from user
  * @param {Object}
  * @return {Object}
  */
-export const useGetAllPolls = () => {
+export const useGetAllPolls = (props) => {
   const { smartWalletAddress } = useWeb3();
   const { authenticated, ready } = usePrivy();
   return useQuery({
@@ -20,6 +21,10 @@ export const useGetAllPolls = () => {
     refetchOnWindowFocus: false,
     refetchOnMount: true,
     retry: 1,
-    enabled: Boolean(smartWalletAddress && authenticated && ready),
+    enabled:
+      typeof props === "undefined"
+        ? true
+        : props?.enabled &&
+          Boolean(smartWalletAddress && authenticated && ready),
   });
 };

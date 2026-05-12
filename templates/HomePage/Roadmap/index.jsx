@@ -66,18 +66,13 @@ const Roadmap = () => {
         <h2 className="font-medium text-[40px] leading-[38px] tracking-[-0.04em]  text-[#19363f] text-center w-full max-md:text-[20px] max-md:leading-normal max-md:tracking-[-0.8px] ">
           RoadMap
         </h2>
-        {/* Description */}
-        <p className="font-normal text-[16px] text-[rgba(25,54,63,0.7)] text-center tracking-[-0.32px] leading-6 w-full max-w-[575px]">
-          En breve podrás disfrutar de todas las funcionalidades de Hyxora,
-          estate atento a las noticias del lanzamiento
-        </p>
       </div>
       <div className="flex flex-col items-center justify-center max-w-[1220px] gap-12 max-lg:flex-row max-lg:items-start max-md:flex-col max-md:gap-24">
         {/* First Row */}
         <div className="relative w-full p-4  pl-[212px] flex rounded-[16px] border-[0.7px] border-[rgba(25,54,63,0.02)] bg-[rgba(25,54,63,0.02)] shadow-[inset_0px_0px_4px_0px_rgba(25,54,63,0.04)] max-lg:flex-col max-lg:pl-4  max-lg:w-min">
           {/* Hot Badge */}
           <div
-            className="backdrop-blur-sm bg-[rgba(25,54,63,0.02)] border-[0.7px] border-[rgba(25,54,63,0.02)] border-solid flex gap-[10px] items-center px-[14px] py-0 absolute rounded-[32px]  top-[-32px] max-lg:left-0"
+            className="backdrop-blur-sm bg-[rgba(25,54,63,0.02)] border-[0.7px] border-[rgba(25,54,63,0.02)] border-solid flex gap-[10px] items-center px-[14px] py-0 absolute rounded-[32px]  top-[-32px] left-0"
             style={{ boxShadow: "0px 0px 4px 0px inset rgba(25,54,63,0.04)" }}
           >
             <p className="font-bold text-[14px] text-[rgba(25,54,63,0.7)] tracking-tight whitespace-nowrap  ">
@@ -170,7 +165,7 @@ const Roadmap = () => {
             rightItems={[
               {
                 icon: checkSVG,
-                text: "Modelo Pymes",
+                text: "Modelo Business",
               },
               {
                 icon: checkSVG,
@@ -312,7 +307,7 @@ const Roadmap = () => {
                 icon: checkSVG,
                 text: (
                   <>
-                    Lanzamiento <span className="font-bold">350 und</span>
+                    Lanzamiento <span className="font-bold">350 und</span>{" "}
                     <span className="font-light">3000€/und</span>
                   </>
                 ),

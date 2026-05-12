@@ -71,15 +71,15 @@ const Footer = () => {
           <div className="flex gap-2.5 max-md:gap-2.5 items-center">
             <SocialLink
               icon={linkedinIMG}
-              href="https://www.linkedin.com/company/110459565/"
+              href="https://www.linkedin.com/company/hyxora/posts/?feedView=all"
             />
             <SocialLink
               icon={instagramIMG}
-              href="https://www.instagram.com/hyxoraapp/"
+              href="https://www.instagram.com/hyxoraapp/?%20target_user_id=80202938321&ndid=6513e60030263H12ac77b7d1H6513ea999053%205H2d&utm_source=instagram&utm_medium=email&utm_campaign=find_friend_acti%20vity_email&click_source=profile&__bp=1"
             />
             <SocialLink
               icon={whatsappIMG}
-              href="https://chat.whatsapp.com/DKPpMrawHta5hxNkjmBNxM"
+              href="https://whatsapp.com/channel/0029VbCoQ1P11ulXrUUV191l"
             />
           </div>
         </div>

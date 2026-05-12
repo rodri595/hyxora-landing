@@ -12,9 +12,7 @@ export const useGetPollResults = (pollNumber) => {
   return useQuery({
     queryKey: ["getPollResults", pollNumber, smartWalletAddress],
     queryFn: async () => {
-      const response = await apiClient.get(
-        `${import.meta.env.VITE_HYXORA_API}/poll/${pollNumber}/results`,
-      );
+      const response = await apiClient.get(`/poll/${pollNumber}/results`);
       return response?.data?.data || {};
     },
     staleTime: 1 * 60 * 1000, // 1 minute
