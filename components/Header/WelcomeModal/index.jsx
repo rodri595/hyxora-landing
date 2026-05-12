@@ -122,22 +122,24 @@ const WelcomeModal = ({ open, onClose, onLogin }) => {
           </div>
 
           {/* Email field — only shown for newsletter option */}
-          <Field
-            label="Tu email"
-            placeholder="Email"
-            type="email"
-            required={option === LOGIN_OPTIONS.NEWSLETTER}
-            validated={
-              option === LOGIN_OPTIONS.NEWSLETTER && email.trim() !== ""
-            }
-            disabled={option !== LOGIN_OPTIONS.NEWSLETTER}
-            className={cn(
-              "",
-              option !== LOGIN_OPTIONS.NEWSLETTER &&
-                "cursor-not-allowed opacity-50",
-            )}
-            onChange={(e) => setEmail(e.target.value)}
-          />
+          {option === LOGIN_OPTIONS.NEWSLETTER && (
+            <Field
+              label="Tu email"
+              placeholder="Email"
+              type="email"
+              required={option === LOGIN_OPTIONS.NEWSLETTER}
+              validated={
+                option === LOGIN_OPTIONS.NEWSLETTER && email.trim() !== ""
+              }
+              disabled={option !== LOGIN_OPTIONS.NEWSLETTER}
+              className={cn(
+                "",
+                option !== LOGIN_OPTIONS.NEWSLETTER &&
+                  "cursor-not-allowed opacity-50",
+              )}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+          )}
 
           {/* Terms */}
           <label className="flex items-center gap-3 cursor-pointer">
