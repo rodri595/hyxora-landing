@@ -2,6 +2,8 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import UpButton from "@/components/UpButton";
 import ChatWidget from "@/components/ChatWidget";
+import PurchaseNFTModal from "@/components/PurchaseNFTModal";
+
 const Layout = ({
   className,
   classContainer,
@@ -28,6 +30,7 @@ const Layout = ({
       {!isHiddenFooter && <Footer />}
       <UpButton />
       <ChatWidget />
+      <PurchaseNFTModal />
     </div>
   );
 };

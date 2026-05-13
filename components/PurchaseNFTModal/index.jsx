@@ -10,6 +10,7 @@ import { useCreatePaymentLink } from "@/hooks/useCreatePaymentLink";
 import Spinner from "@/components/Spinner";
 import fireSVG from "@/assets/imgs/icons/fire.svg";
 import shieldSVG from "@/assets/imgs/icons/shield-check.svg";
+import { copyToClipboard } from "@/utils";
 
 import posterIMG from "@/assets/imgs/brand/poster.jpeg";
 import Video from "@/components/Video";
@@ -24,7 +25,7 @@ const FEATURES = [
 const UNITS_AVAILABLE = 350;
 const PRICE = "3.000€";
 const PRICEIVA = "3.630€ (IVA incluido)";
-
+const DEFAULT_CONCEPT = "Compra NFT Founder_";
 /* ─── Dark inline checkbox ─── */
 const DarkCheckbox = ({ checked, onChange, children }) => (
   <label className="flex items-center gap-2 cursor-pointer select-none">
@@ -59,6 +60,55 @@ const DarkCheckbox = ({ checked, onChange, children }) => (
   </label>
 );
 
+/* ─── Copy button ─── */
+const CopyButton = ({ text }) => {
+  const [copied, setCopied] = useState(false);
+  const handleCopy = () => {
+    copyToClipboard(text);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+  return (
+    <button
+      type="button"
+      onClick={handleCopy}
+      className="shrink-0 flex items-center justify-center size-5 rounded-md transition-colors hover:bg-[rgba(255,255,255,0.12)]"
+      style={{ background: "rgba(255,255,255,0.06)" }}
+      title="Copiar"
+    >
+      {copied ? (
+        <svg width="10" height="10" viewBox="0 0 12 10" fill="none">
+          <path
+            d="M1 5L4.5 8.5L11 1"
+            stroke="#4ade80"
+            strokeWidth="1.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
+      ) : (
+        <svg width="10" height="10" viewBox="0 0 16 16" fill="none">
+          <rect
+            x="5"
+            y="5"
+            width="9"
+            height="9"
+            rx="1.5"
+            stroke="rgba(255,255,255,0.50)"
+            strokeWidth="1.5"
+          />
+          <path
+            d="M11 5V3.5A1.5 1.5 0 0 0 9.5 2H3.5A1.5 1.5 0 0 0 2 3.5v6A1.5 1.5 0 0 0 3.5 11H5"
+            stroke="rgba(255,255,255,0.50)"
+            strokeWidth="1.5"
+            strokeLinecap="round"
+          />
+        </svg>
+      )}
+    </button>
+  );
+};
+
 /* ─── Main component ─── */
 const PurchaseNFTModal = () => {
   const { isModalPurchaseNFTOpen, setIsModalPurchaseNFTOpen } = useWeb3();
@@ -69,9 +119,9 @@ const PurchaseNFTModal = () => {
   } = useCreatePaymentLink();
   const [step, setStep] = useState(1);
   const [username, setUsername] = useState("");
+  const [refBy, setRefBy] = useState("");
   const [accepted, setAccepted] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState(null); // 'stripe' | 'crypto' | 'bank'
-  const [concept, setConcept] = useState("");
 
   const handleClose = () => {
     setIsModalPurchaseNFTOpen(false);
@@ -79,9 +129,9 @@ const PurchaseNFTModal = () => {
     setTimeout(() => {
       setStep(1);
       setUsername("");
+      setRefBy("");
       setAccepted(false);
       setPaymentMethod(null);
-      setConcept("");
     }, 300);
   };
 
@@ -93,10 +143,18 @@ const PurchaseNFTModal = () => {
       return;
     }
     if (paymentMethod === "stripe") {
-      const { link } = await mutateAsync({ type: "Stripe", username });
+      const { link } = await mutateAsync({
+        type: "Stripe",
+        username,
+        referenceNumber: refBy || undefined,
+      });
       window.location.href = link;
     } else if (paymentMethod === "crypto") {
-      const { link } = await mutateAsync({ type: "Crypto", username });
+      const { link } = await mutateAsync({
+        type: "Crypto",
+        username,
+        referenceNumber: refBy || undefined,
+      });
       window.location.href = link;
     }
   };
@@ -149,12 +207,11 @@ const PurchaseNFTModal = () => {
             </span>
           </div>
         </div>
-
         {/* ── Title ── */}
         <h2 className="text-white font-semibold text-[18px] tracking-[-0.54px] leading-tight">
           NFT Founder de Hyxora
         </h2>
-        {step !== 3 && (
+        {step !== 3 && step !== 4 && (
           <>
             {/* ── Two-column: features + NFT image ── */}
             <div className="grid grid-cols-2 gap-3">
@@ -254,24 +311,62 @@ const PurchaseNFTModal = () => {
         {/* ── Step 1: form ── */}
         {step === 1 && (
           <>
-            {/* Username field */}
-            <div className="flex flex-col gap-2">
-              <label className="text-[12px] font-medium text-white tracking-[-0.24px]">
-                Primer paso: Nombre de Usuario
-                <span className="text-[#1b5ffd] ml-0.5">*</span>
-              </label>
+            {/* Username + refBy row */}
+            <div className="grid grid-cols-2 gap-3">
+              {/* Username field */}
+              <div className="flex flex-col gap-2">
+                <label className="text-[12px] font-medium text-white tracking-[-0.24px]">
+                  Nombre de Usuario
+                  <span className="text-[#1b5ffd] ml-0.5">*</span>
+                </label>
 
-              <div className="relative">
-                <span className="absolute left-2 top-1/2 -translate-y-1/2 text-[rgba(255,255,255,0.35)] text-[14px] tracking-tighter">
-                  @
+                <div className="relative">
+                  <span className="absolute left-2 top-1/2 -translate-y-1/2 text-[rgba(255,255,255,0.35)] text-[14px] tracking-tighter">
+                    @
+                  </span>
+                  <input
+                    type="text"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value.slice(0, 15))}
+                    placeholder="Aparecerá en tu NFT"
+                    maxLength={15}
+                    className="w-full h-9 pl-7 pr-3 rounded-[10px] text-[12px] text-white placeholder:text-[rgba(255,255,255,0.30)] transition-colors outline-none"
+                    style={{
+                      background: "rgba(255,255,255,0.06)",
+                      border: "1px solid rgba(255,255,255,0.10)",
+                    }}
+                    onFocus={(e) => {
+                      e.target.style.border = "1px solid rgba(27,95,253,0.60)";
+                      e.target.style.background = "rgba(255,255,255,0.09)";
+                    }}
+                    onBlur={(e) => {
+                      e.target.style.border =
+                        "1px solid rgba(255,255,255,0.10)";
+                      e.target.style.background = "rgba(255,255,255,0.06)";
+                    }}
+                  />
+                </div>
+
+                <span className="text-[10px] text-[rgba(255,255,255,0.35)] tracking-[-0.2px]">
+                  Máximo 15 caracteres.
                 </span>
+              </div>
+
+              {/* Referral code field */}
+              <div className="flex flex-col gap-2">
+                <label className="text-[12px] font-medium text-white tracking-[-0.24px]">
+                  Código de referido
+                  <span className="text-[rgba(255,255,255,0.35)] ml-1 font-normal text-[11px]">
+                    (opcional)
+                  </span>
+                </label>
+
                 <input
                   type="text"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value.slice(0, 15))}
-                  placeholder="Este nombre aparecerá en tu NFT"
-                  maxLength={15}
-                  className="w-full h-9 pl-7 pr-3 rounded-[10px] text-[12px] text-white placeholder:text-[rgba(255,255,255,0.30)] transition-colors outline-none"
+                  value={refBy}
+                  onChange={(e) => setRefBy(e.target.value)}
+                  placeholder="Ej: ABC123"
+                  className="w-full h-9 px-3 rounded-[10px] text-[12px] text-white placeholder:text-[rgba(255,255,255,0.30)] transition-colors outline-none"
                   style={{
                     background: "rgba(255,255,255,0.06)",
                     border: "1px solid rgba(255,255,255,0.10)",
@@ -285,11 +380,11 @@ const PurchaseNFTModal = () => {
                     e.target.style.background = "rgba(255,255,255,0.06)";
                   }}
                 />
-              </div>
 
-              <span className="text-[10px] text-[rgba(255,255,255,0.35)] tracking-[-0.2px]">
-                El nombre puede contener como máximo 15 caracteres.
-              </span>
+                <span className="text-[10px] text-[rgba(255,255,255,0.35)] tracking-[-0.2px]">
+                  Si alguien te refirió, ponlo aquí.
+                </span>
+              </div>
             </div>
 
             {/* Terms checkbox */}
@@ -311,7 +406,8 @@ const PurchaseNFTModal = () => {
             {/* CTA */}
             <button
               type="button"
-              disabled={!canProceed}
+              disabled
+              // disabled={!canProceed}
               onClick={() => setStep(2)}
               className="w-full h-11 relative rounded-[100px] cursor-pointer overflow-hidden disabled:opacity-40 disabled:cursor-not-allowed transition-opacity"
               style={{
@@ -696,7 +792,7 @@ const PurchaseNFTModal = () => {
                   <span className="text-[10px] text-[rgba(255,255,255,0.40)] tracking-[-0.2px]">
                     • Importe:
                   </span>
-                  <span className="text-[12px] font-semibold text-[#1b5ffd] tracking-[-0.24px]">
+                  <span className="text-[12px] font-semibold text-white tracking-[-0.24px]">
                     {PRICEIVA}
                   </span>
                 </div>
@@ -704,25 +800,34 @@ const PurchaseNFTModal = () => {
                   <span className="text-[10px] text-[rgba(255,255,255,0.40)] tracking-[-0.2px]">
                     • IBAN:
                   </span>
-                  <span className="text-[11px] font-semibold text-[#1b5ffd] tracking-[-0.22px] break-all">
-                    ES64 0182 0187 2902 0163 5449
-                  </span>
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-[11px] font-semibold text-white tracking-[-0.22px] break-all">
+                      ES64 0182 0187 2902 0163 5449
+                    </span>
+                    <CopyButton text="ES64 0182 0187 2902 0163 5449" />
+                  </div>
                 </div>
                 <div className="flex flex-col gap-0.5">
                   <span className="text-[10px] text-[rgba(255,255,255,0.40)] tracking-[-0.2px]">
                     • Beneficiario:
                   </span>
-                  <span className="text-[12px] font-semibold text-[#1b5ffd] tracking-[-0.24px]">
-                    Hyxora Finance SL
-                  </span>
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-[12px] font-semibold text-white tracking-[-0.24px]">
+                      Hyxora Finance SL
+                    </span>
+                    <CopyButton text="Hyxora Finance SL" />
+                  </div>
                 </div>
                 <div className="flex flex-col gap-0.5">
                   <span className="text-[10px] text-[rgba(255,255,255,0.40)] tracking-[-0.2px]">
                     • CIF:
                   </span>
-                  <span className="text-[12px] font-semibold text-[#1b5ffd] tracking-[-0.24px]">
-                    B24879702
-                  </span>
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-[12px] font-semibold text-white tracking-[-0.24px]">
+                      B24879702
+                    </span>
+                    <CopyButton text="B24879702" />
+                  </div>
                 </div>
               </div>
 
@@ -734,7 +839,7 @@ const PurchaseNFTModal = () => {
                   borderColor: "rgba(27,95,253,0.40)",
                 }}
               >
-                <p className="text-[12px] font-semibold text-[#1b5ffd] tracking-[-0.24px] leading-relaxed">
+                <p className="text-[12px] font-semibold text-white tracking-[-0.24px] leading-relaxed">
                   No te preocupes, te mandaremos un mail con estos datos de la
                   transferencia para que los tengas a mano.
                 </p>
@@ -747,31 +852,24 @@ const PurchaseNFTModal = () => {
                 Concepto
                 <span className="text-[#1b5ffd] ml-0.5">*</span>
               </label>
-              <input
-                type="text"
-                value={concept}
-                onChange={(e) => setConcept(e.target.value)}
-                placeholder="Tu nombre completo"
-                className="w-full h-9 px-3 rounded-[10px] text-[12px] text-white placeholder:text-[rgba(255,255,255,0.30)] transition-colors outline-none"
-                style={{
-                  background: "rgba(255,255,255,0.06)",
-                  border: "1px solid rgba(255,255,255,0.10)",
-                }}
-                onFocus={(e) => {
-                  e.target.style.border = "1px solid rgba(27,95,253,0.60)";
-                  e.target.style.background = "rgba(255,255,255,0.09)";
-                }}
-                onBlur={(e) => {
-                  e.target.style.border = "1px solid rgba(255,255,255,0.10)";
-                  e.target.style.background = "rgba(255,255,255,0.06)";
-                }}
-              />
-              <span className="text-[10px] text-[rgba(255,255,255,0.35)] tracking-[-0.2px] leading-relaxed">
-                Escribe en el concepto:{" "}
-                <span className="text-[rgba(255,255,255,0.55)] font-medium">
-                  Compra NFT Founder _ Tu nombre
-                </span>
-              </span>
+              <div className="flex items-center gap-2">
+                <input
+                  type="text"
+                  value={DEFAULT_CONCEPT + username}
+                  placeholder="Tu nombre completo"
+                  className="w-full h-9 px-3 rounded-[10px] text-[12px] text-white placeholder:text-[rgba(255,255,255,0.30)] transition-colors outline-none"
+                  style={{
+                    background: "rgba(255,255,255,0.06)",
+                    border: "1px solid rgba(255,255,255,0.10)",
+                  }}
+                  onFocus={(e) => {
+                    e.target.style.border = "1px solid rgba(27,95,253,0.60)";
+                    e.target.style.background = "rgba(255,255,255,0.09)";
+                  }}
+                  readOnly
+                />
+                <CopyButton text={DEFAULT_CONCEPT + username} />
+              </div>
             </div>
 
             <p className="text-[9px] text-[rgba(255,255,255,0.30)] tracking-[-0.18px] leading-relaxed -mt-1">
@@ -794,18 +892,15 @@ const PurchaseNFTModal = () => {
 
               <button
                 type="button"
-                disabled={!concept.trim() || isPending}
+                disabled={isPending}
                 onClick={async () => {
                   try {
                     await mutateAsync({
                       type: "Transfer",
                       username,
-                      referenceNumber: concept,
+                      referenceNumber: DEFAULT_CONCEPT + username,
                     });
-                    handleClose();
-                    toast.success(
-                      "¡Solicitud enviada! Te mandaremos los datos de la transferencia por email.",
-                    );
+                    setStep(4);
                   } catch {
                     toast.error(
                       "Error al procesar la transferencia. Inténtalo de nuevo.",
@@ -845,6 +940,135 @@ const PurchaseNFTModal = () => {
               </span>
             </div>
           </>
+        )}
+
+        {/* ── Step 4: success ── */}
+        {step === 4 && (
+          <div className="flex flex-col items-center gap-5 py-3">
+            {/* Checkmark */}
+            <div
+              className="flex items-center justify-center size-14 rounded-full"
+              style={{
+                background: "rgba(27,95,253,0.15)",
+                border: "1.5px solid rgba(27,95,253,0.40)",
+              }}
+            >
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="none">
+                <path
+                  d="M5 12.5L9.5 17L19 7"
+                  stroke="#1b5ffd"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </div>
+
+            {/* Heading */}
+            <div className="flex flex-col items-center gap-1.5 text-center">
+              <p className="text-[13px] font-bold text-[#1b5ffd] tracking-[0.5px] uppercase leading-tight">
+                Proceso realizado correctamente
+              </p>
+              <p className="text-[14px] font-semibold text-white tracking-[-0.42px] leading-tight">
+                Esperamos tu transferencia a:
+              </p>
+            </div>
+
+            {/* Bank details card */}
+            <div
+              className="w-full flex flex-col gap-3 p-5 rounded-[16px] border"
+              style={{
+                background: "rgba(255,255,255,0.03)",
+                borderColor: "rgba(255,255,255,0.09)",
+              }}
+            >
+              <div className="flex flex-col gap-0.5">
+                <span className="text-[11px] text-[rgba(255,255,255,0.45)] tracking-[-0.22px]">
+                  • Importe:
+                </span>
+                <span className="text-[13px] font-semibold text-white tracking-[-0.26px]">
+                  {PRICEIVA}
+                </span>
+              </div>
+              <div className="flex flex-col gap-0.5">
+                <span className="text-[11px] text-[rgba(255,255,255,0.45)] tracking-[-0.22px]">
+                  • IBAN:
+                </span>
+                <div className="flex items-center gap-1.5">
+                  <span className="text-[13px] font-semibold text-white tracking-[-0.26px]">
+                    ES64 0182 0187 2902 0163 5449
+                  </span>
+                  <CopyButton text="ES64 0182 0187 2902 0163 5449" />
+                </div>
+              </div>
+              <div className="flex flex-col gap-0.5">
+                <span className="text-[11px] text-[rgba(255,255,255,0.45)] tracking-[-0.22px]">
+                  • Beneficiario:
+                </span>
+                <div className="flex items-center gap-1.5">
+                  <span className="text-[13px] font-semibold text-white tracking-[-0.26px]">
+                    Hyxora Finance SL
+                  </span>
+                  <CopyButton text="Hyxora Finance SL" />
+                </div>
+              </div>
+              <div className="flex flex-col gap-0.5">
+                <span className="text-[11px] text-[rgba(255,255,255,0.45)] tracking-[-0.22px]">
+                  • CIF:
+                </span>
+                <div className="flex items-center gap-1.5">
+                  <span className="text-[13px] font-semibold text-white tracking-[-0.26px]">
+                    B24879702
+                  </span>
+                  <CopyButton text="B24879702" />
+                </div>
+              </div>
+            </div>
+
+            {/* Concept reminder */}
+            <div
+              className="w-full px-4 py-3 rounded-[12px] border text-center"
+              style={{
+                background: "rgba(27,95,253,0.07)",
+                borderColor: "rgba(27,95,253,0.30)",
+              }}
+            >
+              <p className="text-[12px] text-[#60a5fa] tracking-[-0.24px] leading-relaxed">
+                No te olvides de poner el concepto en la transferencia para que
+                sea más fácil tu identificación
+              </p>
+              <div className="flex items-center justify-center gap-2 mt-1.5">
+                <p className="text-[13px] font-semibold text-white tracking-[-0.26px]">
+                  Compra NFT Founder_{username}
+                </p>
+                <CopyButton text={`Compra NFT Founder_${username}`} />
+              </div>
+            </div>
+
+            {/* Welcome */}
+            <p className="text-[15px] font-bold text-white tracking-[-0.45px]">
+              Bienvenid@ a Hyxora
+            </p>
+
+            {/* Close */}
+            <button
+              type="button"
+              onClick={handleClose}
+              className="w-full h-11 relative rounded-[100px] cursor-pointer overflow-hidden transition-opacity"
+              style={{
+                background: "linear-gradient(135deg, #1b5ffd 0%, #0d40c8 100%)",
+                border: "1px solid rgba(255,255,255,0.18)",
+              }}
+            >
+              <span className="font-semibold text-[13px] text-white tracking-[-0.52px]">
+                Cerrar
+              </span>
+              <div
+                className="absolute inset-0 pointer-events-none rounded-[inherit]"
+                style={{ boxShadow: "inset 0 0 12px rgba(255,255,255,0.15)" }}
+              />
+            </button>
+          </div>
         )}
       </div>
     </Modal>

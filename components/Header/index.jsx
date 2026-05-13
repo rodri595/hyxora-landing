@@ -19,6 +19,7 @@ import { useLogin, usePrivy } from "@privy-io/react-auth";
 import User from "./User";
 import { cn } from "@/utils";
 import { GetMyPayments } from "@/hooks/nfts/GetMyPayments";
+import { useWeb3 } from "@/context/Web3Provider";
 
 gsap.registerPlugin(ScrollToPlugin);
 const MenuItem = ({ children, href = "#", ...props }) => {
@@ -166,7 +167,7 @@ const ExploreDropdown = () => {
                 disabled
               />
               <ExploreMenuItem
-                title="Podcast de Hyxora"
+                title="Podcast"
                 description="El Elefante Desnudo"
                 external
                 href="https://elefantedesnudo.com"
@@ -280,6 +281,7 @@ const OportunityDropdown = () => {
 };
 const Header = ({ isFixed }) => {
   const { login } = useLogin();
+  const { setIsModalPurchaseNFTOpen } = useWeb3();
   const { authenticated } = usePrivy();
   const [welcomeOpen, setWelcomeOpen] = useState(false);
   const handleApuntate = () => setWelcomeOpen(true);
@@ -372,9 +374,61 @@ const Header = ({ isFixed }) => {
                 </Button>
               </>
             ) : (
-              <User />
+              <>
+                <button
+                  type="button"
+                  onClick={() => setIsModalPurchaseNFTOpen(() => true)}
+                  className={cn(
+                    "bg-[#1b5ffd] border border-[rgba(255,255,255,0.2)] border-solid h-[30px] relative rounded-[100px] cursor-pointer ",
+                  )}
+                >
+                  <div className="flex gap-[3px] h-[30px] items-center justify-center overflow-hidden p-[8px] relative rounded-[inherit]">
+                    <Image
+                      src={fireSVG}
+                      alt="Fire Icon"
+                      className="relative w-[10px] h-[10px]"
+                    />
+                    <p className="font-medium text-[12px] text-[#f7f8f8] tracking-[-0.48px] whitespace-nowrap">
+                      Comprar Ahora
+                    </p>
+                  </div>
+                  <div
+                    className="absolute inset-0 pointer-events-none"
+                    style={{
+                      boxShadow: "0px 0px 10px 0px inset rgba(255,255,255,0.4)",
+                    }}
+                  />
+                </button>
+                <User />
+              </>
             )}
           </div>
+          <button
+            type="button"
+            onClick={() =>
+              authenticated ? setIsModalPurchaseNFTOpen(() => true) : login()
+            }
+            className={cn(
+              "mr-2 hidden max-md:flex bg-[#1b5ffd] border border-[rgba(255,255,255,0.2)] border-solid h-[30px] relative rounded-[100px] cursor-pointer ",
+            )}
+          >
+            <div className="flex gap-[3px] h-[30px] items-center justify-center overflow-hidden p-[8px] relative rounded-[inherit]">
+              <Image
+                src={fireSVG}
+                alt="Fire Icon"
+                className="relative w-[10px] h-[10px]"
+              />
+              <p className="font-medium text-[12px] text-[#f7f8f8] tracking-[-0.48px] whitespace-nowrap">
+                Comprar Ahora
+              </p>
+            </div>
+            <div
+              className="absolute inset-0 pointer-events-none"
+              style={{
+                boxShadow: "0px 0px 10px 0px inset rgba(255,255,255,0.4)",
+              }}
+            />
+          </button>
           <Menu />
         </div>
       </div>

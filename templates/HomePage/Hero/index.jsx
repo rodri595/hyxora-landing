@@ -5,12 +5,12 @@ import chevronSVG from "@/assets/imgs/icons/chevron.svg";
 import mouseSVG from "@/assets/imgs/icons/mouse.svg";
 import appleIMG from "@/assets/imgs/misc/apple.svg";
 import googleIMG from "@/assets/imgs/misc/google.svg";
-import app1IMG from "@/assets/imgs/misc/01 - IPHONE-2.png";
+import app1IMG from "@/assets/imgs/misc/01 - IPHONE.png";
 import app2IMG from "@/assets/imgs/misc/02 - IPHONE-2.png";
-import item1IMG from "@/assets/imgs/misc/swap.png";
+import item1IMG from "@/assets/imgs/misc/btc.png";
 import item2IMG from "@/assets/imgs/misc/graph.png";
-import item3IMG from "@/assets/imgs/misc/staking.png";
-import item4IMG from "@/assets/imgs/misc/tx-container.png";
+import item3IMG from "@/assets/imgs/misc/summary.png";
+import item4IMG from "@/assets/imgs/misc/balance.png";
 import { useRef } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -243,27 +243,27 @@ const Hero = () => {
               src={item3IMG}
               alt="Item Option"
               priority
-              className="absolute bottom-[130px] left-[-320px] h-[200px] w-auto z-1 -rotate-0.1! max-lg:hidden"
+              className="absolute bottom-[-30px] left-[-290px] h-[400px] w-auto z-1 -rotate-0.1! max-lg:hidden"
             />
             <Image
               ref={topLeftItemRef}
               src={item1IMG}
               alt="Item Option"
               priority
-              className="absolute top-[50px] left-[-400px] h-[80px] w-auto max-lg:hidden"
+              className="absolute top-[50px] left-[-300px] h-[200px] w-auto max-lg:hidden "
             />
             <Image
               ref={bottomRightItemRef}
               src={item4IMG}
               alt="Item Option"
               priority
-              className="absolute bottom-[100px] right-[-500px]  h-[200px] w-auto max-lg:hidden"
+              className=" absolute bottom-[10px] right-[-300px]  h-[400px] w-auto max-lg:hidden"
             />
             <Image
               src={layerIMG}
               alt="layer blue Animation"
               priority
-              className="w-full h-56 absolute bottom-0 blur-[2px] max-md:h-[15%] max-md:bottom-[-10px]"
+              className=" w-full h-56 absolute bottom-0 blur-[2px] max-md:h-[15%] max-md:bottom-[-10px]"
               style={{
                 background:
                   "linear-gradient(180deg, rgba(255, 255, 255, 0) 0%, white 100%)",

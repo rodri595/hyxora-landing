@@ -6,7 +6,9 @@ import { useGSAP } from "@gsap/react";
 
 gsap.registerPlugin(useGSAP);
 
-const TARGET_DATE = new Date("2026-05-15T18:00:00");
+import { LAUNCH_DATE } from "@/constants/dates";
+
+const TARGET_DATE = LAUNCH_DATE;
 
 function getTimeLeft() {
   const now = new Date();
@@ -36,7 +38,7 @@ function CountdownUnit({ value, label, digitRef }) {
           {String(value).padStart(2, "0")}
         </span>
       </div>
-      <span className="text-[9px] font-medium text-[rgba(255,255,255,0.40)] tracking-[0.4px] uppercase">
+      <span className="text-[9px] font-medium text-white tracking-[0.4px] uppercase">
         {label}
       </span>
     </div>
@@ -114,12 +116,12 @@ const Countdown = () => {
       className="flex flex-col items-center gap-2 py-2.5 px-3.5 rounded-2xl bg-[#0D0D0D] border border-[#24292D] shadow-[inset_0_0_4px_0_rgba(25,54,63,0.04)] backdrop-blur-[8px] max-w-fit mx-auto"
     >
       {/* Label */}
-      <p className="text-[11px] font-medium text-[rgba(255,255,255,0.55)] tracking-[-0.2px] text-center leading-snug">
+      <p className="text-[11px] font-medium text-white tracking-[-0.2px] text-center leading-snug">
         {time?.done
           ? "¡Fase Pública de NFT Founder abierta!"
           : "Fase Pública de NFT Founder abierta en"}{" "}
         <br />
-        <span className="text-[#1b5ffd] font-semibold whitespace-nowrap">
+        <span className="text-white font-semibold whitespace-nowrap">
           (Sólo 350 und para todo 2026)
         </span>
       </p>

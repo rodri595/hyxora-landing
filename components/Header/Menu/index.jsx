@@ -7,7 +7,6 @@ import Button from "@/components/Button";
 import trendingIcon from "@/assets//imgs/icons/trending.png";
 import newListingsIcon from "@/assets/imgs/icons/newlisting.png";
 import learningCenterIcon from "@/assets/imgs/icons/learning.png";
-import topGainersIcon from "@/assets/imgs/icons/topgainer.png";
 import Link from "next/link";
 import { useLenis } from "lenis/react";
 import { useEffect, useState, useRef, useMemo } from "react";
