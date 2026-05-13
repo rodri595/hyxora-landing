@@ -5,10 +5,10 @@ import WalletItem from "./item";
 import triangleIMG from "@/assets/imgs/icons/triangle.svg";
 import circleIMG from "@/assets/imgs/icons/circle.svg";
 // ///
-import stakeIMG from "./stake.png";
-import swapIMG from "./swap.png";
-import sendIMG from "./send.png";
-import FundsIMG from "./funds.png";
+import stakeIMG from "./1.png";
+import swapIMG from "./3.png";
+import sendIMG from "./4.png";
+import FundsIMG from "./5.png";
 import soonIMG from "./soon.png";
 import Link from "next/link";
 const Finance = () => {
