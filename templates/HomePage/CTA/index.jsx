@@ -64,8 +64,9 @@ const CTA = () => {
             <span className="text-[#19363f]">Hyxora</span>
           </h2>
           <p className="font-normal text-[16px] leading-[24px] tracking-[-0.32px] text-[rgba(25,54,63,0.7)]">
-            Incluir los canales de la Comunidad Hyxora y el Acceso al Podcast
-            Elefantedesnudo
+            Suscríbete a nuestra newsletter y recibe las últimas novedades,
+            tendencias cripto y oportunidades exclusivas directamente en tu
+            correo.
           </p>
         </div>
 
