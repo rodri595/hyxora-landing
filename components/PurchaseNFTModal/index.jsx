@@ -146,14 +146,14 @@ const PurchaseNFTModal = () => {
       const { link } = await mutateAsync({
         type: "Stripe",
         username,
-        referenceNumber: refBy || undefined,
+        refBy: refBy || undefined,
       });
       window.location.href = link;
     } else if (paymentMethod === "crypto") {
       const { link } = await mutateAsync({
         type: "Crypto",
         username,
-        referenceNumber: refBy || undefined,
+        refBy: refBy || undefined,
       });
       window.location.href = link;
     }
@@ -898,6 +898,7 @@ const PurchaseNFTModal = () => {
                     await mutateAsync({
                       type: "Transfer",
                       username,
+                      refBy,
                       referenceNumber: DEFAULT_CONCEPT + username,
                     });
                     setStep(4);

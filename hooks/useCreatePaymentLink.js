@@ -10,7 +10,7 @@ export function useCreatePaymentLink() {
     const { smartWalletAddress } = useWeb3();
 
     return useMutation({
-        mutationFn: async ({ type, username, referenceNumber = undefined }) => {
+        mutationFn: async ({ type, username, refBy = undefined, referenceNumber = undefined }) => {
             const cacheKey = `createLink-${smartWalletAddress}-${type}`;
             const cached = readFromLocalStorageWithExpiracy(cacheKey);
             if (cached) return JSON.parse(cached);
@@ -19,6 +19,7 @@ export function useCreatePaymentLink() {
                 wallet: smartWalletAddress,
                 name: username,
                 type,
+                refBy,
                 ref: referenceNumber,
                 lang: "ES",
             });
