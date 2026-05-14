@@ -375,7 +375,7 @@ const Header = ({ isFixed }) => {
               </>
             ) : (
               <>
-                <button
+                {/* <button
                   type="button"
                   onClick={() => setIsModalPurchaseNFTOpen(() => true)}
                   className={cn(
@@ -389,7 +389,7 @@ const Header = ({ isFixed }) => {
                       className="relative w-[10px] h-[10px]"
                     />
                     <p className="font-medium text-[12px] text-[#f7f8f8] tracking-[-0.48px] whitespace-nowrap">
-                      Comprar Ahora
+                      Inicia Sesión
                     </p>
                   </div>
                   <div
@@ -398,37 +398,37 @@ const Header = ({ isFixed }) => {
                       boxShadow: "0px 0px 10px 0px inset rgba(255,255,255,0.4)",
                     }}
                   />
-                </button>
+                </button> */}
                 <User />
               </>
             )}
           </div>
-          <button
-            type="button"
-            onClick={() =>
-              authenticated ? setIsModalPurchaseNFTOpen(() => true) : login()
-            }
-            className={cn(
-              "mr-2 hidden max-md:flex bg-[#1b5ffd] border border-[rgba(255,255,255,0.2)] border-solid h-[30px] relative rounded-[100px] cursor-pointer ",
-            )}
-          >
-            <div className="flex gap-[3px] h-[30px] items-center justify-center overflow-hidden p-[8px] relative rounded-[inherit]">
-              <Image
-                src={fireSVG}
-                alt="Fire Icon"
-                className="relative w-[10px] h-[10px]"
+          {!authenticated && (
+            <button
+              type="button"
+              onClick={() => login()}
+              className={cn(
+                "mr-2 hidden max-md:flex bg-[#1b5ffd] border border-[rgba(255,255,255,0.2)] border-solid h-[30px] relative rounded-[100px] cursor-pointer ",
+              )}
+            >
+              <div className="flex gap-[3px] h-[30px] items-center justify-center overflow-hidden p-[8px] relative rounded-[inherit]">
+                <Image
+                  src={fireSVG}
+                  alt="Fire Icon"
+                  className="relative w-[10px] h-[10px]"
+                />
+                <p className="font-medium text-[12px] text-[#f7f8f8] tracking-[-0.48px] whitespace-nowrap">
+                  Inicia Sesión
+                </p>
+              </div>
+              <div
+                className="absolute inset-0 pointer-events-none"
+                style={{
+                  boxShadow: "0px 0px 10px 0px inset rgba(255,255,255,0.4)",
+                }}
               />
-              <p className="font-medium text-[12px] text-[#f7f8f8] tracking-[-0.48px] whitespace-nowrap">
-                Comprar Ahora
-              </p>
-            </div>
-            <div
-              className="absolute inset-0 pointer-events-none"
-              style={{
-                boxShadow: "0px 0px 10px 0px inset rgba(255,255,255,0.4)",
-              }}
-            />
-          </button>
+            </button>
+          )}
           <Menu />
         </div>
       </div>

@@ -4,7 +4,7 @@ import Icon from "@/components/Icon";
 const ShareContent = () => {
   return (
     <div className="flex w-full items-start justify-between gap-[16px] flex-row! flex-wrap">
-      <Tab
+      {/* <Tab
         className="w-full"
         icon={
           <Icon
@@ -16,7 +16,7 @@ const ShareContent = () => {
         title="Factura"
         description="Rellena los datos de factución"
         disabled
-      />
+      /> */}
       <Tab
         className="w-full"
         icon={
@@ -57,6 +57,21 @@ const ShareContent = () => {
         title="Política de privacidad"
         description="Lee la política de privacidad"
         to="/privacy"
+        target="_blank"
+      />
+      <Tab
+        className="w-full"
+        icon={
+          <Icon
+            name={"add-document"}
+            className="size-[16px] aspect-square"
+            size={20}
+          />
+        }
+        title="Nota a los Founders"
+        description="Descarga el documento FASE 1"
+        to="/docs/nota-founders-fase1.pdf"
+        download="nota-founders-fase1.pdf"
         target="_blank"
       />
     </div>
