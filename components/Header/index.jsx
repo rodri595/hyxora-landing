@@ -169,8 +169,7 @@ const ExploreDropdown = () => {
               <ExploreMenuItem
                 title="Podcast"
                 description="El Elefante Desnudo"
-                external
-                href="https://elefantedesnudo.com"
+                href="/podcast"
                 image={podcastIMG}
               />
             </div>

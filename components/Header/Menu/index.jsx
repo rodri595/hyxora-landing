@@ -344,10 +344,8 @@ const MenuComponent = () => {
                 title="Podcast de Hyxora"
                 description="El Elefante Desnudo"
                 className="w-full max-w-none"
-                external
-                href="https://elefantedesnudo.com"
+                href="/podcast"
                 image={podcastIMG}
-                target="_blank"
               />
             </div>
             {/* Información Section */}

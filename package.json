@@ -6,7 +6,9 @@
     "dev": "next dev --port 8081",
     "build": "next build",
     "start": "next start --port 8081",
-    "lint": "eslint"
+    "lint": "biome check .",
+    "lint:fix": "biome check --write .",
+    "format": "biome format --write ."
   },
   "dependencies": {
     "@gsap/react": "^2.1.2",
@@ -37,8 +39,7 @@
     "@tailwindcss/postcss": "^4",
     "@types/node": "24.10.1",
     "@types/react": "19.2.7",
-    "eslint": "^9",
-    "eslint-config-next": "16.0.6",
+    "@biomejs/biome": "^1.9.4",
     "tailwindcss": "^4"
   }
 }
