@@ -20,7 +20,7 @@ const AdminContent = () => {
 
   return (
     <section
-      className="flex-1 flex gap-[16px] justify-start items-start p-4 h-full min-h-0 overflow-y-auto"
+      className="flex-1 flex gap-4 justify-start items-start p-4 h-full min-h-0"
       data-lenis-prevent
     >
       {Module ? (
@@ -34,7 +34,7 @@ const AdminContent = () => {
           <Module />
         </Suspense>
       ) : (
-        <div className="flex items-center justify-center w-full h-full">
+        <div className="flex items-center justify-center w-full ">
           <p className="font-inter text-[12px] text-[rgba(25,54,63,0.4)] tracking-[-0.48px]">
             {activeTabData.label} — próximamente
           </p>

@@ -152,15 +152,20 @@ const Header = ({
                 isSpecialPage && "bg-[#24292D]",
               )}
             />
-            <div className="w-full flex justify-between items-center py-[12px] gap-[24px]">
+            <div
+              className={cn(
+                "w-full flex justify-between items-center gap-[24px]",
+                !headerExtra && "py-3",
+              )}
+            >
               {headerExtra ? (
-                <div className="flex justify-start items-center flex-1 overflow-x-auto no-scrollbar">
+                <div className="flex justify-start items-center flex-1">
                   {headerExtra}
                 </div>
               ) : (
                 <>
                   {/* left side */}
-                  <div className="flex justify-start items-center gap-[24px] flex-1">
+                  <div className="flex justify-start items-center gap-6 flex-1 ">
                     {/* Hot Button */}
                     <button
                       type="button"

@@ -353,7 +353,7 @@ const DataTable = ({
   const totalRows = table.getFilteredRowModel().rows.length;
 
   return (
-    <div className="flex flex-col w-full h-full gap-0">
+    <div className="flex flex-col w-full h-full ">
       {/* Toolbar */}
       <div className="flex items-center justify-between gap-3 mb-3 flex-wrap">
         {title && (
@@ -409,9 +409,9 @@ const DataTable = ({
       </div>
 
       {/* Table wrapper */}
-      <div className="flex-1 overflow-auto rounded-xl border-[0.7px] border-[rgba(25,54,63,0.08)] bg-white shadow-[0px_1px_4px_0px_rgba(25,54,63,0.04)]">
-        <table className="w-full border-collapse table-auto">
-          <thead>
+      <div className="flex-1  overflow-auto rounded-xl border-[0.7px] border-[rgba(25,54,63,0.08)] bg-white shadow-[0px_1px_4px_0px_rgba(25,54,63,0.04)] scrollbar-thin scrollbar-thumb-[rgba(25,54,63,0.2)] scrollbar-thumb-rounded-lg">
+        <table className="w-full border-collapse table-auto ">
+          <thead className="sticky top-0 z-10">
             {table.getHeaderGroups().map((hg) => (
               <tr
                 key={hg.id}
@@ -469,13 +469,13 @@ const DataTable = ({
               table.getRowModel().rows.map((row, i) => (
                 <tr
                   key={row.id}
-                  onClick={row.getToggleSelectedHandler()}
+                  // onClick={row.getToggleSelectedHandler()}
                   onKeyDown={(e) => {
                     if (e.key === " " || e.key === "Enter")
                       row.getToggleSelectedHandler()(e);
                   }}
                   className={cn(
-                    "border-b-[0.7px] border-[rgba(25,54,63,0.05)] cursor-pointer transition-colors",
+                    "border-b-[0.7px] border-[rgba(25,54,63,0.05)] cursor-pointer transition-colors ",
                     row.getIsSelected()
                       ? "bg-[rgba(25,54,63,0.03)]"
                       : i % 2 === 0
