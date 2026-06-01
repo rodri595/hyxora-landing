@@ -10,7 +10,7 @@ import Header from "./Header";
 import Sidebar from "./Sidebar";
 import PurchaseNFTModal from "@/components/PurchaseNFTModal";
 
-const DashboardLayout = ({ children }) => {
+const DashboardLayout = ({ children, headerExtra }) => {
   const router = useRouter();
   const pathname = usePathname();
   const { authenticated, ready } = usePrivy();
@@ -49,6 +49,7 @@ const DashboardLayout = ({ children }) => {
         isSpecialPage={isSpecialPage}
         isSidebarOpen={isSidebarOpen}
         setIsSidebarOpen={setIsSidebarOpen}
+        headerExtra={headerExtra}
       />
       <div className="flex flex-1 w-full min-h-0 h-full justify-start items-stretch ]">
         <Sidebar

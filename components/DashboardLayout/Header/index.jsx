@@ -20,6 +20,7 @@ const Header = ({
   isSidebarOpen,
   setIsSidebarOpen,
   extraNav = true,
+  headerExtra,
 }) => {
   const { setIsModalPurchaseNFTOpen } = useWeb3();
   const toggleMenu = () => {
@@ -53,6 +54,7 @@ const Header = ({
                   fill="none"
                   xmlns="http://www.w3.org/2000/svg"
                 >
+                  <title>Menu</title>
                   <path
                     d="M12 4L4 12M4 4L12 12"
                     stroke={isSpecialPage ? "#fff" : "#19363F"}
@@ -104,6 +106,7 @@ const Header = ({
                   xmlns="http://www.w3.org/2000/svg"
                   className="aspect-square size-[20px]"
                 >
+                  <title>Chat</title>
                   <path
                     d="M22 12.62V14.68C22 15.24 21.54 15.7 20.97 15.7H19.04C17.96 15.7 16.97 14.91 16.88 13.83C16.82 13.2 17.06 12.61 17.48 12.2C17.85 11.82 18.36 11.6 18.92 11.6H20.97C21.54 11.6 22 12.06 22 12.62Z"
                     fill={isSpecialPage ? "#fff" : "#8294AC"}
@@ -141,7 +144,7 @@ const Header = ({
             <User isSpecialPage={isSpecialPage} />
           </div>
         </div>
-        {extraNav && (
+        {(extraNav || headerExtra) && (
           <>
             <div
               className={cn(
@@ -150,55 +153,63 @@ const Header = ({
               )}
             />
             <div className="w-full flex justify-between items-center py-[12px] gap-[24px]">
-              {/* left side */}
-              <div className="flex justify-start items-center gap-[24px] flex-1">
-                {/* Hot Button */}
-                <button
-                  type="button"
-                  rel="noopener noreferrer"
-                  onClick={() => setIsModalPurchaseNFTOpen(true)}
-                  className={cn(
-                    "bg-[#1b5ffd] border border-[rgba(255,255,255,0.2)] border-solid h-[30px] relative rounded-[100px] cursor-pointer max-md:h-[24px] overflow-hidden",
-                  )}
-                >
-                  <div className="flex gap-[3px] h-[30px] max-md:h-[24px] items-center justify-center overflow-hidden p-[8px_16px] max-md:p-[8px_12px]  relative rounded-[inherit]">
-                    <Image
-                      src={fireSVG}
-                      alt="Fire Icon"
-                      className="relative size-[10px] max-md:size-[8px]"
-                    />
-                    <p className="font-medium text-[12px] text-[#f7f8f8] tracking-[-0.48px] whitespace-nowrap">
-                      Comprar NFT
-                    </p>
-                  </div>
-                  <div
-                    className="absolute inset-0 pointer-events-none"
-                    style={{
-                      boxShadow: "0px 0px 10px 0px inset rgba(255,255,255,0.4)",
-                    }}
-                  />
-                </button>
-              </div>
-              {/* right side */}
-              <div className="flex justify-end items-center gap-[24px] flex-1">
-                <div className="flex justify-end items-center gap-[16px] opacity-50 cursor-not-allowed">
-                  <Image
-                    data-tooltip-id="tooltip"
-                    data-tooltip-content="Próximamente"
-                    alt="Download on the App Store"
-                    src={appleIMG}
-                    className="h-[24px] w-auto max-lg:h-[20px]"
-                  />
-
-                  <Image
-                    data-tooltip-id="tooltip"
-                    data-tooltip-content="Próximamente"
-                    src={googleIMG}
-                    alt="Get it on Google Play"
-                    className="h-[24px] w-auto max-lg:h-[20px]"
-                  />
+              {headerExtra ? (
+                <div className="flex justify-start items-center flex-1 overflow-x-auto no-scrollbar">
+                  {headerExtra}
                 </div>
-              </div>
+              ) : (
+                <>
+                  {/* left side */}
+                  <div className="flex justify-start items-center gap-[24px] flex-1">
+                    {/* Hot Button */}
+                    <button
+                      type="button"
+                      rel="noopener noreferrer"
+                      onClick={() => setIsModalPurchaseNFTOpen(true)}
+                      className={cn(
+                        "bg-[#1b5ffd] border border-[rgba(255,255,255,0.2)] border-solid h-[30px] relative rounded-[100px] cursor-pointer max-md:h-[24px] overflow-hidden",
+                      )}
+                    >
+                      <div className="flex gap-[3px] h-[30px] max-md:h-[24px] items-center justify-center overflow-hidden p-[8px_16px] max-md:p-[8px_12px]  relative rounded-[inherit]">
+                        <Image
+                          src={fireSVG}
+                          alt="Fire Icon"
+                          className="relative size-[10px] max-md:size-[8px]"
+                        />
+                        <p className="font-medium text-[12px] text-[#f7f8f8] tracking-[-0.48px] whitespace-nowrap">
+                          Comprar NFT
+                        </p>
+                      </div>
+                      <div
+                        className="absolute inset-0 pointer-events-none"
+                        style={{
+                          boxShadow:
+                            "0px 0px 10px 0px inset rgba(255,255,255,0.4)",
+                        }}
+                      />
+                    </button>
+                  </div>
+                  {/* right side */}
+                  <div className="flex justify-end items-center gap-[24px] flex-1">
+                    <div className="flex justify-end items-center gap-[16px] opacity-50 cursor-not-allowed">
+                      <Image
+                        data-tooltip-id="tooltip"
+                        data-tooltip-content="Próximamente"
+                        alt="Download on the App Store"
+                        src={appleIMG}
+                        className="h-[24px] w-auto max-lg:h-[20px]"
+                      />
+                      <Image
+                        data-tooltip-id="tooltip"
+                        data-tooltip-content="Próximamente"
+                        src={googleIMG}
+                        alt="Get it on Google Play"
+                        className="h-[24px] w-auto max-lg:h-[20px]"
+                      />
+                    </div>
+                  </div>
+                </>
+              )}
             </div>
           </>
         )}

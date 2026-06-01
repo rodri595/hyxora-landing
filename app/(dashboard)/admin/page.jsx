@@ -1,0 +1,53 @@
+"use client";
+import { useSearchParams } from "next/navigation";
+import { Suspense, lazy } from "react";
+import { ADMIN_TABS } from "@/components/AdminTabBar";
+import Spinner from "@/components/Spinner";
+
+const UsersModule = lazy(() => import("./_modules/UsersModule"));
+
+const moduleMap = {
+  users: UsersModule,
+};
+
+const AdminContent = () => {
+  const searchParams = useSearchParams();
+  const activeTab = searchParams.get("tab") ?? ADMIN_TABS[0].id;
+  const activeTabData =
+    ADMIN_TABS.find((t) => t.id === activeTab) ?? ADMIN_TABS[0];
+
+  const Module = moduleMap[activeTab];
+
+  return (
+    <section
+      className="flex-1 flex gap-[16px] justify-start items-start p-4 h-full min-h-0 overflow-y-auto"
+      data-lenis-prevent
+    >
+      {Module ? (
+        <Suspense
+          fallback={
+            <div className="flex items-center justify-center w-full h-full">
+              <Spinner />
+            </div>
+          }
+        >
+          <Module />
+        </Suspense>
+      ) : (
+        <div className="flex items-center justify-center w-full h-full">
+          <p className="font-inter text-[12px] text-[rgba(25,54,63,0.4)] tracking-[-0.48px]">
+            {activeTabData.label} — próximamente
+          </p>
+        </div>
+      )}
+    </section>
+  );
+};
+
+const AdminPage = () => (
+  <Suspense>
+    <AdminContent />
+  </Suspense>
+);
+
+export default AdminPage;

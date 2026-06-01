@@ -17,6 +17,7 @@
     "@sentry/react": "^10.51.0",
     "@sentry/vite-plugin": "^5.2.1",
     "@tanstack/react-query": "^5.100.6",
+    "@tanstack/react-table": "^8.21.3",
     "axios": "^1.15.2",
     "buffer": "^6.0.3",
     "clsx": "^2.1.1",
@@ -33,13 +34,15 @@
     "recharts": "^3.8.1",
     "tailwind-merge": "^3.5.0",
     "viem": "^2.48.4",
-    "web-haptics": "^0.0.6"
+    "web-haptics": "^0.0.6",
+    "xlsx": "^0.18.5"
   },
   "devDependencies": {
+    "@biomejs/biome": "^1.9.4",
     "@tailwindcss/postcss": "^4",
     "@types/node": "24.10.1",
     "@types/react": "19.2.7",
-    "@biomejs/biome": "^1.9.4",
-    "tailwindcss": "^4"
+    "tailwindcss": "^4",
+    "typescript": "6.0.3"
   }
 }

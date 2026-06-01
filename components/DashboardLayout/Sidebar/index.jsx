@@ -70,7 +70,7 @@ const MenuItemButton = ({
           <div className="flex flex-col gap-[8px] items-start justify-center flex-1 ">
             <p
               className={cn(
-                `font-inter font-medium text-[12px] tracking-[-0.56px] leading-[10px]`,
+                "font-inter font-medium text-[12px] tracking-[-0.56px] leading-[10px]",
                 disabled && "text-[rgba(25,54,63,0.4)]",
                 isSpecialPage && "text-[#fff]",
               )}
@@ -137,7 +137,7 @@ const MenuItemButton = ({
         <div className="flex flex-col gap-[8px] items-start justify-center flex-1 ">
           <p
             className={cn(
-              `font-inter font-medium text-[12px] tracking-[-0.56px] leading-[10px]`,
+              "font-inter font-medium text-[12px] tracking-[-0.56px] leading-[10px]",
               disabled && "text-[rgba(25,54,63,0.4)]",
               isSpecialPage && "text-[#fff]",
             )}
@@ -255,6 +255,7 @@ const Sidebar = ({ isSpecialPage, isSidebarOpen, setIsSidebarOpen }) => {
           fill="none"
           xmlns="http://www.w3.org/2000/svg"
         >
+          <title>chevron</title>
           <path
             d="M12 4L4 12M4 4L12 12"
             stroke={isSpecialPage ? "#fff" : "#19363F"}
@@ -298,7 +299,6 @@ const Sidebar = ({ isSpecialPage, isSidebarOpen, setIsSidebarOpen }) => {
               }
               href="/admin"
               active={pathname === "/admin"}
-              disabled
             />
           )
         )}

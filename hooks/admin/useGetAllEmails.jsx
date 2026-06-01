@@ -1,24 +1,30 @@
 import apiClient from "@/utils/axios";
 import { useWeb3 } from "@/context/Web3Provider";
 import { useQuery } from "@tanstack/react-query";
+import { usePrivy } from "@privy-io/react-auth";
+import { useGetUserInformation } from "@/hooks/user/useGetUserInformation";
+import { useMemo } from "react";
+import { roleNames } from "@/constants/roles";
 
-/**
- * Custom hook to fetch all emails from admin
- * @param {Object} params - Query parameters
- * @param {string} params.to - Filter by recipient email
- * @return {Object}
- */
 export const useGetAllEmails = (params = {}) => {
   const { smartWalletAddress } = useWeb3();
+  const { authenticated, ready } = usePrivy();
+  const { data: userInformation } = useGetUserInformation();
   const { to } = params;
 
+  const isAdmin = useMemo(
+    () =>
+      userInformation?.information?.role?.includes(roleNames?.admin ?? "") ??
+      false,
+    [userInformation],
+  );
+
   return useQuery({
-    queryKey: ["allEmails", smartWalletAddress],
+    queryKey: ["allEmails", smartWalletAddress, to],
     queryFn: async () => {
       const queryParams = new URLSearchParams();
       if (to) queryParams.append("to", to);
-
-      const url = `${import.meta.env.VITE_HYXORA_API}/admin/listEmails${
+      const url = `/admin/listEmails${
         queryParams.toString() ? `?${queryParams.toString()}` : ""
       }`;
       const response = await apiClient.get(url);
@@ -29,6 +35,6 @@ export const useGetAllEmails = (params = {}) => {
     refetchOnWindowFocus: false,
     refetchOnMount: false,
     retry: false,
-    enabled: Boolean(smartWalletAddress),
+    enabled: Boolean(smartWalletAddress) && authenticated && ready && isAdmin,
   });
 };
