@@ -44,6 +44,7 @@ const DarkCheckbox = ({ checked, onChange, children }) => (
     >
       {checked && (
         <svg width="8" height="6" viewBox="0 0 10 8" fill="none">
+          <title>Checked</title>
           <path
             d="M1 4L3.5 6.5L9 1"
             stroke="white"
@@ -78,6 +79,7 @@ const CopyButton = ({ text }) => {
     >
       {copied ? (
         <svg width="10" height="10" viewBox="0 0 12 10" fill="none">
+          <title>Copiado</title>
           <path
             d="M1 5L4.5 8.5L11 1"
             stroke="#4ade80"
@@ -88,6 +90,7 @@ const CopyButton = ({ text }) => {
         </svg>
       ) : (
         <svg width="10" height="10" viewBox="0 0 16 16" fill="none">
+          <title>Copiar</title>
           <rect
             x="5"
             y="5"
@@ -172,6 +175,7 @@ const PurchaseNFTModal = () => {
         className="absolute right-4 top-4 z-20 flex items-center justify-center size-7 rounded-lg bg-[rgba(255,255,255,0.06)] border border-[rgba(255,255,255,0.08)] hover:bg-[rgba(255,255,255,0.12)] transition-colors"
       >
         <svg width="11" height="11" viewBox="0 0 16 16" fill="none">
+          <title>Cerrar</title>
           <path
             d="M12 4L4 12M4 4L12 12"
             stroke="rgba(255,255,255,0.6)"
@@ -194,6 +198,7 @@ const PurchaseNFTModal = () => {
             }}
           >
             <svg width="10" height="10" viewBox="0 0 12 12" fill="none">
+              <title>Checked</title>
               <path
                 d="M7 1L2 7h4.5L5 11l5-6H6L7 1z"
                 fill="#60a5fa"

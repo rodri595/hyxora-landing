@@ -7,15 +7,78 @@ import { useGetAllUsers } from "@/hooks/admin/useGetAllUsers";
 import DataTable from "@/components/DataTable";
 import Spinner from "@/components/Spinner";
 import UserDetailSidebar from "@/components/UserDetailSidebar";
-import { cn } from "@/utils";
+import { cn, copyToClipboard } from "@/utils";
+import Tabs from "@/components/Tabs";
 
 gsap.registerPlugin(useGSAP);
 
 const SIDEBAR_WIDTH = 320;
 
+const CopyButton = ({ text }) => {
+  const [copied, setCopied] = useState(false);
+  const handleCopy = () => {
+    copyToClipboard(text);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+  return (
+    <button
+      type="button"
+      onClick={handleCopy}
+      className="shrink-0 flex items-center justify-center size-5 rounded-md transition-colors hover:bg-[rgba(25,54,63,0.08)]"
+      style={{ background: "rgba(25,54,63,0.05)" }}
+      title="Copiar"
+    >
+      {copied ? (
+        <svg width="10" height="10" viewBox="0 0 12 10" fill="none">
+          <title>Copiado</title>
+          <path
+            d="M1 5L4.5 8.5L11 1"
+            stroke="#16a34a"
+            strokeWidth="1.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
+      ) : (
+        <svg width="10" height="10" viewBox="0 0 16 16" fill="none">
+          <title>Copiar</title>
+          <rect
+            x="5"
+            y="5"
+            width="9"
+            height="9"
+            rx="1.5"
+            stroke="rgba(25,54,63,0.40)"
+            strokeWidth="1.5"
+          />
+          <path
+            d="M11 5V3.5A1.5 1.5 0 0 0 9.5 2H3.5A1.5 1.5 0 0 0 2 3.5v6A1.5 1.5 0 0 0 3.5 11H5"
+            stroke="rgba(25,54,63,0.40)"
+            strokeWidth="1.5"
+            strokeLinecap="round"
+          />
+        </svg>
+      )}
+    </button>
+  );
+};
+
+const TABS = [
+  { id: "all", label: "Todos los usuarios" },
+  { id: "nft-buyers", label: "Compradores NFT" },
+];
+
 const UsersModule = () => {
   const { data, isLoading, isError } = useGetAllUsers();
   const rows = useMemo(() => data ?? [], [data]);
+  const [activeTab, setActiveTab] = useState("all");
+
+  // NFT buyers: users who have at least one payment
+  const nftBuyersRows = useMemo(
+    () => rows.filter((u) => (u.payments?.length ?? 0) > 0),
+    [rows],
+  );
 
   // `isOpen` drives animations. `displayedUser` persists through the close
   // animation so content doesn't vanish mid-collapse.
@@ -36,6 +99,15 @@ const UsersModule = () => {
   }, []);
 
   const handleClose = useCallback(() => setIsOpen(false), []);
+
+  const handleTabChange = useCallback(
+    (id) => {
+      if (id === activeTab) return;
+      setIsOpen(false);
+      setActiveTab(id);
+    },
+    [activeTab],
+  );
 
   // ── Desktop animation (lg+): slide wrapper width ──────────────────────────
   useGSAP(
@@ -99,31 +171,48 @@ const UsersModule = () => {
       {
         accessorKey: "email",
         header: "Email",
-        cell: (info) => (
-          <span className="font-inter text-[11px] tracking-[-0.44px] text-[#19363F]">
-            {info.getValue() ?? "—"}
-          </span>
-        ),
-      },
-      {
-        accessorKey: "phoneNumber",
-        header: "Teléfono",
-        cell: (info) => (
-          <span className="font-inter text-[11px] tracking-[-0.44px] text-[rgba(25,54,63,0.6)]">
-            {info.getValue() ?? "—"}
-          </span>
-        ),
-      },
-      {
-        accessorKey: "address",
-        header: "Wallet",
         cell: (info) => {
           const val = info.getValue();
           if (!val) return <span className="text-[rgba(25,54,63,0.3)]">—</span>;
           return (
-            <span className="font-mono text-[10px] text-[rgba(25,54,63,0.65)] tracking-tight">
-              {val.slice(0, 6)}…{val.slice(-4)}
-            </span>
+            <div className="flex items-center gap-1.5">
+              <span className="font-inter text-[11px] tracking-[-0.44px] text-[#19363F]">
+                {val}
+              </span>
+              <CopyButton text={val} />
+            </div>
+          );
+        },
+      },
+      {
+        accessorKey: "phoneNumber",
+        header: "Teléfono",
+        cell: (info) => {
+          const val = info.getValue();
+          if (!val) return <span className="text-[rgba(25,54,63,0.3)]">—</span>;
+          return (
+            <div className="flex items-center gap-1.5">
+              <span className="font-inter text-[11px] tracking-[-0.44px] text-[rgba(25,54,63,0.6)]">
+                {val}
+              </span>
+              <CopyButton text={val} />
+            </div>
+          );
+        },
+      },
+      {
+        accessorKey: "address",
+        header: "SmartWallet",
+        cell: (info) => {
+          const val = info.getValue();
+          if (!val) return <span className="text-[rgba(25,54,63,0.3)]">—</span>;
+          return (
+            <div className="flex items-center gap-1.5">
+              <span className="font-mono text-[10px] text-[rgba(25,54,63,0.65)] tracking-tight">
+                {val.slice(0, 6)}…{val.slice(-4)}
+              </span>
+              <CopyButton text={val} />
+            </div>
           );
         },
       },
@@ -271,14 +360,33 @@ const UsersModule = () => {
 
   return (
     <div className="flex flex-row flex-1 min-h-0 overflow-hidden h-full">
-      <div className="flex flex-col flex-1 w-0">
-        <DataTable
-          data={rows}
-          columns={columns}
-          filename="usuarios"
-          title="Usuarios"
-          searchPlaceholder="Buscar por email, wallet..."
+      <div className="flex flex-col flex-1 w-0 rounded-xl border-[0.7px] border-[rgba(25,54,63,0.08)] shadow-[0px_2px_12px_0px_rgba(25,54,63,0.08)] px-4 py-3">
+        <Tabs
+          tabs={TABS}
+          value={activeTab}
+          onChange={handleTabChange}
+          className="mb-3"
         />
+
+        {activeTab === "all" && (
+          <DataTable
+            data={rows}
+            columns={columns}
+            filename="usuarios"
+            title="Usuarios"
+            searchPlaceholder="Buscar por email, wallet..."
+          />
+        )}
+
+        {activeTab === "nft-buyers" && (
+          <DataTable
+            data={nftBuyersRows}
+            columns={columns}
+            filename="compradores-nft"
+            title="Compradores NFT"
+            searchPlaceholder="Buscar por email, wallet..."
+          />
+        )}
       </div>
 
       {/* ── Desktop (lg+): inline wrapper — GSAP animates its width ── */}

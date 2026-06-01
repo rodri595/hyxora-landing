@@ -334,7 +334,7 @@ const UserDetailSidebar = ({ user, mode: initialMode = "edit", onClose }) => {
       />
 
       {/* Scrollable content */}
-      <div className="flex-1 overflow-y-auto">
+      <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-[rgba(25,54,63,0.1)] scrollbar-thumb-rounded scrollbar-track-transparent">
         {mode === "edit" ? (
           <EditPanel user={user} />
         ) : (
