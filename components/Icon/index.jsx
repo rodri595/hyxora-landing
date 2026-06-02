@@ -257,7 +257,8 @@ const Icon = ({
       viewBox={`0 0 ${actualWidth} ${actualHeight}`}
       {...props}
     >
-      <path fill={fill} d={iconSet[name]}></path>
+      <title>{name}</title>
+      <path fill={fill} d={iconSet[name]} />
       {children}
     </svg>
   );
