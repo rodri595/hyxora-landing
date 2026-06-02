@@ -44,7 +44,7 @@ export const metadata = {
   },
   openGraph: {
     type: "website",
-    locale: "es_ES",
+
     url: siteUrl,
     title: "Hyxora - Plataforma DeFi: Finanzas Descentralizadas en tus Manos",
     description:

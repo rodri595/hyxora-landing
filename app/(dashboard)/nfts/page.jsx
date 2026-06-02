@@ -106,13 +106,13 @@ export default function NftsPage() {
                     Todavía no has adquirido ningún NFT de Hyxora. Podrás
                     comprarlos a partir del{" "}
                     <span className="text-white font-medium">
-                      {LAUNCH_DATE.toLocaleDateString("es-ES", {
+                      {LAUNCH_DATE.toLocaleDateString(undefined, {
                         day: "numeric",
                         month: "long",
                         year: "numeric",
                       })}{" "}
                       a las{" "}
-                      {LAUNCH_DATE.toLocaleTimeString("es-ES", {
+                      {LAUNCH_DATE.toLocaleTimeString(undefined, {
                         hour: "2-digit",
                         minute: "2-digit",
                       })}
@@ -126,7 +126,7 @@ export default function NftsPage() {
                   <div className="flex flex-wrap items-center gap-[16px] self-stretch max-sm:flex-col max-sm:items-start">
                     <BulletPoint
                       label="Disponible"
-                      value={LAUNCH_DATE.toLocaleDateString("es-ES", {
+                      value={LAUNCH_DATE.toLocaleDateString(undefined, {
                         day: "numeric",
                         month: "long",
                         year: "numeric",

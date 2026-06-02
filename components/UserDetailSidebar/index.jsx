@@ -70,7 +70,7 @@ const PaymentCard = ({ payment }) => {
 
       <div className="flex items-center justify-between gap-2">
         <span className="font-inter text-[10px] tracking-[-0.4px] text-[rgba(25,54,63,0.4)]">
-          {new Date(payment.createdAt).toLocaleDateString("es-ES", {
+          {new Date(payment.createdAt).toLocaleDateString(undefined, {
             day: "2-digit",
             month: "short",
             year: "numeric",

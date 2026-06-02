@@ -24,7 +24,7 @@ const STATUS_CONFIG = {
 
 const formatDate = (dateString) => {
   const date = new Date(dateString);
-  return date.toLocaleDateString("es-ES", {
+  return date.toLocaleDateString(undefined, {
     day: "numeric",
     month: "long",
     year: "numeric",

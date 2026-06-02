@@ -25,7 +25,7 @@ const NftCard = ({ payment, onVatRefund }) => {
     payment;
 
   const purchaseDate = updatedAt
-    ? new Date(updatedAt).toLocaleDateString("es-ES", {
+    ? new Date(updatedAt).toLocaleDateString(undefined, {
         year: "numeric",
         month: "long",
         day: "numeric",

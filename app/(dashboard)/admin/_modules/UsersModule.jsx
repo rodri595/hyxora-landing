@@ -263,7 +263,7 @@ const UsersModule = () => {
           if (!val) return <span className="text-[rgba(25,54,63,0.3)]">—</span>;
           return (
             <span className="font-inter text-[11px] tracking-[-0.44px] text-[rgba(25,54,63,0.6)]">
-              {new Date(val).toLocaleDateString("es-ES", {
+              {new Date(val).toLocaleDateString(undefined, {
                 day: "2-digit",
                 month: "short",
                 year: "numeric",
