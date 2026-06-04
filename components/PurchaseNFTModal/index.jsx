@@ -411,8 +411,8 @@ const PurchaseNFTModal = () => {
             {/* CTA */}
             <button
               type="button"
-              disabled
-              // disabled={!canProceed}
+            
+              disabled={!canProceed}
               onClick={() => setStep(2)}
               className="w-full h-11 relative rounded-[100px] cursor-pointer overflow-hidden disabled:opacity-40 disabled:cursor-not-allowed transition-opacity"
               style={{
