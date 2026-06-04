@@ -7,6 +7,7 @@ import Error from "@/components/Error";
 import Image from "@/components/Image";
 import { useWeb3 } from "@/context/Web3Provider";
 import { useCreatePaymentLink } from "@/hooks/useCreatePaymentLink";
+import { GetNftsRemaining } from "@/hooks/nfts/GetNftsRemaining";
 import Spinner from "@/components/Spinner";
 import fireSVG from "@/assets/imgs/icons/fire.svg";
 import shieldSVG from "@/assets/imgs/icons/shield-check.svg";
@@ -120,6 +121,11 @@ const PurchaseNFTModal = () => {
     isPending,
     error: paymentLinkError,
   } = useCreatePaymentLink();
+  const {
+    data: nftsRemaining,
+    isLoading: isNftsRemainingLoading,
+    error: nftsRemainingError,
+  } = GetNftsRemaining();
   const [step, setStep] = useState(1);
   const [username, setUsername] = useState("");
   const [refBy, setRefBy] = useState("");
@@ -287,7 +293,11 @@ const PurchaseNFTModal = () => {
                   Unidades disponibles
                 </span>
                 <span className="text-white font-semibold text-[16px] tracking-[-0.48px] leading-tight">
-                  {UNITS_AVAILABLE}
+                  {isNftsRemainingLoading ? (
+                    <Spinner />
+                  ) : (
+                    (nftsRemaining?.remaining ?? UNITS_AVAILABLE)
+                  )}
                 </span>
               </div>
 
@@ -411,7 +421,6 @@ const PurchaseNFTModal = () => {
             {/* CTA */}
             <button
               type="button"
-            
               disabled={!canProceed}
               onClick={() => setStep(2)}
               className="w-full h-11 relative rounded-[100px] cursor-pointer overflow-hidden disabled:opacity-40 disabled:cursor-not-allowed transition-opacity"
@@ -521,6 +530,7 @@ const PurchaseNFTModal = () => {
                   style={{ background: "rgba(255,255,255,0.06)" }}
                 >
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                    <title>Tarjeta de crédito</title>
                     <rect
                       x="2"
                       y="5"
@@ -590,6 +600,7 @@ const PurchaseNFTModal = () => {
                   style={{ background: "rgba(255,255,255,0.06)" }}
                 >
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                    <title>Cripto (USDC)</title>
                     <circle
                       cx="12"
                       cy="12"
@@ -649,6 +660,7 @@ const PurchaseNFTModal = () => {
                   style={{ background: "rgba(255,255,255,0.06)" }}
                 >
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                    <title>Transferencia bancaria</title>
                     <path
                       d="M3 10.5L12 4l9 6.5"
                       stroke="rgba(255,255,255,0.60)"
@@ -757,6 +769,15 @@ const PurchaseNFTModal = () => {
                 paymentLinkError?.response?.data?.message ||
                 paymentLinkError?.message ||
                 "Ha ocurrido un error al generar el enlace de pago. Por favor, inténtalo de nuevo."
+              }
+            />
+            <Error
+              error={nftsRemainingError}
+              className="bg-transparent"
+              message={
+                nftsRemainingError?.response?.data?.message ||
+                nftsRemainingError?.message ||
+                "Ha ocurrido un error al obtener la disponibilidad de NFTs. Por favor, actualiza la página e inténtalo de nuevo."
               }
             />
           </>

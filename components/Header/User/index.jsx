@@ -248,8 +248,7 @@ const User = () => {
                       size={20}
                     />
                   }
-                  // href="/admin"
-                  disabled
+                  href="/admin"
                 />
               )
             )}

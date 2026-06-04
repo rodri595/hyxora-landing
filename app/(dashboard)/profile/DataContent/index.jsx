@@ -8,9 +8,15 @@ import { GetMyPayments } from "@/hooks/nfts/GetMyPayments";
 import { cn } from "@/utils";
 import { useGetUserInformation } from "@/hooks/user/useGetUserInformation";
 import Spinner from "@/components/Spinner";
+import { GetNftsRemaining } from "@/hooks/nfts/GetNftsRemaining";
 
 const DataContent = () => {
   const { data: payments } = GetMyPayments();
+  const {
+    data: nftsRemaining,
+    isLoading: isNftsRemainingLoading,
+    error: nftsRemainingError,
+  } = GetNftsRemaining();
   const HasNfts = useMemo(() => {
     if (!payments || payments.length === 0) return false;
     const filtered = payments.filter(
@@ -45,6 +51,7 @@ const DataContent = () => {
                 fill="none"
                 className="absolute"
               >
+                <title>Perfil de usuario</title>
                 <rect
                   x="0.5"
                   y="0.5"
@@ -264,6 +271,7 @@ const DataContent = () => {
               viewBox="0 0 28 9"
               fill="none"
             >
+              <title>Roadmap</title>
               <g opacity="0.2" filter="url(#filter0_f_239_27441)">
                 <ellipse cx="14" cy="4.5" rx="10" ry="0.5" fill="black" />
               </g>
@@ -301,18 +309,24 @@ const DataContent = () => {
                 Fase:
               </p>
               <p className="text-[13px] font-bold text-[#0D1B2A] leading-[15px]">
-                Pre-venta
+                Venta 1
               </p>
             </div>
           </div>
           <div className="flex gap-[8px] items-center justify-center ">
             <div>
               <p className="text-[11px] text-[#8A9BB0] font-medium leading-[15px]">
-                Unds en fase:
+                Cantidad restante:
               </p>
-              <p className="text-[13px] font-bold text-[#0D1B2A] leading-[15px]">
-                50 und
-              </p>
+              <div className="text-[13px] font-bold text-[#0D1B2A] leading-[15px]">
+                {isNftsRemainingLoading ? (
+                  <Spinner />
+                ) : nftsRemaining?.remaining > 0 ? (
+                  nftsRemaining.remaining
+                ) : (
+                  "Agotados"
+                )}
+              </div>
             </div>
           </div>
         </div>
