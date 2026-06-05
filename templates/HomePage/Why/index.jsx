@@ -23,7 +23,7 @@ const Why = () => {
           {/* Title */}
           <h2 className="font-medium text-[40px] leading-[38px] tracking-[-0.04em] text-center text-white w-[540px] max-md:text-[20px] max-md:leading-normal max-md:tracking-[-0.8px] max-md:w-full max-md:max-w-[306px]">
             <span className="text-[rgba(255,255,255,0.6)]">Una plataforma</span>{" "}
-            financiera creada por y para el usuario
+            creada por y para el usuario
           </h2>
 
           {/* Cards Container */}

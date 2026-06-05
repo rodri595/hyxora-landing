@@ -21,20 +21,20 @@ const ChatWidget = () => {
             className="w-[280px] h-[450px] md:w-[400px] md:h-[600px] rounded-xl shadow-2xl border-0"
             allow="clipboard-write"
             title="Chatbot"
-          ></iframe>
+          />
         </div>
       )}
 
       {/* Toggle button */}
       <Button
-        className={`fixed! left-5 bottom-5 z-[1000] transition-all! max-md:left-4 max-md:bottom-4 w-[38px] h-[38px] ${
+        className={`fixed! left-5 bottom-5 z-1000transition-all! max-md:left-4 max-md:bottom-4 size-9.5 ${
           isOpen ? "rotate-180" : ""
         }`}
         onClick={toggleChat}
         isPrimary
         isCircle
       >
-        <Icon name={isOpen ? "close-small" : "star"} />
+        <Icon name={isOpen ? "close-small" : "question-circle"} />
       </Button>
     </>
   );
