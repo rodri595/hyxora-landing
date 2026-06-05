@@ -9,7 +9,7 @@ const ProfilePage = () => {
   const { error: paymentsError } = GetMyPayments();
   return (
     <section
-      className="flex-1 flex gap-[16px] justify-start items-start p-4 h-full min-h-0 overflow-y-auto"
+      className="flex-1 flex gap-4 justify-start items-start p-4 h-full min-h-0 overflow-y-auto max-w-360 mx-auto"
       data-lenis-prevent
     >
       <div className="flex flex-col flex-1 gap-[16px] ">

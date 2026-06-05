@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, Fragment } from "react";
 import Button from "@/components/Button";
 import Icon from "@/components/Icon";
 import fireSVG from "@/assets/imgs/icons/fire.svg";
@@ -16,24 +16,24 @@ const plans = [
     buttonDisabled: false,
     isPrimary: false,
     features: [
-      "IBAN Europeo",
-      "SEPA",
+      "IBAN Europeo (próximamente)",
+      "SEPA (próximamente)",
       "Transferencias/Remesas internacionales",
-      "Tarjeta de débito",
+      "Tarjeta de débito (próximamente)",
       "Wallet autocustodia",
-      <>Intercambios Fiat-Crypto / Swaps </>,
-      "Ingresos pasivos / Depósitos",
+      "Intercambios Fiat-Crypto / Swaps",
+      "Productos Hyxora In",
       "Academia 1.0",
     ],
   },
   {
     name: "PREMIUM",
     description: (
-      <>
+      <Fragment>
         BASIC+DeFi
         <br />
         Conoce las oportunidades que DeFi tiene para ti
-      </>
+      </Fragment>
     ),
     monthlyPrice: 9.99,
     yearlyPrice: 95.88,
@@ -42,9 +42,7 @@ const plans = [
     isPrimary: true,
     features: [
       "Plan BASIC",
-      <>
-        ETFs DEFI <br />
-      </>,
+      "Hyxora PLUS",
       "Mayores rendimientos",
       "Academia 2.0",
       "IA Personalizada",
@@ -87,16 +85,16 @@ const plans = [
     isPrimary: false,
     features: [
       "Plan Premium gratuito de por vida",
-      <>
+      <Fragment key={0}>
         Equity Hyxora{" "}
         <span className="text-[12px] font-light">(hasta un 10%)</span>
-      </>,
+      </Fragment>,
       "Accesos prioritarios",
       "Comité Consultivo Founder",
-      <>
+      <Fragment key={1}>
         Posición FOUNDER transferible a otro usuario{" "}
         <span className="text-[12px] font-light">(2028)</span>
-      </>,
+      </Fragment>,
       "Imagen diferenciada Founder",
       "Descuentos especiales y rendimientos máximos",
     ],
@@ -119,6 +117,7 @@ const Plans = () => {
           <div className="relative w-[216px] h-10">
             <div className="absolute inset-0 bg-b-surface3 border border-stroke2 rounded-xl p-1 flex items-center shadow-[inset_0px_1px_1.9px_0px_rgba(50,50,50,0.1)]">
               <button
+                type="button"
                 onClick={() => setIsYearly(false)}
                 className={`flex-1 h-8 rounded-lg flex items-center justify-center text-[13px] font-semibold tracking-[-0.01em] transition-all ${
                   !isYearly
@@ -129,6 +128,7 @@ const Plans = () => {
                 Mensual
               </button>
               <button
+                type="button"
                 onClick={() => setIsYearly(true)}
                 className={`flex-1 h-8 rounded-lg flex items-center justify-center text-[13px] font-semibold tracking-[-0.01em] transition-all ${
                   isYearly

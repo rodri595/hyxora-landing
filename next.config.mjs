@@ -14,6 +14,13 @@ const nextConfig = {
     "pino-std-serializers",
   ],
 
+  turbopack: {
+    resolveAlias: {
+      pino: "./lib/empty-module.js",
+      "thread-stream": "./lib/empty-module.js",
+    },
+  },
+
   webpack: (config, { isServer }) => {
     if (isServer) {
       config.externals = [...(config.externals || []), "pino", "thread-stream"];

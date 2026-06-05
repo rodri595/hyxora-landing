@@ -10,7 +10,7 @@ const CHANNELS = [
     badge: "Principal",
     title: "¿Qué pasa en Hyxora?",
     description:
-      "Entrevistas exclusivas a los founders y CEOs. Descubre de primera mano los retos, la visión y la realidad de construir un banco desde cero.",
+      "No nos gustan los videos de formación.. mejor desde la voz de los protagonistas en un podcast sabrás todo lo que ocurre en Hyxora, desde de dónde surge la idea, tecnologías, activos, a por qué esta app es perfecta para ti.",
   },
   {
     id: "elefante",

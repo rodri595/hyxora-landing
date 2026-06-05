@@ -17,9 +17,9 @@ const Finance = () => {
   const walletItems = [
     {
       id: 0,
-      title: "Depósito remunerado",
+      title: "Hyxora IN",
       description:
-        "Consigue rendimientos e ingresos pasivos sólo por el hecho de mantener tu capital en Hyxora",
+        "Consigue mayores rendimientos sólo por el hecho de mantener tu capital en Hyxora",
       iconSrc: circleIMG,
       imageSrc: stakeIMG,
     },
@@ -41,16 +41,16 @@ const Finance = () => {
     },
     {
       id: 3,
-      title: "Fondos y ETFs",
+      title: "Hyxora Plus",
       description:
-        "Invierte en fondos indexados con las mayores rentabilidades que ambos mundos financieros pueden ofrecerte en conjunto.",
+        "Conoce las oportunidades del acceso directo a productos de primer nivel tanto del mundo tradicional como del mundo descentralizado",
       iconSrc: circleIMG,
       imageSrc: FundsIMG,
     },
     {
       id: 4,
-      title: "Proximamente",
-      description: "Pools de liquidez, Lending, etc. etc….",
+      title: "Retiradas en moneda local",
+      description: "Retira tus fondos en tu moneda local (Consultar países disponibles)",
       iconSrc: triangleIMG,
       imageSrc: soonIMG,
     },
