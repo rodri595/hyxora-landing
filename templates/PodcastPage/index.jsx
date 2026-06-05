@@ -1,6 +1,7 @@
 "use client";
 
 import Layout from "@/components/Layout";
+import Image from "@/components/Image";
 import hyxoraLogo from "@/assets/imgs/brand/logo.svg";
 import elefanteLogo from "@/assets/imgs/podcast/Logo fondo cuadrodo E Negro.png";
 
@@ -74,6 +75,45 @@ const PlayIcon = () => (
   </svg>
 );
 
+const THEMES = {
+  dark: {
+    shadow: "border-[rgba(255,255,255,0.06)] bg-[rgba(30,30,30,0.80)]",
+    card: "border-[rgba(255,255,255,0.06)] bg-[rgba(30,30,30)]",
+    logoBorder: "border-[rgba(255,255,255,0.12)]",
+    ytLabel: "text-[rgba(255,255,255,0.35)]",
+    badge:
+      "bg-[rgba(255,255,255,0.06)] border-[rgba(255,255,255,0.06)] text-[rgba(255,255,255,0.45)]",
+    title: "text-white",
+    description: "text-[rgba(255,255,255,0.55)]",
+    btn: "bg-[rgba(255,255,255,0.06)] hover:bg-[rgba(255,255,255,0.10)] border-[rgba(255,255,255,0.08)] text-[rgba(255,255,255,0.80)]",
+    sectionLabel: "text-[rgba(255,255,255,0.30)]",
+    videoTitle: "text-[rgba(255,255,255,0.72)]",
+    videoDate: "text-[rgba(255,255,255,0.28)]",
+    videoThumb: "bg-[rgba(255,255,255,0.04)]",
+    emptyBox: "bg-[rgba(255,255,255,0.03)] border-[rgba(255,255,255,0.04)]",
+    emptyText: "text-[rgba(255,255,255,0.22)]",
+    playFill: "#fff",
+  },
+  light: {
+    shadow: "border-[rgba(25,54,63,0.02)] bg-[rgba(25,54,63,0.02)]",
+    card: "border-[rgba(25,54,63,0.02)] bg-[rgba(25,54,63,0.02)]",
+    logoBorder: "border-[rgba(25,54,63,0.12)]",
+    ytLabel: "text-[rgba(25,54,63,0.40)]",
+    badge:
+      "bg-[rgba(25,54,63,0.03)] border-[rgba(25,54,63,0.06)] text-[rgba(25,54,63,0.50)]",
+    title: "text-[#19363F]",
+    description: "text-[rgba(25,54,63,0.65)]",
+    btn: "bg-[rgba(25,54,63,0.04)] hover:bg-[rgba(25,54,63,0.08)] border-[rgba(25,54,63,0.08)] text-[rgba(25,54,63,0.80)]",
+    sectionLabel: "text-[rgba(25,54,63,0.35)]",
+    videoTitle: "text-[rgba(25,54,63,0.72)]",
+    videoDate: "text-[rgba(25,54,63,0.38)]",
+    videoThumb: "bg-[rgba(25,54,63,0.04)]",
+    emptyBox: "bg-[rgba(25,54,63,0.02)] border-[rgba(25,54,63,0.04)]",
+    emptyText: "text-[rgba(25,54,63,0.30)]",
+    playFill: "#19363F",
+  },
+};
+
 const PodcastPage = ({ channels = [] }) => {
   return (
     <Layout
@@ -93,115 +133,138 @@ const PodcastPage = ({ channels = [] }) => {
             </p>
           </div>
 
-          {/* Stacked card — matches main section */}
-          <div className="relative max-w-[1320px] mx-auto w-full flex">
-            {/* shadow 2 */}
-            <div className="absolute w-[calc(100%-160px)] h-[calc(100%+32px)] top-[8px] left-[80px] rounded-[16px] border border-[rgba(255,255,255,0.06)] bg-[rgba(30,30,30,0.80)] shadow-[inset_0_0_4px_0_rgba(25,54,63,0.04)] backdrop-blur-[8px] max-sm:hidden" />
-            {/* shadow 1 */}
-            <div className="absolute w-[calc(100%-80px)] h-[calc(100%+16px)] top-[4px] left-[40px] rounded-[16px] border border-[rgba(255,255,255,0.06)] bg-[rgba(30,30,30,0.80)] shadow-[inset_0_0_4px_0_rgba(25,54,63,0.04)] backdrop-blur-[8px] max-sm:hidden" />
-            {/* Main card */}
-            <div className="flex w-full flex-1 rounded-[16px] border border-[rgba(255,255,255,0.06)] bg-[rgba(30,30,30)] shadow-[inset_0_0_4px_0_rgba(25,54,63,0.04)] backdrop-blur-[8px] max-md:flex-col">
-              {channels.map((ch, i) => (
-                <div
-                  key={ch.id}
-                  className={`flex flex-col flex-1 ${i === 0 ? "border-r border-[rgba(255,255,255,0.06)] max-md:border-r-0 max-md:border-b" : ""}`}
-                >
-                  {/* Channel info */}
-                  <div className="flex flex-col gap-[24px] p-[40px] max-md:p-[24px]">
-                    <div className="flex items-center gap-[12px]">
-                      <div className="w-[52px] h-[52px] rounded-[12px] overflow-hidden flex-shrink-0 border border-[rgba(255,255,255,0.12)]">
-                        <img
-                          src={getLogoSrc(CHANNEL_LOGOS[ch.id])}
-                          alt={ch.title}
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                      <div className="flex flex-col gap-[6px]">
-                        <div className="flex items-center gap-[5px]">
-                          <YouTubeIcon />
-                          <span className="text-[rgba(255,255,255,0.35)] text-[11px] font-medium tracking-[0.5px] uppercase">
-                            YouTube
+          {/* Individual channel cards */}
+          <div className="flex gap-[24px] w-full max-md:flex-col max-md:gap-[48px] pb-[20px]">
+            {channels.map((ch) => {
+              const t = ch.id === "elefante" ? THEMES.light : THEMES.dark;
+              return (
+                <div key={ch.id} className="relative flex-1">
+                  {/* shadow 2 */}
+                  <div
+                    className={`absolute w-[calc(100%-80px)] h-[calc(100%+32px)] top-[8px] left-[40px] rounded-[16px] border shadow-[inset_0_0_4px_0_rgba(25,54,63,0.04)] backdrop-blur-[8px] max-sm:hidden ${t.shadow}`}
+                  />
+                  {/* shadow 1 */}
+                  <div
+                    className={`absolute w-[calc(100%-40px)] h-[calc(100%+16px)] top-[4px] left-[20px] rounded-[16px] border shadow-[inset_0_0_4px_0_rgba(25,54,63,0.04)] backdrop-blur-[8px] max-sm:hidden ${t.shadow}`}
+                  />
+                  {/* Main card */}
+                  <div
+                    className={`relative flex flex-col rounded-[16px] border shadow-[inset_0_0_4px_0_rgba(25,54,63,0.04)] backdrop-blur-[8px] ${t.card}`}
+                  >
+                    {/* Channel info */}
+                    <div className="flex flex-col gap-[24px] p-[40px] max-md:p-[24px]">
+                      <div className="flex items-center gap-[12px]">
+                        <div
+                          className={`w-[52px] h-[52px] rounded-full overflow-hidden flex-shrink-0 border ${t.logoBorder} flex items-center justify-center`}
+                        >
+                          <Image
+                            src={getLogoSrc(CHANNEL_LOGOS[ch.id])}
+                            alt={ch.title}
+                            width={100}
+                            height={100}
+                            className="size-[60px] object-cover object-center"
+                          />
+                        </div>
+                        <div className="flex flex-col gap-[6px]">
+                          <div className="flex items-center gap-[5px]">
+                            <YouTubeIcon />
+                            <span
+                              className={`text-[11px] font-medium tracking-[0.5px] uppercase ${t.ytLabel}`}
+                            >
+                              YouTube
+                            </span>
+                          </div>
+                          <span
+                            className={`px-[8px] py-[3px] rounded-[32px] border text-[11px] font-medium tracking-[0.5px] uppercase w-fit ${t.badge}`}
+                          >
+                            {ch.badge}
                           </span>
                         </div>
-                        <span className="px-[8px] py-[3px] rounded-[32px] bg-[rgba(255,255,255,0.06)] border border-[rgba(255,255,255,0.06)] text-[rgba(255,255,255,0.45)] text-[11px] font-medium tracking-[0.5px] uppercase w-fit">
-                          {ch.badge}
-                        </span>
                       </div>
-                    </div>
 
-                    <div className="flex flex-col gap-[10px]">
-                      <h3 className="text-white font-medium text-[22px] tracking-[-0.88px] leading-[28px]">
-                        {ch.title}
-                      </h3>
-                      <p className="text-[rgba(255,255,255,0.55)] text-[14px] leading-[22px] tracking-[-0.28px]">
-                        {ch.description}
-                      </p>
-                    </div>
-
-                    <a
-                      href={ch.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center gap-[6px] w-fit px-[14px] py-[9px] rounded-[8px] bg-[rgba(255,255,255,0.06)] hover:bg-[rgba(255,255,255,0.10)] transition-colors border border-[rgba(255,255,255,0.08)] text-[rgba(255,255,255,0.80)] text-[13px] font-medium tracking-[-0.26px]"
-                    >
-                      Ver Canal
-                      <ExternalIcon />
-                    </a>
-                  </div>
-
-                  {/* Divider */}
-                  {/* <div className="h-px bg-[rgba(255,255,255,0.06)] mt-auto" /> */}
-
-                  {/* Videos */}
-                  <div className="flex flex-col gap-[14px] p-[40px] max-md:p-[24px] mt-auto">
-                    <p className="text-[rgba(255,255,255,0.30)] text-[11px] font-medium tracking-[0.5px] uppercase">
-                      Últimos videos
-                    </p>
-
-                    {ch.videos.length > 0 ? (
-                      <div className="grid grid-cols-3 gap-[10px] max-sm:grid-cols-2">
-                        {ch.videos.map((video) => (
-                          <a
-                            key={video.videoId}
-                            href={video.url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="group flex flex-col gap-[7px]"
-                          >
-                            <div className="relative w-full aspect-video rounded-[8px] overflow-hidden bg-[rgba(255,255,255,0.04)]">
-                              <img
-                                src={video.thumbnail}
-                                alt={video.title}
-                                className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-                              />
-                              <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-[rgba(0,0,0,0.35)]">
-                                <div className="w-[28px] h-[28px] rounded-full bg-white flex items-center justify-center">
-                                  <PlayIcon />
-                                </div>
-                              </div>
-                            </div>
-                            <p className="text-[rgba(255,255,255,0.72)] text-[11px] leading-[15px] tracking-[-0.22px] line-clamp-2">
-                              {video.title}
-                            </p>
-                            {video.published && (
-                              <p className="text-[rgba(255,255,255,0.28)] text-[10px]">
-                                {formatRelativeDate(video.published)}
-                              </p>
-                            )}
-                          </a>
-                        ))}
-                      </div>
-                    ) : (
-                      <div className="py-[24px] flex items-center justify-center rounded-[8px] bg-[rgba(255,255,255,0.03)] border border-[rgba(255,255,255,0.04)]">
-                        <p className="text-[rgba(255,255,255,0.22)] text-[12px]">
-                          Videos próximamente
+                      <div className="flex flex-col gap-[10px]">
+                        <h3
+                          className={`font-medium text-[22px] tracking-[-0.88px] leading-[28px] ${t.title}`}
+                        >
+                          {ch.title}
+                        </h3>
+                        <p
+                          className={`text-[14px] leading-[22px] tracking-[-0.28px] ${t.description}`}
+                        >
+                          {ch.description}
                         </p>
                       </div>
-                    )}
+
+                      <a
+                        href={ch.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className={`flex items-center gap-[6px] w-fit px-[14px] py-[9px] rounded-[8px] transition-colors border text-[13px] font-medium tracking-[-0.26px] ${t.btn}`}
+                      >
+                        Explorar Formato
+                        <ExternalIcon />
+                      </a>
+                    </div>
+
+                    {/* Videos */}
+                    <div className="flex flex-col gap-[14px] p-[40px] max-md:p-[24px] mt-auto">
+                      <p
+                        className={`text-[11px] font-medium tracking-[0.5px] uppercase ${t.sectionLabel}`}
+                      >
+                        Últimos videos
+                      </p>
+
+                      {ch.videos.length > 0 ? (
+                        <div className="grid grid-cols-3 gap-[10px] max-sm:grid-cols-2">
+                          {ch.videos.map((video) => (
+                            <a
+                              key={video.videoId}
+                              href={video.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="group flex flex-col gap-[7px]"
+                            >
+                              <div
+                                className={`relative w-full aspect-video rounded-[8px] overflow-hidden ${t.videoThumb}`}
+                              >
+                                <img
+                                  src={video.thumbnail}
+                                  alt={video.title}
+                                  className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                                />
+                                <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-[rgba(0,0,0,0.35)]">
+                                  <div className="w-[28px] h-[28px] rounded-full bg-white flex items-center justify-center">
+                                    <PlayIcon />
+                                  </div>
+                                </div>
+                              </div>
+                              <p
+                                className={`text-[11px] leading-[15px] tracking-[-0.22px] line-clamp-2 ${t.videoTitle}`}
+                              >
+                                {video.title}
+                              </p>
+                              {video.published && (
+                                <p className={`text-[10px] ${t.videoDate}`}>
+                                  {formatRelativeDate(video.published)}
+                                </p>
+                              )}
+                            </a>
+                          ))}
+                        </div>
+                      ) : (
+                        <div
+                          className={`py-[24px] flex items-center justify-center rounded-[8px] border ${t.emptyBox}`}
+                        >
+                          <p className={`text-[12px] ${t.emptyText}`}>
+                            Videos próximamente
+                          </p>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
-              ))}
-            </div>
+              );
+            })}
           </div>
         </div>
       </section>

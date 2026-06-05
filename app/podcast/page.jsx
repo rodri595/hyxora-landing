@@ -16,7 +16,7 @@ const CHANNELS = [
     id: "elefante",
     channelId: "UCsCmz7TG7GtLk9tK8O-N5Rw",
     url: "https://www.youtube.com/@ElefanteDesnudo",
-    badge: "Debates",
+    badge: "Patrocinado por Hyxora",
     title: "El Elefante Desnudo",
     description:
       'Lo que todos ven, lo que nadie dice. Llevamos a expertos a la mesa para hablar de ese gran "elefante en la habitación" del que nadie se atreve a decir nada. Análisis directo y sin filtros.',
