@@ -4,6 +4,8 @@ import { useMemo, useState, useCallback, useRef } from "react";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import { useGetAllUsers } from "@/hooks/admin/useGetAllUsers";
+import { useGetAllPayments } from "@/hooks/admin/useGetAllPayments";
+import { useGetAllPolls } from "@/hooks/poll/useGetAllPolls";
 import DataTable from "@/components/DataTable";
 import Spinner from "@/components/Spinner";
 import UserDetailSidebar from "@/components/UserDetailSidebar";
@@ -71,13 +73,251 @@ const TABS = [
 
 const UsersModule = () => {
   const { data, isLoading, isError } = useGetAllUsers();
+  const { data: allPayments, isLoading: isLoadingPayments } =
+    useGetAllPayments();
+  const { data: allPolls } = useGetAllPolls();
   const rows = useMemo(() => data ?? [], [data]);
   const [activeTab, setActiveTab] = useState("all");
 
-  // NFT buyers: users who have at least one payment
-  const nftBuyersRows = useMemo(
-    () => rows.filter((u) => (u.payments?.length ?? 0) > 0),
-    [rows],
+  // Build per-user vote counts from all polls
+  const userVotesMap = useMemo(() => {
+    const map = {};
+    if (!Array.isArray(allPolls)) return map;
+    for (const poll of allPolls) {
+      if (!Array.isArray(poll?.votes)) continue;
+      for (const vote of poll.votes) {
+        if (vote?.user) map[vote.user] = (map[vote.user] || 0) + 1;
+      }
+    }
+    return map;
+  }, [allPolls]);
+
+  // Build flat buyers list from completed payments
+  const buyers = useMemo(() => {
+    if (!Array.isArray(allPayments) || !allPayments.length) return [];
+
+    const buyersData = [];
+    const matchedPaymentIds = new Set();
+
+    // Users with matched completed payments
+    for (const user of rows) {
+      const userPayments = allPayments.filter(
+        (p) =>
+          p?.status === "completed" &&
+          (p?.wallet?.toLowerCase() === user?.address?.toLowerCase() ||
+            p?.email?.toLowerCase() === user?.email?.toLowerCase()),
+      );
+      for (const payment of userPayments) {
+        matchedPaymentIds.add(payment._id);
+        buyersData.push({
+          ...user,
+          payment,
+          tokenId: payment?.tokenId || "N/A",
+          nombre: payment?.name || user?.name || "N/A",
+          email: user?.email || payment?.email || "N/A",
+          fecha: payment?.createdAt,
+          facturaId: payment?.invoiceNumber || "N/A",
+          metodo: payment?.type || payment?.method || "N/A",
+          monto: payment?.amount || payment?.total || payment?.price || 0,
+          respuestas: userVotesMap[user?._id] || 0,
+          isUnsynced: false,
+        });
+      }
+    }
+
+    // Orphaned payments (no matching user account)
+    for (const payment of allPayments) {
+      if (payment?.status !== "completed" || matchedPaymentIds.has(payment._id))
+        continue;
+      let parsedData = null;
+      try {
+        if (payment?.data) parsedData = JSON.parse(payment.data);
+      } catch (_) {}
+      buyersData.push({
+        _id: `unsynced-${payment._id}`,
+        payment,
+        tokenId: payment?.tokenId || "N/A",
+        nombre: payment?.name || parsedData?.transfer?.reference || "N/A",
+        email: payment?.email || "N/A",
+        fecha: payment?.createdAt,
+        facturaId: payment?.invoiceNumber || "N/A",
+        metodo: payment?.method || "N/A",
+        monto: payment?.amount || payment?.total || payment?.price || 0,
+        wallet: payment?.wallet,
+        respuestas: 0,
+        isUnsynced: true,
+      });
+    }
+
+    // Count purchases per email
+    const emailCount = {};
+    for (const b of buyersData) {
+      const em = b?.email?.toLowerCase();
+      if (em && em !== "n/a") emailCount[em] = (emailCount[em] || 0) + 1;
+    }
+    for (const b of buyersData) {
+      const em = b?.email?.toLowerCase();
+      b.cantidadCompras = em && em !== "n/a" ? emailCount[em] : 1;
+    }
+
+    // Default tokenId sort (oldest first)
+    buyersData.sort((a, b) => {
+      const aId = a?.payment?.tokenId ?? "0";
+      const bId = b?.payment?.tokenId ?? "0";
+      return aId.localeCompare(bId, undefined, { numeric: true });
+    });
+
+    return buyersData;
+  }, [rows, allPayments, userVotesMap]);
+
+  const buyersColumns = useMemo(
+    () => [
+      {
+        // id: "founderNumber",
+        accessorKey: "tokenId",
+        header: "#",
+        size: 44,
+        cell: (info) => {
+          const val = info.getValue();
+          return (
+            <span className="font-inter text-[11px] font-semibold tabular-nums text-[rgba(25,54,63,0.35)]">
+              {val}
+            </span>
+          );
+        },
+      },
+      {
+        accessorKey: "nombre",
+        header: "Nombre",
+        cell: (info) => {
+          const val = info.getValue();
+          const isUnsynced = info.row.original.isUnsynced;
+          return (
+            <div className="flex items-center gap-1.5">
+              <span className="font-inter text-[11px] tracking-[-0.44px] text-[#19363F]">
+                {val}
+              </span>
+              {isUnsynced && (
+                <span className="inline-flex items-center px-1 py-px rounded-[4px] bg-amber-50 text-amber-600 font-inter text-[9px] font-medium tracking-wide border border-amber-200">
+                  sin cuenta
+                </span>
+              )}
+            </div>
+          );
+        },
+      },
+      {
+        accessorKey: "email",
+        header: "Email",
+        cell: (info) => {
+          const val = info.getValue();
+          if (!val || val === "N/A")
+            return <span className="text-[rgba(25,54,63,0.3)]">—</span>;
+          return (
+            <div className="flex items-center gap-1.5">
+              <span className="font-inter text-[11px] tracking-[-0.44px] text-[rgba(25,54,63,0.7)]">
+                {val}
+              </span>
+              <CopyButton text={val} />
+            </div>
+          );
+        },
+      },
+      {
+        accessorKey: "fecha",
+        header: "Fecha",
+        cell: (info) => {
+          const val = info.getValue();
+          if (!val) return <span className="text-[rgba(25,54,63,0.3)]">—</span>;
+          return (
+            <span className="font-inter text-[11px] tracking-[-0.44px] text-[rgba(25,54,63,0.6)]">
+              {new Date(val).toLocaleDateString(undefined, {
+                year: "numeric",
+                month: "short",
+                day: "numeric",
+                hour: "2-digit",
+                minute: "2-digit",
+              })}
+            </span>
+          );
+        },
+      },
+      {
+        accessorKey: "facturaId",
+        header: "Factura",
+        cell: (info) => {
+          const val = info.getValue();
+          if (!val || val === "N/A")
+            return <span className="text-[rgba(25,54,63,0.3)]">—</span>;
+          return (
+            <div className="flex items-center gap-1.5">
+              <span className="font-mono text-[10px] tracking-tight text-[rgba(25,54,63,0.65)]">
+                {val}
+              </span>
+              <CopyButton text={val} />
+            </div>
+          );
+        },
+      },
+      {
+        accessorKey: "metodo",
+        header: "Método",
+        cell: (info) => {
+          const val = info.getValue();
+          if (!val || val === "N/A")
+            return <span className="text-[rgba(25,54,63,0.3)]">—</span>;
+          const label = val.toLowerCase();
+          const isStripe = label.includes("stripe");
+          const isMoonpay = label.includes("moonpay");
+          return (
+            <span
+              className={cn(
+                "inline-flex items-center px-1.5 py-0.5 rounded-[5px] font-inter text-[10px] font-medium tracking-[-0.3px]",
+                isStripe
+                  ? "bg-violet-50 text-violet-700 border border-violet-200"
+                  : isMoonpay
+                    ? "bg-blue-50 text-blue-700 border border-blue-200"
+                    : "bg-[rgba(25,54,63,0.06)] text-[#19363F]",
+              )}
+            >
+              {val}
+            </span>
+          );
+        },
+      },
+      {
+        accessorKey: "cantidadCompras",
+        header: "# Pagos",
+        size: 72,
+        cell: (info) => {
+          const count = info.getValue();
+          return (
+            <span className="font-inter text-[11px] font-semibold tabular-nums text-[#19363F]">
+              {count}
+            </span>
+          );
+        },
+      },
+      {
+        accessorKey: "respuestas",
+        header: "# Encuestas",
+        size: 88,
+        cell: (info) => {
+          const count = info.getValue();
+          return (
+            <span
+              className={cn(
+                "font-inter text-[11px] font-semibold tabular-nums",
+                count > 0 ? "text-[#19363F]" : "text-[rgba(25,54,63,0.25)]",
+              )}
+            >
+              {count}
+            </span>
+          );
+        },
+      },
+    ],
+    [],
   );
 
   // `isOpen` drives animations. `displayedUser` persists through the close
@@ -360,7 +600,7 @@ const UsersModule = () => {
 
   return (
     <div className="flex flex-row flex-1 min-h-0 overflow-hidden h-full">
-      <div className="flex flex-col flex-1 w-0 rounded-xl border-[0.7px] border-[rgba(25,54,63,0.08)] shadow-[0px_2px_12px_0px_rgba(25,54,63,0.08)] px-4 py-3">
+      <div className="flex flex-col flex-1 w-0 min-h-0 rounded-xl border-[0.7px] border-[rgba(25,54,63,0.08)] shadow-[0px_2px_12px_0px_rgba(25,54,63,0.08)] px-4 py-3 overflow-hidden ">
         <Tabs
           tabs={TABS}
           value={activeTab}
@@ -378,15 +618,20 @@ const UsersModule = () => {
           />
         )}
 
-        {activeTab === "nft-buyers" && (
-          <DataTable
-            data={nftBuyersRows}
-            columns={columns}
-            filename="compradores-nft"
-            title="Compradores NFT"
-            searchPlaceholder="Buscar por email, wallet..."
-          />
-        )}
+        {activeTab === "nft-buyers" &&
+          (isLoadingPayments ? (
+            <div className="flex items-center justify-center flex-1">
+              <Spinner />
+            </div>
+          ) : (
+            <DataTable
+              data={buyers}
+              columns={buyersColumns}
+              filename="compradores-nft"
+              title="Compradores NFT"
+              searchPlaceholder="Buscar por nombre, email, factura..."
+            />
+          ))}
       </div>
 
       {/* ── Desktop (lg+): inline wrapper — GSAP animates its width ── */}

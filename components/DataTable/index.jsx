@@ -353,7 +353,7 @@ const DataTable = ({
   const totalRows = table.getFilteredRowModel().rows.length;
 
   return (
-    <div className="flex flex-col w-full h-full ">
+    <div className="flex flex-col w-full flex-1 min-h-0">
       {/* Toolbar */}
       <div className="flex items-center justify-between gap-3 mb-3 flex-wrap">
         {title && (
@@ -409,7 +409,7 @@ const DataTable = ({
       </div>
 
       {/* Table wrapper */}
-      <div className="flex-1  overflow-auto rounded-xl border-[0.7px] border-[rgba(25,54,63,0.08)] bg-white shadow-[0px_1px_4px_0px_rgba(25,54,63,0.04)] scrollbar-thin scrollbar-thumb-[rgba(25,54,63,0.2)] scrollbar-thumb-rounded-lg">
+      <div className="flex-1 min-h-0 overflow-auto rounded-xl border-[0.7px] border-[rgba(25,54,63,0.08)] bg-white shadow-[0px_1px_4px_0px_rgba(25,54,63,0.04)] scrollbar-thin scrollbar-thumb-[rgba(25,54,63,0.2)] scrollbar-thumb-rounded-lg">
         <table className="w-full border-collapse table-auto ">
           <thead className="sticky top-0 z-10">
             {table.getHeaderGroups().map((hg) => (

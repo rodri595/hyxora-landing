@@ -5,9 +5,13 @@ import { ADMIN_TABS } from "@/components/AdminTabBar";
 import Spinner from "@/components/Spinner";
 
 const UsersModule = lazy(() => import("./_modules/UsersModule"));
+const EmailsModule = lazy(() => import("./_modules/EmailsModule"));
+const PollsModule = lazy(() => import("./_modules/PollsModule"));
 
 const moduleMap = {
   users: UsersModule,
+  emails: EmailsModule,
+  polls: PollsModule,
 };
 
 const AdminContent = () => {

@@ -1,7 +1,9 @@
 import apiClient from "@/utils/axios";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 export const useSendTextEmails = () => {
+  const queryClient = useQueryClient();
+
   return useMutation({
     mutationFn: async (data) => {
       const response = await apiClient.post("/admin/sendTextEmails", {
@@ -10,6 +12,9 @@ export const useSendTextEmails = () => {
         texts: data.texts,
       });
       return response?.data?.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["allEmails"] });
     },
   });
 };

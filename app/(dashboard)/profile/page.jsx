@@ -1,6 +1,6 @@
 "use client";
 import { GetMyPayments } from "@/hooks/nfts/GetMyPayments";
-import Error from "@/components/Error";
+import ErrorComp from "@/components/Error";
 //
 import DataContent from "./DataContent";
 import ShareContent from "./ShareContent";
@@ -13,7 +13,7 @@ const ProfilePage = () => {
       data-lenis-prevent
     >
       <div className="flex flex-col flex-1 gap-[16px] ">
-        <Error
+        <ErrorComp
           error={paymentsError}
           message={
             paymentsError?.response?.data?.message ||

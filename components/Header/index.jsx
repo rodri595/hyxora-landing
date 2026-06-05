@@ -11,7 +11,6 @@ import topGainersIcon from "@/assets/imgs/icons/topgainer.png";
 import learningCenterIcon from "@/assets/imgs/icons/learning.png";
 import bannerImage from "@/assets/imgs/brand/tokens.webp";
 import fireSVG from "@/assets/imgs/icons/fire.svg";
-import podcastIMG from "@/assets/imgs/podcast//Logo fondo cuadrodo E Negro.png";
 import Menu from "./Menu";
 import gsap from "gsap";
 import { ScrollToPlugin } from "gsap/ScrollToPlugin";
@@ -19,7 +18,6 @@ import { useLogin, usePrivy } from "@privy-io/react-auth";
 import User from "./User";
 import { cn } from "@/utils";
 import { GetMyPayments } from "@/hooks/nfts/GetMyPayments";
-import { useWeb3 } from "@/context/Web3Provider";
 
 gsap.registerPlugin(ScrollToPlugin);
 const MenuItem = ({ children, href = "#", ...props }) => {
@@ -97,7 +95,7 @@ const ExploreMenuItem = ({
   // If onClick is provided, render as button
   if (onClick) {
     return (
-      <button onClick={onClick} className={baseClassName}>
+      <button onClick={onClick} className={baseClassName} type="button">
         {content}
       </button>
     );
@@ -130,7 +128,10 @@ const ExploreDropdown = () => {
   }, [paymentsData]);
   return (
     <div className="group relative">
-      <button className="box-border flex h-[28px] items-center justify-center gap-2 p-[2px] relative rounded-[6px] shrink-0 hover:bg-[rgba(25,54,63,0.04)] transition-all">
+      <button
+        type="button"
+        className="box-border flex h-[28px] items-center justify-center gap-2 p-[2px] relative rounded-[6px] shrink-0 hover:bg-[rgba(25,54,63,0.04)] transition-all"
+      >
         <div className="box-border flex gap-[10px] items-center justify-center px-2 py-[6px] relative shrink-0">
           <span className="font-inter font-medium leading-6 text-[#19363f] text-[16px] whitespace-nowrap tracking-[-0.64px]">
             Hyxora
@@ -167,10 +168,10 @@ const ExploreDropdown = () => {
                 disabled
               />
               <ExploreMenuItem
-                title="Podcast"
-                description="El Elefante Desnudo"
-                href="/podcast"
-                image={podcastIMG}
+                image={topGainersIcon}
+                title="Planes"
+                description="Descubre nuestros planes"
+                href="/plans"
               />
             </div>
             {/* Banner */}
@@ -210,6 +211,7 @@ const ExploreDropdown = () => {
                       fill="none"
                       // className="rotate-[-90deg]"
                     >
+                      <title>Arrow Icon</title>
                       <path
                         d="M6 12L10 8L6 4"
                         stroke="white"
@@ -245,7 +247,10 @@ const OportunityDropdown = () => {
   };
   return (
     <div className="group relative">
-      <button className="box-border flex h-[28px] items-center justify-center gap-2 p-[2px] relative rounded-[6px] shrink-0 hover:bg-[rgba(25,54,63,0.04)] transition-all">
+      <button
+        type="button"
+        className="box-border flex h-[28px] items-center justify-center gap-2 p-[2px] relative rounded-[6px] shrink-0 hover:bg-[rgba(25,54,63,0.04)] transition-all"
+      >
         <div className="box-border flex gap-[10px] items-center justify-center px-2 py-[6px] relative shrink-0">
           <span className="font-inter font-medium leading-6 text-[#19363f] text-[16px] whitespace-nowrap tracking-[-0.64px]">
             Oportunidades DeFi
@@ -280,7 +285,6 @@ const OportunityDropdown = () => {
 };
 const Header = ({ isFixed }) => {
   const { login } = useLogin();
-  const { setIsModalPurchaseNFTOpen } = useWeb3();
   const { authenticated } = usePrivy();
   const [welcomeOpen, setWelcomeOpen] = useState(false);
   const handleApuntate = () => setWelcomeOpen(true);
@@ -326,7 +330,7 @@ const Header = ({ isFixed }) => {
               NFT Founders
             </MenuItem>
             <OportunityDropdown />
-            <MenuItem href="/plans">Planes</MenuItem>
+            <MenuItem href="/podcast">Podcast</MenuItem>
             <MenuItem href="/faq">FAQ</MenuItem>
           </nav>
 

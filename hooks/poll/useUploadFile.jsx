@@ -11,7 +11,7 @@ export const useUploadFile = () => {
       const formData = new FormData();
       formData.append("file", file);
       const response = await apiClient.post(
-        `${import.meta.env.VITE_HYXORA_API}/poll/uploadFile`,
+        "/poll/uploadFile",
 
         formData,
         {

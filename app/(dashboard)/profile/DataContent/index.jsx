@@ -309,7 +309,7 @@ const DataContent = () => {
                 Fase:
               </p>
               <p className="text-[13px] font-bold text-[#0D1B2A] leading-[15px]">
-                Venta 1
+                Publica 1 (activa)
               </p>
             </div>
           </div>
