@@ -18,6 +18,7 @@ import { useLogin, usePrivy } from "@privy-io/react-auth";
 import User from "./User";
 import { cn } from "@/utils";
 import { GetMyPayments } from "@/hooks/nfts/GetMyPayments";
+import { useWeb3 } from "@/context/Web3Provider";
 
 gsap.registerPlugin(ScrollToPlugin);
 const MenuItem = ({ children, href = "#", ...props }) => {
@@ -286,6 +287,8 @@ const OportunityDropdown = () => {
 const Header = ({ isFixed }) => {
   const { login } = useLogin();
   const { authenticated } = usePrivy();
+  const { setIsModalPurchaseNFTOpen } = useWeb3();
+
   const [welcomeOpen, setWelcomeOpen] = useState(false);
   const handleApuntate = () => setWelcomeOpen(true);
   const handleLogin = () => {
@@ -372,9 +375,9 @@ const Header = ({ isFixed }) => {
               </>
             ) : (
               <>
-                {/* <button
+                <button
                   type="button"
-                  onClick={() => setIsModalPurchaseNFTOpen(() => true)}
+                  onClick={() => setIsModalPurchaseNFTOpen(true)}
                   className={cn(
                     "bg-[#1b5ffd] border border-[rgba(255,255,255,0.2)] border-solid h-[30px] relative rounded-[100px] cursor-pointer ",
                   )}
@@ -386,7 +389,7 @@ const Header = ({ isFixed }) => {
                       className="relative w-[10px] h-[10px]"
                     />
                     <p className="font-medium text-[12px] text-[#f7f8f8] tracking-[-0.48px] whitespace-nowrap">
-                      Inicia Sesión
+                      Comprar NFT
                     </p>
                   </div>
                   <div
@@ -395,7 +398,7 @@ const Header = ({ isFixed }) => {
                       boxShadow: "0px 0px 10px 0px inset rgba(255,255,255,0.4)",
                     }}
                   />
-                </button> */}
+                </button>
                 <User />
               </>
             )}

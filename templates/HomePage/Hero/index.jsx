@@ -127,12 +127,12 @@ const Hero = () => {
     >
       {/* Content */}
       <div className="flex flex-col gap-[38px] w-full  max-md:gap-[34px] max-md:justify-between grow  overflow-hidden">
-        <div className="flex flex-col gap-[38px] w-full items-center  max-md:gap-[16px]  ">
-          <div className="flex flex-col gap-7 items-center justify-center relative w-full max-md:gap-[16px]">
+        <div className="flex flex-col w-full items-center  gap-[24px]  ">
+          <div className="flex flex-col gap-4 items-center justify-center relative w-full max-md:gap-[16px]">
             {/* Hot Badge */}
             <Link
               target="_blank"
-              href="https://founder.hyxora.com/"
+              href="https://app.hyxora.com/"
               rel="noopener noreferrer"
               className="backdrop-blur-sm bg-[rgba(25,54,63,0.02)] border-[0.7px] border-[rgba(25,54,63,0.02)] border-solid flex gap-[10px] items-center pr-[12px] pl-0 py-0 relative rounded-[32px]"
               style={{ boxShadow: "0px 0px 4px 0px inset rgba(25,54,63,0.04)" }}
@@ -146,7 +146,7 @@ const Hero = () => {
                     className="relative w-[10px] h-[10px]"
                   />
                   <p className="font-medium text-[12px] text-[#f7f8f8] tracking-[-0.48px] whitespace-nowrap">
-                    NFT Founder
+                    Acceso a la Plataforma
                   </p>
                 </div>
                 <div
@@ -157,7 +157,7 @@ const Hero = () => {
                 />
               </div>
               <p className="font-normal text-[12px] text-[rgba(25,54,63,0.7)] tracking-[-0.48px] whitespace-nowrap max-md:tracking-[-0.24px] max-md:leading-[20px]">
-                ¡Únete ahora!
+                Hyxora
               </p>
               <Image
                 src={chevronSVG}
@@ -174,6 +174,7 @@ const Hero = () => {
               Hyxora es el puente entre la banca tradicional y las finanzas del
               presente.
             </p>
+            {/* here new button that open the link for https://app.hyxora.com/  */}
           </div>
 
           {/* Download buttons stores */}
@@ -194,10 +195,10 @@ const Hero = () => {
               >
                 <div className="marquee-inner relative flex gap-4 will-change-transform">
                   <span className="cursor-content px-2 py-1 opacity-0">
-                    Proximamente
+                    Próximamente App
                   </span>
                   <span className="cursor-content absolute left-full px-2 py-1 opacity-0">
-                    Proximamente
+                    Próximamente App
                   </span>
                 </div>
               </div>
@@ -206,13 +207,13 @@ const Hero = () => {
               <Image
                 alt="Download on the App Store"
                 src={appleIMG}
-                className="h-[44px] w-auto max-md:h-[40px]"
+                className="h-[40px] w-auto max-md:h-[36px]"
               />
 
               <Image
                 src={googleIMG}
                 alt="Get it on Google Play"
-                className="h-[44px] w-auto max-md:h-[40px]"
+                className="h-[40px] w-auto max-md:h-[36px]"
               />
             </div>
           </div>
