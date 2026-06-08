@@ -1,0 +1,360 @@
+.Access--container {
+  display: flex;
+  height: 100%;
+  padding: 120px 0;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  flex-shrink: 0;
+  align-self: stretch;
+  position: relative;
+  overflow: hidden;
+  background: #fff;
+}
+.Access-ellipse-background {
+  width: 784px;
+  height: 609px;
+  position: absolute;
+  left: 364px;
+  top: -463.508px;
+  border-radius: 784px;
+  opacity: 0.2;
+  background: var(--Blue-400, #3395ff);
+  filter: blur(150px);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.Access-outer-content {
+  display: flex;
+  width: 1184px;
+  padding: 0 47.997px;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 79.995px;
+  flex-shrink: 0;
+}
+.Access--content {
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 32px;
+}
+
+.Access--content-b {
+  width: 718px;
+  text-align: center;
+  font-family: Inter;
+  font-size: 72px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 72px; /* 100% */
+  letter-spacing: -1.677px;
+  background: linear-gradient(180deg, #000 10.16%, #9a9a9a 99.75%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.Access--content-b > strong {
+  background: linear-gradient(180deg, #000 10.16%, #9a9a9a 99.75%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-family: Inter;
+  font-size: 72px;
+  font-style: italic;
+  font-weight: 400;
+  line-height: 72px;
+  letter-spacing: -1.677px;
+}
+
+.Access-div {
+  display: flex;
+  height: 7.999px;
+  padding-right: 0.009px;
+  justify-content: center;
+  align-items: center;
+  gap: 10.342px;
+  align-self: stretch;
+}
+.Access-div-a {
+  width: 79.994px;
+  height: 0.998px;
+  background: linear-gradient(
+    90deg,
+    rgba(0, 0, 0, 0) 0%,
+    rgba(0, 0, 0, 0.2) 100%
+  );
+}
+.Access-div-b {
+  width: 11.313px;
+  height: 11.313px;
+  background: var(--Border-Interactive-Button-Outline-Hover, #000c1a);
+}
+.Access-div-c {
+  width: 79.994px;
+  height: 0.998px;
+  background: linear-gradient(
+    270deg,
+    rgba(0, 0, 0, 0) 0%,
+    rgba(0, 0, 0, 0.2) 100%
+  );
+}
+.Access--content-c {
+  align-self: stretch;
+
+  color: var(--Opacities-Dark-80, rgba(0, 0, 0, 0.8));
+  text-align: center;
+  font-family: Inter;
+  font-size: 18px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 28px; /* 155.556% */
+  letter-spacing: -0.439px;
+}
+.Access-list {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 32px;
+}
+.Access-list-item {
+  display: flex;
+  width: 928px;
+  padding: 24px;
+  align-items: center;
+  gap: 24px;
+
+  border: 0.602px solid var(--Opacities-Dark-20, rgba(0, 0, 0, 0.2));
+  background: var(--Opacities-Dark-05, rgba(0, 0, 0, 0.05));
+}
+
+.Access-list-item-box {
+  display: flex;
+  width: 63.996px;
+  height: 63.996px;
+  padding-right: 0.009px;
+  justify-content: center;
+  align-items: center;
+  flex-shrink: 0;
+
+  border-radius: 4px;
+  background: #000;
+}
+
+.Access-list-item-box > span {
+  color: #fff;
+  display: flex;
+  padding-right: 2.09px;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+.Access-list-item-content {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 3px;
+  flex: 1 0 0;
+}
+
+.Access-list-item-content-title {
+  align-self: stretch;
+  color: #000;
+  font-family: Inter;
+  font-size: var(--Font-Size-Size-24, 24px);
+  font-style: normal;
+  font-weight: var(--Font---Weight-Bold, 700);
+  line-height: var(--Line--Height-Leading-32, 32px); /* 133.333% */
+}
+.Access-list-item-content-bottom {
+  align-self: stretch;
+  color: var(--Foreground-Static-Dim1, #1a2431);
+  font-family: Inter;
+  font-size: 20px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 32.5px; /* 162.5% */
+  letter-spacing: -0.449px;
+}
+
+/* ============================================ */
+/* TABLET RESPONSIVE STYLES (md: 767px - 1023px) */
+/* ============================================ */
+@media (max-width: 1023px) {
+  .Access--container {
+    padding: 80px 0;
+  }
+
+  .Access-outer-content {
+    width: 688px;
+    padding: 0 32px;
+    gap: 64px;
+  }
+
+  .Access--content {
+    width: 100%;
+  }
+
+  .Access--content-b {
+    width: 100%;
+    max-width: 600px;
+    font-size: 56px;
+    line-height: 60px;
+    letter-spacing: -1.3px;
+  }
+
+  .Access--content-b > italic {
+    font-size: 56px;
+    line-height: 60px;
+    letter-spacing: -1.3px;
+  }
+
+  .Access--content-c {
+    font-size: 16px;
+    line-height: 26px;
+    letter-spacing: -0.4px;
+  }
+
+  .Access-ellipse-background {
+    width: 600px;
+    height: 500px;
+    left: 50%;
+    transform: translateX(-50%);
+    top: -350px;
+  }
+
+  .Access-list {
+    width: 100%;
+    gap: 24px;
+  }
+
+  .Access-list-item {
+    width: 100%;
+    padding: 20px;
+    gap: 20px;
+  }
+
+  .Access-list-item-box {
+    width: 56px;
+    height: 56px;
+  }
+
+  .Access-list-item-content-title {
+    font-size: 22px;
+    line-height: 30px;
+  }
+
+  .Access-list-item-content-bottom {
+    font-size: 18px;
+    line-height: 28px;
+    letter-spacing: -0.4px;
+  }
+}
+
+/* ============================================ */
+/* MOBILE RESPONSIVE STYLES (max-width: 767px) */
+/* ============================================ */
+@media (max-width: 767px) {
+  .Access--container {
+    padding: 60px 0;
+  }
+
+  .Access-outer-content {
+    width: 100%;
+    max-width: 375px;
+    padding: 0 16px;
+    gap: 48px;
+  }
+
+  .Access--content {
+    width: 100%;
+    gap: 24px;
+  }
+
+  .Access--content-b {
+    width: 100%;
+    font-size: 36px;
+    line-height: 48px;
+    letter-spacing: -1.677px;
+  }
+
+  .Access--content-b > italic {
+    font-size: 36px;
+    line-height: 48px;
+    letter-spacing: -1.677px;
+  }
+
+  .Access--content-c {
+    font-size: 18px;
+    line-height: 28px;
+    letter-spacing: -0.4395px;
+  }
+
+  .Access-ellipse-background {
+    width: 400px;
+    height: 300px;
+    left: 50%;
+    transform: translateX(-50%);
+    top: -200px;
+  }
+
+  .Access-list {
+    width: 100%;
+    gap: 32px;
+  }
+
+  .Access-list-item {
+    width: 100%;
+    max-width: 343px;
+    padding: 24px 23px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 20px;
+    border: 0.602px solid var(--grey-100, #e6e7e8);
+    background: var(--opacities-light-95, rgba(255, 255, 255, 0.95));
+    border-radius: 2px;
+  }
+
+  .Access-list-item-box {
+    width: 48px;
+    height: 48px;
+    background: linear-gradient(
+        154.058deg,
+        rgba(0, 0, 0, 0) 13.678%,
+        rgba(255, 255, 255, 0.2) 83.636%
+      ),
+      linear-gradient(90deg, rgb(0, 12, 26) 0%, rgb(0, 12, 26) 100%);
+  }
+
+  .Access-list-item-box > span {
+    font-size: 18px;
+    font-weight: 500;
+    line-height: 28px;
+    letter-spacing: -0.4395px;
+  }
+
+  .Access-list-item-content {
+    width: 100%;
+    gap: 12px;
+  }
+
+  .Access-list-item-content-title {
+    font-size: 22px;
+    font-weight: 600;
+    line-height: 28px;
+    letter-spacing: -0.5297px;
+    color: #000;
+  }
+
+  .Access-list-item-content-bottom {
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 24px;
+    letter-spacing: -0.3125px;
+    color: #4a5565;
+  }
+}

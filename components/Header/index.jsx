@@ -322,13 +322,7 @@ const Header = ({ isFixed }) => {
           {/* Navigation Menu */}
           <nav className="flex gap-[18px] items-center justify-center flex-1 max-md:hidden max-lg:gap-[8px]">
             <ExploreDropdown />
-            <MenuItem
-              href="https://founder.hyxora.com/"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              NFT Founders
-            </MenuItem>
+            <MenuItem href="/founders">NFT Founders</MenuItem>
             <OportunityDropdown />
             <MenuItem href="/podcast">Podcast</MenuItem>
             <MenuItem href="/faq">FAQ</MenuItem>

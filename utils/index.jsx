@@ -24,23 +24,23 @@ export const getRandomBool = () => {
 };
 
 export const shortenAddress = (address) => {
-  if (!!!address) return "";
+  if (!address) return "";
   return `${address.slice(0, 5)}...${address.slice(address.length - 4)}`;
 };
 
 export const extraShortenAddress = (address) => {
-  if (!!!address) return "";
+  if (!address) return "";
   return `${address.slice(0, 2)}..${address.slice(address.length - 2)}`;
 };
 
 export const shortenAddressLong = (address) => {
-  if (!!!address) return "";
+  if (!address) return "";
   return `${address.slice(0, 10)}...${address.slice(address.length - 9)}`;
 };
 
 // /////////////////////////////////////////////////////////////
 export const copyToClipboard = (text) => {
-  if (!!!text) return;
+  if (!text) return;
   if (navigator?.clipboard) {
     navigator.clipboard.writeText(text);
   } else {
@@ -90,8 +90,6 @@ export const shareContent = async ({
   title,
   text,
   url = window.location.href,
-  showSuccessToast = true,
-  successMessage = "Link copied to clipboard!",
 }) => {
   const shareData = {
     title,
@@ -101,19 +99,12 @@ export const shareContent = async ({
 
   try {
     // Check if the Web Share API is supported
-    if (navigator.share) {
-      await navigator.share(shareData);
+    if (navigator?.share) {
+      await navigator?.share(shareData);
       return true;
     } else {
       // Fallback: copy to clipboard
-      await navigator.clipboard.writeText(url);
-      if (showSuccessToast) {
-        toast.success(successMessage, {
-          icon: "🔗",
-          duration: 2000,
-          position: "top-right",
-        });
-      }
+      copyToClipboard(url);
       return true;
     }
   } catch (error) {
@@ -121,25 +112,8 @@ export const shareContent = async ({
     if (error.name !== "AbortError") {
       console.error("Error sharing:", error);
       // Fallback: try to copy to clipboard
-      try {
-        await navigator.clipboard.writeText(url);
-        if (showSuccessToast) {
-          toast.success(successMessage, {
-            icon: "🔗",
-            duration: 2000,
-            position: "top-right",
-          });
-        }
-        return true;
-      } catch (clipboardError) {
-        console.error("Error copying to clipboard:", clipboardError);
-        toast.error("Failed to share or copy link", {
-          icon: "❌",
-          duration: 2000,
-          position: "top-right",
-        });
-        return false;
-      }
+      copyToClipboard(url);
+      return true;
     }
     return false;
   }
