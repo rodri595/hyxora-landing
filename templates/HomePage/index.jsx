@@ -8,9 +8,10 @@ import Why from "./Why";
 import Finance from "./Finance";
 import Foundersv2 from "./Foundersv2";
 import FAQ from "./FAQ";
-import CTA from "./CTA";
 import Roadmap from "./Roadmap";
 import Plans from "./Plans";
+import CTA from "./CTA";
+// import Simulation from "./Simulation";
 const HomePage = () => {
   return (
     <Layout
@@ -26,6 +27,7 @@ const HomePage = () => {
       <Roadmap />
       <Plans />
       <FAQ />
+      {/* <Simulation /> */}
       <CTA />
       {/*
        */}

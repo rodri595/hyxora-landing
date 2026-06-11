@@ -20,6 +20,8 @@ import { useWeb3 } from "@/context/Web3Provider";
 import { shortenAddress, copyToClipboard, cn } from "@/utils";
 import podcastIMG from "@/assets/imgs/podcast//Logo fondo cuadrodo E Negro.png";
 import { GetMyPayments } from "@/hooks/nfts/GetMyPayments";
+import { useGetUserInformation } from "@/hooks/user/useGetUserInformation";
+import { roleNames } from "@/constants/roles";
 gsap.registerPlugin(ScrollToPlugin);
 
 // MenuItem component for the mobile menu
@@ -115,6 +117,13 @@ const MenuComponent = () => {
       (payment) => payment?.status === "completed" && payment?.tokenId,
     );
   }, [paymentsData]);
+  const { data: userInformation } = useGetUserInformation();
+  const isAdmin = useMemo(() => {
+    return (
+      userInformation?.information?.role?.includes(roleNames?.admin ?? "") ??
+      false
+    );
+  }, [userInformation]);
   const { logout, smartWalletAddress } = useWeb3();
   const [isActive, setIsActive] = useState(false);
   const [welcomeOpen, setWelcomeOpen] = useState(false);
@@ -312,6 +321,73 @@ const MenuComponent = () => {
                 </span>
               </Button>
             )}
+            {/* USER */}
+            {authenticated && (
+              <>
+                {/* Wallet Section */}
+                <div className="flex items-center justify-start py-0 mb-4">
+                  <p className="font-inter font-medium text-[#19363f] text-[16px] tracking-[-0.64px]">
+                    Mi Billetera
+                  </p>
+                </div>
+                <div className="flex flex-col space-y-2 mb-6">
+                  {isAdmin && (
+                    <MenuItem
+                      icon={
+                        <Icon
+                          name="diamond"
+                          className="w-[16px] h-[16px]"
+                          size={20}
+                        />
+                      }
+                      title="Admin Panel"
+                      description="Gestionar plataforma"
+                      className="w-full max-w-none"
+                      href="/admin"
+                    />
+                  )}
+                  <MenuItem
+                    icon={
+                      <Icon name="profile" className="w-[16px] h-[16px] " />
+                    }
+                    title="Mi Perfil"
+                    description="Tu perfil personal"
+                    className="w-full max-w-none"
+                    href="/profile"
+                  />
+                  <MenuItem
+                    icon={
+                      <Icon name="documents" className="w-[16px] h-[16px]" />
+                    }
+                    title="Comité Consultivo"
+                    description="Únete al comité"
+                    className="w-full max-w-none"
+                    href={hasNft ? "/comite" : undefined}
+                    disabled={!hasNft}
+                  />
+                  <MenuItem
+                    icon={
+                      <Icon
+                        name="sparkle"
+                        className="w-[16px] h-[16px]"
+                        size={20}
+                      />
+                    }
+                    title="Mis NFTs"
+                    description="Tus NFTs coleccionables"
+                    className="w-full max-w-none"
+                    href="/nfts"
+                  />
+                  <MenuItem
+                    icon={<Icon name="logout" className="w-[16px] h-[16px] " />}
+                    title="Sign out"
+                    description="Cerrar sesión"
+                    className="w-full max-w-none"
+                    onClick={() => logout()}
+                  />
+                </div>
+              </>
+            )}
             {/* Explorar Section */}
             <div className="flex items-center justify-start py-0 mb-4">
               <p className="font-inter font-medium text-[#19363f] text-[16px] tracking-[-0.64px]">
@@ -402,36 +478,11 @@ const MenuComponent = () => {
                   <Icon name="verification" className="w-[16px] h-[16px] " />
                 }
                 title="Soporte"
-                disabled
                 className="w-full max-w-none"
+                href="mailto:future@hyxora.com"
+                external
               />
             </div>
-            {authenticated && (
-              <>
-                {/* Wallet Section */}
-                <div className="flex items-center justify-start py-0 mb-4">
-                  <p className="font-inter font-medium text-[#19363f] text-[16px] tracking-[-0.64px]">
-                    Mi Billetera
-                  </p>
-                </div>
-                <div className="flex flex-col space-y-2 mb-6">
-                  <MenuItem
-                    icon={
-                      <Icon name="profile" className="w-[16px] h-[16px] " />
-                    }
-                    title="Mi Perfil"
-                    className="w-full max-w-none"
-                    href={"/profile"}
-                  />
-                  <MenuItem
-                    icon={<Icon name="logout" className="w-[16px] h-[16px] " />}
-                    title="Sign out"
-                    className="w-full max-w-none"
-                    onClick={() => logout()}
-                  />
-                </div>
-              </>
-            )}
             <div className="flex flex-col mt-auto pt-2 border-t space-y-1 pl-12">
               <span className="text-[rgba(25,54,63,0.70)] leading-[18px] font-inter text-[12px] font-normal tracking-[-0.24px]">
                 Al usar la plataforma aceptas nuestros{" "}
