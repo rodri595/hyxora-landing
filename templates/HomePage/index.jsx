@@ -11,7 +11,7 @@ import FAQ from "./FAQ";
 import Roadmap from "./Roadmap";
 import Plans from "./Plans";
 import CTA from "./CTA";
-// import Simulation from "./Simulation";
+import Simulation from "./Simulation";
 const HomePage = () => {
   return (
     <Layout
@@ -27,7 +27,7 @@ const HomePage = () => {
       <Roadmap />
       <Plans />
       <FAQ />
-      {/* <Simulation /> */}
+      <Simulation />
       <CTA />
       {/*
        */}

@@ -129,7 +129,7 @@ const MenuItemButton = ({
   );
 };
 
-const User = () => {
+const User = ({ isDark }) => {
   const { logout, smartWalletAddress } = useWeb3();
   const {
     data: userInformation,
@@ -153,10 +153,10 @@ const User = () => {
     {
       id: 0,
       title: "Mi Wallet",
-      description: !!smartWalletAddress
+      description: smartWalletAddress
         ? shortenAddress(smartWalletAddress)
         : "...",
-      icon: !!smartWalletAddress ? (
+      icon: smartWalletAddress ? (
         <Icon name="wallet" className="size-[16px] aspect-square" size={20} />
       ) : (
         <Spinner />
@@ -221,6 +221,7 @@ const User = () => {
             "flex w-[307px] flex-col items-start gap-[0px] rounded-[16px] py-[16px] border-[0.7px] border-solid border-[rgba(25,54,63,0.02)]",
             "bg-[rgba(250, 251, 251, 0.80)] box-shadow-[0_3px_4px_-4px_rgba(25,54,63,0.05),0_8px_8px_-4px_rgba(25,54,63,0.10),0_0_4px_0_rgba(25,54,63,0.04)_inset] backdrop-blur-[15px]",
             "overflow-y-auto scrollbar-thin scrollbar-thumb-[rgba(25,54,63,0.10)] scrollbar-track-transparent scrollbar-thumb-rounded-full ",
+            isDark && "bg-[rgba(250,251,251)]",
           )}
           anchor="bottom end"
           data-lenis-prevent

@@ -57,7 +57,7 @@ const NftCard = ({ payment, onVatRefund }) => {
               width={100}
               height={200}
               className="rounded-[10px] w-full h-auto "
-              //   unoptimized
+              unoptimized
             />
             {/* Title */}
             {/* <span className="text-[rgba(255,255,255,0.70)] font-inter text-[16px] font-normal leading-[24px] tracking-[-0.32px]">

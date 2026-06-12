@@ -13,23 +13,27 @@ import bannerImage from "@/assets/imgs/brand/tokens.webp";
 import fireSVG from "@/assets/imgs/icons/fire.svg";
 import Menu from "./Menu";
 import gsap from "gsap";
+import { useGSAP } from "@gsap/react";
 import { ScrollToPlugin } from "gsap/ScrollToPlugin";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useLogin, usePrivy } from "@privy-io/react-auth";
 import User from "./User";
 import { cn } from "@/utils";
 import { GetMyPayments } from "@/hooks/nfts/GetMyPayments";
 import { useWeb3 } from "@/context/Web3Provider";
 
-gsap.registerPlugin(ScrollToPlugin);
-const MenuItem = ({ children, href = "#", ...props }) => {
+gsap.registerPlugin(ScrollToPlugin, ScrollTrigger);
+const MenuItem = ({ children, href = "#", isDark, ...props }) => {
   return (
     <Link
       href={href}
-      className="box-border flex h-[28px] items-center justify-center p-[2px] relative rounded-[6px] shrink-0 hover:bg-[rgba(25,54,63,0.04)] transition-all"
+      className={`box-border flex h-[28px] items-center justify-center p-[2px] relative rounded-[6px] shrink-0 transition-all ${isDark ? "hover:bg-[rgba(255,255,255,0.08)]" : "hover:bg-[rgba(25,54,63,0.04)]"}`}
       {...props}
     >
       <div className="box-border flex gap-[10px] items-center justify-center px-2 py-[6px] relative shrink-0">
-        <span className="font-inter font-medium leading-6 text-[#19363f] text-[16px] whitespace-nowrap tracking-[-0.64px]">
+        <span
+          className={`font-inter font-medium leading-6 text-[16px] whitespace-nowrap tracking-[-0.64px] transition-colors duration-300 ${isDark ? "text-white" : "text-[#19363f]"}`}
+        >
           {children}
         </span>
       </div>
@@ -119,7 +123,7 @@ const ExploreMenuItem = ({
   // Fallback: render as div
   return <div className={baseClassName}>{content}</div>;
 };
-const ExploreDropdown = () => {
+const ExploreDropdown = ({ isDark }) => {
   const { data: paymentsData } = GetMyPayments();
   const hasNft = useMemo(() => {
     if (!paymentsData || paymentsData?.length === 0) return false;
@@ -131,10 +135,12 @@ const ExploreDropdown = () => {
     <div className="group relative">
       <button
         type="button"
-        className="box-border flex h-[28px] items-center justify-center gap-2 p-[2px] relative rounded-[6px] shrink-0 hover:bg-[rgba(25,54,63,0.04)] transition-all"
+        className={`box-border flex h-[28px] items-center justify-center gap-2 p-[2px] relative rounded-[6px] shrink-0 transition-all ${isDark ? "hover:bg-[rgba(255,255,255,0.08)]" : "hover:bg-[rgba(25,54,63,0.04)]"}`}
       >
         <div className="box-border flex gap-[10px] items-center justify-center px-2 py-[6px] relative shrink-0">
-          <span className="font-inter font-medium leading-6 text-[#19363f] text-[16px] whitespace-nowrap tracking-[-0.64px]">
+          <span
+            className={`font-inter font-medium leading-6 text-[16px] whitespace-nowrap tracking-[-0.64px] transition-colors duration-300 ${isDark ? "text-white" : "text-[#19363f]"}`}
+          >
             Hyxora
           </span>
         </div>
@@ -176,7 +182,11 @@ const ExploreDropdown = () => {
               />
             </div>
             {/* Banner */}
-            <div className="flex flex-1">
+            <Link
+              target="_blank"
+              href="https://app.hyxora.com/"
+              className="flex flex-1"
+            >
               <div
                 className="relative flex items-end justify-center p-[12px] rounded-[12px] overflow-clip w-full"
                 style={{
@@ -224,14 +234,14 @@ const ExploreDropdown = () => {
                   </div>
                 </div>
               </div>
-            </div>
+            </Link>
           </div>
         </div>
       </div>
     </div>
   );
 };
-const OportunityDropdown = () => {
+const OportunityDropdown = ({ isDark }) => {
   const handleSmoothScroll = (sectionId) => {
     const element = document.querySelector(sectionId);
     if (element) {
@@ -250,10 +260,12 @@ const OportunityDropdown = () => {
     <div className="group relative">
       <button
         type="button"
-        className="box-border flex h-[28px] items-center justify-center gap-2 p-[2px] relative rounded-[6px] shrink-0 hover:bg-[rgba(25,54,63,0.04)] transition-all"
+        className={`box-border flex h-[28px] items-center justify-center gap-2 p-[2px] relative rounded-[6px] shrink-0 transition-all ${isDark ? "hover:bg-[rgba(255,255,255,0.08)]" : "hover:bg-[rgba(25,54,63,0.04)]"}`}
       >
         <div className="box-border flex gap-[10px] items-center justify-center px-2 py-[6px] relative shrink-0">
-          <span className="font-inter font-medium leading-6 text-[#19363f] text-[16px] whitespace-nowrap tracking-[-0.64px]">
+          <span
+            className={`font-inter font-medium leading-6 text-[16px] whitespace-nowrap tracking-[-0.64px] transition-colors duration-300 ${isDark ? "text-white" : "text-[#19363f]"}`}
+          >
             Oportunidades DeFi
           </span>
         </div>
@@ -290,18 +302,39 @@ const Header = ({ isFixed }) => {
   const { setIsModalPurchaseNFTOpen } = useWeb3();
 
   const [welcomeOpen, setWelcomeOpen] = useState(false);
+  const [isDark, setIsDark] = useState(false);
+
   const handleApuntate = () => setWelcomeOpen(true);
   const handleLogin = () => {
     setWelcomeOpen(false);
     login();
   };
 
+  useGSAP(() => {
+    const trigger = document.querySelector("#simulation-section");
+    if (!trigger) return;
+
+    ScrollTrigger.create({
+      trigger,
+      start: "12% top",
+      end: "88% top",
+      onEnter: () => setIsDark(true),
+      onLeave: () => setIsDark(false),
+      onEnterBack: () => setIsDark(true),
+      onLeaveBack: () => setIsDark(false),
+    });
+  }, []);
+
   return (
     <>
       <div
-        className={`relative z-20 backdrop-blur-[10px] bg-[rgba(255,255,255,0.8)] border-b border-white box-border  w-full ${
-          isFixed ? "fixed! top-0 left-0 right-0" : ""
-        }`}
+        className={cn(
+          "relative z-20 backdrop-blur-[10px] border-b box-border w-full transition-colors duration-500",
+          isDark
+            ? "bg-[rgba(13,13,13,0.85)] border-[rgba(255,255,255,0.08)]"
+            : "bg-[rgba(255,255,255,0.8)] border-white",
+          isFixed && "fixed! top-0 left-0 right-0",
+        )}
       >
         <div className="box-border max-w-[1440px] w-full flex items-center h-[52px] px-[50px] py-3 mx-auto max-lg:px-4  max-md:px-4  max-md:py-[10px]">
           {/* Logo */}
@@ -309,14 +342,18 @@ const Header = ({ isFixed }) => {
             <Link href="/" className="flex gap-2 items-center shrink-0  ">
               <div className="relative shrink-0 size-6">
                 <Image
-                  className="w-full h-full object-contain"
+                  className={
+                    "w-full h-full object-contain transition-[filter] duration-300"
+                  }
                   src={brandIMG}
                   width={24}
                   height={24}
                   alt="Logo"
                 />
               </div>
-              <span className="font-inter font-semibold leading-6 text-[#19363f] text-[18px] whitespace-nowrap tracking-[-0.72px]">
+              <span
+                className={`font-inter font-semibold leading-6 text-[18px] whitespace-nowrap tracking-[-0.72px] transition-colors duration-300 ${isDark ? "text-white" : "text-[#19363f]"}`}
+              >
                 Hyxora
               </span>
             </Link>
@@ -324,11 +361,17 @@ const Header = ({ isFixed }) => {
 
           {/* Navigation Menu */}
           <nav className="flex gap-[18px] items-center justify-center flex-1 max-md:hidden max-lg:gap-[8px]">
-            <ExploreDropdown />
-            <MenuItem href="/founders">NFT Founders</MenuItem>
-            <OportunityDropdown />
-            <MenuItem href="/podcast">Podcast</MenuItem>
-            <MenuItem href="/faq">FAQ</MenuItem>
+            <ExploreDropdown isDark={isDark} />
+            <MenuItem href="/founders" isDark={isDark}>
+              NFT Founders
+            </MenuItem>
+            <OportunityDropdown isDark={isDark} />
+            <MenuItem href="/podcast" isDark={isDark}>
+              Podcast
+            </MenuItem>
+            <MenuItem href="/faq" isDark={isDark}>
+              FAQ
+            </MenuItem>
           </nav>
 
           {/* Connect Wallet Button */}
@@ -379,10 +422,10 @@ const Header = ({ isFixed }) => {
                   type="button"
                   onClick={() => setIsModalPurchaseNFTOpen(true)}
                   className={cn(
-                    "bg-[#1b5ffd] border border-[rgba(255,255,255,0.2)] border-solid h-[30px] relative rounded-[100px] cursor-pointer ",
+                    "bg-[#1b5ffd] border border-[rgba(255,255,255,0.2)] border-solid h-[30px] relative rounded-[100px] cursor-pointer overflow-hidden ",
                   )}
                 >
-                  <div className="flex gap-[3px] h-[30px] items-center justify-center overflow-hidden p-[8px] relative rounded-[inherit]">
+                  <div className="flex gap-0.75 h-full items-center justify-center overflow-hidden p-2 relative rounded-[inherit]">
                     <Image
                       src={fireSVG}
                       alt="Fire Icon"
@@ -399,7 +442,7 @@ const Header = ({ isFixed }) => {
                     }}
                   />
                 </button>
-                <User />
+                <User isDark={isDark} />
               </>
             )}
           </div>
@@ -429,7 +472,7 @@ const Header = ({ isFixed }) => {
               />
             </button>
           )}
-          <Menu />
+          <Menu isDark={isDark} />
         </div>
       </div>
 

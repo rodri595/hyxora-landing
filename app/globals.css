@@ -260,9 +260,62 @@
   /* html {
     scrollbar-gutter: stable;
   } */
+  html {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(150, 150, 150, 0.25) transparent;
+  }
+  ::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+    background: transparent;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: rgba(150, 150, 150, 0.25);
+    border-radius: 99px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgba(150, 150, 150, 0.5);
+  }
+  body {
+    scrollbar-gutter: auto;
+    background-color: #ffffff;
+    transition: background-color 0.6s ease;
+  }
+  html[data-dark-section] body {
+    background-color: #0d0d0d;
+  }
   button {
     @apply cursor-pointer;
   }
+}
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+
+.lenis:not(.lenis-autoToggle).lenis-stopped {
+  overflow: clip;
+}
+
+.lenis [data-lenis-prevent],
+.lenis [data-lenis-prevent-wheel],
+.lenis [data-lenis-prevent-touch],
+.lenis [data-lenis-prevent-vertical],
+.lenis [data-lenis-prevent-horizontal] {
+  overscroll-behavior: contain;
+}
+
+.lenis.lenis-smooth iframe {
+  pointer-events: none;
+}
+
+.lenis.lenis-autoToggle {
+  transition-property: overflow;
+  transition-duration: 1ms;
+  transition-behavior: allow-discrete;
 }
 .debug {
   border: 4px dashed red;
