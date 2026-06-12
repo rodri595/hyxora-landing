@@ -6,7 +6,7 @@ import { useGSAP } from "@gsap/react";
 import NumberFlow from "@number-flow/react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { memo, useDeferredValue, useEffect, useRef, useState } from "react";
+import { memo, useDeferredValue, useEffect, useRef } from "react";
 import {
   Bar,
   BarChart,
@@ -26,8 +26,6 @@ import {
 import { useSimulation } from "../simulation-context";
 
 gsap.registerPlugin(useGSAP, ScrollTrigger);
-
-const TABS = ["Simulación", "Proyección"];
 
 const CustomTooltip = ({ active, payload, label }) => {
   if (!active || !payload?.length) return null;
@@ -270,7 +268,6 @@ const ChartCanvas = memo(function ChartCanvas({ data }) {
 });
 
 const ChartCard = ({ showTable, onToggleTable }) => {
-  const [activeTab, setActiveTab] = useState(0);
   const { rows } = useSimulation();
   // Low-priority copy of the data: input commits stay instant and the chart
   // catches up in an interruptible background render (key for mobile).
@@ -296,27 +293,7 @@ const ChartCard = ({ showTable, onToggleTable }) => {
     <Card className="flex-1 h-auto p-0 min-w-0">
       {/* Top bar */}
       <div className="flex items-center justify-between px-[16px] h-[44px] border-b border-[#19222C] shrink-0">
-        {/* Left: tabs */}
-        <div className="flex h-full">
-          {TABS.map((tab, i) => (
-            <button
-              key={tab}
-              type="button"
-              onClick={() => setActiveTab(i)}
-              className={cn(
-                "relative text-[11px] font-medium h-full px-[12px] first:pl-0 transition-colors",
-                activeTab === i
-                  ? "text-white"
-                  : "text-white/30 hover:text-white/60",
-              )}
-            >
-              {tab}
-              {activeTab === i && (
-                <span className="absolute bottom-0 left-0 right-0 h-[2px] bg-white rounded-t-sm" />
-              )}
-            </button>
-          ))}
-        </div>
+        <span className="text-[11px] font-medium text-white">Simulación</span>
 
         {/* Right: table visibility toggle */}
         <button
@@ -326,6 +303,8 @@ const ChartCard = ({ showTable, onToggleTable }) => {
           aria-label={showTable ? "Ocultar tabla" : "Mostrar tabla"}
           className={cn(
             "flex items-center justify-center rounded-[6px] size-[24px] transition-colors",
+            // The table panel is hidden on mobile, so hide its toggle too.
+            "max-md:hidden",
             showTable ? "bg-[#3d3d3d]" : "bg-[#282828] hover:bg-[#3d3d3d]",
           )}
         >
@@ -339,7 +318,10 @@ const ChartCard = ({ showTable, onToggleTable }) => {
 
       {/* Recharts BarChart — owns its height so the row doesn't collapse
           while the table panel is hidden */}
-      <div ref={dimRef} className="w-full flex-1 min-h-[460px]">
+      <div
+        ref={dimRef}
+        className="w-full flex-1 min-h-[460px] max-md:min-h-[320px]"
+      >
         <ChartCanvas data={data} />
       </div>
     </Card>

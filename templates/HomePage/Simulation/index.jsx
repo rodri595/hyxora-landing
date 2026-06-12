@@ -15,13 +15,15 @@ import { SimulationProvider, useSimulation } from "./simulation-context";
 
 gsap.registerPlugin(useGSAP);
 
+// Fixed sample count so every sparkline keeps the same path structure and can
+// morph smoothly between simulator states.
+
 const StatCards = () => {
   const { initial, contribution, frequency, years, projectedReturn } =
     useSimulation();
   const perLabel = frequency === "monthly" ? "mes" : "año";
-
   return (
-    <div className="grid grid-cols-3 gap-[8px] max-md:grid-cols-1">
+    <div className="grid grid-cols-3 gap-[8px] max-lg:grid-cols-1">
       <StatCard
         id="blue"
         color="#3471FD"
@@ -76,22 +78,22 @@ const VaultCard = ({ showSimulator, onToggleSimulator }) => {
   const { vault, apy, isVaultLoading } = useSimulation();
 
   return (
-    <Card className={cn("p-[16px_24px] flex-row gap-[24px] items-center ")}>
-      <div className="flex shrink-0 justify-center items-center size-[40px] p-[4px] bg-[rgba(52,113,253,0.2)] rounded-full">
-        <div className="flex shrink-0 justify-center items-center size-full bg-[#3471FD] rounded-full">
-          <Icon name="sparkle" size={20} className="size-[12px] fill-white" />
-        </div>
-      </div>
+    <Card
+      className={cn(
+        "p-[16px_24px] flex-row gap-[24px] items-center",
+        "max-md:min-w-0 max-md:gap-[12px] max-md:p-[12px_16px]",
+      )}
+    >
       {/* Fund name */}
-      <div className="flex flex-col justify-between h-[40px]">
+      <div className="flex flex-col justify-between h-[40px] min-w-0 max-md:flex-1">
         {isVaultLoading ? (
           <span className="w-[96px] h-[12px] rounded-[4px] bg-white/10 animate-pulse" />
         ) : (
-          <span className="text-[14px] font-[700] text-[#FFF] h-[12px]">
+          <span className="text-[14px] leading-auto  font-[700] text-[#FFF] truncate">
             {vault?.name ?? "Fondo Estable"}
           </span>
         )}
-        <span className="text-[14px] font-[400] text-[#FFF] opacity-70 h-[16px]">
+        <span className="text-[14px] font-[400] text-[#FFF] opacity-70 h-[16px] truncate">
           Mejor Fondo Estable
         </span>
       </div>
@@ -132,6 +134,8 @@ const VaultCard = ({ showSimulator, onToggleSimulator }) => {
         aria-label={showSimulator ? "Ocultar simulador" : "Mostrar simulador"}
         className={cn(
           "flex items-center justify-center rounded-[6px] size-[24px] ml-auto transition-colors",
+          // The simulator is always visible (inline) on mobile, so no toggle.
+          "max-md:hidden",
           showSimulator ? "bg-[#3d3d3d]" : "bg-[#282828] hover:bg-[#3d3d3d]",
         )}
       >
@@ -219,7 +223,7 @@ const Simulation = () => {
   return (
     <section
       id="simulation-section"
-      className="relative w-full h-[calc(100vh+1000px)] flex items-center"
+      className="relative w-full h-[calc(100vh+1000px)] max-md:h-auto flex items-center"
       style={{
         marginTop: "-130px",
         marginBottom: "-130px",
@@ -229,10 +233,10 @@ const Simulation = () => {
           "linear-gradient(to bottom, #ffffff 0%, #0D0D0D 16%, #0D0D0D 84%, #ffffff 100%)",
       }}
     >
-      <div className="max-w-[1440px] mx-auto px-[50px] flex  gap-[8px] w-full justify-between max-lg:px-4 max-md:px-4">
+      <div className="max-w-[1440px] mx-auto px-[50px] flex gap-[8px] w-full justify-between max-lg:px-4">
         <SimulationProvider>
           {/* Bento Grid */}
-          <div className="flex flex-col gap-[8px] flex-1">
+          <div className="flex flex-col gap-[8px] flex-1 min-w-0">
             {/* Row 1 — 3 stat cards */}
             <StatCards />
             {/* Row 2 — Full-width vault ticker card */}
@@ -242,23 +246,32 @@ const Simulation = () => {
             />
             {/* Row 3 — Graph (2/3) + Table (1/3) */}
             <SimulationHoverProvider>
-              <div className="flex gap-[8px] ">
+              <div className="flex gap-[8px]">
                 {/* Graph card */}
                 <ChartCard
                   showTable={showTable}
                   onToggleTable={() => setShowTable((v) => !v)}
                 />
-                {/* Table card — toggled from the chart header */}
-                <TogglePanel show={showTable} width={300}>
-                  <TableCard />
-                </TogglePanel>
+                {/* Table card — toggled from the chart header. Hidden below
+                    md (its toggle is too), so it never mounts on mobile. */}
+                <div className="contents max-md:hidden">
+                  <TogglePanel show={showTable} width={300}>
+                    <TableCard />
+                  </TogglePanel>
+                </div>
               </div>
             </SimulationHoverProvider>
+            {/* Simulator on mobile: always visible, stacked under the chart */}
+            <div className="lg:hidden">
+              <SimulatorCard />
+            </div>
           </div>
-          {/* Simulator — toggled from the ticker card */}
-          <TogglePanel show={showSimulator} width={320}>
-            <SimulatorCard />
-          </TogglePanel>
+          {/* Simulator side panel — toggled from the ticker card (md and up) */}
+          <div className="contents max-lg:hidden">
+            <TogglePanel show={showSimulator} width={320}>
+              <SimulatorCard />
+            </TogglePanel>
+          </div>
         </SimulationProvider>
       </div>
     </section>

@@ -59,10 +59,7 @@ const AmountField = ({ label, value, onChange, accent }) => {
   );
 };
 
-const BAR_POSITIONS = Array.from(
-  { length: 33 },
-  (_, i) => (i / 32) * 100,
-);
+const BAR_POSITIONS = Array.from({ length: 33 }, (_, i) => (i / 32) * 100);
 
 const YearsSlider = ({ value, onChange }) => {
   const trackRef = useRef(null);
@@ -164,7 +161,7 @@ const SimulatorCard = () => {
   } = useSimulation();
 
   return (
-    <Card className="h-auto w-full max-w-[320px] p-0 gap-0">
+    <Card className="h-auto w-full max-w-[320px] p-0 gap-0 max-lg:max-w-full max-lg:min-w-0">
       {/* Header */}
       <div className="flex items-center justify-between px-[15px] h-[44px] border-b border-[#19222C] shrink-0">
         <div className="relative flex items-center h-full">
@@ -240,7 +237,10 @@ const SimulatorCard = () => {
               Valor proyectado
             </p>
             <p className="text-[18px] font-semibold text-white tracking-[-0.72px] leading-[24px]">
-              <NumberFlow value={finalTotal + projectedReturn} format={USD_FORMAT} />
+              <NumberFlow
+                value={finalTotal + projectedReturn}
+                format={USD_FORMAT}
+              />
             </p>
           </div>
           <div className="flex flex-col gap-[8px]">

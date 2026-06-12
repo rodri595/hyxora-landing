@@ -120,9 +120,8 @@ const MiniTable = ({ data, columns, barGradient, accentClass }) => {
 const TableCard = () => {
   // Deferred copy of the simulation: the table re-renders at low priority so
   // typing in the simulator never waits on the table's row work.
-  const { rows, initial, finalTotal, years } = useDeferredValue(
-    useSimulation(),
-  );
+  const { rows, initial, finalTotal, years } =
+    useDeferredValue(useSimulation());
 
   // Inversión: fixed base, bar = its shrinking share of each period's total.
   // Contribuciones: cumulative, bar = its growing share of each period's total.
@@ -161,7 +160,7 @@ const TableCard = () => {
   const horizonLabel = years === 1 ? "12 meses" : `${years} años`;
 
   return (
-    <Card className="w-full max-w-[240px] p-0 flex flex-col overflow-hidden h-auto gap-2">
+    <Card className="w-full  p-0 flex flex-col overflow-hidden h-auto gap-2">
       {/* Header */}
       <div className="flex items-center px-[11px] h-[44px] border-b border-[#19222C] shrink-0">
         <span className="text-[13px] font-semibold text-white tracking-[-0.3px]">

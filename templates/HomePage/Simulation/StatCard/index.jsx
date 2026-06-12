@@ -1,7 +1,12 @@
+"use client";
+
 import Icon from "@/components/Icon";
 import { cn } from "@/utils";
+import { useGSAP } from "@gsap/react";
 import NumberFlow from "@number-flow/react";
+import gsap from "gsap";
 import Card from "../Card";
+gsap.registerPlugin(useGSAP);
 
 const StatCard = ({
   id,
@@ -20,7 +25,7 @@ const StatCard = ({
   const title = `${titleTop} ${titleBottom}`;
 
   return (
-    <Card className={cn("p-[16px] max-lg:min-w-[250px] max-md:min-w-full")}>
+    <Card className={cn("p-[16px] min-w-0 gap-[8px]")}>
       <div className="flex w-full justify-between flex-1">
         <div className="flex gap-[8px] items-start justify-center">
           <div className="relative flex items-center justify-center size-[24px] shrink-0">
@@ -135,8 +140,8 @@ const StatCard = ({
           </svg>
         </div>
       </div>
-      <div className="flex w-full justify-between flex-1 pl-6">
-        <div className="flex gap-[8px] items-center justify-center">
+      <div className="flex w-full justify-end gap-[12px] flex-1 pl-6">
+        <div className="flex gap-[8px] items-center justify-center shrink-0">
           <div>
             <p className="text-[11px] text-white opacity-70 font-medium leading-[15px]">
               {label}
@@ -147,46 +152,6 @@ const StatCard = ({
               {suffix}
             </p>
           </div>
-        </div>
-        <div className="flex gap-[8px] items-center justify-center max-w-[80px]">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="117"
-            height="28"
-            viewBox="0 0 117 28"
-            fill="none"
-          >
-            <title>{`${title} chart`}</title>
-            <path d="M0 21L114 21" stroke="#262626" strokeDasharray="8 8" />
-            <path
-              opacity="0.2"
-              d="M116.5 21.0002C116.5 21.0002 111 18.5002 97.9995 24.5002C83.5 31.192 86.361 2.26757 68.5 4.5002C56.5 6.00021 64.5004 17.7246 49 18.5002C43.3444 18.7832 41.4995 29.0002 33.9995 26.0002C25.5347 22.6143 24 13.5002 12.9995 13.5002C7.09624 13.5002 4.34635 17.2502 3.07227 21.0002"
-              stroke="white"
-              strokeLinecap="round"
-            />
-            <path
-              d="M74.5 4.87114C72.9421 4.35431 70.9974 4.18815 68.5 4.50034C56.5 6.00034 64.5004 17.7248 49 18.5003C43.3444 18.7833 41.4995 29.0003 33.9995 26.0003C31.5526 25.0216 29.6848 23.5642 28 21.9866"
-              stroke={color}
-              strokeWidth="2"
-              strokeLinecap="round"
-            />
-            <circle
-              cx="28"
-              cy="22"
-              r="4"
-              fill={color}
-              stroke="#0D0D0D"
-              strokeWidth="2"
-            />
-            <circle
-              cx="75"
-              cy="5"
-              r="4"
-              fill={color}
-              stroke="#0D0D0D"
-              strokeWidth="2"
-            />
-          </svg>
         </div>
       </div>
     </Card>
