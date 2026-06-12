@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useMemo, useState } from "react";
 import { APY, INITIAL, MONTHLY, buildSimulationRows } from "./data";
-
+import { useGetVaults } from "@/hooks/vault/useGetVaults";
 const SimulationContext = createContext(null);
 
 export const SimulationProvider = ({ children }) => {
@@ -10,7 +10,7 @@ export const SimulationProvider = ({ children }) => {
   const [contribution, setContribution] = useState(MONTHLY);
   const [frequency, setFrequency] = useState("monthly"); // "monthly" | "yearly"
   const [years, setYears] = useState(30);
-
+  const { data: vaults } = useGetVaults();
   const value = useMemo(() => {
     const rows = buildSimulationRows({
       initial,
