@@ -1,8 +1,9 @@
 "use client";
 
-import { createContext, useContext, useMemo, useState } from "react";
-import { APY, INITIAL, MONTHLY, buildSimulationRows } from "./data";
 import { useGetVaults } from "@/hooks/vault/useGetVaults";
+import { createContext, useContext, useMemo, useState } from "react";
+import { DEFAULT_APY, INITIAL, MONTHLY, buildSimulationRows } from "./data";
+
 const SimulationContext = createContext(null);
 
 export const SimulationProvider = ({ children }) => {
@@ -10,8 +11,13 @@ export const SimulationProvider = ({ children }) => {
   const [contribution, setContribution] = useState(MONTHLY);
   const [frequency, setFrequency] = useState("monthly"); // "monthly" | "yearly"
   const [years, setYears] = useState(30);
-  const { data: vaults } = useGetVaults();
+  const { data: vaults, isLoading: isVaultLoading } = useGetVaults();
+
   const value = useMemo(() => {
+    // The simulation runs against the favorite vault's live APY.
+    const vault = vaults?.find((v) => v.favorite) ?? null;
+    const apy = Number(vault?.state?.apy) || DEFAULT_APY;
+
     const rows = buildSimulationRows({
       initial,
       contribution,
@@ -21,10 +27,16 @@ export const SimulationProvider = ({ children }) => {
     const perYear = frequency === "monthly" ? contribution * 12 : contribution;
     const totalContributions = perYear * years;
     const finalTotal = initial + totalContributions;
-    // Future value at APY: initial compounded + yearly contributions compounded.
-    const growth = (1 + APY) ** years;
-    const fv = initial * growth + perYear * ((growth - 1) / APY);
-    const projectedReturn = Math.round(fv - finalTotal);
+    // Mirrors the app's useInvestmentProjection: compound at the contribution
+    // frequency — FV of the lump sum plus FV of the contribution annuity.
+    const n = frequency === "monthly" ? 12 : 1;
+    const growth = (1 + apy / n) ** (n * years);
+    const fvRecurring =
+      apy === 0
+        ? contribution * n * years
+        : contribution * ((growth - 1) / (apy / n));
+    const fv = initial * growth + fvRecurring;
+    const projectedReturn = Math.round(Math.max(0, fv - finalTotal));
 
     return {
       initial,
@@ -39,8 +51,11 @@ export const SimulationProvider = ({ children }) => {
       totalContributions,
       finalTotal,
       projectedReturn,
+      vault,
+      apy,
+      isVaultLoading,
     };
-  }, [initial, contribution, frequency, years]);
+  }, [initial, contribution, frequency, years, vaults, isVaultLoading]);
 
   return (
     <SimulationContext.Provider value={value}>

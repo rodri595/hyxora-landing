@@ -62,6 +62,89 @@ const StatCards = () => {
   );
 };
 
+const formatTvl = (usd) => {
+  const v = Number(usd) || 0;
+  if (v >= 1_000_000_000) return `$${(v / 1_000_000_000).toFixed(2)}B`;
+  if (v >= 1_000_000) return `$${(v / 1_000_000).toFixed(2)}M`;
+  if (v >= 1_000) return `$${(v / 1_000).toFixed(2)}K`;
+  return `$${v.toFixed(2)}`;
+};
+
+// Ticker card for the favorite vault: name, live APY and TVL, with pulse
+// placeholders while the vault list loads.
+const VaultCard = ({ showSimulator, onToggleSimulator }) => {
+  const { vault, apy, isVaultLoading } = useSimulation();
+
+  return (
+    <Card className={cn("p-[16px_24px] flex-row gap-[24px] items-center ")}>
+      <div className="flex shrink-0 justify-center items-center size-[40px] p-[4px] bg-[rgba(52,113,253,0.2)] rounded-full">
+        <div className="flex shrink-0 justify-center items-center size-full bg-[#3471FD] rounded-full">
+          <Icon name="sparkle" size={20} className="size-[12px] fill-white" />
+        </div>
+      </div>
+      {/* Fund name */}
+      <div className="flex flex-col justify-between h-[40px]">
+        {isVaultLoading ? (
+          <span className="w-[96px] h-[12px] rounded-[4px] bg-white/10 animate-pulse" />
+        ) : (
+          <span className="text-[14px] font-[700] text-[#FFF] h-[12px]">
+            {vault?.name ?? "Fondo Estable"}
+          </span>
+        )}
+        <span className="text-[14px] font-[400] text-[#FFF] opacity-70 h-[16px]">
+          Mejor Fondo Estable
+        </span>
+      </div>
+      {/* Divider */}
+      <div className="w-px h-[32px] bg-white/10 shrink-0" />
+      {/* APY */}
+      <div className="flex flex-col justify-between h-[40px]">
+        {isVaultLoading ? (
+          <span className="w-[44px] h-[12px] rounded-[4px] bg-white/10 animate-pulse" />
+        ) : (
+          <span className="text-[14px] font-[700] text-[#26B179] h-[12px]">
+            {+(apy * 100).toFixed(2)}%
+          </span>
+        )}
+        <span className="text-[14px] font-[400] text-[#FFF] opacity-70 h-[16px]">
+          APY
+        </span>
+      </div>
+      {/* Divider */}
+      <div className="w-px h-[32px] bg-white/10 shrink-0" />
+      {/* TVL */}
+      <div className="flex flex-col justify-between h-[40px]">
+        {isVaultLoading ? (
+          <span className="w-[56px] h-[12px] rounded-[4px] bg-white/10 animate-pulse" />
+        ) : (
+          <span className="text-[14px] font-[700] text-[#FFF] h-[12px]">
+            {vault ? formatTvl(vault.state?.totalAssetsUsd) : "—"}
+          </span>
+        )}
+        <span className="text-[14px] font-[400] text-[#FFF] opacity-70 h-[16px]">
+          TVL
+        </span>
+      </div>
+      <button
+        type="button"
+        onClick={onToggleSimulator}
+        aria-pressed={showSimulator}
+        aria-label={showSimulator ? "Ocultar simulador" : "Mostrar simulador"}
+        className={cn(
+          "flex items-center justify-center rounded-[6px] size-[24px] ml-auto transition-colors",
+          showSimulator ? "bg-[#3d3d3d]" : "bg-[#282828] hover:bg-[#3d3d3d]",
+        )}
+      >
+        <Icon
+          name={showSimulator ? "hide-view" : "show-view"}
+          size={20}
+          className="size-[12px] fill-white"
+        />
+      </button>
+    </Card>
+  );
+};
+
 // Collapsible side panel: slides open on the width axis, then the content
 // fades in. Inner keeps a fixed width so the content clips instead of
 // reflowing while the panel animates. Content stays unmounted while the
@@ -152,72 +235,11 @@ const Simulation = () => {
           <div className="flex flex-col gap-[8px] flex-1">
             {/* Row 1 — 3 stat cards */}
             <StatCards />
-            {/* Row 2 — Full-width calculator card */}
-            <Card
-              className={cn("p-[16px_24px] flex-row gap-[24px] items-center ")}
-            >
-              {/* // */}
-              <div className="flex shrink-0 justify-center items-center size-[40px] p-[4px] bg-[rgba(52,113,253,0.2)] rounded-full">
-                <div className="flex shrink-0 justify-center items-center size-full bg-[#3471FD] rounded-full">
-                  <Icon
-                    name="sparkle"
-                    size={20}
-                    className="size-[12px] fill-white"
-                  />
-                </div>
-              </div>
-              {/* Fund name */}
-              <div className="flex flex-col justify-between h-[40px]">
-                <span className="text-[14px] font-[700] text-[#FFF] h-[12px]">
-                  Fluid USDC
-                </span>
-                <span className="text-[14px] font-[400] text-[#FFF] opacity-70 h-[16px]">
-                  Mejor Fondo Estable
-                </span>
-              </div>
-              {/* Divider */}
-              <div className="w-px h-[32px] bg-white/10 shrink-0" />
-              {/* APY */}
-              <div className="flex flex-col justify-between h-[40px]">
-                <span className="text-[14px] font-[700] text-[#26B179] h-[12px]">
-                  5.04%
-                </span>
-                <span className="text-[14px] font-[400] text-[#FFF] opacity-70 h-[16px]">
-                  APY
-                </span>
-              </div>
-              {/* Divider */}
-              <div className="w-px h-[32px] bg-white/10 shrink-0" />
-              {/* TVL */}
-              <div className="flex flex-col justify-between h-[40px]">
-                <span className="text-[14px] font-[700] text-[#FFF] h-[12px]">
-                  $8.00M
-                </span>
-                <span className="text-[14px] font-[400] text-[#FFF] opacity-70 h-[16px]">
-                  TVL
-                </span>
-              </div>
-              <button
-                type="button"
-                onClick={() => setShowSimulator((v) => !v)}
-                aria-pressed={showSimulator}
-                aria-label={
-                  showSimulator ? "Ocultar simulador" : "Mostrar simulador"
-                }
-                className={cn(
-                  "flex items-center justify-center rounded-[6px] size-[24px] ml-auto transition-colors",
-                  showSimulator
-                    ? "bg-[#3d3d3d]"
-                    : "bg-[#282828] hover:bg-[#3d3d3d]",
-                )}
-              >
-                <Icon
-                  name={showSimulator ? "hide-view" : "show-view"}
-                  size={20}
-                  className="size-[12px] fill-white"
-                />
-              </button>
-            </Card>
+            {/* Row 2 — Full-width vault ticker card */}
+            <VaultCard
+              showSimulator={showSimulator}
+              onToggleSimulator={() => setShowSimulator((v) => !v)}
+            />
             {/* Row 3 — Graph (2/3) + Table (1/3) */}
             <SimulationHoverProvider>
               <div className="flex gap-[8px] ">

@@ -1,6 +1,7 @@
 export const INITIAL = 10000;
 export const MONTHLY = 1000;
-export const APY = 0.05;
+// Used when no favorite vault comes back from the API.
+export const DEFAULT_APY = 0.07;
 export const MAX_YEARS = 50;
 
 export const MONTHS = [

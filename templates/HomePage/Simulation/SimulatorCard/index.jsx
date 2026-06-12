@@ -4,7 +4,7 @@ import { cn } from "@/utils";
 import NumberFlow from "@number-flow/react";
 import { useRef } from "react";
 import Card from "../Card";
-import { APY, MAX_YEARS } from "../data";
+import { MAX_YEARS } from "../data";
 import { useSimulation } from "../simulation-context";
 
 const MAX_AMOUNT = 10_000_000;
@@ -160,6 +160,7 @@ const SimulatorCard = () => {
     totalContributions,
     finalTotal,
     projectedReturn,
+    apy,
   } = useSimulation();
 
   return (
@@ -228,7 +229,7 @@ const SimulatorCard = () => {
             </span>
           </div>
           <span className="text-[10px] font-medium text-white/40 border border-[#19222C] rounded-full px-[8px] py-[3px]">
-            {Math.round(APY * 100)}% APY
+            {+(apy * 100).toFixed(2)}% APY
           </span>
         </div>
 
