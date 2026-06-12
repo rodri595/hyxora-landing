@@ -1,11 +1,12 @@
-﻿"use client";
+"use client";
 
 import Icon from "@/components/Icon";
 import { cn } from "@/utils";
 import { useGSAP } from "@gsap/react";
+import NumberFlow from "@number-flow/react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { useRef, useState } from "react";
+import { memo, useDeferredValue, useEffect, useRef, useState } from "react";
 import {
   Bar,
   BarChart,
@@ -17,7 +18,6 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import NumberFlow from "@number-flow/react";
 import Card from "../Card";
 import {
   useSimulationHoverMonth,
@@ -101,13 +101,17 @@ const ChartHoverHighlight = ({ scopeRef }) => {
   return null;
 };
 
-const ChartCard = ({ showTable, onToggleTable }) => {
-  const [activeTab, setActiveTab] = useState(0);
-  const { rows: data } = useSimulation();
+// Memoized so tab clicks, table toggles and parent re-renders never touch the
+// recharts tree — only a new `data` reference does.
+const ChartCanvas = memo(function ChartCanvas({ data }) {
   const chartRef = useRef(null);
   const setHoveredMonth = useSimulationHoverSetter();
-  const hoverCall = useRef(null);
-  const queuedMonth = useRef(null);
+  // recharts animates value updates between renders, but stays inert on the
+  // first render — the GSAP scroll entrance owns the intro.
+  const hasRendered = useRef(false);
+  useEffect(() => {
+    hasRendered.current = true;
+  }, []);
 
   const { contextSafe } = useGSAP(
     (_context, ctxSafe) => {
@@ -152,12 +156,141 @@ const ChartCard = ({ showTable, onToggleTable }) => {
     }
   });
 
-  const queueHover = contextSafe((month) => {
-    if (month === queuedMonth.current) return;
-    queuedMonth.current = month;
-    hoverCall.current?.kill();
-    setHoveredMonth(month);
-  });
+  const barAnimation = {
+    isAnimationActive: hasRendered.current,
+    animationBegin: 0,
+    animationDuration: 400,
+    animationEasing: "ease-out",
+  };
+
+  return (
+    <div ref={chartRef} className="relative w-full h-full">
+      <ChartHoverHighlight scopeRef={chartRef} />
+      {/* debounce keeps the chart from re-rendering on every frame while the
+          side panels animate their width */}
+      <ResponsiveContainer width="100%" height="100%" debounce={50}>
+        <BarChart
+          data={data}
+          maxBarSize={24}
+          margin={{ top: 40, right: 0, bottom: 0, left: 0 }}
+          onMouseMove={(state) =>
+            setHoveredMonth(state?.isTooltipActive ? state.activeLabel : null)
+          }
+          onMouseLeave={() => setHoveredMonth(null)}
+        >
+          <Legend
+            align="left"
+            verticalAlign="top"
+            wrapperStyle={{ position: "absolute", left: 0, top: 0 }}
+            content={({ payload }) => (
+              <div className="flex items-center gap-[16px] px-3">
+                {payload
+                  ?.filter((entry) => entry.color !== "transparent")
+                  .sort((a, b) => b.dataKey.localeCompare(a.dataKey))
+                  .map((entry) => (
+                    <div
+                      key={entry.dataKey}
+                      className="flex items-center justify-center gap-1.5 cursor-pointer hover:opacity-80 transition-opacity"
+                      onMouseEnter={() => animateBars(entry.dataKey)}
+                      onMouseLeave={() => animateBars(undefined)}
+                    >
+                      <span
+                        className="size-2.5 rounded-xs shrink-0"
+                        style={{ backgroundColor: entry.color }}
+                      />
+                      <span className="text-[10px] text-white/40 font-medium">
+                        {entry.value}
+                      </span>
+                    </div>
+                  ))}
+              </div>
+            )}
+          />
+
+          <CartesianGrid
+            vertical={false}
+            stroke="#24292D"
+            strokeDasharray="8 8"
+          />
+          <XAxis
+            dataKey="month"
+            tick={{
+              fill: "rgba(255, 255, 255, 0.50)",
+              fontSize: 9,
+              fontWeight: 500,
+              fontFamily: "Inter",
+            }}
+            axisLine={false}
+            tickLine={false}
+          />
+          <YAxis
+            tickFormatter={(v) => {
+              if (v >= 1_000_000)
+                return `$${(v / 1_000_000).toFixed(1).replace(/\.0$/, "")}M`;
+              if (v >= 1_000)
+                return `$${(v / 1_000).toFixed(1).replace(/\.0$/, "")}K`;
+              return `$${v}`;
+            }}
+            tick={{
+              fill: "rgba(255, 255, 255, 0.70)",
+              fontSize: 10,
+              fontWeight: 500,
+              fontFamily: "Inter",
+            }}
+            axisLine={false}
+            tickLine={false}
+          />
+          <Tooltip
+            content={<CustomTooltip />}
+            cursor={{ fill: "rgba(255,255,255,0.03)", radius: 2 }}
+          />
+          <Bar
+            dataKey="initial"
+            stackId="a"
+            fill="#3471FD"
+            radius={[0, 0, 2, 2]}
+            className="bar-initial"
+            shape={cellShape}
+            {...barAnimation}
+          />
+          <Bar dataKey="gap" stackId="a" fill="transparent" {...barAnimation} />
+          <Bar
+            dataKey="contributions"
+            stackId="a"
+            fill="#26B179"
+            radius={[2, 2, 2, 2]}
+            className="bar-contributions"
+            shape={cellShape}
+            {...barAnimation}
+          />
+        </BarChart>
+      </ResponsiveContainer>
+    </div>
+  );
+});
+
+const ChartCard = ({ showTable, onToggleTable }) => {
+  const [activeTab, setActiveTab] = useState(0);
+  const { rows } = useSimulation();
+  // Low-priority copy of the data: input commits stay instant and the chart
+  // catches up in an interruptible background render (key for mobile).
+  const data = useDeferredValue(rows);
+  const isStale = data !== rows;
+  const dimRef = useRef(null);
+
+  // While the deferred render lags behind (slow devices), gently dim the
+  // chart instead of letting it look frozen.
+  useGSAP(
+    () => {
+      gsap.to(dimRef.current, {
+        opacity: isStale ? 0.7 : 1,
+        duration: isStale ? 0.15 : 0.3,
+        ease: "power2.out",
+        overwrite: "auto",
+      });
+    },
+    { dependencies: [isStale] },
+  );
 
   return (
     <Card className="flex-1 h-auto p-0 min-w-0">
@@ -206,109 +339,8 @@ const ChartCard = ({ showTable, onToggleTable }) => {
 
       {/* Recharts BarChart — owns its height so the row doesn't collapse
           while the table panel is hidden */}
-      <div ref={chartRef} className="w-full flex-1 min-h-[460px] relative">
-        <ChartHoverHighlight scopeRef={chartRef} />
-        <ResponsiveContainer width="100%" height="100%">
-          <BarChart
-            data={data}
-            maxBarSize={24}
-            syncId="anyId"
-            margin={{ top: 40, right: 0, bottom: 0, left: 0 }}
-            onMouseMove={(state) =>
-              queueHover(state?.isTooltipActive ? state.activeLabel : null)
-            }
-            onMouseLeave={() => queueHover(null)}
-          >
-            <Legend
-              align="left"
-              verticalAlign="top"
-              wrapperStyle={{ position: "absolute", left: 0, top: 0 }}
-              content={({ payload }) => (
-                <div className="flex items-center gap-[16px] px-3">
-                  {payload
-                    ?.filter((entry) => entry.color !== "transparent")
-                    .sort((a, b) => b.dataKey.localeCompare(a.dataKey))
-                    .map((entry) => (
-                      <div
-                        key={entry.dataKey}
-                        className="flex items-center justify-center gap-1.5 cursor-pointer hover:opacity-80 transition-opacity"
-                        onMouseEnter={() => animateBars(entry.dataKey)}
-                        onMouseLeave={() => animateBars(undefined)}
-                      >
-                        <span
-                          className="size-2.5 rounded-xs shrink-0"
-                          style={{ backgroundColor: entry.color }}
-                        />
-                        <span className="text-[10px] text-white/40 font-medium">
-                          {entry.value}
-                        </span>
-                      </div>
-                    ))}
-                </div>
-              )}
-            />
-
-            <CartesianGrid
-              vertical={false}
-              stroke="#24292D"
-              strokeDasharray="8 8"
-            />
-            <XAxis
-              dataKey="month"
-              tick={{
-                fill: "rgba(255, 255, 255, 0.50)",
-                fontSize: 9,
-                fontWeight: 500,
-                fontFamily: "Inter",
-              }}
-              axisLine={false}
-              tickLine={false}
-            />
-            <YAxis
-              tickFormatter={(v) => {
-                if (v >= 1_000_000) return `$${(v / 1_000_000).toFixed(1).replace(/\.0$/, "")}M`;
-                if (v >= 1_000) return `$${(v / 1_000).toFixed(1).replace(/\.0$/, "")}K`;
-                return `$${v}`;
-              }}
-              tick={{
-                fill: "rgba(255, 255, 255, 0.70)",
-                fontSize: 10,
-                fontWeight: 500,
-                fontFamily: "Inter",
-              }}
-              axisLine={false}
-              tickLine={false}
-            />
-            <Tooltip
-              content={<CustomTooltip />}
-              cursor={{ fill: "rgba(255,255,255,0.03)", radius: 2 }}
-            />
-            <Bar
-              dataKey="initial"
-              stackId="a"
-              fill="#3471FD"
-              radius={[0, 0, 2, 2]}
-              className="bar-initial"
-              shape={cellShape}
-              isAnimationActive={false}
-            />
-            <Bar
-              dataKey="gap"
-              stackId="a"
-              fill="transparent"
-              isAnimationActive={false}
-            />
-            <Bar
-              dataKey="contributions"
-              stackId="a"
-              fill="#26B179"
-              radius={[2, 2, 2, 2]}
-              className="bar-contributions"
-              shape={cellShape}
-              isAnimationActive={false}
-            />
-          </BarChart>
-        </ResponsiveContainer>
+      <div ref={dimRef} className="w-full flex-1 min-h-[460px]">
+        <ChartCanvas data={data} />
       </div>
     </Card>
   );

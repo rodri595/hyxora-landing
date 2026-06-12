@@ -64,8 +64,10 @@ const StatCards = () => {
 
 // Collapsible side panel: slides open on the width axis, then the content
 // fades in. Inner keeps a fixed width so the content clips instead of
-// reflowing while the panel animates. Hidden by default.
+// reflowing while the panel animates. Content stays unmounted while the
+// panel is closed so hidden cards (e.g. the table) cost nothing to render.
 const TogglePanel = ({ show, width, children }) => {
+  const [mounted, setMounted] = useState(show);
   const panelRef = useRef(null);
   const innerRef = useRef(null);
 
@@ -73,6 +75,14 @@ const TogglePanel = ({ show, width, children }) => {
     () => {
       const panel = panelRef.current;
       const inner = innerRef.current;
+
+      if (!inner) {
+        // Content not mounted yet: mount it first, the effect re-runs and
+        // plays the open animation on the next pass.
+        if (show) setMounted(true);
+        return;
+      }
+
       gsap.killTweensOf([panel, inner]);
 
       if (show) {
@@ -90,11 +100,14 @@ const TogglePanel = ({ show, width, children }) => {
           width: 0,
           duration: 0.3,
           ease: "power2.inOut",
-          onComplete: () => gsap.set(panel, { display: "none" }),
+          onComplete: () => {
+            gsap.set(panel, { display: "none" });
+            setMounted(false);
+          },
         });
       }
     },
-    { dependencies: [show] },
+    { dependencies: [show, mounted] },
   );
 
   return (
@@ -103,9 +116,15 @@ const TogglePanel = ({ show, width, children }) => {
       className="overflow-hidden shrink-0"
       style={{ width: 0, display: "none" }}
     >
-      <div ref={innerRef} className="flex h-full" style={{ width, opacity: 0 }}>
-        {children}
-      </div>
+      {mounted && (
+        <div
+          ref={innerRef}
+          className="flex h-full"
+          style={{ width, opacity: 0 }}
+        >
+          {children}
+        </div>
+      )}
     </div>
   );
 };

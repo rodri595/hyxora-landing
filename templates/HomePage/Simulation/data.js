@@ -1,6 +1,6 @@
 export const INITIAL = 10000;
 export const MONTHLY = 1000;
-export const APY = 0.5;
+export const APY = 0.05;
 export const MAX_YEARS = 50;
 
 export const MONTHS = [

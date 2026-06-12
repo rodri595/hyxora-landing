@@ -8,7 +8,7 @@ import {
   getCoreRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { useMemo } from "react";
+import { useDeferredValue, useMemo } from "react";
 import Card from "../Card";
 import { MIN_BARS } from "../data";
 import { useSimulationHover } from "../hover-context";
@@ -118,7 +118,11 @@ const MiniTable = ({ data, columns, barGradient, accentClass }) => {
 };
 
 const TableCard = () => {
-  const { rows, initial, finalTotal, years } = useSimulation();
+  // Deferred copy of the simulation: the table re-renders at low priority so
+  // typing in the simulator never waits on the table's row work.
+  const { rows, initial, finalTotal, years } = useDeferredValue(
+    useSimulation(),
+  );
 
   // Inversión: fixed base, bar = its shrinking share of each period's total.
   // Contribuciones: cumulative, bar = its growing share of each period's total.
