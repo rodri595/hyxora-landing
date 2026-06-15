@@ -1,5 +1,6 @@
 "use client";
 import { useState, useMemo } from "react";
+import { usePathname } from "next/navigation";
 import Link from "next/link";
 import Image from "@/components/Image";
 import Button from "@/components/Button";
@@ -13,16 +14,17 @@ import bannerImage from "@/assets/imgs/brand/tokens.webp";
 import fireSVG from "@/assets/imgs/icons/fire.svg";
 import Menu from "./Menu";
 import gsap from "gsap";
-import { useGSAP } from "@gsap/react";
 import { ScrollToPlugin } from "gsap/ScrollToPlugin";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useLogin, usePrivy } from "@privy-io/react-auth";
 import User from "./User";
 import { cn } from "@/utils";
 import { GetMyPayments } from "@/hooks/nfts/GetMyPayments";
 import { useWeb3 } from "@/context/Web3Provider";
 
-gsap.registerPlugin(ScrollToPlugin, ScrollTrigger);
+gsap.registerPlugin(ScrollToPlugin);
+
+// Routes that render with a dark background, so the header switches to dark mode.
+const DARK_ROUTES = ["/simulate"];
 const MenuItem = ({ children, href = "#", isDark, ...props }) => {
   return (
     <Link
@@ -302,28 +304,17 @@ const Header = ({ isFixed }) => {
   const { setIsModalPurchaseNFTOpen } = useWeb3();
 
   const [welcomeOpen, setWelcomeOpen] = useState(false);
-  const [isDark, setIsDark] = useState(false);
+
+  const pathname = usePathname();
+  const isDark = DARK_ROUTES.some(
+    (route) => pathname === route || pathname.startsWith(`${route}/`),
+  );
 
   const handleApuntate = () => setWelcomeOpen(true);
   const handleLogin = () => {
     setWelcomeOpen(false);
     login();
   };
-
-  useGSAP(() => {
-    const trigger = document.querySelector("#simulation-section");
-    if (!trigger) return;
-
-    ScrollTrigger.create({
-      trigger,
-      start: "12% top",
-      end: "88% top",
-      onEnter: () => setIsDark(true),
-      onLeave: () => setIsDark(false),
-      onEnterBack: () => setIsDark(true),
-      onLeaveBack: () => setIsDark(false),
-    });
-  }, []);
 
   return (
     <>
