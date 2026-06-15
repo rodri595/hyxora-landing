@@ -45,7 +45,7 @@ const Founders = () => {
               {/* Description */}
               <p className="font-medium text-[16px] leading-[24px] tracking-[-0.32px] text-[#19363f]">
                 Ahora tienes la posibilidad de ser <br />
-                co-propietario de Hyxora
+                Co-Fundador de Hyxora
                 {/* 10% de Equity entre 1000 Founders */}
               </p>
             </div>

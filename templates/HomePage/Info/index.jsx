@@ -131,7 +131,7 @@ const Info = () => {
   //     {
   //       title: "Founder de Hyxora",
   //       description:
-  //         "Al hacerte Founder, adquieres un % del Equity de Hyxora. Además de los propios privilegios de ser Founder, serás co-propietario de Hyxora. Date prisa, sólo habrá 1000 Founders.",
+  //         "Al hacerte Founder, adquieres un % del Equity de Hyxora. Además de los propios privilegios de ser Founder, serás  Co-Fundador de Hyxora. Date prisa, sólo habrá 1000 Founders.",
   //     },
   //     {
   //       title: "iA personalizada",

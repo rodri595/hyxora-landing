@@ -16,7 +16,8 @@ const Access = () => {
             <div className="Access-div-c" />
           </div>
           <span className="Access--content-c">
-            Un proceso claro y seguro: sigue estos pasos para convertirte en Founder y formar parte del proyecto.
+            Un proceso claro y seguro: sigue estos pasos para convertirte en
+            Founder y formar parte del proyecto.
           </span>
         </div>
         <div className="Access-list">
@@ -25,9 +26,12 @@ const Access = () => {
               <span>01</span>
             </div>
             <div className="Access-list-item-content">
-              <span className="Access-list-item-content-title">Infórmate antes de empezar.</span>
+              <span className="Access-list-item-content-title">
+                Infórmate antes de empezar.
+              </span>
               <span className="Access-list-item-content-bottom">
-                Lee atentamente la información del proyecto y asegúrate de entender los beneficios y condiciones.
+                Lee atentamente la información del proyecto y asegúrate de
+                entender los beneficios y condiciones.
               </span>
             </div>
           </div>
@@ -36,9 +40,12 @@ const Access = () => {
               <span>02</span>
             </div>
             <div className="Access-list-item-content">
-              <span className="Access-list-item-content-title">Únete a la comunidad Hyxora.</span>
+              <span className="Access-list-item-content-title">
+                Únete a la comunidad Hyxora.
+              </span>
               <span className="Access-list-item-content-bottom">
-                Crea tu cuenta para iniciar el proceso y acceder a las próximas fases.
+                Crea tu cuenta para iniciar el proceso y acceder a las próximas
+                fases.
               </span>
             </div>
           </div>
@@ -47,9 +54,12 @@ const Access = () => {
               <span>03</span>
             </div>
             <div className="Access-list-item-content">
-              <span className="Access-list-item-content-title">Adquiere tu NFT Founder.</span>
+              <span className="Access-list-item-content-title">
+                Adquiere tu NFT Founder.
+              </span>
               <span className="Access-list-item-content-bottom">
-                Compra el NFT que te convierte en co-propietario de Hyxora y accede a tus beneficios exclusivos.
+                Compra el NFT que te convierte en Co-Fundador de Hyxora y accede
+                a tus beneficios exclusivos.
               </span>
             </div>
           </div>
@@ -58,9 +68,12 @@ const Access = () => {
               <span>04</span>
             </div>
             <div className="Access-list-item-content">
-              <span className="Access-list-item-content-title">Recibe tu contrato firmado.</span>
+              <span className="Access-list-item-content-title">
+                Recibe tu contrato firmado.
+              </span>
               <span className="Access-list-item-content-bottom">
-                Te enviaremos un correo con el contrato oficial de Hyxora que certifica tus derechos sobre el NFT Founder X/1000.
+                Te enviaremos un correo con el contrato oficial de Hyxora que
+                certifica tus derechos sobre el NFT Founder X/1000.
               </span>
             </div>
           </div>
@@ -69,9 +82,12 @@ const Access = () => {
               <span>05</span>
             </div>
             <div className="Access-list-item-content">
-              <span className="Access-list-item-content-title">Verifica tu identidad (KYC).</span>
+              <span className="Access-list-item-content-title">
+                Verifica tu identidad (KYC).
+              </span>
               <span className="Access-list-item-content-bottom">
-                Completa el proceso de validación antes del 01/01/2028 o antes de convertirte en usuario activo.
+                Completa el proceso de validación antes del 01/01/2028 o antes
+                de convertirte en usuario activo.
               </span>
             </div>
           </div>
@@ -80,9 +96,13 @@ const Access = () => {
               <span>06</span>
             </div>
             <div className="Access-list-item-content">
-              <span className="Access-list-item-content-title">Activa tus privilegios Founder.</span>
+              <span className="Access-list-item-content-title">
+                Activa tus privilegios Founder.
+              </span>
               <span className="Access-list-item-content-bottom">
-                Durante el primer trimestre de 2028, recibirás tu NFT en Hyxora. Desde ese momento podrás disfrutar de todos tus beneficios como co-propietario.
+                Durante el primer trimestre de 2028, recibirás tu NFT en Hyxora.
+                Desde ese momento podrás disfrutar de todos tus beneficios como
+                Co-Fundador.
               </span>
             </div>
           </div>

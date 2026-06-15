@@ -65,7 +65,7 @@ const Key = () => {
           <div className="key-benefits-item-content">
             <span className="key-benefits-item-content-a">Adjudicación</span>
             <span className="key-benefits-item-content-b">
-              Serás co-propietario en el % de 10%/und vendidas, de Hyxora.
+              Serás Co-Fundador en el % de 10%/und vendidas, de Hyxora.
             </span>
           </div>
         </div>

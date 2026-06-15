@@ -26,17 +26,19 @@ const Hero = () => {
         <div className="hero-content-b">
           De inversor a
           <br />
-          <span>co-propietario</span>
+          <span> Co-Fundador</span>
         </div>
         <div className="hero-content-divider" />
         <div className="hero-content-c">
-          Forma parte del proyecto Hyxora de forma directa gracias a la oferta de{" "}
-          <span>1000 unidades limitadas</span> de NFT Founder que formarán parte del{" "}
-          <span>10% del Equity</span> de Hyxora.
+          Forma parte del proyecto Hyxora de forma directa gracias a la oferta
+          de <span>1000 unidades limitadas</span> de NFT Founder que formarán
+          parte del <span>10% del Equity</span> de Hyxora.
         </div>
       </div>
       <div className="hero-btns">
-        <Button isPrimary onClick={handleFounderAction}>Hazte Founder</Button>
+        <Button isPrimary onClick={handleFounderAction}>
+          Hazte Founder
+        </Button>
       </div>
       <div className="hero-info">
         <div className="hero-info-inner">

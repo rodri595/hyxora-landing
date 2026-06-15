@@ -39,13 +39,13 @@ const Foundersv2 = () => {
             </div>
             {/* Title */}
             <h2 className="font-medium text-[28px] sm:text-[35px] tracking-[-1.6px] w-full leading-[1.2] flex flex-col">
-              <span className="text-[#19363f]">Sé co-propietario</span>
+              <span className="text-[#19363f]">Sé Co-Fundador</span>
               <span className="text-[rgba(25,54,63,0.6)]">de Hyxora</span>
             </h2>
 
             {/* Description */}
             <p className="font-normal leading-[24px] text-[14px] sm:text-[16px] text-[rgba(25,54,63,0.7)] tracking-[-0.32px] w-full">
-              Ahora tienes la posibilidad de ser co-propietario de Hyxora
+              Ahora tienes la posibilidad de ser Co-Fundador de Hyxora
             </p>
           </div>
 

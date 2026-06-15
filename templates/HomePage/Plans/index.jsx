@@ -74,7 +74,7 @@ const plans = [
     name: "FOUNDER",
     description: (
       <>
-        De usuario a Co-Propietario de HYXORA <br />
+        De usuario a Co-Fundador de HYXORA <br />
         (Limitado a 1000und)
       </>
     ),

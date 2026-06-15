@@ -26,10 +26,13 @@ const Founder = () => {
           <div className="founder-list-item-content">
             <div className="founder-list-item-content-top">
               <Icon name="star" size="24px" />
-              <span className="founder-list-item-content-title">Propiedad Real</span>
+              <span className="founder-list-item-content-title">
+                Propiedad Real
+              </span>
             </div>
             <span className="founder-list-item-content-bottom">
-              Registrada en Blockchain; acceso directo a la app y funcionalidades especiales.
+              Registrada en Blockchain; acceso directo a la app y
+              funcionalidades especiales.
             </span>
           </div>
         </div>
@@ -40,7 +43,9 @@ const Founder = () => {
           <div className="founder-list-item-content">
             <div className="founder-list-item-content-top">
               <Icon name="star" size="24px" />
-              <span className="founder-list-item-content-title">Privilegios Vitalicios</span>
+              <span className="founder-list-item-content-title">
+                Privilegios Vitalicios
+              </span>
             </div>
             <span className="founder-list-item-content-bottom">
               Suscripción Founder gratuita de por vida y acceso prioritario.
@@ -54,10 +59,12 @@ const Founder = () => {
           <div className="founder-list-item-content">
             <div className="founder-list-item-content-top">
               <Icon name="star" size="24px" />
-              <span className="founder-list-item-content-title">Comité consultivo</span>
+              <span className="founder-list-item-content-title">
+                Comité consultivo
+              </span>
             </div>
             <span className="founder-list-item-content-bottom">
-              Participación en decisiones consultivas como socio.
+              Participación en decisiones consultivas como Fundador.
             </span>
           </div>
         </div>
@@ -68,10 +75,13 @@ const Founder = () => {
           <div className="founder-list-item-content">
             <div className="founder-list-item-content-top">
               <Icon name="star" size="24px" />
-              <span className="founder-list-item-content-title">Transmisible</span>
+              <span className="founder-list-item-content-title">
+                Transmisible
+              </span>
             </div>
             <span className="founder-list-item-content-bottom">
-              Se puede vender o heredar; el nuevo propietario mantendrá los privilegios.
+              Se puede vender o heredar; el nuevo propietario mantendrá los
+              privilegios.
             </span>
           </div>
         </div>
@@ -82,7 +92,9 @@ const Founder = () => {
           <div className="founder-list-item-content">
             <div className="founder-list-item-content-top">
               <Icon name="star" size="24px" />
-              <span className="founder-list-item-content-title">Diferenciación</span>
+              <span className="founder-list-item-content-title">
+                Diferenciación
+              </span>
             </div>
             <span className="founder-list-item-content-bottom">
               Reconocimiento especial en app y eventos.
