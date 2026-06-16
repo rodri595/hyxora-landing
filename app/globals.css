@@ -332,72 +332,50 @@ html.lenis body {
     transform: rotate(360deg);
   }
 }
+.showcases-canvas {
+  width: 100%;
+  height: 100%;
+  aspect-ratio: 1;
+  opacity: 0;
+  transition: opacity 0.8s ease;
+  border-radius: 50%;
+  cursor: grab;
+  touch-action: none;
+}
+.showcases-canvas:active {
+  cursor: grabbing;
+}
 
-/* ── Map globe labels ──────────────────────────────────
-   `position-anchor` + opacity/filter are set inline per marker/arc id;
-   cobe deletes the --cobe-visible-* var on back-facing items, so the
-   `0` fallback fades + blurs them out automatically. */
-.ip-city-label {
+.showcase-default-label {
   position: absolute;
   bottom: anchor(top);
   left: anchor(center);
   translate: -50% 0;
   margin-bottom: 8px;
-  padding: 3px 8px;
-  background: #19363f;
-  color: #fff;
-  font-size: 10px;
-  font-weight: 500;
-  letter-spacing: 0.06em;
+  padding: 0.15rem 0.35rem;
+  background: var(--color-text-blue);
+  color: var(--color-bg-surface1);
+  font-family: var(--font-inter);
+  font-size: 0.6rem;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   white-space: nowrap;
-  border-radius: 6px;
-  pointer-events: none;
   transition:
-    opacity 0.4s,
-    filter 0.4s;
+    opacity 0.8s,
+    filter 0.8s;
+  pointer-events: none;
 }
 
-.ip-city-label::after {
+.showcase-default-label::after {
   content: "";
   position: absolute;
   top: 100%;
   left: 50%;
   transform: translate3d(-50%, -1px, 0);
-  border: 4px solid transparent;
-  border-top-color: #19363f;
+  border: 5px solid transparent;
+  border-top-color: var(--color-text-blue);
 }
 
-.ip-arc-label {
-  position: absolute;
-  bottom: anchor(top);
-  left: anchor(center);
-  translate: -50% 0;
-  margin-bottom: 6px;
-  padding: 2px 7px;
-  background: #fff;
-  color: #19363f;
-  font-size: 10px;
-  font-weight: 600;
-  letter-spacing: 0.02em;
-  white-space: nowrap;
-  border-radius: 6px;
-  box-shadow: 0 1px 6px rgba(25, 54, 63, 0.18);
-  pointer-events: none;
-  transition:
-    opacity 0.4s,
-    filter 0.4s;
-}
-
-.ip-arc-label::after {
-  content: "";
-  position: absolute;
-  top: 100%;
-  left: 50%;
-  transform: translate3d(-50%, -1px, 0);
-  border: 4px solid transparent;
-  border-top-color: #fff;
-}
 .dropdown-arrow-up:before {
   content: "";
   position: absolute;
