@@ -323,6 +323,7 @@ html.lenis body {
 .animate-rotate {
   animation: rotate 2s linear infinite;
 }
+
 @keyframes rotate {
   from {
     transform: rotate(0deg);
@@ -332,6 +333,71 @@ html.lenis body {
   }
 }
 
+/* ── Map globe labels ──────────────────────────────────
+   `position-anchor` + opacity/filter are set inline per marker/arc id;
+   cobe deletes the --cobe-visible-* var on back-facing items, so the
+   `0` fallback fades + blurs them out automatically. */
+.ip-city-label {
+  position: absolute;
+  bottom: anchor(top);
+  left: anchor(center);
+  translate: -50% 0;
+  margin-bottom: 8px;
+  padding: 3px 8px;
+  background: #19363f;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  border-radius: 6px;
+  pointer-events: none;
+  transition:
+    opacity 0.4s,
+    filter 0.4s;
+}
+
+.ip-city-label::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translate3d(-50%, -1px, 0);
+  border: 4px solid transparent;
+  border-top-color: #19363f;
+}
+
+.ip-arc-label {
+  position: absolute;
+  bottom: anchor(top);
+  left: anchor(center);
+  translate: -50% 0;
+  margin-bottom: 6px;
+  padding: 2px 7px;
+  background: #fff;
+  color: #19363f;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  border-radius: 6px;
+  box-shadow: 0 1px 6px rgba(25, 54, 63, 0.18);
+  pointer-events: none;
+  transition:
+    opacity 0.4s,
+    filter 0.4s;
+}
+
+.ip-arc-label::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translate3d(-50%, -1px, 0);
+  border: 4px solid transparent;
+  border-top-color: #fff;
+}
 .dropdown-arrow-up:before {
   content: "";
   position: absolute;

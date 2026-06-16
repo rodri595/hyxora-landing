@@ -2,6 +2,7 @@
 
 import Layout from "@/components/Layout";
 import Hero from "./Hero";
+import Map from "./Map";
 // import Whatis from "./Whatis";
 import Info from "./Info";
 import Why from "./Why";
@@ -19,6 +20,7 @@ const HomePage = () => {
       classContainer="flex flex-col gap-[130px] maxmd:gap-[80px]"
     >
       <Hero />
+      <Map />
       {/* <Whatis /> */}
       <Info />
       <Why />
