@@ -227,6 +227,20 @@ const Sidebar = ({ isSpecialPage, isSidebarOpen, setIsSidebarOpen }) => {
       ),
       href: "/nfts",
     },
+    {
+      id: 5,
+      title: "Tutoriales",
+      description: "Aprende paso a paso",
+      icon: (
+        <Icon
+          name="bulb"
+          className="size-[16px] aspect-square"
+          size={20}
+          fill={isSpecialPage ? "#fff" : "#19363F"}
+        />
+      ),
+      href: "/tutorials",
+    },
   ];
   return (
     <aside
