@@ -39,8 +39,13 @@ const categoryLabel = (id) => CATEGORIES.find((c) => c.id === id)?.label ?? "";
 const categoryAccent = (id) =>
   CATEGORIES.find((c) => c.id === id)?.accent ?? "#19363F";
 
-// Decorate a raw record with the derived category label / accent.
+// Decorate a raw record with the derived category label / accent, and apply
+// access-control defaults: membership gating + public flag live on the tutorial.
+//   membershipType — min plan to watch ("all" = any logged-in user)
+//   isPublic       — watchable without login (bypasses the membership check)
 const make = (v) => ({
+  membershipType: "all",
+  isPublic: false,
   ...v,
   category: categoryLabel(v.categoryId),
   accent: categoryAccent(v.categoryId),
@@ -56,6 +61,8 @@ export const TUTORIALS = [
     url: "https://vimeo.com/76979871",
     durationSec: 412,
     visibility: "visible",
+    membershipType: "all",
+    isPublic: true,
     createdAt: "2026-05-02T10:00:00Z",
     updatedAt: "2026-05-10T08:30:00Z",
   }),
@@ -80,6 +87,8 @@ export const TUTORIALS = [
     url: "https://vimeo.com/22439234",
     durationSec: 734,
     visibility: "hidden",
+    membershipType: "premium",
+    isPublic: false,
     createdAt: "2026-04-18T09:00:00Z",
     updatedAt: "2026-04-29T16:45:00Z",
   }),
@@ -92,6 +101,8 @@ export const TUTORIALS = [
     url: "https://www.youtube.com/watch?v=aqz-KE-bpKQ",
     durationSec: 698,
     visibility: "visible",
+    membershipType: "basic",
+    isPublic: false,
     createdAt: "2026-03-30T14:00:00Z",
     updatedAt: "2026-04-12T11:20:00Z",
   }),
@@ -104,6 +115,8 @@ export const TUTORIALS = [
     url: "https://vimeo.com/57580368",
     durationSec: 521,
     visibility: "disabled",
+    membershipType: "founder",
+    isPublic: false,
     createdAt: "2026-03-20T08:00:00Z",
     updatedAt: "2026-03-22T10:10:00Z",
   }),

@@ -1,5 +1,6 @@
 "use client";
 
+import { MEMBERSHIP_OPTIONS } from "@/app/(dashboard)/admin/_data/categories";
 import { CATEGORIES, VISIBILITY_OPTIONS } from "@/app/(dashboard)/admin/_data/tutorials";
 import SelectDropdown from "@/components/SelectDropdown";
 import VideoPreview from "@/components/VideoPreview";
@@ -23,6 +24,29 @@ const inputCls =
 const labelCls =
   "font-inter text-[10px] font-medium tracking-[-0.4px] text-[rgba(25,54,63,0.4)] uppercase";
 
+const membershipOptions = MEMBERSHIP_OPTIONS;
+
+// Small switch for the "public" flag (watchable without login).
+const Toggle = ({ checked, onChange }) => (
+  <button
+    type="button"
+    role="switch"
+    aria-checked={checked}
+    onClick={() => onChange(!checked)}
+    className={cn(
+      "relative h-5 w-9 shrink-0 rounded-full transition-colors",
+      checked ? "bg-[#19363F]" : "bg-[rgba(25,54,63,0.15)]",
+    )}
+  >
+    <span
+      className={cn(
+        "absolute top-0.5 size-4 rounded-full bg-white shadow-sm transition-transform",
+        checked ? "translate-x-4.5" : "translate-x-0.5",
+      )}
+    />
+  </button>
+);
+
 const CreateTutorialSidebar = ({ onClose, onCreate }) => {
   const panelRef = useRef(null);
 
@@ -32,6 +56,8 @@ const CreateTutorialSidebar = ({ onClose, onCreate }) => {
   const [url, setUrl] = useState("");
   const [duration, setDuration] = useState("");
   const [visibility, setVisibility] = useState("visible");
+  const [membershipType, setMembershipType] = useState("all");
+  const [isPublic, setIsPublic] = useState(false);
 
   const source = useMemo(() => detectVideoSource(url), [url]);
 
@@ -60,6 +86,8 @@ const CreateTutorialSidebar = ({ onClose, onCreate }) => {
       url: url.trim(),
       durationSec: parseDuration(duration),
       visibility,
+      membershipType,
+      isPublic,
     });
     onClose?.();
   };
@@ -135,6 +163,36 @@ const CreateTutorialSidebar = ({ onClose, onCreate }) => {
                 options={visibilityOptions}
               />
             </div>
+          </div>
+
+          {/* ── Acceso ── */}
+          <div className="flex items-start justify-between gap-3 rounded-lg border-[0.7px] border-[rgba(25,54,63,0.12)] p-2.5">
+            <div className="flex flex-col gap-0.5">
+              <span className="font-inter text-[11px] font-medium tracking-[-0.44px] text-[#19363F]">
+                Público
+              </span>
+              <span className="font-inter text-[10px] tracking-[-0.4px] text-[rgba(25,54,63,0.4)]">
+                Visible sin iniciar sesión. Ignora la membresía.
+              </span>
+            </div>
+            <Toggle checked={isPublic} onChange={setIsPublic} />
+          </div>
+
+          <div
+            className={cn(
+              "flex flex-col gap-1 transition-opacity",
+              isPublic && "pointer-events-none opacity-40",
+            )}
+          >
+            <span className={labelCls}>Membresía requerida</span>
+            <SelectDropdown
+              value={membershipType}
+              onChange={setMembershipType}
+              options={membershipOptions}
+            />
+            <span className="font-inter text-[10px] tracking-[-0.4px] text-[rgba(25,54,63,0.4)]">
+              Plan mínimo para ver este tutorial.
+            </span>
           </div>
 
           <label className="flex flex-col gap-1">

@@ -324,6 +324,31 @@ const TutorialsModule = () => {
         ),
       },
       {
+        accessorKey: "membershipType",
+        header: "Acceso",
+        size: 120,
+        cell: ({ row }) => {
+          const m = MEMBERSHIPS[row.original.membershipType] ?? MEMBERSHIPS.all;
+          return (
+            <div className="flex items-center gap-1">
+              {row.original.isPublic && (
+                <span className="inline-flex items-center rounded-[5px] bg-emerald-50 px-1.5 py-0.5 font-inter text-[10px] font-medium tracking-[-0.3px] text-emerald-700">
+                  Público
+                </span>
+              )}
+              <span
+                className={cn(
+                  "inline-flex items-center rounded-[5px] px-1.5 py-0.5 font-inter text-[10px] font-medium tracking-[-0.3px]",
+                  m.badge,
+                )}
+              >
+                {m.label}
+              </span>
+            </div>
+          );
+        },
+      },
+      {
         accessorKey: "visibility",
         header: "Estado",
         size: 110,
@@ -422,35 +447,6 @@ const TutorialsModule = () => {
         cell: (info) => (
           <span className="line-clamp-1 font-inter text-[11px] tracking-[-0.44px] text-[rgba(25,54,63,0.6)]">
             {info.getValue() || "—"}
-          </span>
-        ),
-      },
-      {
-        accessorKey: "membershipType",
-        header: "Membresía",
-        size: 110,
-        cell: (info) => {
-          const m = MEMBERSHIPS[info.getValue()] ?? MEMBERSHIPS.all;
-          return (
-            <span
-              className={cn(
-                "inline-flex items-center rounded-[5px] px-1.5 py-0.5 font-inter text-[10px] font-medium tracking-[-0.3px]",
-                m.badge,
-              )}
-            >
-              {m.label}
-            </span>
-          );
-        },
-      },
-      {
-        id: "count",
-        header: "Tutoriales",
-        size: 90,
-        accessorFn: (row) => categoryCounts[row.id] ?? 0,
-        cell: (info) => (
-          <span className="font-inter text-[11px] tabular-nums tracking-[-0.44px] text-[rgba(25,54,63,0.6)]">
-            {info.getValue()}
           </span>
         ),
       },

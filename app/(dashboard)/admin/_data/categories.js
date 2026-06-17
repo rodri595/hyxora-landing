@@ -1,13 +1,14 @@
 // Mock categories data for the admin module. Categories are the small lookup
-// table that classifies tutorials (and, in the future, may gate them behind a
-// membership plan). There is no backend yet — this seeds local state.
+// table that classifies tutorials. Membership gating lives on the tutorial, not
+// the category. There is no backend yet — this seeds local state.
 // Replace with a real hook (e.g. useGetCategories) later.
 
 import { CATEGORIES } from "../../academy/_data";
 
-// ── Membership gating (forward-looking) ──────────────────────────────────────
-// Mirrors the public plan names (see templates/HomePage/Plans). "all" means the
-// category is open to everyone; the rest require at least that plan.
+// ── Membership gating ─────────────────────────────────────────────────────────
+// Mirrors the public plan names (see templates/HomePage/Plans). Applied per
+// tutorial via `membershipType`. "all" means any logged-in user; the rest require
+// at least that plan. (A tutorial flagged `isPublic` bypasses this entirely.)
 export const MEMBERSHIPS = {
   all: {
     id: "all",
@@ -60,12 +61,10 @@ export const slugify = (str) =>
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-+|-+$/g, "");
 
-// Seed admin state from the canonical category list, defaulting every category
-// to "all" (open) until membership gating is wired up for real.
+// Seed admin state from the canonical category list.
 export const CATEGORY_SEED = CATEGORIES.map((c) => ({
   id: c.id,
   label: c.label,
   description: c.description ?? "",
   accent: c.accent ?? "#19363F",
-  membershipType: c.membershipType ?? "all",
 }));

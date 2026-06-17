@@ -1,11 +1,6 @@
 "use client";
 
-import {
-  ACCENT_PRESETS,
-  MEMBERSHIPS,
-  MEMBERSHIP_OPTIONS,
-} from "@/app/(dashboard)/admin/_data/categories";
-import SelectDropdown from "@/components/SelectDropdown";
+import { ACCENT_PRESETS } from "@/app/(dashboard)/admin/_data/categories";
 import Tabs from "@/components/Tabs";
 import { cn } from "@/utils";
 import { useGSAP } from "@gsap/react";
@@ -34,7 +29,7 @@ const AccentPicker = ({ value, onChange }) => (
           "size-6 rounded-full transition-transform",
           value === hex
             ? "ring-2 ring-[#19363F] ring-offset-2 ring-offset-white"
-            : "hover:scale-110"
+            : "hover:scale-110",
         )}
         style={{ background: hex }}
       />
@@ -42,23 +37,15 @@ const AccentPicker = ({ value, onChange }) => (
   </div>
 );
 
-const MembershipBadge = ({ membershipType }) => {
-  const m = MEMBERSHIPS[membershipType] ?? MEMBERSHIPS.all;
-  return (
-    <span
-      className={cn(
-        "inline-flex items-center rounded-[5px] px-1.5 py-0.5 font-inter text-[10px] font-medium tracking-[-0.3px]",
-        m.badge
-      )}
-    >
-      {m.label}
-    </span>
-  );
-};
-
 // ── Shared form fields (create + edit) ───────────────────────────────────────
 
-const CategoryForm = ({ values, setValues, submitLabel, canSubmit, onSubmit }) => {
+const CategoryForm = ({
+  values,
+  setValues,
+  submitLabel,
+  canSubmit,
+  onSubmit,
+}) => {
   const set = (key) => (val) => setValues((p) => ({ ...p, [key]: val }));
 
   return (
@@ -90,18 +77,6 @@ const CategoryForm = ({ values, setValues, submitLabel, canSubmit, onSubmit }) =
         <AccentPicker value={values.accent} onChange={set("accent")} />
       </div>
 
-      <div className="flex flex-col gap-1">
-        <span className={labelCls}>Membresía requerida</span>
-        <SelectDropdown
-          value={values.membershipType}
-          onChange={set("membershipType")}
-          options={MEMBERSHIP_OPTIONS}
-        />
-        <span className="font-inter text-[10px] tracking-[-0.4px] text-[rgba(25,54,63,0.4)]">
-          Plan mínimo para ver los tutoriales de esta categoría.
-        </span>
-      </div>
-
       {/* Live chip preview */}
       <div className="flex flex-col gap-1.5">
         <span className={labelCls}>Vista previa</span>
@@ -112,7 +87,6 @@ const CategoryForm = ({ values, setValues, submitLabel, canSubmit, onSubmit }) =
           >
             {values.label.trim() || "Nombre de categoría"}
           </span>
-          <MembershipBadge membershipType={values.membershipType} />
         </div>
       </div>
 
@@ -141,8 +115,18 @@ const ConfirmBlock = ({ message, confirmLabel, onCancel, onConfirm }) => (
         className="mt-px shrink-0"
         aria-hidden="true"
       >
-        <path d="M8 2L14.5 13H1.5L8 2Z" stroke="#dc2626" strokeWidth="1.3" strokeLinejoin="round" />
-        <path d="M8 6.5V9.5M8 11v.5" stroke="#dc2626" strokeWidth="1.3" strokeLinecap="round" />
+        <path
+          d="M8 2L14.5 13H1.5L8 2Z"
+          stroke="#dc2626"
+          strokeWidth="1.3"
+          strokeLinejoin="round"
+        />
+        <path
+          d="M8 6.5V9.5M8 11v.5"
+          stroke="#dc2626"
+          strokeWidth="1.3"
+          strokeLinecap="round"
+        />
       </svg>
       <p className="font-inter text-[11px] leading-relaxed tracking-[-0.44px] text-red-700">
         {message}
@@ -178,7 +162,6 @@ const DetailPanel = ({ category, tutorialCount }) => (
       >
         {category.label}
       </span>
-      <MembershipBadge membershipType={category.membershipType} />
     </div>
 
     <div className="flex flex-col gap-1">
@@ -211,25 +194,28 @@ const emptyValues = {
   label: "",
   description: "",
   accent: ACCENT_PRESETS[0],
-  membershipType: "all",
 };
 
 const toValues = (category) => ({
   label: category.label ?? "",
   description: category.description ?? "",
   accent: category.accent ?? ACCENT_PRESETS[0],
-  membershipType: category.membershipType ?? "all",
 });
 
-const EditPanel = ({ category, tutorialCount, onUpdate, onDelete, onClose }) => {
+const EditPanel = ({
+  category,
+  tutorialCount,
+  onUpdate,
+  onDelete,
+  onClose,
+}) => {
   const [values, setValues] = useState(() => toValues(category));
   const [confirmDelete, setConfirmDelete] = useState(false);
 
   const hasChanges =
     values.label !== (category.label ?? "") ||
     values.description !== (category.description ?? "") ||
-    values.accent !== category.accent ||
-    values.membershipType !== (category.membershipType ?? "all");
+    values.accent !== category.accent;
 
   const canSubmit = hasChanges && values.label.trim();
 
@@ -245,7 +231,6 @@ const EditPanel = ({ category, tutorialCount, onUpdate, onDelete, onClose }) => 
             label: values.label.trim(),
             description: values.description.trim(),
             accent: values.accent,
-            membershipType: values.membershipType,
           })
         }
       />
@@ -297,7 +282,6 @@ const CreatePanel = ({ onCreate, onClose }) => {
           label: values.label.trim(),
           description: values.description.trim(),
           accent: values.accent,
-          membershipType: values.membershipType,
         });
         onClose?.();
       }}
@@ -341,16 +325,15 @@ const CategorySidebar = ({
       gsap.fromTo(
         panelRef.current,
         { opacity: 0 },
-        { opacity: 1, duration: 0.28, delay: 0.14, ease: "power2.out" }
+        { opacity: 1, duration: 0.28, delay: 0.14, ease: "power2.out" },
       );
     },
-    { scope: panelRef }
+    { scope: panelRef },
   );
 
   const header = useMemo(() => {
     if (isCreate) return { title: "Nueva categoría", sub: null };
-    const m = MEMBERSHIPS[category.membershipType] ?? MEMBERSHIPS.all;
-    return { title: category.label, sub: `${m.label} · ${tutorialCount} tutorial(es)` };
+    return { title: category.label, sub: category.description || null };
   }, [isCreate, category, tutorialCount]);
 
   return (
@@ -366,7 +349,7 @@ const CategorySidebar = ({
           </p>
           {header.sub && (
             <p className="truncate font-inter text-[10px] tracking-[-0.4px] text-[rgba(25,54,63,0.4)]">
-              {header.sub}
+              {header?.sub}
             </p>
           )}
         </div>
@@ -376,7 +359,13 @@ const CategorySidebar = ({
           aria-label="Cerrar panel"
           className="mt-0.5 flex size-6 shrink-0 items-center justify-center rounded-md text-[rgba(25,54,63,0.4)] transition-colors hover:bg-[rgba(25,54,63,0.06)] hover:text-[#19363F]"
         >
-          <svg width="10" height="10" viewBox="0 0 10 10" fill="none" aria-hidden="true">
+          <svg
+            width="10"
+            height="10"
+            viewBox="0 0 10 10"
+            fill="none"
+            aria-hidden="true"
+          >
             <path
               d="M8.5 1.5l-7 7M1.5 1.5l7 7"
               stroke="currentColor"
@@ -388,7 +377,14 @@ const CategorySidebar = ({
       </div>
 
       {/* Tabs (detail mode only) */}
-      {!isCreate && <Tabs tabs={DETAIL_TABS} value={tab} onChange={setTab} className="px-4" />}
+      {!isCreate && (
+        <Tabs
+          tabs={DETAIL_TABS}
+          value={tab}
+          onChange={setTab}
+          className="px-4"
+        />
+      )}
 
       {/* Content */}
       <div className="scrollbar-thin scrollbar-thumb-[rgba(25,54,63,0.1)] scrollbar-thumb-rounded scrollbar-track-transparent flex-1 overflow-y-auto">

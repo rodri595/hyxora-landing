@@ -1,6 +1,10 @@
 "use client";
 
 import {
+  MEMBERSHIPS,
+  MEMBERSHIP_OPTIONS,
+} from "@/app/(dashboard)/admin/_data/categories";
+import {
   CATEGORIES,
   VISIBILITY,
   VISIBILITY_OPTIONS,
@@ -21,6 +25,7 @@ const visibilityOptions = VISIBILITY_OPTIONS.map((v) => ({
   value: v.id,
   label: v.label,
 }));
+const membershipOptions = MEMBERSHIP_OPTIONS;
 
 const inputCls =
   "w-full px-2.5 rounded-lg border-[0.7px] border-[rgba(25,54,63,0.12)] bg-white font-inter text-[12px] tracking-[-0.48px] text-[#19363F] placeholder:text-[rgba(25,54,63,0.3)] outline-none focus:border-[rgba(25,54,63,0.4)] transition-colors";
@@ -54,6 +59,41 @@ const VisibilityBadge = ({ visibility }) => {
   );
 };
 
+const MembershipBadge = ({ membershipType }) => {
+  const m = MEMBERSHIPS[membershipType] ?? MEMBERSHIPS.all;
+  return (
+    <span
+      className={cn(
+        "inline-flex items-center rounded-[5px] px-1.5 py-0.5 font-inter text-[10px] font-medium tracking-[-0.3px]",
+        m.badge
+      )}
+    >
+      {m.label}
+    </span>
+  );
+};
+
+// Small switch for the "public" flag (watchable without login).
+const Toggle = ({ checked, onChange }) => (
+  <button
+    type="button"
+    role="switch"
+    aria-checked={checked}
+    onClick={() => onChange(!checked)}
+    className={cn(
+      "relative h-5 w-9 shrink-0 rounded-full transition-colors",
+      checked ? "bg-[#19363F]" : "bg-[rgba(25,54,63,0.15)]"
+    )}
+  >
+    <span
+      className={cn(
+        "absolute top-0.5 size-4 rounded-full bg-white shadow-sm transition-transform",
+        checked ? "translate-x-4.5" : "translate-x-0.5"
+      )}
+    />
+  </button>
+);
+
 // ── DetailPanel ──────────────────────────────────────────────────────────────
 
 const DetailPanel = ({ video }) => {
@@ -71,6 +111,23 @@ const DetailPanel = ({ video }) => {
         <span className="font-inter text-[10px] tracking-[-0.4px] tabular-nums text-[rgba(25,54,63,0.4)]">
           {formatDuration(video.durationSec)}
         </span>
+      </div>
+
+      <div className="flex flex-col gap-1">
+        <span className={labelCls}>Acceso</span>
+        <div className="flex flex-wrap items-center gap-2">
+          {video.isPublic && (
+            <span className="inline-flex items-center rounded-[5px] bg-emerald-50 px-1.5 py-0.5 font-inter text-[10px] font-medium tracking-[-0.3px] text-emerald-700">
+              Público
+            </span>
+          )}
+          <MembershipBadge membershipType={video.membershipType} />
+          {video.isPublic && (
+            <span className="font-inter text-[10px] tracking-[-0.4px] text-[rgba(25,54,63,0.4)]">
+              Visible sin iniciar sesión
+            </span>
+          )}
+        </div>
       </div>
 
       <div className="flex flex-col gap-1">
@@ -181,6 +238,8 @@ const EditPanel = ({ video, onUpdate, onDelete, onClose }) => {
   const [url, setUrl] = useState(video.url ?? "");
   const [duration, setDuration] = useState(formatDuration(video.durationSec));
   const [visibility, setVisibility] = useState(video.visibility ?? "visible");
+  const [membershipType, setMembershipType] = useState(video.membershipType ?? "all");
+  const [isPublic, setIsPublic] = useState(video.isPublic ?? false);
   const [confirmDelete, setConfirmDelete] = useState(false);
 
   const source = useMemo(() => detectVideoSource(url), [url]);
@@ -191,7 +250,9 @@ const EditPanel = ({ video, onUpdate, onDelete, onClose }) => {
     categoryId !== video.categoryId ||
     url !== (video.url ?? "") ||
     parseDuration(duration) !== video.durationSec ||
-    visibility !== video.visibility;
+    visibility !== video.visibility ||
+    membershipType !== (video.membershipType ?? "all") ||
+    isPublic !== (video.isPublic ?? false);
 
   const handleSave = () => {
     onUpdate?.(video.id, {
@@ -201,6 +262,8 @@ const EditPanel = ({ video, onUpdate, onDelete, onClose }) => {
       url: url.trim(),
       durationSec: parseDuration(duration),
       visibility,
+      membershipType,
+      isPublic,
     });
   };
 
@@ -235,6 +298,33 @@ const EditPanel = ({ video, onUpdate, onDelete, onClose }) => {
           <span className={labelCls}>Visibilidad</span>
           <SelectDropdown value={visibility} onChange={setVisibility} options={visibilityOptions} />
         </div>
+      </div>
+
+      {/* ── Acceso ── */}
+      <div className="flex items-start justify-between gap-3 rounded-lg border-[0.7px] border-[rgba(25,54,63,0.12)] p-2.5">
+        <div className="flex flex-col gap-0.5">
+          <span className="font-inter text-[11px] font-medium tracking-[-0.44px] text-[#19363F]">
+            Público
+          </span>
+          <span className="font-inter text-[10px] tracking-[-0.4px] text-[rgba(25,54,63,0.4)]">
+            Visible sin iniciar sesión. Ignora la membresía.
+          </span>
+        </div>
+        <Toggle checked={isPublic} onChange={setIsPublic} />
+      </div>
+
+      <div
+        className={cn(
+          "flex flex-col gap-1 transition-opacity",
+          isPublic && "pointer-events-none opacity-40"
+        )}
+      >
+        <span className={labelCls}>Membresía requerida</span>
+        <SelectDropdown
+          value={membershipType}
+          onChange={setMembershipType}
+          options={membershipOptions}
+        />
       </div>
 
       <label className="flex flex-col gap-1">

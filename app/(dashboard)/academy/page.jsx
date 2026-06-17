@@ -32,22 +32,7 @@ const SearchButton = ({ onClick }) => (
       className="shrink-0 fill-[rgba(25,54,63,0.4)] size-[16px]"
       size={20}
     />
-    {/* <svg
-      width="12"
-      height="12"
-      viewBox="0 0 16 16"
-      fill="none"
-      aria-hidden="true"
-      className="shrink-0"
-    >
-      <path
-        d="M7.333 12.667A5.333 5.333 0 1 0 7.333 2a5.333 5.333 0 0 0 0 10.667ZM14 14l-2.9-2.9"
-        stroke="rgba(25,54,63,0.4)"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg> */}
+
     <span className="hidden sm:inline">Buscar tutoriales</span>
     <span className="sm:hidden">Buscar</span>
     <kbd className="ml-1 hidden rounded-[5px] border-[0.7px] border-[rgba(25,54,63,0.12)] bg-[rgba(25,54,63,0.03)] px-1 py-px font-inter text-[9.5px] font-medium text-[rgba(25,54,63,0.4)] sm:inline max-md:ml-auto">
