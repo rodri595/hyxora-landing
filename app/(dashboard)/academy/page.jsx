@@ -135,13 +135,11 @@ const ViewToggle = ({ value, onChange }) => {
   );
 };
 
-// ─── Featured hero (Apple TV-style spotlight) ───────────────────────────────
-
 const FeaturedHero = ({ video }) => {
   const [from, to] = video.gradient;
   return (
     <Link
-      href={`/tutorials/${video.slug}`}
+      href={`/academy/${video.slug}`}
       className="group/hero relative flex min-h-[200px] items-end overflow-hidden rounded-2xl p-5 sm:min-h-[260px] sm:p-7"
       style={{ background: `linear-gradient(120deg, ${from} 0%, ${to} 100%)` }}
     >

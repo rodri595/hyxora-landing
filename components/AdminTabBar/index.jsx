@@ -1,12 +1,13 @@
 "use client";
+import Tabs from "@/components/Tabs";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense } from "react";
-import Tabs from "@/components/Tabs";
 
 export const ADMIN_TABS = [
   { id: "users", label: "Usuarios" },
   { id: "emails", label: "Emails" },
   { id: "polls", label: "Polls" },
+  { id: "tutorials", label: "Tutoriales" },
 ];
 
 const AdminTabBarInner = () => {

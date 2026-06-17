@@ -121,6 +121,8 @@ const ExploreMenuItem = ({
 };
 const ExploreDropdown = () => {
   const { data: paymentsData } = GetMyPayments();
+  const { authenticated } = usePrivy();
+
   const hasNft = useMemo(() => {
     if (!paymentsData || paymentsData?.length === 0) return false;
     return paymentsData.some(
@@ -166,7 +168,7 @@ const ExploreDropdown = () => {
                 image={learningCenterIcon}
                 title="Academia"
                 description="Formate en Hyxora"
-                disabled
+                href={authenticated ? "/academy" : "/tutorials"}
               />
               <ExploreMenuItem
                 image={topGainersIcon}

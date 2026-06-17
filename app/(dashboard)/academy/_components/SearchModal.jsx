@@ -35,7 +35,9 @@ const SearchModal = ({ open, onClose }) => {
     const q = norm(query.trim());
     if (!q) return VIDEOS.slice(0, 6);
     return VIDEOS.filter((v) => {
-      const haystack = norm(`${v.title} ${v.description} ${v.category} ${v.level}`);
+      const haystack = norm(
+        `${v.title} ${v.description} ${v.category} ${v.level}`,
+      );
       return q.split(/\s+/).every((token) => haystack.includes(token));
     });
   }, [query]);
@@ -62,7 +64,14 @@ const SearchModal = ({ open, onClose }) => {
         gsap.fromTo(
           panel,
           { opacity: 0, y: -12, scale: 0.98 },
-          { opacity: 1, y: 0, scale: 1, duration: 0.28, ease: "power3.out", overwrite: true }
+          {
+            opacity: 1,
+            y: 0,
+            scale: 1,
+            duration: 0.28,
+            ease: "power3.out",
+            overwrite: true,
+          },
         );
       } else {
         gsap.to(backdrop, {
@@ -71,15 +80,21 @@ const SearchModal = ({ open, onClose }) => {
           overwrite: true,
           onComplete: () => gsap.set(backdrop, { display: "none" }),
         });
-        gsap.to(panel, { opacity: 0, y: -8, scale: 0.98, duration: 0.16, overwrite: true });
+        gsap.to(panel, {
+          opacity: 0,
+          y: -8,
+          scale: 0.98,
+          duration: 0.16,
+          overwrite: true,
+        });
       }
     },
-    { dependencies: [open] }
+    { dependencies: [open] },
   );
 
   const go = (video) => {
     onClose();
-    router.push(`/tutorials/${video.slug}`);
+    router.push(`/academy/${video.slug}`);
   };
 
   const onKeyDown = (e) => {
@@ -125,7 +140,13 @@ const SearchModal = ({ open, onClose }) => {
       >
         {/* search field */}
         <div className="flex items-center gap-2.5 border-b-[0.7px] border-[rgba(25,54,63,0.08)] px-4 py-3.5">
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 16 16"
+            fill="none"
+            aria-hidden="true"
+          >
             <path
               d="M7.333 12.667A5.333 5.333 0 1 0 7.333 2a5.333 5.333 0 0 0 0 10.667ZM14 14l-2.9-2.9"
               stroke="rgba(25,54,63,0.45)"
@@ -150,7 +171,11 @@ const SearchModal = ({ open, onClose }) => {
         </div>
 
         {/* results */}
-        <div ref={listRef} data-lenis-prevent className="min-h-0 flex-1 overflow-y-auto p-2">
+        <div
+          ref={listRef}
+          data-lenis-prevent
+          className="min-h-0 flex-1 overflow-y-auto p-2"
+        >
           {!query.trim() && (
             <p className="px-2 pb-1.5 pt-1 font-inter text-[10.5px] font-semibold uppercase tracking-[0.4px] text-[rgba(25,54,63,0.35)]">
               Sugeridos
@@ -176,7 +201,9 @@ const SearchModal = ({ open, onClose }) => {
                 onClick={() => go(v)}
                 className={cn(
                   "flex w-full items-center gap-3 rounded-xl px-2 py-2 text-left transition-colors",
-                  i === active ? "bg-[rgba(25,54,63,0.05)]" : "hover:bg-[rgba(25,54,63,0.03)]"
+                  i === active
+                    ? "bg-[rgba(25,54,63,0.05)]"
+                    : "hover:bg-[rgba(25,54,63,0.03)]",
                 )}
               >
                 <div className="w-[88px] shrink-0 overflow-hidden rounded-lg">
@@ -193,7 +220,9 @@ const SearchModal = ({ open, onClose }) => {
                     />
                     <span className="truncate">{v.category}</span>
                     <span className="text-[rgba(25,54,63,0.3)]">·</span>
-                    <span className="tabular-nums">{formatDuration(v.durationSec)}</span>
+                    <span className="tabular-nums">
+                      {formatDuration(v.durationSec)}
+                    </span>
                   </span>
                 </div>
               </button>

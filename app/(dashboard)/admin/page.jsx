@@ -1,17 +1,19 @@
 "use client";
-import { useSearchParams } from "next/navigation";
-import { Suspense, lazy } from "react";
 import { ADMIN_TABS } from "@/components/AdminTabBar";
 import Spinner from "@/components/Spinner";
+import { useSearchParams } from "next/navigation";
+import { Suspense, lazy } from "react";
 
 const UsersModule = lazy(() => import("./_modules/UsersModule"));
 const EmailsModule = lazy(() => import("./_modules/EmailsModule"));
 const PollsModule = lazy(() => import("./_modules/PollsModule"));
+const TutorialsModule = lazy(() => import("./_modules/TutorialsModule"));
 
 const moduleMap = {
   users: UsersModule,
   emails: EmailsModule,
   polls: PollsModule,
+  tutorials: TutorialsModule,
 };
 
 const AdminContent = () => {

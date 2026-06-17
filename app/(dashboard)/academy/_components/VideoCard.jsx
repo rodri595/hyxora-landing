@@ -14,9 +14,12 @@ import Poster from "./Poster";
  */
 const VideoCard = ({ video, className }) => (
   <Link
-    href={`/tutorials/${video.slug}`}
+    href={`/academy/${video.slug}`}
     data-stagger-item
-    className={cn("group/card flex w-full flex-col gap-2 text-left outline-none", className)}
+    className={cn(
+      "group/card flex w-full flex-col gap-2 text-left outline-none",
+      className,
+    )}
   >
     <div className="overflow-hidden rounded-[10px] shadow-[0px_1px_4px_0px_rgba(25,54,63,0.08)] transition-all duration-300 group-hover/card:shadow-[0px_8px_24px_0px_rgba(25,54,63,0.16)] group-focus-visible/card:ring-2 group-focus-visible/card:ring-[#19363F]">
       <Poster
@@ -38,7 +41,9 @@ const VideoCard = ({ video, className }) => (
         />
         <span className="truncate">{video.level}</span>
         <span className="text-[rgba(25,54,63,0.3)]">·</span>
-        <span className="whitespace-nowrap">{formatDate(video.publishedAt)}</span>
+        <span className="whitespace-nowrap">
+          {formatDate(video.publishedAt)}
+        </span>
       </div>
     </div>
   </Link>

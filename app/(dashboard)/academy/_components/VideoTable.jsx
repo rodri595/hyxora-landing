@@ -246,10 +246,10 @@ const VideoTable = ({ videos }) => {
                   key={row.id}
                   data-stagger-item
                   onMouseEnter={(e) => handleRowEnter(e, row.original.id)}
-                  onClick={() => router.push(`/tutorials/${row.original.slug}`)}
+                  onClick={() => router.push(`/academy/${row.original.slug}`)}
                   onKeyDown={(e) => {
                     if (e.key === "Enter")
-                      router.push(`/tutorials/${row.original.slug}`);
+                      router.push(`/academy/${row.original.slug}`);
                   }}
                   className={cn(
                     "cursor-pointer border-b-[0.7px] border-[rgba(25,54,63,0.05)]",
