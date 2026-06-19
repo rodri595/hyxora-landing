@@ -10,62 +10,13 @@ import DataTable from "@/components/DataTable";
 import Spinner from "@/components/Spinner";
 import UserDetailSidebar from "@/components/UserDetailSidebar";
 import InvoiceDetailSidebar from "@/components/InvoiceDetailSidebar";
-import { cn, copyToClipboard } from "@/utils";
+import { cn } from "@/utils";
 import Tabs from "@/components/Tabs";
+import CopyButton from "@/components/CopyButton";
 
 gsap.registerPlugin(useGSAP);
 
 const SIDEBAR_WIDTH = 320;
-
-const CopyButton = ({ text }) => {
-  const [copied, setCopied] = useState(false);
-  const handleCopy = () => {
-    copyToClipboard(text);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
-  return (
-    <button
-      type="button"
-      onClick={handleCopy}
-      className="shrink-0 flex items-center justify-center size-5 rounded-md transition-colors hover:bg-[rgba(25,54,63,0.08)]"
-      style={{ background: "rgba(25,54,63,0.05)" }}
-      title="Copiar"
-    >
-      {copied ? (
-        <svg width="10" height="10" viewBox="0 0 12 10" fill="none">
-          <title>Copiado</title>
-          <path
-            d="M1 5L4.5 8.5L11 1"
-            stroke="#16a34a"
-            strokeWidth="1.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </svg>
-      ) : (
-        <svg width="10" height="10" viewBox="0 0 16 16" fill="none">
-          <title>Copiar</title>
-          <rect
-            x="5"
-            y="5"
-            width="9"
-            height="9"
-            rx="1.5"
-            stroke="rgba(25,54,63,0.40)"
-            strokeWidth="1.5"
-          />
-          <path
-            d="M11 5V3.5A1.5 1.5 0 0 0 9.5 2H3.5A1.5 1.5 0 0 0 2 3.5v6A1.5 1.5 0 0 0 3.5 11H5"
-            stroke="rgba(25,54,63,0.40)"
-            strokeWidth="1.5"
-            strokeLinecap="round"
-          />
-        </svg>
-      )}
-    </button>
-  );
-};
 
 const TABS = [
   { id: "all", label: "Todos los usuarios" },

@@ -3,11 +3,12 @@
 import { useRef, useState, useEffect } from "react";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
-import { cn, copyToClipboard } from "@/utils";
+import { cn } from "@/utils";
 import { useSetInvoiceNumber } from "@/hooks/admin/useSetInvoiceNumber";
 import Spinner from "@/components/Spinner";
 import ErrorComp from "@/components/Error";
 import Tabs from "@/components/Tabs";
+import CopyButton from "@/components/CopyButton";
 
 gsap.registerPlugin(useGSAP);
 
@@ -30,83 +31,79 @@ const formatDate = (value) =>
       })
     : "—";
 
-// ── CopyButton ───────────────────────────────────────────────────────────────
+// ── Field ────────────────────────────────────────────────────────────────────
+// One field component for both read-only display and editable input.
+// - Pass `onChange` (and don't force `readOnly`) to render an <input>.
+// - `copy` is a shorthand that drops a CopyButton in the trailing slot when the
+//   value is non-empty. For anything custom, pass it as `children` instead — the
+//   slot renders whatever you give it without breaking the copy shorthand.
 
-const CopyButton = ({ text }) => {
-  const [copied, setCopied] = useState(false);
-  const handleCopy = () => {
-    copyToClipboard(text);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
-  return (
-    <button
-      type="button"
-      onClick={handleCopy}
-      className="shrink-0 flex items-center justify-center size-5 rounded-md transition-colors hover:bg-[rgba(25,54,63,0.08)]"
-      style={{ background: "rgba(25,54,63,0.05)" }}
-      title="Copiar"
-    >
-      {copied ? (
-        <svg width="10" height="10" viewBox="0 0 12 10" fill="none">
-          <title>Copiado</title>
-          <path
-            d="M1 5L4.5 8.5L11 1"
-            stroke="#16a34a"
-            strokeWidth="1.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </svg>
-      ) : (
-        <svg width="10" height="10" viewBox="0 0 16 16" fill="none">
-          <title>Copiar</title>
-          <rect
-            x="5"
-            y="5"
-            width="9"
-            height="9"
-            rx="1.5"
-            stroke="rgba(25,54,63,0.40)"
-            strokeWidth="1.5"
-          />
-          <path
-            d="M11 5V3.5A1.5 1.5 0 0 0 9.5 2H3.5A1.5 1.5 0 0 0 2 3.5v6A1.5 1.5 0 0 0 3.5 11H5"
-            stroke="rgba(25,54,63,0.40)"
-            strokeWidth="1.5"
-            strokeLinecap="round"
-          />
-        </svg>
-      )}
-    </button>
-  );
-};
-
-// ── ReadField ──────────────────────────────────────────────────────────────────
-
-const ReadField = ({ label, value, mono, copy, className }) => {
+const Field = ({
+  label,
+  value,
+  onChange,
+  readOnly = false,
+  mono,
+  placeholder,
+  hint,
+  copy,
+  className,
+  children,
+}) => {
+  const editable = !readOnly && typeof onChange === "function";
   const display = value || "—";
   const hasValue = value && value !== "N/A";
+  const Wrapper = editable ? "label" : "div";
+
   return (
-    <div className="flex flex-col gap-1">
+    <Wrapper className="flex flex-col gap-1">
       <span className="font-inter text-[10px] font-medium tracking-[-0.4px] text-[rgba(25,54,63,0.4)] uppercase">
         {label}
       </span>
-      <div className="flex h-8 px-2.5 items-center gap-2 rounded-lg bg-[rgba(25,54,63,0.03)] border-[0.7px] border-[rgba(25,54,63,0.06)] overflow-hidden">
-        <span
-          className={cn(
-            "flex-1 truncate text-[rgba(25,54,63,0.55)]",
-            mono
-              ? "font-mono text-[10px]"
-              : "font-inter text-[11px] tracking-[-0.44px]",
-            className,
-          )}
-        >
-          {display}
-        </span>
+      <div
+        className={cn(
+          "flex h-8 px-2.5 items-center gap-2 rounded-lg border-[0.7px] overflow-hidden",
+          editable
+            ? "bg-white border-[rgba(25,54,63,0.12)] focus-within:border-[rgba(25,54,63,0.4)] transition-colors"
+            : "bg-[rgba(25,54,63,0.03)] border-[rgba(25,54,63,0.06)]",
+        )}
+      >
+        {editable ? (
+          <input
+            type="text"
+            value={value ?? ""}
+            onChange={onChange}
+            placeholder={placeholder}
+            className={cn(
+              "flex-1 min-w-0 bg-transparent outline-none text-[#19363F] placeholder:text-[rgba(25,54,63,0.3)]",
+              mono
+                ? "font-mono text-[10px]"
+                : "font-inter text-[12px] tracking-[-0.48px]",
+              className,
+            )}
+          />
+        ) : (
+          <span
+            className={cn(
+              "flex-1 truncate text-[rgba(25,54,63,0.55)]",
+              mono
+                ? "font-mono text-[10px]"
+                : "font-inter text-[11px] tracking-[-0.44px]",
+              className,
+            )}
+          >
+            {display}
+          </span>
+        )}
+        {children}
         {copy && hasValue && <CopyButton text={value} />}
       </div>
-    </div>
+      {hint && (
+        <span className="font-inter text-[10px] tracking-[-0.4px] text-[rgba(25,54,63,0.4)]">
+          {hint}
+        </span>
+      )}
+    </Wrapper>
   );
 };
 
@@ -125,7 +122,8 @@ const EditPanel = ({ payment }) => {
 
   useEffect(() => () => clearTimeout(savedTimeout.current), []);
 
-  const handleSave = () => {
+  const handleSubmit = (e) => {
+    e.preventDefault();
     if (!hasChanges || isPending) return;
     reset();
     setSaved(false);
@@ -144,10 +142,10 @@ const EditPanel = ({ payment }) => {
   };
 
   return (
-    <div className="flex flex-col gap-4 p-4">
+    <form onSubmit={handleSubmit} className="flex flex-col gap-4 p-4">
       {/* Read-only */}
-      <ReadField label="Payment ID" value={payment?._id} mono copy />
-      <ReadField
+      <Field label="Payment ID" value={payment?._id} mono copy />
+      <Field
         label="ID de Factura (Externo)"
         value={payment?.paymentId}
         mono
@@ -155,24 +153,16 @@ const EditPanel = ({ payment }) => {
       />
 
       {/* Editable internal invoice number */}
-      <label className="flex flex-col gap-1">
-        <span className="font-inter text-[10px] font-medium tracking-[-0.4px] text-[rgba(25,54,63,0.4)] uppercase">
-          Número de Factura Interno
-        </span>
-        <input
-          type="text"
-          value={invoiceNumber}
-          onChange={(e) => {
-            setInvoiceNumber(e.target.value);
-            setSaved(false);
-          }}
-          placeholder="Ej: FAC-2026-001"
-          className="w-full h-8 px-2.5 rounded-lg border-[0.7px] border-[rgba(25,54,63,0.12)] bg-white font-inter text-[12px] tracking-[-0.48px] text-[#19363F] placeholder:text-[rgba(25,54,63,0.3)] outline-none focus:border-[rgba(25,54,63,0.4)] transition-colors"
-        />
-        <span className="font-inter text-[10px] tracking-[-0.4px] text-[rgba(25,54,63,0.4)]">
-          Número de factura interno para seguimiento y contabilidad.
-        </span>
-      </label>
+      <Field
+        label="Número de Factura Interno"
+        value={invoiceNumber}
+        onChange={(e) => {
+          setInvoiceNumber(e.target.value);
+          setSaved(false);
+        }}
+        placeholder="Ej: FAC-2026-001"
+        hint="Número de factura interno para seguimiento y contabilidad."
+      />
 
       {error && (
         <ErrorComp
@@ -204,14 +194,13 @@ const EditPanel = ({ payment }) => {
       )}
 
       <button
-        type="button"
+        type="submit"
         disabled={!hasChanges || isPending}
-        onClick={handleSave}
         className="w-full h-8 flex items-center justify-center rounded-lg bg-[#19363F] text-white font-inter text-[12px] font-medium tracking-[-0.48px] disabled:opacity-40 disabled:cursor-not-allowed hover:bg-[#0f2228] transition-colors"
       >
         {isPending ? <Spinner className="size-4" /> : "Guardar factura"}
       </button>
-    </div>
+    </form>
   );
 };
 
@@ -224,26 +213,24 @@ const DetailPanel = ({ payment }) => {
 
   return (
     <div className="flex flex-col gap-4 p-4">
-      <ReadField label="Payment ID" value={payment?._id} mono copy />
-      <ReadField
+      <Field label="Payment ID" value={payment?._id} mono copy />
+      <Field
         label="ID de Factura (Externo)"
         value={payment?.paymentId}
         mono
         copy
       />
-      <ReadField
+      <Field
         label="Número de Factura Interno"
         value={payment?.invoiceNumber}
         mono
       />
+      <Field label="Cliente" value={payment?.name} />
+
+      <Field label="Email" value={payment?.email} copy />
 
       <div className="grid grid-cols-2 gap-3">
-        <ReadField label="Cliente" value={payment?.name} />
-        <ReadField label="Email" value={payment?.email} copy />
-      </div>
-
-      <div className="grid grid-cols-2 gap-3">
-        <ReadField
+        <Field
           label="Método de Pago"
           value={payment?.type || payment?.method}
           className="capitalize"
@@ -266,7 +253,7 @@ const DetailPanel = ({ payment }) => {
       </div>
 
       {payment?.tokenId && (
-        <ReadField
+        <Field
           label="Token ID (FOUNDER Nº)"
           value={`#${payment.tokenId}`}
           className="font-semibold text-[#19363F]!"
@@ -274,19 +261,16 @@ const DetailPanel = ({ payment }) => {
       )}
 
       {payment?.wallet && (
-        <ReadField label="Wallet Address" value={payment.wallet} mono copy />
+        <Field label="Wallet Address" value={payment.wallet} mono copy />
       )}
 
       {payment?.txHash && (
-        <ReadField label="Transaction Hash" value={payment.txHash} mono copy />
+        <Field label="Transaction Hash" value={payment.txHash} mono copy />
       )}
 
       <div className="grid grid-cols-2 gap-3">
-        <ReadField
-          label="Fecha de Pago"
-          value={formatDate(payment?.createdAt)}
-        />
-        <ReadField
+        <Field label="Fecha de Pago" value={formatDate(payment?.createdAt)} />
+        <Field
           label="Última Actualización"
           value={formatDate(payment?.updatedAt)}
         />
