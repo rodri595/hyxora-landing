@@ -1,10 +1,6 @@
 "use client";
 
 import {
-  MEMBERSHIPS,
-  MEMBERSHIP_OPTIONS,
-} from "@/app/(dashboard)/admin/_data/categories";
-import {
   VISIBILITY,
   VISIBILITY_OPTIONS,
 } from "@/app/(dashboard)/admin/_data/tutorials";
@@ -24,7 +20,6 @@ const visibilityOptions = VISIBILITY_OPTIONS.map((v) => ({
   value: v.id,
   label: v.label,
 }));
-const membershipOptions = MEMBERSHIP_OPTIONS;
 
 const inputCls =
   "w-full px-2.5 rounded-lg border-[0.7px] border-[rgba(25,54,63,0.12)] bg-white font-inter text-[12px] tracking-[-0.48px] text-[#19363F] placeholder:text-[rgba(25,54,63,0.3)] outline-none focus:border-[rgba(25,54,63,0.4)] transition-colors";
@@ -54,20 +49,6 @@ const VisibilityBadge = ({ visibility }) => {
     >
       <span className="size-1.5 rounded-full" style={{ background: v.dot }} />
       {v.label}
-    </span>
-  );
-};
-
-const MembershipBadge = ({ membershipType }) => {
-  const m = MEMBERSHIPS[membershipType] ?? MEMBERSHIPS.all;
-  return (
-    <span
-      className={cn(
-        "inline-flex items-center rounded-[5px] px-1.5 py-0.5 font-inter text-[10px] font-medium tracking-[-0.3px]",
-        m.badge
-      )}
-    >
-      {m.label}
     </span>
   );
 };
@@ -115,15 +96,18 @@ const DetailPanel = ({ video }) => {
       <div className="flex flex-col gap-1">
         <span className={labelCls}>Acceso</span>
         <div className="flex flex-wrap items-center gap-2">
-          {video.isPublic && (
-            <span className="inline-flex items-center rounded-[5px] bg-emerald-50 px-1.5 py-0.5 font-inter text-[10px] font-medium tracking-[-0.3px] text-emerald-700">
-              Público
-            </span>
-          )}
-          <MembershipBadge membershipType={video.membershipType} />
-          {video.isPublic && (
-            <span className="font-inter text-[10px] tracking-[-0.4px] text-[rgba(25,54,63,0.4)]">
-              Visible sin iniciar sesión
+          {video.isPublic ? (
+            <>
+              <span className="inline-flex items-center rounded-[5px] bg-emerald-50 px-1.5 py-0.5 font-inter text-[10px] font-medium tracking-[-0.3px] text-emerald-700">
+                Público
+              </span>
+              <span className="font-inter text-[10px] tracking-[-0.4px] text-[rgba(25,54,63,0.4)]">
+                Visible sin iniciar sesión
+              </span>
+            </>
+          ) : (
+            <span className="inline-flex items-center rounded-[5px] bg-[rgba(25,54,63,0.06)] px-1.5 py-0.5 font-inter text-[10px] font-medium tracking-[-0.3px] text-[rgba(25,54,63,0.6)]">
+              Privado
             </span>
           )}
         </div>
@@ -239,7 +223,6 @@ const EditPanel = ({ video, categoryOptions, onUpdate, onDelete, onClose }) => {
   const [url, setUrl] = useState(video.url ?? "");
   const [duration, setDuration] = useState(formatDuration(video.durationSec));
   const [visibility, setVisibility] = useState(video.visibility ?? "visible");
-  const [membershipType, setMembershipType] = useState(video.membershipType ?? "all");
   const [isPublic, setIsPublic] = useState(video.isPublic ?? false);
   const [confirmDelete, setConfirmDelete] = useState(false);
 
@@ -252,7 +235,6 @@ const EditPanel = ({ video, categoryOptions, onUpdate, onDelete, onClose }) => {
     url !== (video.url ?? "") ||
     parseDuration(duration) !== video.durationSec ||
     visibility !== video.visibility ||
-    membershipType !== (video.membershipType ?? "all") ||
     isPublic !== (video.isPublic ?? false);
 
   const handleSave = () => {
@@ -263,7 +245,6 @@ const EditPanel = ({ video, categoryOptions, onUpdate, onDelete, onClose }) => {
       url: url.trim(),
       durationSec: parseDuration(duration),
       visibility,
-      membershipType,
       isPublic,
     });
   };
@@ -308,24 +289,10 @@ const EditPanel = ({ video, categoryOptions, onUpdate, onDelete, onClose }) => {
             Público
           </span>
           <span className="font-inter text-[10px] tracking-[-0.4px] text-[rgba(25,54,63,0.4)]">
-            Visible sin iniciar sesión. Ignora la membresía.
+            Visible sin iniciar sesión.
           </span>
         </div>
         <Toggle checked={isPublic} onChange={setIsPublic} />
-      </div>
-
-      <div
-        className={cn(
-          "flex flex-col gap-1 transition-opacity",
-          isPublic && "pointer-events-none opacity-40"
-        )}
-      >
-        <span className={labelCls}>Membresía requerida</span>
-        <SelectDropdown
-          value={membershipType}
-          onChange={setMembershipType}
-          options={membershipOptions}
-        />
       </div>
 
       <label className="flex flex-col gap-1">

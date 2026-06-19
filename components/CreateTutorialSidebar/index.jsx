@@ -1,6 +1,5 @@
 "use client";
 
-import { MEMBERSHIP_OPTIONS } from "@/app/(dashboard)/admin/_data/categories";
 import { VISIBILITY_OPTIONS } from "@/app/(dashboard)/admin/_data/tutorials";
 import SelectDropdown from "@/components/SelectDropdown";
 import VideoPreview from "@/components/VideoPreview";
@@ -24,8 +23,6 @@ const inputCls =
 const labelCls =
   "font-inter text-[10px] font-medium tracking-[-0.4px] text-[rgba(25,54,63,0.4)] uppercase";
 
-const membershipOptions = MEMBERSHIP_OPTIONS;
-
 // Small switch for the "public" flag (watchable without login).
 const Toggle = ({ checked, onChange }) => (
   <button
@@ -47,7 +44,7 @@ const Toggle = ({ checked, onChange }) => (
   </button>
 );
 
-const CreateTutorialSidebar = ({ onClose, onCreate }) => {
+const CreateTutorialSidebar = ({ onClose, onCreate, onCreateCategory }) => {
   const panelRef = useRef(null);
 
   const { data: categories } = useGetAllCategories();
@@ -55,6 +52,7 @@ const CreateTutorialSidebar = ({ onClose, onCreate }) => {
     () => (categories ?? []).map((c) => ({ value: c.id, label: c.label })),
     [categories],
   );
+  const hasCategories = categoryOptions.length > 0;
 
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -62,7 +60,6 @@ const CreateTutorialSidebar = ({ onClose, onCreate }) => {
   const [url, setUrl] = useState("");
   const [duration, setDuration] = useState("");
   const [visibility, setVisibility] = useState("visible");
-  const [membershipType, setMembershipType] = useState("all");
   const [isPublic, setIsPublic] = useState(false);
 
   const source = useMemo(() => detectVideoSource(url), [url]);
@@ -99,13 +96,13 @@ const CreateTutorialSidebar = ({ onClose, onCreate }) => {
       url: url.trim(),
       durationSec: parseDuration(duration),
       visibility,
-      membershipType,
       isPublic,
     });
     onClose?.();
   };
 
-  const canSubmit = title.trim() && url.trim() && source.provider && source.provider !== null;
+  const canSubmit =
+    title.trim() && url.trim() && categoryId && source.provider;
 
   return (
     <div
@@ -162,11 +159,22 @@ const CreateTutorialSidebar = ({ onClose, onCreate }) => {
           <div className="grid grid-cols-2 gap-3">
             <div className="flex flex-col gap-1">
               <span className={labelCls}>Categoría</span>
-              <SelectDropdown
-                value={categoryId}
-                onChange={setCategoryId}
-                options={categoryOptions}
-              />
+              {hasCategories ? (
+                <SelectDropdown
+                  value={categoryId}
+                  onChange={setCategoryId}
+                  options={categoryOptions}
+                />
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => onCreateCategory?.()}
+                  className="flex h-8 w-full items-center justify-center gap-1 rounded-lg border-[0.7px] border-dashed border-[rgba(25,54,63,0.25)] font-inter text-[11px] font-medium tracking-[-0.44px] text-[rgba(25,54,63,0.55)] transition-colors hover:border-[#19363F] hover:text-[#19363F]"
+                >
+                  <span className="text-[13px] leading-none">+</span>
+                  Crear categoría
+                </button>
+              )}
             </div>
             <div className="flex flex-col gap-1">
               <span className={labelCls}>Visibilidad</span>
@@ -185,27 +193,10 @@ const CreateTutorialSidebar = ({ onClose, onCreate }) => {
                 Público
               </span>
               <span className="font-inter text-[10px] tracking-[-0.4px] text-[rgba(25,54,63,0.4)]">
-                Visible sin iniciar sesión. Ignora la membresía.
+                Visible sin iniciar sesión.
               </span>
             </div>
             <Toggle checked={isPublic} onChange={setIsPublic} />
-          </div>
-
-          <div
-            className={cn(
-              "flex flex-col gap-1 transition-opacity",
-              isPublic && "pointer-events-none opacity-40",
-            )}
-          >
-            <span className={labelCls}>Membresía requerida</span>
-            <SelectDropdown
-              value={membershipType}
-              onChange={setMembershipType}
-              options={membershipOptions}
-            />
-            <span className="font-inter text-[10px] tracking-[-0.4px] text-[rgba(25,54,63,0.4)]">
-              Plan mínimo para ver este tutorial.
-            </span>
           </div>
 
           <label className="flex flex-col gap-1">
@@ -251,6 +242,12 @@ const CreateTutorialSidebar = ({ onClose, onCreate }) => {
             <span className={labelCls}>Vista previa</span>
             <VideoPreview url={url} onReady={handlePlayerReady} />
           </div>
+
+          {!hasCategories && (
+            <p className="font-inter text-[10px] leading-relaxed tracking-[-0.4px] text-amber-600">
+              Necesitas al menos una categoría antes de crear un tutorial.
+            </p>
+          )}
 
           <button
             type="button"

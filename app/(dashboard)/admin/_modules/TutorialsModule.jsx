@@ -22,7 +22,6 @@ import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import { useCallback, useMemo, useRef, useState } from "react";
 import toast from "react-hot-toast";
-import { MEMBERSHIPS } from "../_data/categories";
 import { VISIBILITY, decorateTutorial } from "../_data/tutorials";
 
 gsap.registerPlugin(useGSAP);
@@ -170,6 +169,15 @@ const TutorialsModule = () => {
   }, []);
 
   const onOpenCreate = useCallback(() => {
+    setDisplayedId(null);
+    setSidebarMode("create");
+    setIsOpen(true);
+  }, []);
+
+  // From the tutorial-create form when no categories exist yet: swap the open
+  // panel over to the category-create form (the panel stays open, just re-renders).
+  const onOpenCreateCategory = useCallback(() => {
+    setView("categories");
     setDisplayedId(null);
     setSidebarMode("create");
     setIsOpen(true);
@@ -360,31 +368,6 @@ const TutorialsModule = () => {
         ),
       },
       {
-        accessorKey: "membershipType",
-        header: "Acceso",
-        size: 120,
-        cell: ({ row }) => {
-          const m = MEMBERSHIPS[row.original.membershipType] ?? MEMBERSHIPS.all;
-          return (
-            <div className="flex items-center gap-1">
-              {row.original.isPublic && (
-                <span className="inline-flex items-center rounded-[5px] bg-emerald-50 px-1.5 py-0.5 font-inter text-[10px] font-medium tracking-[-0.3px] text-emerald-700">
-                  Público
-                </span>
-              )}
-              <span
-                className={cn(
-                  "inline-flex items-center rounded-[5px] px-1.5 py-0.5 font-inter text-[10px] font-medium tracking-[-0.3px]",
-                  m.badge,
-                )}
-              >
-                {m.label}
-              </span>
-            </div>
-          );
-        },
-      },
-      {
         accessorKey: "visibility",
         header: "Estado",
         size: 110,
@@ -546,7 +529,11 @@ const TutorialsModule = () => {
     }
     if (sidebarMode === "create") {
       return (
-        <CreateTutorialSidebar onClose={handleClose} onCreate={handleCreate} />
+        <CreateTutorialSidebar
+          onClose={handleClose}
+          onCreate={handleCreate}
+          onCreateCategory={onOpenCreateCategory}
+        />
       );
     }
     return (

@@ -34,7 +34,8 @@ export const CATEGORIES = [
   },
 ];
 
-const accentFor = (id) => CATEGORIES.find((c) => c.id === id)?.accent ?? "#19363F";
+const accentFor = (id) =>
+  CATEGORIES.find((c) => c.id === id)?.accent ?? "#19363F";
 
 const make = (v) => ({
   ...v,
@@ -172,7 +173,8 @@ export const VIDEOS = [
     id: "t-303",
     slug: "indicadores-clave",
     title: "Los 4 indicadores que de verdad uso",
-    description: "Medias móviles, RSI, MACD y volumen explicados con ejemplos reales del mercado.",
+    description:
+      "Medias móviles, RSI, MACD y volumen explicados con ejemplos reales del mercado.",
     categoryId: "trading",
     durationSec: 552,
     level: "Intermedio",
@@ -221,7 +223,8 @@ export const VIDEOS = [
     id: "t-403",
     slug: "2fa-correctamente",
     title: "Configura 2FA correctamente",
-    description: "Por qué el SMS no basta y cómo migrar a una app de autenticación o llave física.",
+    description:
+      "Por qué el SMS no basta y cómo migrar a una app de autenticación o llave física.",
     categoryId: "seguridad",
     durationSec: 287,
     level: "Principiante",

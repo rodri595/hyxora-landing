@@ -1,11 +1,3 @@
-// Mock tutorials data for the admin module. There is no backend yet — videos
-// are not stored as files, only referenced by their Vimeo / YouTube link.
-// Replace the in-memory list with a real hook (e.g. useGetTutorials) later.
-
-import { CATEGORIES } from "../../academy/_data";
-
-export { CATEGORIES };
-
 // Visibility states drive whether a tutorial is shown to the public.
 export const VISIBILITY = {
   visible: {
@@ -39,90 +31,12 @@ const categoryLabel = (id) => CATEGORIES.find((c) => c.id === id)?.label ?? "";
 const categoryAccent = (id) =>
   CATEGORIES.find((c) => c.id === id)?.accent ?? "#19363F";
 
-// Decorate a raw record with the derived category label / accent, and apply
-// access-control defaults: membership gating + public flag live on the tutorial.
-//   membershipType — min plan to watch ("all" = any logged-in user)
-//   isPublic       — watchable without login (bypasses the membership check)
-// Backend records embed an enriched `category` object — prefer it, and fall back
-// to looking the categoryId up locally for any mock/legacy records.
 const make = (v) => ({
-  membershipType: "all",
   isPublic: false,
   ...v,
   category: v.category?.label ?? categoryLabel(v.categoryId),
   accent: v.category?.accent ?? categoryAccent(v.categoryId),
 });
-
-export const TUTORIALS = [
-  make({
-    id: "t-101",
-    title: "¿Qué es Hyxora y cómo funciona?",
-    description:
-      "Un recorrido completo por la plataforma: qué problema resuelve, cómo se estructura y qué puedes hacer desde tu panel.",
-    categoryId: "primeros-pasos",
-    url: "https://vimeo.com/76979871",
-    durationSec: 412,
-    visibility: "visible",
-    membershipType: "all",
-    isPublic: true,
-    createdAt: "2026-05-02T10:00:00Z",
-    updatedAt: "2026-05-10T08:30:00Z",
-  }),
-  make({
-    id: "t-102",
-    title: "Configura tu cuenta y wallet en 5 minutos",
-    description:
-      "Te guiamos paso a paso para dejar tu cuenta lista: verificación, wallet y primeras preferencias.",
-    categoryId: "primeros-pasos",
-    url: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
-    durationSec: 318,
-    visibility: "visible",
-    createdAt: "2026-05-05T12:00:00Z",
-    updatedAt: "2026-05-05T12:00:00Z",
-  }),
-  make({
-    id: "t-201",
-    title: "Blockchain explicado sin tecnicismos",
-    description:
-      "Bloques, hashes y consenso contados con analogías simples para entenderlo de verdad.",
-    categoryId: "fundamentos",
-    url: "https://vimeo.com/22439234",
-    durationSec: 734,
-    visibility: "hidden",
-    membershipType: "premium",
-    isPublic: false,
-    createdAt: "2026-04-18T09:00:00Z",
-    updatedAt: "2026-04-29T16:45:00Z",
-  }),
-  make({
-    id: "t-301",
-    title: "Cómo leer un gráfico de velas",
-    description:
-      "Apertura, cierre, mechas y volumen. Aprende a interpretar lo que el precio te está diciendo.",
-    categoryId: "trading",
-    url: "https://www.youtube.com/watch?v=aqz-KE-bpKQ",
-    durationSec: 698,
-    visibility: "visible",
-    membershipType: "basic",
-    isPublic: false,
-    createdAt: "2026-03-30T14:00:00Z",
-    updatedAt: "2026-04-12T11:20:00Z",
-  }),
-  make({
-    id: "t-401",
-    title: "Protege tus claves frente a phishing",
-    description:
-      "Las estafas más comunes y un checklist práctico para no caer en ninguna de ellas.",
-    categoryId: "seguridad",
-    url: "https://vimeo.com/57580368",
-    durationSec: 521,
-    visibility: "disabled",
-    membershipType: "founder",
-    isPublic: false,
-    createdAt: "2026-03-20T08:00:00Z",
-    updatedAt: "2026-03-22T10:10:00Z",
-  }),
-];
 
 // Re-attach derived fields after edits/creates so the table stays consistent.
 export const decorateTutorial = make;
