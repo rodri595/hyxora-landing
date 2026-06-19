@@ -7,6 +7,7 @@ import { cn } from "@/utils";
 import Tabs from "@/components/Tabs";
 import Spinner from "@/components/Spinner";
 import ErrorComp from "@/components/Error";
+import Field from "@/components/Field";
 import { useEditPoll } from "@/hooks/admin/useEditPoll";
 import { useClosePoll } from "@/hooks/admin/useClosePoll";
 import { useDeletePoll } from "@/hooks/admin/useDeletePoll";
@@ -157,6 +158,11 @@ const STATUS_STYLES = {
   CLOSED:
     "bg-[rgba(25,54,63,0.06)] text-[rgba(25,54,63,0.55)] border-[rgba(25,54,63,0.1)]",
 };
+
+// Compact uppercase label for the dense admin layout, passed to <Field> via
+
+const TEXTAREA_CLS =
+  "h-auto min-h-[120px] px-[16px] py-3 border-[0.7px] border-[rgba(25,54,63,0.02)] rounded-[8px] bg-[rgba(25,54,63,0.02)] text-[12px] text-[#5E7279] focus:bg-white focus:border-[rgba(25,54,63,0.04)]";
 
 // ── DetailPanel ────────────────────────────────────────────────────────────────
 
@@ -511,17 +517,26 @@ const EditPanel = ({ poll, onClose }) => {
       prev.map((o) => (o.id === id ? { ...o, value: val } : o)),
     );
 
-  const inputCls =
-    "w-full px-2.5 rounded-lg border-[0.7px] border-[rgba(25,54,63,0.12)] bg-white font-inter text-[12px] tracking-[-0.48px] text-[#19363F] placeholder:text-[rgba(25,54,63,0.3)] outline-none focus:border-[rgba(25,54,63,0.4)] transition-colors";
-
   const isClosed = poll.status === "CLOSED";
 
   if (isDeleteSuccess) {
     return (
       <div className="flex flex-col items-center justify-center gap-4 p-6 h-full text-center">
         <div className="size-10 rounded-full bg-emerald-50 flex items-center justify-center">
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-            <path d="M3 8l3.5 3.5L13 5" stroke="#059669" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 16 16"
+            fill="none"
+            aria-hidden="true"
+          >
+            <path
+              d="M3 8l3.5 3.5L13 5"
+              stroke="#059669"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
           </svg>
         </div>
         <div className="flex flex-col gap-1">
@@ -547,8 +562,20 @@ const EditPanel = ({ poll, onClose }) => {
     <div className="flex flex-col gap-4 p-4">
       {isSaveSuccess && (
         <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-emerald-50 border border-emerald-200">
-          <svg width="12" height="12" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-            <path d="M3 8l3.5 3.5L13 5" stroke="#059669" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+          <svg
+            width="12"
+            height="12"
+            viewBox="0 0 16 16"
+            fill="none"
+            aria-hidden="true"
+          >
+            <path
+              d="M3 8l3.5 3.5L13 5"
+              stroke="#059669"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
           </svg>
           <span className="font-inter text-[11px] tracking-[-0.44px] text-emerald-700">
             Cambios guardados correctamente
@@ -558,8 +585,20 @@ const EditPanel = ({ poll, onClose }) => {
 
       {isCloseSuccess && (
         <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-emerald-50 border border-emerald-200">
-          <svg width="12" height="12" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-            <path d="M3 8l3.5 3.5L13 5" stroke="#059669" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+          <svg
+            width="12"
+            height="12"
+            viewBox="0 0 16 16"
+            fill="none"
+            aria-hidden="true"
+          >
+            <path
+              d="M3 8l3.5 3.5L13 5"
+              stroke="#059669"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
           </svg>
           <span className="font-inter text-[11px] tracking-[-0.44px] text-emerald-700">
             Encuesta cerrada correctamente
@@ -600,57 +639,37 @@ const EditPanel = ({ poll, onClose }) => {
         message={`Error al guardar: ${saveError?.message}`}
       />
 
-      <label className="flex flex-col gap-1">
-        <span className="font-inter text-[10px] font-medium tracking-[-0.4px] text-[rgba(25,54,63,0.4)] uppercase">
-          Título
-        </span>
-        <input
-          type="text"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          className={cn(inputCls, "h-8")}
-          disabled={isClosed}
-        />
-      </label>
+      <Field
+        label="Título"
+        value={title}
+        onChange={(e) => setTitle(e.target.value)}
+        disabled={isClosed}
+      />
 
-      <label className="flex flex-col gap-1">
-        <span className="font-inter text-[10px] font-medium tracking-[-0.4px] text-[rgba(25,54,63,0.4)] uppercase">
-          Descripción
-        </span>
-        <textarea
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-          rows={5}
-          className={cn(inputCls, "py-2 resize-none")}
-          disabled={isClosed}
-        />
-      </label>
+      <Field
+        label="Descripción"
+        textarea
+        classInput={TEXTAREA_CLS}
+        value={description}
+        onChange={(e) => setDescription(e.target.value)}
+        disabled={isClosed}
+      />
 
       <div className="grid grid-cols-2 gap-3">
-        <label className="flex flex-col gap-1">
-          <span className="font-inter text-[10px] font-medium tracking-[-0.4px] text-[rgba(25,54,63,0.4)] uppercase">
-            Apertura
-          </span>
-          <input
-            type="datetime-local"
-            value={startsAt}
-            onChange={(e) => setStartsAt(e.target.value)}
-            className={cn(inputCls, "h-8")}
-            disabled={isClosed}
-          />
-        </label>
-        <label className="flex flex-col gap-1">
-          <span className="font-inter text-[10px] font-medium tracking-[-0.4px] text-[rgba(25,54,63,0.4)] uppercase">
-            Cierre
-          </span>
-          <input
-            type="datetime-local"
-            value={endsAt}
-            onChange={(e) => setEndsAt(e.target.value)}
-            className={cn(inputCls, "h-8")}
-            disabled={isClosed}
-          />
-        </label>
+        <Field
+          label="Apertura"
+          type="datetime-local"
+          value={startsAt}
+          onChange={(e) => setStartsAt(e.target.value)}
+          disabled={isClosed}
+        />
+        <Field
+          label="Cierre"
+          type="datetime-local"
+          value={endsAt}
+          onChange={(e) => setEndsAt(e.target.value)}
+          disabled={isClosed}
+        />
       </div>
 
       <div className="flex flex-col gap-2">
@@ -662,11 +681,11 @@ const EditPanel = ({ poll, onClose }) => {
             <span className="font-inter text-[10px] font-semibold text-[rgba(25,54,63,0.3)] tabular-nums w-4 shrink-0 text-right">
               {i + 1}.
             </span>
-            <input
-              type="text"
+            <Field
+              className="flex-1"
+              classInput="h-7 px-2.5 text-[11px]"
               value={opt.value}
               onChange={(e) => updateOption(opt.id, e.target.value)}
-              className={cn(inputCls, "h-7 flex-1 text-[11px]")}
               placeholder={`Opción ${i + 1}`}
               disabled={isClosed}
             />

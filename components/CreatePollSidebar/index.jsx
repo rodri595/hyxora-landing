@@ -3,9 +3,9 @@
 import { useRef, useState } from "react";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
-import { cn } from "@/utils";
 import Spinner from "@/components/Spinner";
 import ErrorComp from "@/components/Error";
+import Field from "@/components/Field";
 import { useCreatePoll } from "@/hooks/admin/useCreatePoll";
 import { useUploadFile } from "@/hooks/poll/useUploadFile";
 
@@ -124,6 +124,13 @@ const fmtDatetimeLocal = (d) => {
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
 };
 
+// Compact uppercase label for the dense admin layout, passed to <Field> via
+// `classLabel`. TEXTAREA_CLS restyles Field's textarea to match the dense input.
+const LABEL_CLS =
+  "text-[10px] tracking-[-0.4px] text-[rgba(25,54,63,0.4)] uppercase";
+const TEXTAREA_CLS =
+  "h-auto min-h-[120px] px-[16px] py-3 border-[0.7px] border-[rgba(25,54,63,0.02)] rounded-[8px] bg-[rgba(25,54,63,0.02)] text-[12px] text-[#5E7279] focus:bg-white focus:border-[rgba(25,54,63,0.04)]";
+
 const CreatePollSidebar = ({ nextNumber, onClose }) => {
   const panelRef = useRef(null);
 
@@ -209,9 +216,6 @@ const CreatePollSidebar = ({ nextNumber, onClose }) => {
   const canSubmit =
     title.trim() && number && options.filter((o) => o.value.trim()).length >= 1;
 
-  const inputCls =
-    "w-full px-2.5 rounded-lg border-[0.7px] border-[rgba(25,54,63,0.12)] bg-white font-inter text-[12px] tracking-[-0.48px] text-[#19363F] placeholder:text-[rgba(25,54,63,0.3)] outline-none focus:border-[rgba(25,54,63,0.4)] transition-colors";
-
   return (
     <div
       ref={panelRef}
@@ -262,70 +266,50 @@ const CreatePollSidebar = ({ nextNumber, onClose }) => {
           )}
 
           <div className="grid grid-cols-[72px_1fr] gap-3">
-            <label className="flex flex-col gap-1">
-              <span className="font-inter text-[10px] font-medium tracking-[-0.4px] text-[rgba(25,54,63,0.4)] uppercase">
-                N.º
-              </span>
-              <input
-                type="number"
-                min={1}
-                value={number}
-                onChange={(e) => setNumber(e.target.value)}
-                className={cn(inputCls, "h-8")}
-                placeholder="1"
-              />
-            </label>
+            <Field
+              label="N.º"
+              classLabel={LABEL_CLS}
+              type="number"
+              min={1}
+              value={number}
+              onChange={(e) => setNumber(e.target.value)}
+              placeholder="1"
+            />
 
-            <label className="flex flex-col gap-1">
-              <span className="font-inter text-[10px] font-medium tracking-[-0.4px] text-[rgba(25,54,63,0.4)] uppercase">
-                Título
-              </span>
-              <input
-                type="text"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                className={cn(inputCls, "h-8")}
-                placeholder="Título de la encuesta"
-              />
-            </label>
+            <Field
+              label="Título"
+              classLabel={LABEL_CLS}
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder="Título de la encuesta"
+            />
           </div>
 
-          <label className="flex flex-col gap-1">
-            <span className="font-inter text-[10px] font-medium tracking-[-0.4px] text-[rgba(25,54,63,0.4)] uppercase">
-              Descripción
-            </span>
-            <textarea
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              rows={6}
-              className={cn(inputCls, "py-2 resize-none")}
-              placeholder="Texto de la encuesta..."
-            />
-          </label>
+          <Field
+            label="Descripción"
+            classLabel={LABEL_CLS}
+            textarea
+            classInput={TEXTAREA_CLS}
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            placeholder="Texto de la encuesta..."
+          />
 
           <div className="grid grid-cols-2 gap-3">
-            <label className="flex flex-col gap-1">
-              <span className="font-inter text-[10px] font-medium tracking-[-0.4px] text-[rgba(25,54,63,0.4)] uppercase">
-                Apertura
-              </span>
-              <input
-                type="datetime-local"
-                value={startsAt}
-                onChange={(e) => setStartsAt(e.target.value)}
-                className={cn(inputCls, "h-8")}
-              />
-            </label>
-            <label className="flex flex-col gap-1">
-              <span className="font-inter text-[10px] font-medium tracking-[-0.4px] text-[rgba(25,54,63,0.4)] uppercase">
-                Cierre
-              </span>
-              <input
-                type="datetime-local"
-                value={endsAt}
-                onChange={(e) => setEndsAt(e.target.value)}
-                className={cn(inputCls, "h-8")}
-              />
-            </label>
+            <Field
+              label="Apertura"
+              classLabel={LABEL_CLS}
+              type="datetime-local"
+              value={startsAt}
+              onChange={(e) => setStartsAt(e.target.value)}
+            />
+            <Field
+              label="Cierre"
+              classLabel={LABEL_CLS}
+              type="datetime-local"
+              value={endsAt}
+              onChange={(e) => setEndsAt(e.target.value)}
+            />
           </div>
 
           <div className="flex flex-col gap-2">
@@ -337,11 +321,11 @@ const CreatePollSidebar = ({ nextNumber, onClose }) => {
                 <span className="font-inter text-[10px] font-semibold text-[rgba(25,54,63,0.3)] tabular-nums w-4 shrink-0 text-right">
                   {i + 1}.
                 </span>
-                <input
-                  type="text"
+                <Field
+                  className="flex-1"
+                  classInput="h-7 px-2.5 text-[11px]"
                   value={opt.value}
                   onChange={(e) => updateOption(opt.id, e.target.value)}
-                  className={cn(inputCls, "h-7 flex-1 text-[11px]")}
                   placeholder={`Opción ${i + 1}`}
                 />
                 {options.length > 1 && (

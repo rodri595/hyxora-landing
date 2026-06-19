@@ -8,7 +8,7 @@ import { useSetInvoiceNumber } from "@/hooks/admin/useSetInvoiceNumber";
 import Spinner from "@/components/Spinner";
 import ErrorComp from "@/components/Error";
 import Tabs from "@/components/Tabs";
-import CopyButton from "@/components/CopyButton";
+import Field from "@/components/Field";
 
 gsap.registerPlugin(useGSAP);
 
@@ -31,81 +31,10 @@ const formatDate = (value) =>
       })
     : "—";
 
-// ── Field ────────────────────────────────────────────────────────────────────
-// One field component for both read-only display and editable input.
-// - Pass `onChange` (and don't force `readOnly`) to render an <input>.
-// - `copy` is a shorthand that drops a CopyButton in the trailing slot when the
-//   value is non-empty. For anything custom, pass it as `children` instead — the
-//   slot renders whatever you give it without breaking the copy shorthand.
-
-const Field = ({
-  label,
-  value,
-  onChange,
-  readOnly = false,
-  mono,
-  placeholder,
-  hint,
-  copy,
-  className,
-  children,
-}) => {
-  const editable = !readOnly && typeof onChange === "function";
-  const display = value || "—";
-  const hasValue = value && value !== "N/A";
-  const Wrapper = editable ? "label" : "div";
-
-  return (
-    <Wrapper className="flex flex-col gap-1">
-      <span className="font-inter text-[10px] font-medium tracking-[-0.4px] text-[rgba(25,54,63,0.4)] uppercase">
-        {label}
-      </span>
-      <div
-        className={cn(
-          "flex h-8 px-2.5 items-center gap-2 rounded-lg border-[0.7px] overflow-hidden",
-          editable
-            ? "bg-white border-[rgba(25,54,63,0.12)] focus-within:border-[rgba(25,54,63,0.4)] transition-colors"
-            : "bg-[rgba(25,54,63,0.03)] border-[rgba(25,54,63,0.06)]",
-        )}
-      >
-        {editable ? (
-          <input
-            type="text"
-            value={value ?? ""}
-            onChange={onChange}
-            placeholder={placeholder}
-            className={cn(
-              "flex-1 min-w-0 bg-transparent outline-none text-[#19363F] placeholder:text-[rgba(25,54,63,0.3)]",
-              mono
-                ? "font-mono text-[10px]"
-                : "font-inter text-[12px] tracking-[-0.48px]",
-              className,
-            )}
-          />
-        ) : (
-          <span
-            className={cn(
-              "flex-1 truncate text-[rgba(25,54,63,0.55)]",
-              mono
-                ? "font-mono text-[10px]"
-                : "font-inter text-[11px] tracking-[-0.44px]",
-              className,
-            )}
-          >
-            {display}
-          </span>
-        )}
-        {children}
-        {copy && hasValue && <CopyButton text={value} />}
-      </div>
-      {hint && (
-        <span className="font-inter text-[10px] tracking-[-0.4px] text-[rgba(25,54,63,0.4)]">
-          {hint}
-        </span>
-      )}
-    </Wrapper>
-  );
-};
+// Compact uppercase label, matching the admin sidebar's dense layout. Passed to
+// the shared <Field> via `classLabel` so we reuse one field component app-wide.
+const LABEL_CLS =
+  "text-[10px] tracking-[-0.4px] text-[rgba(25,54,63,0.4)] uppercase";
 
 // ── EditPanel ──────────────────────────────────────────────────────────────────
 
@@ -144,17 +73,27 @@ const EditPanel = ({ payment }) => {
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-4 p-4">
       {/* Read-only */}
-      <Field label="Payment ID" value={payment?._id} mono copy />
+      <Field
+        label="Payment ID"
+        classLabel={LABEL_CLS}
+        value={payment?._id || "—"}
+        copy={payment?._id}
+        readOnly
+        mono
+      />
       <Field
         label="ID de Factura (Externo)"
-        value={payment?.paymentId}
+        classLabel={LABEL_CLS}
+        value={payment?.paymentId || "—"}
+        copy={payment?.paymentId}
+        readOnly
         mono
-        copy
       />
 
       {/* Editable internal invoice number */}
       <Field
         label="Número de Factura Interno"
+        classLabel={LABEL_CLS}
         value={invoiceNumber}
         onChange={(e) => {
           setInvoiceNumber(e.target.value);
@@ -207,33 +146,60 @@ const EditPanel = ({ payment }) => {
 // ── DetailPanel ──────────────────────────────────────────────────────────────────
 
 const DetailPanel = ({ payment }) => {
+  {
+    console.log(payment);
+  }
   const statusCls =
     STATUS_CLASSES[payment?.status] ??
     "bg-[rgba(25,54,63,0.06)] text-[#19363F]";
 
   return (
     <div className="flex flex-col gap-4 p-4">
-      <Field label="Payment ID" value={payment?._id} mono copy />
+      <Field
+        label="Payment ID"
+        classLabel={LABEL_CLS}
+        value={payment?._id || "—"}
+        copy={payment?._id}
+        readOnly
+        mono
+      />
       <Field
         label="ID de Factura (Externo)"
-        value={payment?.paymentId}
+        classLabel={LABEL_CLS}
+        value={payment?.paymentId || "—"}
+        copy={payment?.paymentId}
+        readOnly
         mono
-        copy
       />
       <Field
         label="Número de Factura Interno"
-        value={payment?.invoiceNumber}
+        classLabel={LABEL_CLS}
+        value={payment?.invoiceNumber || "—"}
+        readOnly
         mono
       />
-      <Field label="Cliente" value={payment?.name} />
+      <Field
+        label="Cliente"
+        classLabel={LABEL_CLS}
+        value={payment?.name || "—"}
+        readOnly
+      />
 
-      <Field label="Email" value={payment?.email} copy />
+      <Field
+        label="Email"
+        classLabel={LABEL_CLS}
+        value={payment?.user?.email || "—"}
+        copy={payment?.user?.email}
+        readOnly
+      />
 
       <div className="grid grid-cols-2 gap-3">
         <Field
           label="Método de Pago"
-          value={payment?.type || payment?.method}
-          className="capitalize"
+          classLabel={LABEL_CLS}
+          classInput="capitalize"
+          value={payment?.type || payment?.method || "—"}
+          readOnly
         />
         <div className="flex flex-col gap-1">
           <span className="font-inter text-[10px] font-medium tracking-[-0.4px] text-[rgba(25,54,63,0.4)] uppercase">
@@ -255,26 +221,47 @@ const DetailPanel = ({ payment }) => {
       {payment?.tokenId && (
         <Field
           label="Token ID (FOUNDER Nº)"
+          classLabel={LABEL_CLS}
+          classInput="font-semibold text-[#19363F]"
           value={`#${payment.tokenId}`}
-          className="font-semibold text-[#19363F]!"
+          readOnly
         />
       )}
 
       {payment?.wallet && (
-        <Field label="Wallet Address" value={payment.wallet} mono copy />
+        <Field
+          label="Wallet Address"
+          classLabel={LABEL_CLS}
+          value={payment.wallet}
+          copy={payment.wallet}
+          readOnly
+          mono
+        />
       )}
 
       {payment?.txHash && (
-        <Field label="Transaction Hash" value={payment.txHash} mono copy />
+        <Field
+          label="Transaction Hash"
+          classLabel={LABEL_CLS}
+          value={payment.txHash}
+          copy={payment.txHash}
+          readOnly
+          mono
+        />
       )}
 
-      <div className="grid grid-cols-2 gap-3">
-        <Field label="Fecha de Pago" value={formatDate(payment?.createdAt)} />
-        <Field
-          label="Última Actualización"
-          value={formatDate(payment?.updatedAt)}
-        />
-      </div>
+      <Field
+        label="Fecha de Pago"
+        classLabel={LABEL_CLS}
+        value={formatDate(payment?.createdAt)}
+        readOnly
+      />
+      <Field
+        label="Última Actualización"
+        classLabel={LABEL_CLS}
+        value={formatDate(payment?.updatedAt)}
+        readOnly
+      />
     </div>
   );
 };
