@@ -1,14 +1,20 @@
 import Link from "next/link";
 import Icon from "@/components/Icon";
+import CopyButton from "@/components/CopyButton";
 import { cn } from "@/utils";
 const Field = ({
   className,
   classInput,
+  classLabel,
   label,
   children,
   textarea,
   type,
   validated,
+  mono,
+  hint,
+  copy,
+  copyVariant,
   icon = "check",
   iconFill = "green",
   iconSize = 24,
@@ -18,6 +24,10 @@ const Field = ({
   isDark,
   ...props
 }) => {
+  // Trailing copy button — same slot pattern as `validated`. Pass `copy` as the
+  // text to copy; it renders a CopyButton only when there's something to copy.
+  const showCopy = Boolean(copy) && copy !== "N/A";
+  const hasTrailing = validated || showCopy;
   return (
     <div className={`${className || ""}`}>
       {label && (
@@ -26,6 +36,7 @@ const Field = ({
             className={cn(
               "mr-auto text-[12px] font-medium tracking-[-0.12px]",
               isDark ? "text-white" : "",
+              classLabel,
             )}
           >
             {label}
@@ -44,11 +55,14 @@ const Field = ({
         {children}
         {textarea ? (
           <textarea
-            className={`w-full h-20 px-5.5 py-4 border-[1.5px] border-s-01 rounded-xl text-[13px] text-primary transition-colors resize-none outline-0 focus:border-s-02 ${
-              validated ? "pr-10" : ""
-            }  ${classInput || ""}`}
+            className={cn(
+              "w-full h-20 px-5.5 py-4 border-[1.5px] border-s-01 rounded-xl text-[13px] text-primary transition-colors resize-none outline-0 focus:border-s-02",
+              hasTrailing && "pr-10",
+              mono && "font-mono",
+              classInput,
+            )}
             {...props}
-          ></textarea>
+          />
         ) : (
           <input
             className={cn(
@@ -56,7 +70,8 @@ const Field = ({
               isDark
                 ? "bg-[rgba(255,255,255,0.06)] border-[rgba(255,255,255,0.06)] text-[#cdcdcd] placeholder:text-[#cdcdcd] shadow-[inset_0px_0px_4px_0px_rgba(25,54,63,0.04)] focus:bg-[rgba(255,255,255,0.10)] focus:border-[rgba(255,255,255,0.12)]"
                 : "bg-[rgba(25,54,63,0.02)] border-[rgba(25,54,63,0.02)] text-[#5E7279] shadow-[0px_0px_4px_0px_inset_rgba(25,54,63,0.04)] focus:bg-white focus:border-[rgba(25,54,63,0.04)] focus:shadow-[0px_0px_4px_0px_inset_rgba(25,54,63,0.04)]",
-              validated && "pr-10",
+              hasTrailing && "pr-10",
+              mono && "font-mono",
               classInput,
             )}
             type={type || "text"}
@@ -75,7 +90,26 @@ const Field = ({
             onClick={iconHandler}
           />
         )}
+        {showCopy && (
+          <CopyButton
+            text={copy}
+            variant={copyVariant ?? (isDark ? "dark" : "light")}
+            className="absolute top-1/2 right-2 -translate-y-1/2"
+          />
+        )}
       </div>
+      {hint && (
+        <span
+          className={cn(
+            "mt-1.5 block font-inter text-[10px] tracking-[-0.4px]",
+            isDark
+              ? "text-[rgba(255,255,255,0.4)]"
+              : "text-[rgba(25,54,63,0.4)]",
+          )}
+        >
+          {hint}
+        </span>
+      )}
     </div>
   );
 };

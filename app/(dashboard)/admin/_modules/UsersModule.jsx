@@ -9,62 +9,14 @@ import { useGetAllPolls } from "@/hooks/poll/useGetAllPolls";
 import DataTable from "@/components/DataTable";
 import Spinner from "@/components/Spinner";
 import UserDetailSidebar from "@/components/UserDetailSidebar";
-import { cn, copyToClipboard } from "@/utils";
+import InvoiceDetailSidebar from "@/components/InvoiceDetailSidebar";
+import { cn } from "@/utils";
 import Tabs from "@/components/Tabs";
+import CopyButton from "@/components/CopyButton";
 
 gsap.registerPlugin(useGSAP);
 
 const SIDEBAR_WIDTH = 320;
-
-const CopyButton = ({ text }) => {
-  const [copied, setCopied] = useState(false);
-  const handleCopy = () => {
-    copyToClipboard(text);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
-  return (
-    <button
-      type="button"
-      onClick={handleCopy}
-      className="shrink-0 flex items-center justify-center size-5 rounded-md transition-colors hover:bg-[rgba(25,54,63,0.08)]"
-      style={{ background: "rgba(25,54,63,0.05)" }}
-      title="Copiar"
-    >
-      {copied ? (
-        <svg width="10" height="10" viewBox="0 0 12 10" fill="none">
-          <title>Copiado</title>
-          <path
-            d="M1 5L4.5 8.5L11 1"
-            stroke="#16a34a"
-            strokeWidth="1.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </svg>
-      ) : (
-        <svg width="10" height="10" viewBox="0 0 16 16" fill="none">
-          <title>Copiar</title>
-          <rect
-            x="5"
-            y="5"
-            width="9"
-            height="9"
-            rx="1.5"
-            stroke="rgba(25,54,63,0.40)"
-            strokeWidth="1.5"
-          />
-          <path
-            d="M11 5V3.5A1.5 1.5 0 0 0 9.5 2H3.5A1.5 1.5 0 0 0 2 3.5v6A1.5 1.5 0 0 0 3.5 11H5"
-            stroke="rgba(25,54,63,0.40)"
-            strokeWidth="1.5"
-            strokeLinecap="round"
-          />
-        </svg>
-      )}
-    </button>
-  );
-};
 
 const TABS = [
   { id: "all", label: "Todos los usuarios" },
@@ -169,6 +121,52 @@ const UsersModule = () => {
 
     return buyersData;
   }, [rows, allPayments, userVotesMap]);
+
+  // `isOpen` drives animations. `displayedUser`/`displayedPayment` persist
+  // through the close animation so content doesn't vanish mid-collapse.
+  const [isOpen, setIsOpen] = useState(false);
+  const [displayedUser, setDisplayedUser] = useState(null);
+  const [displayedPayment, setDisplayedPayment] = useState(null);
+  const [sidebarType, setSidebarType] = useState("user");
+  const [sidebarMode, setSidebarMode] = useState("edit");
+
+  const clearDisplayed = useCallback(() => {
+    setDisplayedUser(null);
+    setDisplayedPayment(null);
+  }, []);
+
+  // Desktop (lg+): inline wrapper whose width GSAP animates so DataTable shrinks smoothly.
+  const desktopWrapRef = useRef(null);
+  // Mobile/tablet (<lg): fixed overlay panel + backdrop.
+  const mobileWrapRef = useRef(null);
+  const backdropRef = useRef(null);
+
+  const onSelectUser = useCallback((user, mode) => {
+    setDisplayedPayment(null);
+    setSidebarType("user");
+    setDisplayedUser(user);
+    setSidebarMode(mode);
+    setIsOpen(true);
+  }, []);
+
+  const onSelectInvoice = useCallback((payment, mode) => {
+    setDisplayedUser(null);
+    setSidebarType("invoice");
+    setDisplayedPayment(payment);
+    setSidebarMode(mode);
+    setIsOpen(true);
+  }, []);
+
+  const handleClose = useCallback(() => setIsOpen(false), []);
+
+  const handleTabChange = useCallback(
+    (id) => {
+      if (id === activeTab) return;
+      setIsOpen(false);
+      setActiveTab(id);
+    },
+    [activeTab],
+  );
 
   const buyersColumns = useMemo(
     () => [
@@ -316,37 +314,68 @@ const UsersModule = () => {
           );
         },
       },
+      {
+        id: "actions",
+        header: "",
+        enableSorting: false,
+        size: 72,
+        cell: ({ row }) => {
+          const payment = row.original.payment;
+          if (!payment) return null;
+          return (
+            <div className="flex items-center gap-1">
+              <button
+                type="button"
+                aria-label="Editar factura"
+                onClick={() => onSelectInvoice(payment, "edit")}
+                className="size-6 flex items-center justify-center rounded-md text-[rgba(25,54,63,0.4)] hover:bg-[rgba(25,54,63,0.08)] hover:text-[#19363F] transition-colors"
+              >
+                <svg
+                  width="12"
+                  height="12"
+                  viewBox="0 0 16 16"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                  aria-hidden="true"
+                >
+                  <path
+                    d="M11.333 2a1.886 1.886 0 0 1 2.667 2.667L5.333 13.333l-3.666.667.666-3.667L11.333 2z"
+                    stroke="currentColor"
+                    strokeWidth="1.3"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </button>
+              <button
+                type="button"
+                aria-label="Ver detalle de factura"
+                onClick={() => onSelectInvoice(payment, "preview")}
+                className="size-6 flex items-center justify-center rounded-md text-[rgba(25,54,63,0.4)] hover:bg-[rgba(25,54,63,0.08)] hover:text-[#19363F] transition-colors"
+              >
+                <svg
+                  width="12"
+                  height="12"
+                  viewBox="0 0 16 16"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                  aria-hidden="true"
+                >
+                  <path
+                    d="M1 8s2.5-5 7-5 7 5 7 5-2.5 5-7 5-7-5-7-5z"
+                    stroke="currentColor"
+                    strokeWidth="1.3"
+                    strokeLinejoin="round"
+                  />
+                  <circle cx="8" cy="8" r="2" stroke="currentColor" strokeWidth="1.3" />
+                </svg>
+              </button>
+            </div>
+          );
+        },
+      },
     ],
-    [],
-  );
-
-  // `isOpen` drives animations. `displayedUser` persists through the close
-  // animation so content doesn't vanish mid-collapse.
-  const [isOpen, setIsOpen] = useState(false);
-  const [displayedUser, setDisplayedUser] = useState(null);
-  const [sidebarMode, setSidebarMode] = useState("edit");
-
-  // Desktop (lg+): inline wrapper whose width GSAP animates so DataTable shrinks smoothly.
-  const desktopWrapRef = useRef(null);
-  // Mobile/tablet (<lg): fixed overlay panel + backdrop.
-  const mobileWrapRef = useRef(null);
-  const backdropRef = useRef(null);
-
-  const onSelectUser = useCallback((user, mode) => {
-    setDisplayedUser(user);
-    setSidebarMode(mode);
-    setIsOpen(true);
-  }, []);
-
-  const handleClose = useCallback(() => setIsOpen(false), []);
-
-  const handleTabChange = useCallback(
-    (id) => {
-      if (id === activeTab) return;
-      setIsOpen(false);
-      setActiveTab(id);
-    },
-    [activeTab],
+    [onSelectInvoice],
   );
 
   // ── Desktop animation (lg+): slide wrapper width ──────────────────────────
@@ -369,7 +398,7 @@ const UsersModule = () => {
           duration: 0.26,
           ease: "power2.in",
           overwrite: true,
-          onComplete: () => setDisplayedUser(null),
+          onComplete: clearDisplayed,
         });
       }
     },
@@ -398,7 +427,7 @@ const UsersModule = () => {
           duration: 0.26,
           ease: "power2.in",
           overwrite: true,
-          onComplete: () => setDisplayedUser(null),
+          onComplete: clearDisplayed,
         });
         gsap.to(backdrop, { opacity: 0, duration: 0.22, overwrite: true });
       }
@@ -640,14 +669,21 @@ const UsersModule = () => {
         style={{ width: 0, marginLeft: 0 }}
         className="hidden lg:block shrink-0 overflow-hidden"
       >
-        {displayedUser && (
+        {sidebarType === "invoice" && displayedPayment ? (
+          <InvoiceDetailSidebar
+            key={displayedPayment._id}
+            payment={displayedPayment}
+            mode={sidebarMode}
+            onClose={handleClose}
+          />
+        ) : displayedUser ? (
           <UserDetailSidebar
             key={displayedUser._id}
             user={displayedUser}
             mode={sidebarMode}
             onClose={handleClose}
           />
-        )}
+        ) : null}
       </div>
 
       {/* ── Mobile/tablet (<lg): backdrop ── */}
@@ -670,14 +706,21 @@ const UsersModule = () => {
         className="lg:hidden fixed inset-y-0 right-0 z-50 w-[min(320px,100vw)] p-2"
         style={{ transform: "translateX(100%)" }}
       >
-        {displayedUser && (
+        {sidebarType === "invoice" && displayedPayment ? (
+          <InvoiceDetailSidebar
+            key={displayedPayment._id}
+            payment={displayedPayment}
+            mode={sidebarMode}
+            onClose={handleClose}
+          />
+        ) : displayedUser ? (
           <UserDetailSidebar
             key={displayedUser._id}
             user={displayedUser}
             mode={sidebarMode}
             onClose={handleClose}
           />
-        )}
+        ) : null}
       </div>
     </div>
   );

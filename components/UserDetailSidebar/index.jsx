@@ -8,10 +8,9 @@ import { cn } from "@/utils";
 import { useEditUserInfo } from "@/hooks/admin/useEditUserInfo";
 import { useSetRole } from "@/hooks/admin/useSetRole";
 import Tabs from "@/components/Tabs";
+import Field from "@/components/Field";
 
 gsap.registerPlugin(useGSAP);
-
-// ── helpers ────────────────────────────────────────────────────────────────────
 
 const parsePaymentInfo = (dataStr) => {
   try {
@@ -193,41 +192,29 @@ const EditPanel = ({ user }) => {
   return (
     <div className="flex flex-col gap-4 p-4">
       {/* Read-only */}
-      <div className="flex flex-col gap-1">
-        <span className="font-inter text-[10px] font-medium tracking-[-0.4px] text-[rgba(25,54,63,0.4)] uppercase">
-          Email
-        </span>
-        <div className="flex h-8 px-2.5 items-center rounded-lg bg-[rgba(25,54,63,0.03)] border-[0.7px] border-[rgba(25,54,63,0.06)]">
-          <span className="font-inter text-[11px] tracking-[-0.44px] text-[rgba(25,54,63,0.5)] truncate">
-            {user.email ?? "—"}
-          </span>
-        </div>
-      </div>
+      <Field
+        label="Email"
+        value={user.email || "—"}
+        copy={user.email}
+        readOnly
+      />
 
-      <div className="flex flex-col gap-1">
-        <span className="font-inter text-[10px] font-medium tracking-[-0.4px] text-[rgba(25,54,63,0.4)] uppercase">
-          Wallet
-        </span>
-        <div className="flex h-8 px-2.5 items-center rounded-lg bg-[rgba(25,54,63,0.03)] border-[0.7px] border-[rgba(25,54,63,0.06)] overflow-hidden">
-          <span className="font-mono text-[10px] text-[rgba(25,54,63,0.45)] truncate">
-            {user.address ?? "—"}
-          </span>
-        </div>
-      </div>
+      <Field
+        label="Wallet"
+        value={user.address || "—"}
+        copy={user.address}
+        readOnly
+        mono
+      />
 
       {/* Editable */}
-      <label className="flex flex-col gap-1">
-        <span className="font-inter text-[10px] font-medium tracking-[-0.4px] text-[rgba(25,54,63,0.4)] uppercase">
-          Teléfono
-        </span>
-        <input
-          type="tel"
-          value={phone}
-          onChange={(e) => setPhone(e.target.value)}
-          placeholder="+34 600 000 000"
-          className="w-full h-8 px-2.5 rounded-lg border-[0.7px] border-[rgba(25,54,63,0.12)] bg-white font-inter text-[12px] tracking-[-0.48px] text-[#19363F] placeholder:text-[rgba(25,54,63,0.3)] outline-none focus:border-[rgba(25,54,63,0.4)] transition-colors"
-        />
-      </label>
+      <Field
+        label="Teléfono"
+        type="tel"
+        value={phone}
+        onChange={(e) => setPhone(e.target.value)}
+        placeholder="+34 600 000 000"
+      />
 
       <div className="flex flex-col gap-1">
         <span className="font-inter text-[10px] font-medium tracking-[-0.4px] text-[rgba(25,54,63,0.4)] uppercase">

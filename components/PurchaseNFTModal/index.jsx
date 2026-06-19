@@ -11,7 +11,7 @@ import { GetNftsRemaining } from "@/hooks/nfts/GetNftsRemaining";
 import Spinner from "@/components/Spinner";
 import fireSVG from "@/assets/imgs/icons/fire.svg";
 import shieldSVG from "@/assets/imgs/icons/shield-check.svg";
-import { copyToClipboard } from "@/utils";
+import CopyButton from "@/components/CopyButton";
 
 import posterIMG from "@/assets/imgs/brand/poster.jpeg";
 import Video from "@/components/Video";
@@ -28,57 +28,6 @@ const UNITS_AVAILABLE = 350;
 const PRICE = "3.000€";
 const PRICEIVA = "3.630€ (IVA incluido)";
 const DEFAULT_CONCEPT = "Compra NFT Founder_";
-
-/* ─── Copy button ─── */
-const CopyButton = ({ text }) => {
-  const [copied, setCopied] = useState(false);
-  const handleCopy = () => {
-    copyToClipboard(text);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
-  return (
-    <button
-      type="button"
-      onClick={handleCopy}
-      className="shrink-0 flex items-center justify-center size-5 rounded-md transition-colors hover:bg-[rgba(255,255,255,0.12)]"
-      style={{ background: "rgba(255,255,255,0.06)" }}
-      title="Copiar"
-    >
-      {copied ? (
-        <svg width="10" height="10" viewBox="0 0 12 10" fill="none">
-          <title>Copiado</title>
-          <path
-            d="M1 5L4.5 8.5L11 1"
-            stroke="#4ade80"
-            strokeWidth="1.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </svg>
-      ) : (
-        <svg width="10" height="10" viewBox="0 0 16 16" fill="none">
-          <title>Copiar</title>
-          <rect
-            x="5"
-            y="5"
-            width="9"
-            height="9"
-            rx="1.5"
-            stroke="rgba(255,255,255,0.50)"
-            strokeWidth="1.5"
-          />
-          <path
-            d="M11 5V3.5A1.5 1.5 0 0 0 9.5 2H3.5A1.5 1.5 0 0 0 2 3.5v6A1.5 1.5 0 0 0 3.5 11H5"
-            stroke="rgba(255,255,255,0.50)"
-            strokeWidth="1.5"
-            strokeLinecap="round"
-          />
-        </svg>
-      )}
-    </button>
-  );
-};
 
 /* ─── Main component ─── */
 const PurchaseNFTModal = () => {
@@ -800,7 +749,7 @@ const PurchaseNFTModal = () => {
                     <span className="text-[11px] font-semibold text-white tracking-[-0.22px] break-all">
                       ES64 0182 0187 2902 0163 5449
                     </span>
-                    <CopyButton text="ES64 0182 0187 2902 0163 5449" />
+                    <CopyButton text="ES64 0182 0187 2902 0163 5449" variant="dark" />
                   </div>
                 </div>
                 <div className="flex flex-col gap-0.5">
@@ -811,7 +760,7 @@ const PurchaseNFTModal = () => {
                     <span className="text-[12px] font-semibold text-white tracking-[-0.24px]">
                       Hyxora Finance SL
                     </span>
-                    <CopyButton text="Hyxora Finance SL" />
+                    <CopyButton text="Hyxora Finance SL" variant="dark" />
                   </div>
                 </div>
                 <div className="flex flex-col gap-0.5">
@@ -822,7 +771,7 @@ const PurchaseNFTModal = () => {
                     <span className="text-[12px] font-semibold text-white tracking-[-0.24px]">
                       B24879702
                     </span>
-                    <CopyButton text="B24879702" />
+                    <CopyButton text="B24879702" variant="dark" />
                   </div>
                 </div>
               </div>
@@ -864,7 +813,7 @@ const PurchaseNFTModal = () => {
                   }}
                   readOnly
                 />
-                <CopyButton text={DEFAULT_CONCEPT + username} />
+                <CopyButton text={DEFAULT_CONCEPT + username} variant="dark" />
               </div>
             </div>
 
@@ -995,7 +944,7 @@ const PurchaseNFTModal = () => {
                   <span className="text-[13px] font-semibold text-white tracking-[-0.26px]">
                     ES64 0182 0187 2902 0163 5449
                   </span>
-                  <CopyButton text="ES64 0182 0187 2902 0163 5449" />
+                  <CopyButton text="ES64 0182 0187 2902 0163 5449" variant="dark" />
                 </div>
               </div>
               <div className="flex flex-col gap-0.5">
@@ -1006,7 +955,7 @@ const PurchaseNFTModal = () => {
                   <span className="text-[13px] font-semibold text-white tracking-[-0.26px]">
                     Hyxora Finance SL
                   </span>
-                  <CopyButton text="Hyxora Finance SL" />
+                  <CopyButton text="Hyxora Finance SL" variant="dark" />
                 </div>
               </div>
               <div className="flex flex-col gap-0.5">
@@ -1017,7 +966,7 @@ const PurchaseNFTModal = () => {
                   <span className="text-[13px] font-semibold text-white tracking-[-0.26px]">
                     B24879702
                   </span>
-                  <CopyButton text="B24879702" />
+                  <CopyButton text="B24879702" variant="dark" />
                 </div>
               </div>
             </div>
@@ -1038,7 +987,7 @@ const PurchaseNFTModal = () => {
                 <p className="text-[13px] font-semibold text-white tracking-[-0.26px]">
                   Compra NFT Founder_{username}
                 </p>
-                <CopyButton text={`Compra NFT Founder_${username}`} />
+                <CopyButton text={`Compra NFT Founder_${username}`} variant="dark" />
               </div>
             </div>
 
