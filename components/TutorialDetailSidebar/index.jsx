@@ -5,13 +5,13 @@ import {
   MEMBERSHIP_OPTIONS,
 } from "@/app/(dashboard)/admin/_data/categories";
 import {
-  CATEGORIES,
   VISIBILITY,
   VISIBILITY_OPTIONS,
 } from "@/app/(dashboard)/admin/_data/tutorials";
 import SelectDropdown from "@/components/SelectDropdown";
 import Tabs from "@/components/Tabs";
 import VideoPreview from "@/components/VideoPreview";
+import { useGetAllCategories } from "@/hooks/admin/useGetAllCategories";
 import { cn } from "@/utils";
 import { detectVideoSource, formatDate, formatDuration, parseDuration } from "@/utils/video";
 import { useGSAP } from "@gsap/react";
@@ -20,7 +20,6 @@ import { useEffect, useMemo, useRef, useState } from "react";
 
 gsap.registerPlugin(useGSAP);
 
-const categoryOptions = CATEGORIES.map((c) => ({ value: c.id, label: c.label }));
 const visibilityOptions = VISIBILITY_OPTIONS.map((v) => ({
   value: v.id,
   label: v.label,
@@ -231,10 +230,12 @@ const ConfirmBlock = ({ message, confirmLabel, onCancel, onConfirm }) => (
 
 // ── EditPanel ────────────────────────────────────────────────────────────────
 
-const EditPanel = ({ video, onUpdate, onDelete, onClose }) => {
+const EditPanel = ({ video, categoryOptions, onUpdate, onDelete, onClose }) => {
   const [title, setTitle] = useState(video.title ?? "");
   const [description, setDescription] = useState(video.description ?? "");
-  const [categoryId, setCategoryId] = useState(video.categoryId ?? CATEGORIES[0]?.id);
+  const [categoryId, setCategoryId] = useState(
+    video.categoryId ?? categoryOptions[0]?.value ?? "",
+  );
   const [url, setUrl] = useState(video.url ?? "");
   const [duration, setDuration] = useState(formatDuration(video.durationSec));
   const [visibility, setVisibility] = useState(video.visibility ?? "visible");
@@ -405,6 +406,12 @@ const TutorialDetailSidebar = ({ video, initialTab = "detail", onUpdate, onDelet
   const panelRef = useRef(null);
   const [tab, setTab] = useState(initialTab);
 
+  const { data: categories } = useGetAllCategories();
+  const categoryOptions = useMemo(
+    () => (categories ?? []).map((c) => ({ value: c.id, label: c.label })),
+    [categories],
+  );
+
   useEffect(() => {
     setTab(initialTab);
   }, [initialTab]);
@@ -460,7 +467,13 @@ const TutorialDetailSidebar = ({ video, initialTab = "detail", onUpdate, onDelet
         {tab === "detail" && <DetailPanel video={video} />}
         {tab === "preview" && <PreviewPanel video={video} />}
         {tab === "edit" && (
-          <EditPanel video={video} onUpdate={onUpdate} onDelete={onDelete} onClose={onClose} />
+          <EditPanel
+            video={video}
+            categoryOptions={categoryOptions}
+            onUpdate={onUpdate}
+            onDelete={onDelete}
+            onClose={onClose}
+          />
         )}
       </div>
     </div>

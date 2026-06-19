@@ -43,12 +43,14 @@ const categoryAccent = (id) =>
 // access-control defaults: membership gating + public flag live on the tutorial.
 //   membershipType — min plan to watch ("all" = any logged-in user)
 //   isPublic       — watchable without login (bypasses the membership check)
+// Backend records embed an enriched `category` object — prefer it, and fall back
+// to looking the categoryId up locally for any mock/legacy records.
 const make = (v) => ({
   membershipType: "all",
   isPublic: false,
   ...v,
-  category: categoryLabel(v.categoryId),
-  accent: categoryAccent(v.categoryId),
+  category: v.category?.label ?? categoryLabel(v.categoryId),
+  accent: v.category?.accent ?? categoryAccent(v.categoryId),
 });
 
 export const TUTORIALS = [

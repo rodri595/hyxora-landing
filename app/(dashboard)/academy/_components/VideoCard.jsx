@@ -39,7 +39,7 @@ const VideoCard = ({ video, className }) => (
           className="inline-block size-1.5 shrink-0 rounded-full"
           style={{ background: video.accent }}
         />
-        <span className="truncate">{video.level}</span>
+        <span className="truncate">{video.level || video.category}</span>
         <span className="text-[rgba(25,54,63,0.3)]">·</span>
         <span className="whitespace-nowrap">
           {formatDate(video.publishedAt)}

@@ -1,18 +1,39 @@
 "use client";
 
+import ErrorComp from "@/components/Error";
+import Spinner from "@/components/Spinner";
+import { useGetTutorial } from "@/hooks/academy/useGetTutorial";
 import Link from "next/link";
-import { notFound } from "next/navigation";
 import { use } from "react";
 import Poster from "../_components/Poster";
-import { getVideoBySlug } from "../_data";
-import { formatDate, formatDuration } from "../_lib";
+import { decorateAcademyTutorial, formatDate, formatDuration } from "../_lib";
 
 // Placeholder detail page. The full video player / chapters experience
 // is the next step — for now it confirms navigation works end to end.
 const TutorialDetailPage = ({ params }) => {
   const { slug } = use(params);
-  const video = getVideoBySlug(slug);
-  if (!video) notFound();
+  const { data, isLoading, isError } = useGetTutorial(slug);
+  const video = decorateAcademyTutorial(data?.tutorial);
+
+  if (isLoading) {
+    return (
+      <section className="flex h-full min-h-0 flex-1 items-center justify-center p-4">
+        <Spinner />
+      </section>
+    );
+  }
+
+  if (isError || !video) {
+    return (
+      <section className="flex h-full min-h-0 flex-1 items-center justify-center p-4">
+        <ErrorComp
+          error
+          message="No se pudo cargar este tutorial."
+          className="max-w-sm"
+        />
+      </section>
+    );
+  }
 
   return (
     <section className="flex h-full min-h-0 flex-1 flex-col p-4" data-lenis-prevent>
@@ -48,7 +69,8 @@ const TutorialDetailPage = ({ params }) => {
               className="inline-flex w-fit items-center rounded-[5px] px-1.5 py-0.5 font-inter text-[10px] font-medium tracking-[-0.3px]"
               style={{ background: `${video.accent}14`, color: video.accent }}
             >
-              {video.category} · {video.level}
+              {video.category}
+              {video.level ? ` · ${video.level}` : ""}
             </span>
             <h1 className="font-inter text-[20px] font-bold leading-[1.15] tracking-[-0.7px] text-[#19363F]">
               {video.title}

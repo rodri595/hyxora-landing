@@ -1,18 +1,18 @@
 "use client";
 
 import { MEMBERSHIP_OPTIONS } from "@/app/(dashboard)/admin/_data/categories";
-import { CATEGORIES, VISIBILITY_OPTIONS } from "@/app/(dashboard)/admin/_data/tutorials";
+import { VISIBILITY_OPTIONS } from "@/app/(dashboard)/admin/_data/tutorials";
 import SelectDropdown from "@/components/SelectDropdown";
 import VideoPreview from "@/components/VideoPreview";
+import { useGetAllCategories } from "@/hooks/admin/useGetAllCategories";
 import { cn } from "@/utils";
 import { detectVideoSource, formatDuration, parseDuration } from "@/utils/video";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 gsap.registerPlugin(useGSAP);
 
-const categoryOptions = CATEGORIES.map((c) => ({ value: c.id, label: c.label }));
 const visibilityOptions = VISIBILITY_OPTIONS.map((v) => ({
   value: v.id,
   label: v.label,
@@ -50,9 +50,15 @@ const Toggle = ({ checked, onChange }) => (
 const CreateTutorialSidebar = ({ onClose, onCreate }) => {
   const panelRef = useRef(null);
 
+  const { data: categories } = useGetAllCategories();
+  const categoryOptions = useMemo(
+    () => (categories ?? []).map((c) => ({ value: c.id, label: c.label })),
+    [categories],
+  );
+
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [categoryId, setCategoryId] = useState(CATEGORIES[0]?.id ?? "");
+  const [categoryId, setCategoryId] = useState("");
   const [url, setUrl] = useState("");
   const [duration, setDuration] = useState("");
   const [visibility, setVisibility] = useState("visible");
@@ -60,6 +66,13 @@ const CreateTutorialSidebar = ({ onClose, onCreate }) => {
   const [isPublic, setIsPublic] = useState(false);
 
   const source = useMemo(() => detectVideoSource(url), [url]);
+
+  // Default to the first category once the list has loaded.
+  useEffect(() => {
+    if (!categoryId && categoryOptions.length > 0) {
+      setCategoryId(categoryOptions[0].value);
+    }
+  }, [categoryId, categoryOptions]);
 
   useGSAP(
     () => {

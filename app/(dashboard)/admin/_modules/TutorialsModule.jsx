@@ -3,16 +3,27 @@
 import CategorySidebar from "@/components/CategorySidebar";
 import CreateTutorialSidebar from "@/components/CreateTutorialSidebar";
 import DataTable from "@/components/DataTable";
+import ErrorComp from "@/components/Error";
 import Icon from "@/components/Icon";
+import Spinner from "@/components/Spinner";
 import Tabs from "@/components/Tabs";
 import TutorialDetailSidebar from "@/components/TutorialDetailSidebar";
+import { useCreateCategory } from "@/hooks/admin/useCreateCategory";
+import { useCreateTutorial } from "@/hooks/admin/useCreateTutorial";
+import { useDeleteCategory } from "@/hooks/admin/useDeleteCategory";
+import { useDeleteTutorial } from "@/hooks/admin/useDeleteTutorial";
+import { useEditCategory } from "@/hooks/admin/useEditCategory";
+import { useEditTutorial } from "@/hooks/admin/useEditTutorial";
+import { useGetAllCategories } from "@/hooks/admin/useGetAllCategories";
+import { useGetAllTutorials } from "@/hooks/admin/useGetAllTutorials";
 import { cn } from "@/utils";
 import { formatDate, formatDuration } from "@/utils/video";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import { useCallback, useMemo, useRef, useState } from "react";
-import { CATEGORY_SEED, MEMBERSHIPS, slugify } from "../_data/categories";
-import { TUTORIALS, VISIBILITY, decorateTutorial } from "../_data/tutorials";
+import toast from "react-hot-toast";
+import { MEMBERSHIPS } from "../_data/categories";
+import { VISIBILITY, decorateTutorial } from "../_data/tutorials";
 
 gsap.registerPlugin(useGSAP);
 
@@ -101,23 +112,29 @@ const VIEWS = [
 
 // ── Module ───────────────────────────────────────────────────────────────────
 
-let idSeq = 0;
-const nextId = () => `t-new-${Date.now()}-${idSeq++}`;
-
-// Ensure a category slug is unique against existing ids.
-const uniqueCategoryId = (label, existing) => {
-  const base = slugify(label) || "categoria";
-  let id = base;
-  let n = 2;
-  const taken = new Set(existing.map((c) => c.id));
-  while (taken.has(id)) id = `${base}-${n++}`;
-  return id;
-};
-
 const TutorialsModule = () => {
+  const { data: tutorialsData, isLoading, isError } = useGetAllTutorials();
+  const { data: categoriesData } = useGetAllCategories();
+
+  // Mutations — each invalidates its list query on success (see the hooks).
+  const { mutate: createTutorial } = useCreateTutorial();
+  const { mutate: editTutorial } = useEditTutorial();
+  const { mutate: deleteTutorial } = useDeleteTutorial();
+  const { mutate: createCategory } = useCreateCategory();
+  const { mutate: editCategory } = useEditCategory();
+  const { mutate: deleteCategory } = useDeleteCategory();
+
   const [view, setView] = useState("tutorials"); // "tutorials" | "categories"
-  const [videos, setVideos] = useState(TUTORIALS);
-  const [categories, setCategories] = useState(CATEGORY_SEED);
+
+  // The tables read straight from the queries. On a mutation the list query is
+  // invalidated and refetched; React Query keeps the previous data during the
+  // background refetch, so the open sidebar (derived from these lists by id) is
+  // never unmounted — it just re-renders with fresh values.
+  const videos = useMemo(
+    () => (tutorialsData ?? []).map(decorateTutorial),
+    [tutorialsData],
+  );
+  const categories = useMemo(() => categoriesData ?? [], [categoriesData]);
 
   const [isOpen, setIsOpen] = useState(false);
   const [sidebarMode, setSidebarMode] = useState("detail"); // "detail" | "create"
@@ -170,62 +187,81 @@ const TutorialsModule = () => {
     [view],
   );
 
-  // ── Tutorial CRUD (local mock state) ──
-  const handleCreate = useCallback((data) => {
-    const now = new Date().toISOString();
-    setVideos((prev) => [
-      decorateTutorial({
-        ...data,
-        id: nextId(),
-        createdAt: now,
-        updatedAt: now,
-      }),
-      ...prev,
-    ]);
-  }, []);
+  // ── Tutorial CRUD ──
+  // The create/delete sidebars close themselves (they call onClose after the
+  // callback). Update intentionally does NOT close — the panel stays open and
+  // re-renders with the freshly invalidated data.
+  const handleCreate = useCallback(
+    (data) => {
+      createTutorial(data, {
+        onSuccess: () => toast.success("Tutorial creado"),
+        onError: () => toast.error("No se pudo crear el tutorial"),
+      });
+    },
+    [createTutorial],
+  );
 
-  const handleUpdate = useCallback((id, data) => {
-    setVideos((prev) =>
-      prev.map((v) =>
-        v.id === id
-          ? decorateTutorial({
-              ...v,
-              ...data,
-              updatedAt: new Date().toISOString(),
-            })
-          : v,
-      ),
-    );
-  }, []);
+  const handleUpdate = useCallback(
+    (id, data) => {
+      editTutorial(
+        { id, ...data },
+        {
+          onSuccess: () => toast.success("Cambios guardados"),
+          onError: () => toast.error("No se pudieron guardar los cambios"),
+        },
+      );
+    },
+    [editTutorial],
+  );
 
   const handleDelete = useCallback(
     (id) => {
-      setVideos((prev) => prev.filter((v) => v.id !== id));
-      if (displayedId === id) setIsOpen(false);
+      deleteTutorial(
+        { id },
+        {
+          onSuccess: () => toast.success("Tutorial eliminado"),
+          onError: () => toast.error("No se pudo eliminar el tutorial"),
+        },
+      );
     },
-    [displayedId],
+    [deleteTutorial],
   );
 
-  // ── Category CRUD (local mock state) ──
-  const handleCreateCategory = useCallback((data) => {
-    setCategories((prev) => [
-      { ...data, id: uniqueCategoryId(data.label, prev) },
-      ...prev,
-    ]);
-  }, []);
+  // ── Category CRUD ──
+  const handleCreateCategory = useCallback(
+    (data) => {
+      createCategory(data, {
+        onSuccess: () => toast.success("Categoría creada"),
+        onError: () => toast.error("No se pudo crear la categoría"),
+      });
+    },
+    [createCategory],
+  );
 
-  const handleUpdateCategory = useCallback((id, data) => {
-    setCategories((prev) =>
-      prev.map((c) => (c.id === id ? { ...c, ...data } : c)),
-    );
-  }, []);
+  const handleUpdateCategory = useCallback(
+    (id, data) => {
+      editCategory(
+        { id, ...data },
+        {
+          onSuccess: () => toast.success("Cambios guardados"),
+          onError: () => toast.error("No se pudieron guardar los cambios"),
+        },
+      );
+    },
+    [editCategory],
+  );
 
   const handleDeleteCategory = useCallback(
     (id) => {
-      setCategories((prev) => prev.filter((c) => c.id !== id));
-      if (displayedId === id) setIsOpen(false);
+      deleteCategory(
+        { id },
+        {
+          onSuccess: () => toast.success("Categoría eliminada"),
+          onError: () => toast.error("No se pudo eliminar la categoría"),
+        },
+      );
     },
-    [displayedId],
+    [deleteCategory],
   );
 
   // Desktop (lg+): inline wrapper — GSAP animates its width
@@ -528,6 +564,24 @@ const TutorialsModule = () => {
   };
 
   const isCategories = view === "categories";
+
+  if (isLoading)
+    return (
+      <div className="flex items-center justify-center w-full h-full">
+        <Spinner />
+      </div>
+    );
+
+  if (isError)
+    return (
+      <div className="flex items-center justify-center w-full h-full p-4">
+        <ErrorComp
+          error
+          message="Error al cargar los tutoriales."
+          className="max-w-sm"
+        />
+      </div>
+    );
 
   return (
     <div className="flex flex-row flex-1 min-h-0 overflow-hidden h-full">

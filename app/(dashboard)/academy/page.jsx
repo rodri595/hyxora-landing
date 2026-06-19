@@ -5,12 +5,14 @@ import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import Link from "next/link";
 import Icon from "@/components/Icon";
+import ErrorComp from "@/components/Error";
+import Spinner from "@/components/Spinner";
+import { useGetTutorials } from "@/hooks/academy/useGetTutorials";
 import { useEffect, useMemo, useRef, useState } from "react";
 import CategoryCarousel from "./_components/CategoryCarousel";
 import SearchModal from "./_components/SearchModal";
 import VideoTable from "./_components/VideoTable";
-import { CATEGORIES, FEATURED, VIDEOS, getVideosByCategory } from "./_data";
-import { formatDuration } from "./_lib";
+import { decorateAcademyTutorial, formatDuration } from "./_lib";
 
 gsap.registerPlugin(useGSAP);
 
@@ -177,20 +179,30 @@ const TutorialsPage = () => {
   const [searchOpen, setSearchOpen] = useState(false);
   const viewRef = useRef(null);
 
-  const categoriesWithVideos = useMemo(
-    () =>
-      CATEGORIES.map((c) => ({
-        ...c,
-        videos: getVideosByCategory(c.id),
-      })).filter((c) => c.videos.length > 0),
-    [],
+  const { data, isLoading, isError } = useGetTutorials();
+
+  // Flat list of decorated tutorials (slug / category label / accent / gradient).
+  const allVideos = useMemo(
+    () => (data?.tutorials ?? []).map(decorateAcademyTutorial),
+    [data],
   );
 
-  // Flat list (newest first) for the table layout.
-  const allVideos = useMemo(
+  const featured = useMemo(
+    () => (data?.featured ? decorateAcademyTutorial(data.featured) : null),
+    [data],
+  );
+
+  // The API only returns categories that have at least one tutorial; group the
+  // decorated tutorials under them for the carousel layout.
+  const categoriesWithVideos = useMemo(
     () =>
-      [...VIDEOS].sort((a, b) => b.publishedAt.localeCompare(a.publishedAt)),
-    [],
+      (data?.categories ?? [])
+        .map((c) => ({
+          ...c,
+          videos: allVideos.filter((v) => v.categoryId === c.id),
+        }))
+        .filter((c) => c.videos.length > 0),
+    [data, allVideos],
   );
 
   // Staggered intro per video whenever the active view (grid ↔ list) changes —
@@ -243,7 +255,7 @@ const TutorialsPage = () => {
               Tutoriales
             </h1>
             <p className="hidden font-inter text-[11.5px] tracking-[-0.3px] text-[rgba(25,54,63,0.5)] sm:block">
-              {VIDEOS.length} vídeos para dominar la plataforma
+              {allVideos.length} vídeos para dominar la plataforma
             </p>
           </div>
 
@@ -258,27 +270,55 @@ const TutorialsPage = () => {
           className="-mr-2 min-h-0 min-w-0 flex-1 overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-[rgba(25,54,63,0.2)] scrollbar-thumb-rounded-lg"
           data-lenis-prevent
         >
-          <div className="flex min-w-0 flex-col gap-7 pb-2">
-            <FeaturedHero video={FEATURED} />
-
-            <div
-              key={view}
-              ref={viewRef}
-              className="flex min-w-0 flex-col gap-4"
-            >
-              {view === "grid" ? (
-                categoriesWithVideos.map((c) => (
-                  <CategoryCarousel key={c.id} category={c} videos={c.videos} />
-                ))
-              ) : (
-                <VideoTable videos={allVideos} />
-              )}
+          {isLoading ? (
+            <div className="flex h-full items-center justify-center">
+              <Spinner />
             </div>
-          </div>
+          ) : isError ? (
+            <div className="flex h-full items-center justify-center p-4">
+              <ErrorComp
+                error
+                message="No se pudieron cargar los tutoriales."
+                className="max-w-sm"
+              />
+            </div>
+          ) : allVideos.length === 0 ? (
+            <div className="flex h-full items-center justify-center">
+              <p className="font-inter text-[12px] tracking-[-0.48px] text-[rgba(25,54,63,0.4)]">
+                Aún no hay tutoriales disponibles.
+              </p>
+            </div>
+          ) : (
+            <div className="flex min-w-0 flex-col gap-7 pb-2">
+              {featured && <FeaturedHero video={featured} />}
+
+              <div
+                key={view}
+                ref={viewRef}
+                className="flex min-w-0 flex-col gap-4"
+              >
+                {view === "grid" ? (
+                  categoriesWithVideos.map((c) => (
+                    <CategoryCarousel
+                      key={c.id}
+                      category={c}
+                      videos={c.videos}
+                    />
+                  ))
+                ) : (
+                  <VideoTable videos={allVideos} />
+                )}
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
-      <SearchModal open={searchOpen} onClose={() => setSearchOpen(false)} />
+      <SearchModal
+        open={searchOpen}
+        onClose={() => setSearchOpen(false)}
+        videos={allVideos}
+      />
     </section>
   );
 };

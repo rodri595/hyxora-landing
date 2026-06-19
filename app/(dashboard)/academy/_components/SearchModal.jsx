@@ -5,7 +5,6 @@ import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { VIDEOS } from "../_data";
 import { formatDuration } from "../_lib";
 import Poster from "./Poster";
 
@@ -22,7 +21,7 @@ const norm = (s) =>
  * Global search overlay (⌘K / Ctrl+K). Filters across title, description,
  * category and level; arrow keys navigate, Enter opens.
  */
-const SearchModal = ({ open, onClose }) => {
+const SearchModal = ({ open, onClose, videos = [] }) => {
   const router = useRouter();
   const [query, setQuery] = useState("");
   const [active, setActive] = useState(0);
@@ -33,14 +32,14 @@ const SearchModal = ({ open, onClose }) => {
 
   const results = useMemo(() => {
     const q = norm(query.trim());
-    if (!q) return VIDEOS.slice(0, 6);
-    return VIDEOS.filter((v) => {
+    if (!q) return videos.slice(0, 6);
+    return videos.filter((v) => {
       const haystack = norm(
-        `${v.title} ${v.description} ${v.category} ${v.level}`,
+        `${v.title} ${v.description} ${v.category} ${v.level ?? ""}`,
       );
       return q.split(/\s+/).every((token) => haystack.includes(token));
     });
-  }, [query]);
+  }, [query, videos]);
 
   // Reset state & focus when opened.
   useEffect(() => {
