@@ -1,5 +1,7 @@
 "use client";
 
+import { useEffect } from "react";
+import { consumePendingScroll } from "@/hooks/useSectionScroll";
 import Layout from "@/components/Layout";
 import Hero from "./Hero";
 // import Whatis from "./Whatis";
@@ -13,6 +15,8 @@ import Plans from "./Plans";
 import CTA from "./CTA";
 // import Simulation from "./Simulation";
 const HomePage = () => {
+  useEffect(() => consumePendingScroll(), []);
+
   return (
     <Layout
       isFixedHeader

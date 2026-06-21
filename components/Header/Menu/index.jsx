@@ -21,6 +21,7 @@ import { shortenAddress, copyToClipboard, cn } from "@/utils";
 import podcastIMG from "@/assets/imgs/podcast//Logo fondo cuadrodo E Negro.png";
 import { GetMyPayments } from "@/hooks/nfts/GetMyPayments";
 import { useGetUserInformation } from "@/hooks/user/useGetUserInformation";
+import { useSectionScroll } from "@/hooks/useSectionScroll";
 import { roleNames } from "@/constants/roles";
 gsap.registerPlugin(ScrollToPlugin);
 
@@ -145,21 +146,13 @@ const MenuComponent = () => {
     setIsActive((prev) => !prev);
   };
 
+  const scrollToSection = useSectionScroll();
   const handleSmoothScroll = (sectionId) => {
     // Close menu
     setIsActive(false);
-    // Wait for menu animation to complete before scrolling
+    // Wait for menu animation to complete before scrolling/navigating
     setTimeout(() => {
-      const element = document.querySelector(sectionId);
-      if (element) {
-        const offsetY = 100;
-        const elementPosition =
-          element.getBoundingClientRect().top + window.pageYOffset;
-        window.scrollTo({
-          top: elementPosition - offsetY,
-          behavior: "smooth",
-        });
-      }
+      scrollToSection(sectionId);
     }, 400);
   };
 

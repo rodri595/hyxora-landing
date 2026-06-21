@@ -13,9 +13,6 @@ export const GetMyPayments = (props) => {
       const response = await apiClient.get("/payment/list");
       return response?.data?.data || [];
     },
-    enabled:
-      typeof props === "undefined"
-        ? true
-        : props.enabled && !!smartWalletAddress && authenticated && ready,
+    enabled: !!smartWalletAddress && authenticated && ready,
   });
 };

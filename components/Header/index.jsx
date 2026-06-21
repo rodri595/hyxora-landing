@@ -12,15 +12,12 @@ import learningCenterIcon from "@/assets/imgs/icons/learning.png";
 import bannerImage from "@/assets/imgs/brand/tokens.webp";
 import fireSVG from "@/assets/imgs/icons/fire.svg";
 import Menu from "./Menu";
-import gsap from "gsap";
-import { ScrollToPlugin } from "gsap/ScrollToPlugin";
 import { useLogin, usePrivy } from "@privy-io/react-auth";
 import User from "./User";
 import { cn } from "@/utils";
 import { GetMyPayments } from "@/hooks/nfts/GetMyPayments";
 import { useWeb3 } from "@/context/Web3Provider";
-
-gsap.registerPlugin(ScrollToPlugin);
+import { useSectionScroll } from "@/hooks/useSectionScroll";
 const MenuItem = ({ children, href = "#", ...props }) => {
   return (
     <Link
@@ -234,20 +231,7 @@ const ExploreDropdown = () => {
   );
 };
 const OportunityDropdown = () => {
-  const handleSmoothScroll = (sectionId) => {
-    const element = document.querySelector(sectionId);
-    if (element) {
-      gsap.to(window, {
-        scrollTo: {
-          y: element,
-          offsetY: 100,
-          autoKill: true,
-        },
-        duration: 1.5,
-        ease: "power3.inOut",
-      });
-    }
-  };
+  const handleSmoothScroll = useSectionScroll();
   return (
     <div className="group relative">
       <button
