@@ -1,5 +1,6 @@
 "use client";
 
+import { useCallback, useEffect, useRef, useState } from "react";
 import Layout from "@/components/Layout";
 import Image from "@/components/Image";
 import hyxoraLogo from "@/assets/imgs/brand/logo.svg";
@@ -75,6 +76,26 @@ const PlayIcon = () => (
   </svg>
 );
 
+const ChevronIcon = ({ dir = "right" }) => (
+  <svg
+    width="14"
+    height="14"
+    viewBox="0 0 24 24"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+    aria-hidden="true"
+    style={{ transform: dir === "left" ? "rotate(180deg)" : undefined }}
+  >
+    <path
+      d="M9 6l6 6-6 6"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </svg>
+);
+
 const THEMES = {
   dark: {
     shadow: "border-[rgba(255,255,255,0.06)] bg-[rgba(30,30,30,0.80)]",
@@ -114,6 +135,109 @@ const THEMES = {
   },
 };
 
+const VideoSlider = ({ videos, t }) => {
+  const scrollRef = useRef(null);
+  const [canLeft, setCanLeft] = useState(false);
+  const [canRight, setCanRight] = useState(false);
+
+  const updateButtons = useCallback(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    setCanLeft(el.scrollLeft > 4);
+    setCanRight(el.scrollLeft < el.scrollWidth - el.clientWidth - 4);
+  }, []);
+
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    updateButtons();
+    el.addEventListener("scroll", updateButtons, { passive: true });
+    window.addEventListener("resize", updateButtons);
+    return () => {
+      el.removeEventListener("scroll", updateButtons);
+      window.removeEventListener("resize", updateButtons);
+    };
+  }, [updateButtons]);
+
+  const scrollByDir = (dir) => {
+    const el = scrollRef.current;
+    if (!el) return;
+    el.scrollBy({ left: dir * el.clientWidth * 0.85, behavior: "smooth" });
+  };
+
+  return (
+    <div className="flex flex-col gap-[12px]">
+      <div className="flex items-center justify-between">
+        <p
+          className={`text-[11px] font-medium tracking-[0.5px] uppercase ${t.sectionLabel}`}
+        >
+          Últimos videos
+        </p>
+        <div className="flex gap-[6px]">
+          <button
+            type="button"
+            aria-label="Videos anteriores"
+            onClick={() => scrollByDir(-1)}
+            disabled={!canLeft}
+            className={`flex items-center justify-center w-[28px] h-[28px] rounded-full border transition-all disabled:opacity-25 disabled:cursor-not-allowed ${t.btn}`}
+          >
+            <ChevronIcon dir="left" />
+          </button>
+          <button
+            type="button"
+            aria-label="Más videos"
+            onClick={() => scrollByDir(1)}
+            disabled={!canRight}
+            className={`flex items-center justify-center w-[28px] h-[28px] rounded-full border transition-all disabled:opacity-25 disabled:cursor-not-allowed ${t.btn}`}
+          >
+            <ChevronIcon dir="right" />
+          </button>
+        </div>
+      </div>
+
+      <div
+        ref={scrollRef}
+        className="flex gap-[12px] overflow-x-auto snap-x snap-mandatory scroll-smooth -mx-[4px] px-[4px] pb-[4px] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+      >
+        {videos.map((video) => (
+          <a
+            key={video.videoId}
+            href={video.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="group flex flex-col gap-[7px] snap-start shrink-0 w-[180px] max-md:w-[160px] max-sm:w-[150px]"
+          >
+            <div
+              className={`relative w-full aspect-video rounded-[8px] overflow-hidden ${t.videoThumb}`}
+            >
+              <img
+                src={video.thumbnail}
+                alt={video.title}
+                className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+              />
+              <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-[rgba(0,0,0,0.35)]">
+                <div className="w-[28px] h-[28px] rounded-full bg-white flex items-center justify-center">
+                  <PlayIcon />
+                </div>
+              </div>
+            </div>
+            <p
+              className={`text-[11px] leading-[15px] tracking-[-0.22px] line-clamp-2 ${t.videoTitle}`}
+            >
+              {video.title}
+            </p>
+            {video.published && (
+              <p className={`text-[10px] ${t.videoDate}`}>
+                {formatRelativeDate(video.published)}
+              </p>
+            )}
+          </a>
+        ))}
+      </div>
+    </div>
+  );
+};
+
 const PodcastPage = ({ channels = [] }) => {
   return (
     <Layout
@@ -122,7 +246,7 @@ const PodcastPage = ({ channels = [] }) => {
     >
       {/* CHANNELS SECTION */}
       <section className="w-full flex justify-center px-4 pb-[60px]">
-        <div className="flex flex-col gap-[50px] items-center w-full max-w-[1320px]">
+        <div className="flex flex-col gap-[50px] items-center w-full max-w-[1320px] ">
           {/* Heading */}
           <div className="flex flex-col gap-[14px] items-center text-center">
             <h2 className="font-medium text-[40px] text-[#19363f] tracking-[-3.2px] leading-normal max-md:text-[26px] max-md:tracking-[-1.2px]">
@@ -134,18 +258,18 @@ const PodcastPage = ({ channels = [] }) => {
           </div>
 
           {/* Individual channel cards */}
-          <div className="flex gap-[24px] w-full max-md:flex-col max-md:gap-[48px] pb-[20px]">
+          <div className="flex gap-[16px] w-full max-md:flex-col max-md:gap-[48px] pb-[20px]">
             {channels.map((ch) => {
               const t = ch.id === "elefante" ? THEMES.light : THEMES.dark;
               return (
-                <div key={ch.id} className="relative flex-1">
+                <div key={ch.id} className="relative flex-1 min-w-0">
                   {/* shadow 2 */}
                   <div
-                    className={`absolute w-[calc(100%-80px)] h-[calc(100%+32px)] top-[8px] left-[40px] rounded-[16px] border shadow-[inset_0_0_4px_0_rgba(25,54,63,0.04)] backdrop-blur-[8px] max-sm:hidden ${t.shadow}`}
+                    className={`absolute w-[calc(100%-80px)] h-[calc(100%+32px)] top-[8px] left-[40px] rounded-[16px] border shadow-[inset_0_0_4px_0_rgba(25,54,63,0.04)] backdrop-blur-[8px]  ${t.shadow}`}
                   />
                   {/* shadow 1 */}
                   <div
-                    className={`absolute w-[calc(100%-40px)] h-[calc(100%+16px)] top-[4px] left-[20px] rounded-[16px] border shadow-[inset_0_0_4px_0_rgba(25,54,63,0.04)] backdrop-blur-[8px] max-sm:hidden ${t.shadow}`}
+                    className={`absolute w-[calc(100%-40px)] h-[calc(100%+16px)] top-[4px] left-[20px] rounded-[16px] border shadow-[inset_0_0_4px_0_rgba(25,54,63,0.04)] backdrop-blur-[8px]  ${t.shadow}`}
                   />
                   {/* Main card */}
                   <div
@@ -207,57 +331,23 @@ const PodcastPage = ({ channels = [] }) => {
                     </div>
 
                     {/* Videos */}
-                    <div className="flex flex-col gap-[14px] p-[40px] max-md:p-[24px] mt-auto">
-                      <p
-                        className={`text-[11px] font-medium tracking-[0.5px] uppercase ${t.sectionLabel}`}
-                      >
-                        Últimos videos
-                      </p>
-
+                    <div className="flex flex-col p-[40px] max-md:p-[24px] mt-auto">
                       {ch.videos.length > 0 ? (
-                        <div className="grid grid-cols-3 gap-[10px] max-sm:grid-cols-2">
-                          {ch.videos.map((video) => (
-                            <a
-                              key={video.videoId}
-                              href={video.url}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="group flex flex-col gap-[7px]"
-                            >
-                              <div
-                                className={`relative w-full aspect-video rounded-[8px] overflow-hidden ${t.videoThumb}`}
-                              >
-                                <img
-                                  src={video.thumbnail}
-                                  alt={video.title}
-                                  className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-                                />
-                                <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-[rgba(0,0,0,0.35)]">
-                                  <div className="w-[28px] h-[28px] rounded-full bg-white flex items-center justify-center">
-                                    <PlayIcon />
-                                  </div>
-                                </div>
-                              </div>
-                              <p
-                                className={`text-[11px] leading-[15px] tracking-[-0.22px] line-clamp-2 ${t.videoTitle}`}
-                              >
-                                {video.title}
-                              </p>
-                              {video.published && (
-                                <p className={`text-[10px] ${t.videoDate}`}>
-                                  {formatRelativeDate(video.published)}
-                                </p>
-                              )}
-                            </a>
-                          ))}
-                        </div>
+                        <VideoSlider videos={ch.videos} t={t} />
                       ) : (
-                        <div
-                          className={`py-[24px] flex items-center justify-center rounded-[8px] border ${t.emptyBox}`}
-                        >
-                          <p className={`text-[12px] ${t.emptyText}`}>
-                            Videos próximamente
+                        <div className="flex flex-col gap-[14px]">
+                          <p
+                            className={`text-[11px] font-medium tracking-[0.5px] uppercase ${t.sectionLabel}`}
+                          >
+                            Últimos videos
                           </p>
+                          <div
+                            className={`py-[24px] flex items-center justify-center rounded-[8px] border ${t.emptyBox}`}
+                          >
+                            <p className={`text-[12px] ${t.emptyText}`}>
+                              Videos próximamente
+                            </p>
+                          </div>
                         </div>
                       )}
                     </div>

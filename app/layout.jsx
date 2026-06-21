@@ -80,8 +80,8 @@ export const metadata = {
   },
   icons: {
     icon: "/favicon.ico",
-    shortcut: "/favicon-16x16.png",
-    apple: "/apple-touch-icon.png",
+    shortcut: "/favicon.ico",
+    apple: [{ url: "/apple-touch-icon.png" }],
   },
   manifest: "/site.webmanifest",
   alternates: {
@@ -122,11 +122,11 @@ export default function RootLayout({ children }) {
     <html lang="es" suppressHydrationWarning>
       <head>
         {/* Structured Data */}
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        <script type="application/ld+json">{JSON.stringify(jsonLd)}</script>
+        <meta
+          name="viewport"
+          content="width=device-width, initial-scale=1, maximum-scale=1"
         />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
         {/* Preconnect for performance */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link
