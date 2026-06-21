@@ -78,12 +78,11 @@ export const metadata = {
       "max-snippet": -1,
     },
   },
-  icons: {
-    icon: "/favicon.ico",
-    shortcut: "/favicon.ico",
-    apple: [{ url: "/apple-touch-icon.png" }],
-  },
-  manifest: "/site.webmanifest",
+  // Icons and manifest are generated automatically by Next.js from the
+  // file conventions in /app: favicon.ico, icon0.svg, icon1.png,
+  // apple-icon.png and manifest.json. Hard-coding them here previously
+  // pointed at non-existent files, so iOS "Add to Home Screen" fell back
+  // to the "H" letter instead of the brand logo.
   alternates: {
     canonical: siteUrl,
     languages: {
@@ -134,7 +133,7 @@ export default function RootLayout({ children }) {
           href="https://fonts.gstatic.com"
           crossOrigin="anonymous"
         />
-        <meta name="apple-mobile-web-app-title" content="hyxora" />
+        <meta name="apple-mobile-web-app-title" content="Hyxora" />
       </head>
 
       <body
