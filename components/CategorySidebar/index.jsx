@@ -1,6 +1,7 @@
 "use client";
 
 import { ACCENT_PRESETS } from "@/app/(dashboard)/admin/_data/categories";
+import Field from "@/components/Field";
 import Tabs from "@/components/Tabs";
 import { cn } from "@/utils";
 import { useGSAP } from "@gsap/react";
@@ -9,11 +10,13 @@ import { useEffect, useMemo, useRef, useState } from "react";
 
 gsap.registerPlugin(useGSAP);
 
-const inputCls =
-  "w-full px-2.5 rounded-lg border-[0.7px] border-[rgba(25,54,63,0.12)] bg-white font-inter text-[12px] tracking-[-0.48px] text-[#19363F] placeholder:text-[rgba(25,54,63,0.3)] outline-none focus:border-[rgba(25,54,63,0.4)] transition-colors";
-
 const labelCls =
   "font-inter text-[10px] font-medium tracking-[-0.4px] text-[rgba(25,54,63,0.4)] uppercase";
+
+// Compact textarea styling for <Field textarea> so it matches the dense admin
+// inputs (the Field default is a taller, rounded variant).
+const TEXTAREA_CLS =
+  "h-auto min-h-[72px] px-[16px] py-3 border-[0.7px] border-[rgba(25,54,63,0.02)] rounded-[8px] bg-[rgba(25,54,63,0.02)] text-[12px] text-[#5E7279] focus:bg-white focus:border-[rgba(25,54,63,0.04)]";
 
 // ── Accent swatch picker ─────────────────────────────────────────────────────
 
@@ -50,27 +53,21 @@ const CategoryForm = ({
 
   return (
     <div className="flex flex-col gap-4 p-4">
-      <label className="flex flex-col gap-1">
-        <span className={labelCls}>Nombre</span>
-        <input
-          type="text"
-          value={values.label}
-          onChange={(e) => set("label")(e.target.value)}
-          className={cn(inputCls, "h-8")}
-          placeholder="Ej. Primeros pasos"
-        />
-      </label>
+      <Field
+        label="Nombre"
+        value={values.label}
+        onChange={(e) => set("label")(e.target.value)}
+        placeholder="Ej. Primeros pasos"
+      />
 
-      <label className="flex flex-col gap-1">
-        <span className={labelCls}>Descripción</span>
-        <textarea
-          value={values.description}
-          onChange={(e) => set("description")(e.target.value)}
-          rows={3}
-          className={cn(inputCls, "resize-none py-2")}
-          placeholder="Breve descripción de la categoría..."
-        />
-      </label>
+      <Field
+        label="Descripción"
+        textarea
+        classInput={TEXTAREA_CLS}
+        value={values.description}
+        onChange={(e) => set("description")(e.target.value)}
+        placeholder="Breve descripción de la categoría..."
+      />
 
       <div className="flex flex-col gap-1.5">
         <span className={labelCls}>Color</span>

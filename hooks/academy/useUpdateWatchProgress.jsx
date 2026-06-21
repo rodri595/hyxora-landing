@@ -19,10 +19,12 @@ export const useUpdateWatchProgress = () => {
       );
       return response?.data?.data;
     },
-    onSuccess: (_result, variables) => {
-      queryClient.invalidateQueries({
-        queryKey: ["academyTutorial", variables.id],
-      });
+    onSuccess: () => {
+      // Only refresh the "continue watching" history — that query is inactive
+      // on the player page, so this just marks it stale for the next visit.
+      // We intentionally do NOT invalidate ["academyTutorial", id]: the player
+      // pings every few seconds during playback and refetching the tutorial it
+      // is currently rendering would be wasteful churn.
       queryClient.invalidateQueries({ queryKey: ["watchHistory"] });
     },
   });

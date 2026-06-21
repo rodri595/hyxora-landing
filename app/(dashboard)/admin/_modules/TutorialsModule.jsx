@@ -139,6 +139,10 @@ const TutorialsModule = () => {
   const [sidebarMode, setSidebarMode] = useState("detail"); // "detail" | "create"
   const [displayedId, setDisplayedId] = useState(null);
   const [initialTab, setInitialTab] = useState("detail");
+  // Bumped each time a create session opens. The create sidebars stay mounted
+  // (the wrapper only animates width/transform), so keying on this forces a
+  // fresh mount and clears any leftover form input.
+  const [createKey, setCreateKey] = useState(0);
 
   const desktopWrapRef = useRef(null);
   const mobileWrapRef = useRef(null);
@@ -171,6 +175,7 @@ const TutorialsModule = () => {
   const onOpenCreate = useCallback(() => {
     setDisplayedId(null);
     setSidebarMode("create");
+    setCreateKey((k) => k + 1);
     setIsOpen(true);
   }, []);
 
@@ -180,6 +185,7 @@ const TutorialsModule = () => {
     setView("categories");
     setDisplayedId(null);
     setSidebarMode("create");
+    setCreateKey((k) => k + 1);
     setIsOpen(true);
   }, []);
 
@@ -508,6 +514,7 @@ const TutorialsModule = () => {
       if (sidebarMode === "create") {
         return (
           <CategorySidebar
+            key={`create-${createKey}`}
             onCreate={handleCreateCategory}
             onClose={handleClose}
           />
@@ -530,6 +537,7 @@ const TutorialsModule = () => {
     if (sidebarMode === "create") {
       return (
         <CreateTutorialSidebar
+          key={`create-${createKey}`}
           onClose={handleClose}
           onCreate={handleCreate}
           onCreateCategory={onOpenCreateCategory}

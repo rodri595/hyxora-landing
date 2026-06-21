@@ -32,7 +32,13 @@ const VideoModal = ({ open, video, onClose }) => (
               {video.title}
             </h2>
           </div>
-          <Button isSecondary isCircle aria-label="Cerrar" onClick={onClose} className="shrink-0">
+          <Button
+            isSecondary
+            isCircle
+            aria-label="Cerrar"
+            onClick={onClose}
+            className="shrink-0"
+          >
             <Icon name="close-small" className="size-5 fill-inherit" />
           </Button>
         </div>

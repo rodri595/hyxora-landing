@@ -1,13 +1,28 @@
 "use client";
 
+import Button from "@/components/Button";
+import ErrorComp from "@/components/Error";
 import Layout from "@/components/Layout";
-import { useState } from "react";
+import Spinner from "@/components/Spinner";
+import { useGetPublicTutorials } from "@/hooks/academy/useGetPublicTutorials";
+import { useMemo, useState } from "react";
 import VideoCard from "./VideoCard";
 import VideoModal from "./VideoModal";
-import { TUTORIALS } from "./_data";
+import { decoratePublicTutorial } from "./_lib";
 
 const TutorialsPage = () => {
   const [active, setActive] = useState(null);
+
+  const { data, isLoading, isError, isFetching, refetch } =
+    useGetPublicTutorials();
+
+  // The endpoint mirrors the authenticated one (`{ tutorials, featured,
+  // categories }`); the public grid only needs the flat tutorials list. Stay
+  // resilient if the backend returns a bare array instead.
+  const videos = useMemo(() => {
+    const list = Array.isArray(data) ? data : (data?.tutorials ?? []);
+    return list.map(decoratePublicTutorial);
+  }, [data]);
 
   return (
     <Layout
@@ -29,16 +44,46 @@ const TutorialsPage = () => {
           </p>
         </div>
 
-        {/* Video grid */}
-        <div className="grid w-full grid-cols-4 gap-x-4 gap-y-[60px] max-lg:grid-cols-2 max-md:gap-y-10 max-sm:grid-cols-1">
-          {TUTORIALS.map((video) => (
-            <VideoCard
-              key={video.id}
-              video={video}
-              onPlay={() => setActive(video)}
+        {/* Content states */}
+        {isLoading ? (
+          <div className="flex min-h-80 w-full items-center justify-center">
+            <Spinner />
+          </div>
+        ) : isError ? (
+          <div className="flex min-h-80 w-full flex-col items-center justify-center gap-5">
+            <ErrorComp
+              error
+              message="No se pudieron cargar los tutoriales. Inténtalo de nuevo."
+              className="max-w-sm"
             />
-          ))}
-        </div>
+            <Button
+              isSecondary
+              onClick={() => refetch()}
+              disabled={isFetching}
+            >
+              {isFetching ? "Cargando…" : "Reintentar"}
+            </Button>
+          </div>
+        ) : videos.length === 0 ? (
+          <div className="flex min-h-80 w-full flex-col items-center justify-center gap-2 text-center">
+            <p className="font-inter text-[18px] font-medium tracking-[-0.72px] text-[#19363f]">
+              Aún no hay tutoriales disponibles.
+            </p>
+            <p className="font-inter text-[14px] tracking-[-0.28px] text-[rgba(25,54,63,0.6)]">
+              Estamos preparando nuevo contenido. Vuelve pronto.
+            </p>
+          </div>
+        ) : (
+          <div className="grid w-full grid-cols-4 gap-x-4 gap-y-[60px] max-lg:grid-cols-2 max-md:gap-y-10 max-sm:grid-cols-1">
+            {videos.map((video) => (
+              <VideoCard
+                key={video.id}
+                video={video}
+                onPlay={() => setActive(video)}
+              />
+            ))}
+          </div>
+        )}
       </section>
 
       <VideoModal

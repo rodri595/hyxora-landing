@@ -1,10 +1,11 @@
 "use client";
 
 import { VISIBILITY_OPTIONS } from "@/app/(dashboard)/admin/_data/tutorials";
+import Checkbox from "@/components/Checkbox";
+import Field from "@/components/Field";
 import SelectDropdown from "@/components/SelectDropdown";
 import VideoPreview from "@/components/VideoPreview";
 import { useGetAllCategories } from "@/hooks/admin/useGetAllCategories";
-import { cn } from "@/utils";
 import { detectVideoSource, formatDuration, parseDuration } from "@/utils/video";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
@@ -17,32 +18,13 @@ const visibilityOptions = VISIBILITY_OPTIONS.map((v) => ({
   label: v.label,
 }));
 
-const inputCls =
-  "w-full px-2.5 rounded-lg border-[0.7px] border-[rgba(25,54,63,0.12)] bg-white font-inter text-[12px] tracking-[-0.48px] text-[#19363F] placeholder:text-[rgba(25,54,63,0.3)] outline-none focus:border-[rgba(25,54,63,0.4)] transition-colors";
-
 const labelCls =
   "font-inter text-[10px] font-medium tracking-[-0.4px] text-[rgba(25,54,63,0.4)] uppercase";
 
-// Small switch for the "public" flag (watchable without login).
-const Toggle = ({ checked, onChange }) => (
-  <button
-    type="button"
-    role="switch"
-    aria-checked={checked}
-    onClick={() => onChange(!checked)}
-    className={cn(
-      "relative h-5 w-9 shrink-0 rounded-full transition-colors",
-      checked ? "bg-[#19363F]" : "bg-[rgba(25,54,63,0.15)]",
-    )}
-  >
-    <span
-      className={cn(
-        "absolute top-0.5 size-4 rounded-full bg-white shadow-sm transition-transform",
-        checked ? "translate-x-4.5" : "translate-x-0.5",
-      )}
-    />
-  </button>
-);
+// Compact textarea styling for <Field textarea> so it matches the dense admin
+// inputs (the Field default is a taller, rounded variant).
+const TEXTAREA_CLS =
+  "h-auto min-h-[84px] px-[16px] py-3 border-[0.7px] border-[rgba(25,54,63,0.02)] rounded-[8px] bg-[rgba(25,54,63,0.02)] text-[12px] text-[#5E7279] focus:bg-white focus:border-[rgba(25,54,63,0.04)]";
 
 const CreateTutorialSidebar = ({ onClose, onCreate, onCreateCategory }) => {
   const panelRef = useRef(null);
@@ -134,27 +116,21 @@ const CreateTutorialSidebar = ({ onClose, onCreate, onCreateCategory }) => {
       {/* Form */}
       <div className="scrollbar-thin scrollbar-thumb-[rgba(25,54,63,0.1)] scrollbar-thumb-rounded scrollbar-track-transparent flex-1 overflow-y-auto">
         <div className="flex flex-col gap-4 p-4">
-          <label className="flex flex-col gap-1">
-            <span className={labelCls}>Título</span>
-            <input
-              type="text"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              className={cn(inputCls, "h-8")}
-              placeholder="Título del tutorial"
-            />
-          </label>
+          <Field
+            label="Título"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            placeholder="Título del tutorial"
+          />
 
-          <label className="flex flex-col gap-1">
-            <span className={labelCls}>Descripción</span>
-            <textarea
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              rows={4}
-              className={cn(inputCls, "resize-none py-2")}
-              placeholder="Breve descripción del contenido..."
-            />
-          </label>
+          <Field
+            label="Descripción"
+            textarea
+            classInput={TEXTAREA_CLS}
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            placeholder="Breve descripción del contenido..."
+          />
 
           <div className="grid grid-cols-2 gap-3">
             <div className="flex flex-col gap-1">
@@ -187,25 +163,24 @@ const CreateTutorialSidebar = ({ onClose, onCreate, onCreateCategory }) => {
           </div>
 
           {/* ── Acceso ── */}
-          <div className="flex items-start justify-between gap-3 rounded-lg border-[0.7px] border-[rgba(25,54,63,0.12)] p-2.5">
-            <div className="flex flex-col gap-0.5">
-              <span className="font-inter text-[11px] font-medium tracking-[-0.44px] text-[#19363F]">
-                Público
-              </span>
-              <span className="font-inter text-[10px] tracking-[-0.4px] text-[rgba(25,54,63,0.4)]">
-                Visible sin iniciar sesión.
-              </span>
-            </div>
-            <Toggle checked={isPublic} onChange={setIsPublic} />
+          <div className="flex flex-col gap-1 rounded-lg border-[0.7px] border-[rgba(25,54,63,0.12)] p-2.5">
+            <Checkbox
+              checked={isPublic}
+              onChange={(e) => setIsPublic(e.target.checked)}
+              label="Público"
+              labelClassName="font-inter text-[11px] font-medium tracking-[-0.44px] text-[#19363F]"
+            />
+            <span className="pl-5.5 font-inter text-[10px] tracking-[-0.4px] text-[rgba(25,54,63,0.4)]">
+              Visible sin iniciar sesión.
+            </span>
           </div>
 
-          <label className="flex flex-col gap-1">
-            <span className={labelCls}>Enlace del video (Vimeo / YouTube)</span>
-            <input
+          <div className="flex flex-col gap-1">
+            <Field
+              label="Enlace del video (Vimeo / YouTube)"
               type="url"
               value={url}
               onChange={(e) => setUrl(e.target.value)}
-              className={cn(inputCls, "h-8")}
               placeholder="https://vimeo.com/123456789"
             />
             {url.trim() && !source.provider && (
@@ -223,19 +198,16 @@ const CreateTutorialSidebar = ({ onClose, onCreate, onCreateCategory }) => {
                 Detectado: {source.provider === "vimeo" ? "Vimeo" : "YouTube"}
               </span>
             )}
-          </label>
+          </div>
 
-          <label className="flex flex-col gap-1">
-            <span className={labelCls}>Duración (m:ss)</span>
-            <input
-              type="text"
-              value={duration}
-              onChange={(e) => setDuration(e.target.value)}
-              className={cn(inputCls, "h-8 w-28")}
-              placeholder="6:52"
-              inputMode="numeric"
-            />
-          </label>
+          <Field
+            label="Duración (m:ss)"
+            classInput="w-28"
+            value={duration}
+            onChange={(e) => setDuration(e.target.value)}
+            placeholder="6:52"
+            inputMode="numeric"
+          />
 
           {/* Preview */}
           <div className="flex flex-col gap-1">
