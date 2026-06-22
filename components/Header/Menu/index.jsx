@@ -249,7 +249,7 @@ const MenuComponent = () => {
               <title>Close Menu</title>
               <path
                 d="M12 4L4 12M4 4L12 12"
-                stroke={ "#19363f"}
+                stroke={"#19363f"}
                 strokeWidth="1.5"
                 strokeLinecap="round"
                 strokeLinejoin="round"
@@ -414,14 +414,21 @@ const MenuComponent = () => {
                 title="Academia"
                 description="Formate en Hyxora"
                 className="w-full max-w-none"
-                disabled
+                href={authenticated ? "/academy" : "/tutorials"}
               />
               <MenuItem
-                title="Podcast de Hyxora"
-                description="El Elefante Desnudo"
+                title="Podcasts"
+                description="Escucha nuestros podcasts"
                 className="w-full max-w-none"
                 href="/podcast"
                 image={podcastIMG}
+              />
+              <MenuItem
+                title="Simulador de Inversión"
+                description="Simulador de inversiones"
+                className="w-full max-w-none"
+                href="/simulate"
+                image={newListingsIcon}
               />
             </div>
             {/* Información Section */}

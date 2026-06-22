@@ -33,7 +33,7 @@ const SocialLink = ({ icon, href = "#" }) => {
 
 const Footer = () => {
   return (
-    <footer className="backdrop-blur-[10px] bg-[rgba(25,54,63,0.01)] border-t-[0.7px] border-[rgba(25,54,63,0.02)] relative w-full  ">
+    <footer className="backdrop-blur-[10px] bg-[rgba(25,54,63,0.01)] border-t-[0.7px] border-[rgba(25,54,63,0.02)] relative w-full  max-md:pb-[60px]">
       <div className="box-border flex flex-col gap-[50px] max-md:gap-[30px] pb-3.5 max-md:pb-0 pt-[40px] max-md:pt-[30px] px-[50px] max-md:px-0 max-w-[1440px] mx-auto max-md:mx-none">
         {/* Top section with logo, menu, and social */}
         <div className="flex items-center justify-between w-full max-md:px-4">

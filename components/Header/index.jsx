@@ -259,7 +259,7 @@ const OportunityDropdown = () => {
       {/* <div className="absolute top-full left-1/2  pt-4 -translate-x-1/2 transition-all group-hover:opacity-100 group-hover:visible "> */}
       <div className="absolute top-full left-1/2  pt-4 -translate-x-1/2 invisible opacity-0 transition-all group-hover:opacity-100 group-hover:visible pointer-events-none group-hover:pointer-events-auto">
         <div className="relative backdrop-blur-[15px] bg-[rgba(250,251,251)] border-[0.7px] border-[rgba(25,54,63,0.02)] border-solid flex flex-col gap-[10px] items-start overflow-clip p-[14px] rounded-[16px] shadow-[0px_3px_4px_-4px_rgba(25,54,63,0.05),0px_8px_8px_-4px_rgba(25,54,63,0.1)] shadow-[0px_0px_4px_0px_inset_rgba(25,54,63,0.04)]">
-          <div className="flex gap-[20px] items-stretch w-full h-[106px]">
+          <div className="flex gap-[20px] items-stretch w-full ">
             {/* Column 1 */}
             <div className="flex flex-col gap-[14px] flex-1">
               <ExploreMenuItem
@@ -273,6 +273,12 @@ const OportunityDropdown = () => {
                 title="Oportunidades"
                 description="Oportunidades en Hyxora"
                 onClick={() => handleSmoothScroll("#opportunities-section")}
+              />
+              <ExploreMenuItem
+                image={learningCenterIcon}
+                title="Simulador"
+                description="Simulador de inversiones"
+                href="/simulate"
               />
             </div>
           </div>
