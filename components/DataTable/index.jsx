@@ -8,7 +8,9 @@ import {
   flexRender,
 } from "@tanstack/react-table";
 import { useState, useMemo, useRef } from "react";
+import Field from "@/components/Field";
 import { cn } from "@/utils";
+import Checkbox from "@/components/Checkbox";
 import * as XLSX from "xlsx";
 
 // ─── Export helpers ───────────────────────────────────────────────────────────
@@ -132,72 +134,20 @@ const ChevronIcon = () => (
 
 // ─── Row checkbox cell ─────────────────────────────────────────────────────────
 
-const RowCheckbox = ({ checked, indeterminate, onChange }) => {
-  const ref = useRef(null);
-
-  if (ref.current) {
-    ref.current.indeterminate = indeterminate;
-  }
-
-  const handleClick = (e) => {
-    e.stopPropagation();
-    onChange(e);
-  };
-
-  return (
-    <div
-      className="flex items-center justify-center"
-      onClick={(e) => e.stopPropagation()}
-      onKeyDown={() => {}}
-    >
-      <label className="relative flex items-center justify-center cursor-pointer">
-        <input
-          ref={ref}
-          type="checkbox"
-          checked={checked}
-          onChange={handleClick}
-          className="sr-only"
-        />
-        <span
-          className={cn(
-            "size-3.5 rounded-[3px] border border-solid transition-all flex items-center justify-center shrink-0 pointer-events-none",
-            checked || indeterminate
-              ? "bg-[#19363F] border-[#19363F]"
-              : "bg-white border-[rgba(25,54,63,0.2)]",
-          )}
-        >
-          {indeterminate && !checked ? (
-            <svg
-              width="8"
-              height="2"
-              viewBox="0 0 8 2"
-              fill="none"
-              aria-hidden="true"
-            >
-              <rect x="0" y="0.5" width="8" height="1" rx="0.5" fill="white" />
-            </svg>
-          ) : checked ? (
-            <svg
-              width="8"
-              height="6"
-              viewBox="0 0 8 6"
-              fill="none"
-              aria-hidden="true"
-            >
-              <path
-                d="M1 3l2 2 4-4"
-                stroke="white"
-                strokeWidth="1.2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-          ) : null}
-        </span>
-      </label>
-    </div>
-  );
-};
+const RowCheckbox = ({ checked, indeterminate, onChange }) => (
+  <div
+    className="flex items-center justify-center"
+    onClick={(e) => e.stopPropagation()}
+    onKeyDown={() => {}}
+  >
+    <Checkbox
+      checked={checked}
+      indeterminate={indeterminate}
+      onChange={onChange}
+      stopPropagation
+    />
+  </div>
+);
 
 // ─── Export dropdown ──────────────────────────────────────────────────────────
 
@@ -362,39 +312,22 @@ const DataTable = ({
           </h2>
         )}
         {/* Search */}
-        <div className="flex items-center gap-1.5 h-7.5 px-2.5 rounded-lg border-[0.7px] border-[rgba(25,54,63,0.08)] bg-white shadow-[0px_0px_4px_0px_inset_rgba(25,54,63,0.04)] flex-1 min-w-40 max-w-70">
-          <SearchIcon />
-          <input
-            type="text"
-            value={globalFilter}
-            onChange={(e) => setGlobalFilter(e.target.value)}
-            placeholder={searchPlaceholder}
-            className="flex-1 bg-transparent outline-none font-inter text-[11px] tracking-[-0.44px] text-[#19363F] placeholder:text-[rgba(25,54,63,0.35)]"
-          />
-          {globalFilter && (
-            <button
-              type="button"
-              onClick={() => setGlobalFilter("")}
-              className="text-[rgba(25,54,63,0.35)] hover:text-[#19363F] transition-colors"
-              aria-label="Clear search"
-            >
-              <svg
-                width="10"
-                height="10"
-                viewBox="0 0 10 10"
-                fill="none"
-                aria-hidden="true"
-              >
-                <path
-                  d="M7.5 2.5l-5 5M2.5 2.5l5 5"
-                  stroke="currentColor"
-                  strokeWidth="1.2"
-                  strokeLinecap="round"
-                />
-              </svg>
-            </button>
-          )}
-        </div>
+        <Field
+          className="flex-1 min-w-40 max-w-70"
+          classInput="h-[30px] pl-9 text-[11px] tracking-[-0.44px]"
+          value={globalFilter}
+          onChange={(e) => setGlobalFilter(e.target.value)}
+          placeholder={searchPlaceholder}
+          validated={Boolean(globalFilter)}
+          icon="close-small"
+          iconFill="rgba(25,54,63,0.4)"
+          iconHandler={() => setGlobalFilter("")}
+          iconClassName="size-[16px] cursor-pointer hover:opacity-60 transition-opacity"
+        >
+          <span className="absolute left-3 top-1/2 z-1 -translate-y-1/2 pointer-events-none">
+            <SearchIcon />
+          </span>
+        </Field>
 
         {/* Right side actions */}
         <div className="flex items-center gap-2">

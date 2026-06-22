@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import Layout from "@/components/Layout";
+import Button from "@/components/Button";
 
 const NotFoundPage = () => {
   return (
@@ -13,16 +14,13 @@ const NotFoundPage = () => {
         404
       </p>
       <h1 className="font-inter text-[48px] font-semibold tracking-[-1.92px] text-[#19363f] text-center maxmd:text-[36px]">
-        Page not found
+        Pagina no encontrada
       </h1>
       <p className="max-w-[420px] text-center font-inter text-[16px] leading-[1.6] tracking-[-0.48px] text-[rgba(25,54,63,0.65)]">
-        The page you are looking for does not exist or has been moved.
+        La página que estás buscando no existe o ha sido movida.
       </p>
-      <Link
-        href="/"
-        className="mt-2 rounded-[12px] bg-[#1b5ffd] px-6 py-3 font-inter text-[14px] font-semibold tracking-[-0.42px] text-white transition-all hover:bg-[#114fdf]"
-      >
-        Back to home
+      <Link href="/">
+        <Button isPrimary>Volver al inicio</Button>
       </Link>
     </Layout>
   );

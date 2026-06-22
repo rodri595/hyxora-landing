@@ -5,10 +5,9 @@ import { usePrivy } from "@privy-io/react-auth";
 
 /**
  * Custom hook to fetch user information based on their smart wallet address.
- * @param {Object}
  * @return {Object}
  */
-export const useGetUserInformation = (props) => {
+export const useGetUserInformation = () => {
   const { smartWalletAddress } = useWeb3();
   const { authenticated, ready } = usePrivy();
 
@@ -23,12 +22,6 @@ export const useGetUserInformation = (props) => {
     refetchOnWindowFocus: true,
     refetchOnMount: false,
     retry: 2,
-    enabled:
-      typeof props === "undefined"
-        ? true
-        : props.enabled &&
-          Boolean(smartWalletAddress) &&
-          authenticated &&
-          ready,
+    enabled: Boolean(smartWalletAddress) && authenticated && ready,
   });
 };

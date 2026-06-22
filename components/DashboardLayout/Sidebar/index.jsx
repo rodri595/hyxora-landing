@@ -178,6 +178,9 @@ const Sidebar = ({ isSpecialPage, isSidebarOpen, setIsSidebarOpen }) => {
   const toggleMenu = () => {
     setIsSidebarOpen((prev) => !prev);
   };
+  const closeSidebar = () => {
+    setIsSidebarOpen(false);
+  };
   const isAdmin = useMemo(() => {
     return (
       userInformation?.information?.role?.includes(roleNames?.admin ?? "") ??
@@ -226,6 +229,20 @@ const Sidebar = ({ isSpecialPage, isSidebarOpen, setIsSidebarOpen }) => {
         />
       ),
       href: "/nfts",
+    },
+    {
+      id: 5,
+      title: "Academia",
+      description: "Aprende paso a paso",
+      icon: (
+        <Icon
+          name="bulb"
+          className="size-[16px] aspect-square"
+          size={20}
+          fill={isSpecialPage ? "#fff" : "#19363F"}
+        />
+      ),
+      href: "/academy",
     },
   ];
   return (
@@ -299,6 +316,7 @@ const Sidebar = ({ isSpecialPage, isSidebarOpen, setIsSidebarOpen }) => {
               }
               href="/admin"
               active={pathname === "/admin"}
+              onClick={closeSidebar}
             />
           )
         )}
@@ -308,6 +326,7 @@ const Sidebar = ({ isSpecialPage, isSidebarOpen, setIsSidebarOpen }) => {
             {...item}
             active={!!item.href && pathname === item.href}
             isSpecialPage={isSpecialPage}
+            onClick={closeSidebar}
           />
         ))}
       </div>

@@ -34,7 +34,7 @@ async function fetchChannelVideos(channelId) {
     const xml = await res.text();
     const videos = [];
     for (const match of xml.matchAll(/<entry>([\s\S]*?)<\/entry>/g)) {
-      if (videos.length >= 3) break;
+      // if (videos.length >= 3) break;
       const b = match[1];
       const videoId = (b.match(/<yt:videoId>(.*?)<\/yt:videoId>/) || [])[1];
       if (!videoId) continue;
