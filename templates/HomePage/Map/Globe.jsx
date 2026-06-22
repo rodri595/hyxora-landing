@@ -4,23 +4,23 @@ import { useEffect, useRef, useCallback } from "react";
 import { useSpring } from "react-spring";
 import { useLenis } from "lenis/react";
 
-const MARKERS = [
-  { id: "bogota", location: [4.71, -74.07], label: "Bogotá" },
-  {
-    id: "saopaulo",
-    location: [-23.55, -46.63],
-    label: "São Paulo",
-  },
-  {
-    id: "buenosaires",
-    location: [-34.6, -58.38],
-    label: "Buenos Aires",
-  },
-  { id: "caracas", location: [10.48, -66.9], label: "Caracas" },
-  // Central America / Mexico — blended in
-  { id: "panama", location: [8.98, -79.52], label: "Panamá" },
-  { id: "mexico", location: [19.43, -99.13], label: "México" },
-];
+// const MARKERS = [
+// { id: "bogota", location: [4.71, -74.07], label: "Bogotá" },
+// {
+//   id: "saopaulo",
+//   location: [-23.55, -46.63],
+//   label: "São Paulo",
+// },
+// {
+//   id: "buenosaires",
+//   location: [-34.6, -58.38],
+//   label: "Buenos Aires",
+// },
+// { id: "caracas", location: [10.48, -66.9], label: "Caracas" },
+// // Central America / Mexico — blended in
+// { id: "panama", location: [8.98, -79.52], label: "Panamá" },
+// { id: "mexico", location: [19.43, -99.13], label: "México" },
+// ];
 
 const Globe = () => {
   const lenis = useLenis();
@@ -132,10 +132,15 @@ const Globe = () => {
 
   useEffect(() => {
     if (!canvasRef.current) return;
+    const canvas = canvasRef.current;
     let phi = 0;
-    const width = canvasRef.current.offsetWidth;
+    const width = canvas.offsetWidth;
 
-    const globe = createGlobe(canvasRef.current, {
+    // Lower geometry density on small / touch-first devices to keep the
+    // globe at 60fps. cobe recommends ~8000 samples for mobile, 16000 desktop.
+    const isMobile = window.matchMedia("(max-width: 768px)").matches;
+
+    const globe = createGlobe(canvas, {
       devicePixelRatio: Math.min(window.devicePixelRatio, 2),
       width: width,
       height: width,
@@ -143,7 +148,7 @@ const Globe = () => {
       theta: 0.2,
       dark: 0,
       diffuse: 1.5,
-      mapSamples: 16000,
+      mapSamples: isMobile ? 8000 : 16000,
       mapBrightness: 10,
       baseColor: [1, 1, 1],
       markerColor: [0.3, 0.45, 0.85],
@@ -153,15 +158,16 @@ const Globe = () => {
       arcHeight: 0.1,
       opacity: 0.7,
       markerElevation: 0.0,
-      markers: MARKERS.map((m) => ({
-        location: m.location,
-        size: 0.03,
-        id: m.id,
-      })),
+      // markers: MARKERS.map((m) => ({
+      //   location: m.location,
+      //   size: 0.03,
+      //   id: m.id,
+      // })),
       // arcs: ARCS.map(({ id, from, to }) => ({ id, from, to })),
     });
 
     let animationId = 0;
+    let running = false;
     function animate() {
       const s = springRef.current;
       if (!isPausedRef.current) {
@@ -200,17 +206,37 @@ const Globe = () => {
       });
       animationId = requestAnimationFrame(animate);
     }
-    animate();
 
-    setTimeout(
-      () => canvasRef.current && (canvasRef.current.style.opacity = "1"),
-    );
-    const observer = new IntersectionObserver(([e]) => {
-      if (e.isIntersecting) animate();
-    });
-    observer.observe(canvasRef.current);
-    return () => {
+    function start() {
+      if (running) return;
+      running = true;
+      animate();
+    }
+
+    function stop() {
+      running = false;
       cancelAnimationFrame(animationId);
+    }
+
+    const fadeId = setTimeout(() => {
+      canvas.style.opacity = "1";
+    });
+
+    // Only run the render loop while the globe is on screen — scrolling it out
+    // of view stops the RAF loop and frees the GPU.
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) start();
+        else stop();
+      },
+      { threshold: 0 },
+    );
+    observer.observe(canvas);
+
+    return () => {
+      clearTimeout(fadeId);
+      observer.disconnect();
+      stop();
       globe.destroy();
     };
   }, []);
@@ -220,11 +246,15 @@ const Globe = () => {
         ref={canvasRef}
         className="showcases-canvas"
         onPointerDown={handlePointerDown}
-        onPointerEnter={() => (speedRef.current = 0.8)}
-        onPointerLeave={() => (speedRef.current = 1)}
+        onPointerEnter={() => {
+          speedRef.current = 0.8;
+        }}
+        onPointerLeave={() => {
+          speedRef.current = 1;
+        }}
       />
       {/* City name labels — only the curated subset with a `label`. */}
-      {MARKERS.map((m) => (
+      {/* {MARKERS.map((m) => (
         <div
           key={m.id}
           className="showcase-default-label "
@@ -236,7 +266,7 @@ const Globe = () => {
         >
           {m.label}
         </div>
-      ))}
+      ))} */}
     </div>
   );
 };

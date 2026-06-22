@@ -33,25 +33,25 @@ const CustomTooltip = ({ active, payload, label }) => {
   const contrib =
     payload.find((p) => p.dataKey === "contributions")?.value ?? 0;
   return (
-    <div className="bg-[rgba(255,255,255,0.06)] backdrop-blur-[15px] border-[0.7px] border-solid border-[rgba(255,255,255,0.06)] shadow-[0_6px_14px_-4px_rgba(25,54,63,0.15),0_12px_20px_-4px_rgba(25,54,63,0.15)] rounded-2xl px-3 py-2.5 text-[11px]">
-      <p className="text-white/50 mb-[6px] font-medium">{label}</p>
+    <div className="bg-white/90 backdrop-blur-[15px] border-[0.7px] border-solid border-[#E2E2E2] shadow-[0_6px_14px_-4px_rgba(25,54,63,0.15),0_12px_20px_-4px_rgba(25,54,63,0.15)] rounded-2xl px-3 py-2.5 text-[11px]">
+      <p className="text-[#a8a8a8] mb-[6px] font-medium">{label}</p>
       <div className="flex items-center gap-[8px] mb-[4px]">
-        <span className="size-[7px] rounded-full bg-[#3471FD] shrink-0" />
-        <span className="text-white/60">Inversión:</span>
-        <span className="text-white font-bold ml-auto pl-[12px]">
+        <span className="size-[7px] rounded-full bg-[#2D68FF] shrink-0" />
+        <span className="text-[#727272]">Inversión:</span>
+        <span className="text-[#1B1B1B] font-bold ml-auto pl-[12px]">
           $<NumberFlow value={initial} format={{ useGrouping: true }} />
         </span>
       </div>
       <div className="flex items-center gap-[8px] mb-[6px]">
-        <span className="size-[7px] rounded-full bg-[#26B179] shrink-0" />
-        <span className="text-white/60">Contribución:</span>
-        <span className="text-white font-bold ml-auto pl-[12px]">
+        <span className="size-[7px] rounded-full bg-[#00A656] shrink-0" />
+        <span className="text-[#727272]">Contribución:</span>
+        <span className="text-[#1B1B1B] font-bold ml-auto pl-[12px]">
           $<NumberFlow value={contrib} format={{ useGrouping: true }} />
         </span>
       </div>
-      <div className="border-t border-white/10 pt-[6px] flex justify-between">
-        <span className="text-white/40">Total:</span>
-        <span className="text-white font-bold">
+      <div className="border-t border-[#E2E2E2] pt-[6px] flex justify-between">
+        <span className="text-[#a8a8a8]">Total:</span>
+        <span className="text-[#1B1B1B] font-bold">
           $
           <NumberFlow
             value={initial + contrib}
@@ -196,7 +196,7 @@ const ChartCanvas = memo(function ChartCanvas({ data }) {
                         className="size-2.5 rounded-xs shrink-0"
                         style={{ backgroundColor: entry.color }}
                       />
-                      <span className="text-[10px] text-white/40 font-medium">
+                      <span className="text-[10px] text-[#a8a8a8] font-medium">
                         {entry.value}
                       </span>
                     </div>
@@ -207,13 +207,13 @@ const ChartCanvas = memo(function ChartCanvas({ data }) {
 
           <CartesianGrid
             vertical={false}
-            stroke="#24292D"
+            stroke="#E2E2E2"
             strokeDasharray="8 8"
           />
           <XAxis
             dataKey="month"
             tick={{
-              fill: "rgba(255, 255, 255, 0.50)",
+              fill: "#A8A8A8",
               fontSize: 9,
               fontWeight: 500,
               fontFamily: "Inter",
@@ -230,7 +230,7 @@ const ChartCanvas = memo(function ChartCanvas({ data }) {
               return `$${v}`;
             }}
             tick={{
-              fill: "rgba(255, 255, 255, 0.70)",
+              fill: "#727272",
               fontSize: 10,
               fontWeight: 500,
               fontFamily: "Inter",
@@ -240,12 +240,12 @@ const ChartCanvas = memo(function ChartCanvas({ data }) {
           />
           <Tooltip
             content={<CustomTooltip />}
-            cursor={{ fill: "rgba(255,255,255,0.03)", radius: 2 }}
+            cursor={{ fill: "rgba(0,0,0,0.04)", radius: 2 }}
           />
           <Bar
             dataKey="initial"
             stackId="a"
-            fill="#3471FD"
+            fill="#2D68FF"
             radius={[0, 0, 2, 2]}
             className="bar-initial"
             shape={cellShape}
@@ -255,7 +255,7 @@ const ChartCanvas = memo(function ChartCanvas({ data }) {
           <Bar
             dataKey="contributions"
             stackId="a"
-            fill="#26B179"
+            fill="#00A656"
             radius={[2, 2, 2, 2]}
             className="bar-contributions"
             shape={cellShape}
@@ -292,8 +292,8 @@ const ChartCard = ({ showTable, onToggleTable }) => {
   return (
     <Card className="flex-1 h-auto p-0 min-w-0">
       {/* Top bar */}
-      <div className="flex items-center justify-between px-[16px] h-[44px] border-b border-[#19222C] shrink-0">
-        <span className="text-[11px] font-medium text-white">Simulación</span>
+      <div className="flex items-center justify-between px-[16px] h-[44px] border-b border-[#E2E2E2] shrink-0">
+        <span className="text-[11px] font-medium text-[#1B1B1B]">Simulación</span>
 
         {/* Right: table visibility toggle */}
         <button
@@ -305,13 +305,13 @@ const ChartCard = ({ showTable, onToggleTable }) => {
             "flex items-center justify-center rounded-[6px] size-[24px] transition-colors",
             // The table panel is hidden on mobile, so hide its toggle too.
             "max-md:hidden",
-            showTable ? "bg-[#3d3d3d]" : "bg-[#282828] hover:bg-[#3d3d3d]",
+            showTable ? "bg-[#E2E2E2]" : "bg-[#F1F1F1] hover:bg-[#E2E2E2]",
           )}
         >
           <Icon
             name={showTable ? "hide-view" : "show-view"}
             size={20}
-            className="size-[12px] fill-white"
+            className="size-[12px] fill-[#727272]"
           />
         </button>
       </div>

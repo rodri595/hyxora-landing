@@ -2,7 +2,7 @@ import { Menu, MenuButton, MenuItems, MenuItem } from "@headlessui/react";
 import Icon from "@/components/Icon";
 import Image from "@/components/Image";
 import Spinner from "@/components/Spinner";
-import Error from "@/components/Error";
+import ErrorComp from "@/components/Error";
 import Link from "next/link";
 import { useWeb3 } from "@/context/Web3Provider";
 import { cn, shortenAddress, copyToClipboard } from "@/utils";
@@ -129,7 +129,7 @@ const MenuItemButton = ({
   );
 };
 
-const User = ({ isDark }) => {
+const User = () => {
   const { logout, smartWalletAddress } = useWeb3();
   const {
     data: userInformation,
@@ -221,7 +221,6 @@ const User = ({ isDark }) => {
             "flex w-[307px] flex-col items-start gap-[0px] rounded-[16px] py-[16px] border-[0.7px] border-solid border-[rgba(25,54,63,0.02)]",
             "bg-[rgba(250, 251, 251, 0.80)] box-shadow-[0_3px_4px_-4px_rgba(25,54,63,0.05),0_8px_8px_-4px_rgba(25,54,63,0.10),0_0_4px_0_rgba(25,54,63,0.04)_inset] backdrop-blur-[15px]",
             "overflow-y-auto scrollbar-thin scrollbar-thumb-[rgba(25,54,63,0.10)] scrollbar-track-transparent scrollbar-thumb-rounded-full ",
-            isDark && "bg-[rgba(250,251,251)]",
           )}
           anchor="bottom end"
           data-lenis-prevent
@@ -259,7 +258,7 @@ const User = ({ isDark }) => {
           </div>
           {userInformationError && (
             <div className="flex p-[0_20px] justify-center items-center gap-[10px]">
-              <Error
+              <ErrorComp
                 error={userInformationError}
                 message={
                   userInformationError?.response?.data?.message ||

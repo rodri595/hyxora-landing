@@ -109,7 +109,7 @@ const MenuItem = ({
   return <div className={baseClassName}>{content}</div>;
 };
 
-const MenuComponent = ({ isDark }) => {
+const MenuComponent = () => {
   const { data: paymentsData } = GetMyPayments();
   const hasNft = useMemo(() => {
     if (!paymentsData || paymentsData?.length === 0) return false;
@@ -243,8 +243,6 @@ const MenuComponent = ({ isDark }) => {
           type="button"
           className={cn(
             "group hidden max-md:flex rounded-[8px] border-[0.7px] border-[rgba(25,54,63,0.02)] bg-[rgba(25,54,63,0.04)] shadow-[0px_0px_4px_0px_inset_rgba(25,54,63,0.04)] justify-center items-center shrink-0 !h-[32px] !w-[32px] focus:outline-none",
-            isDark &&
-              "bg-[rgba(255,255,255,0.1)] border-[rgba(255,255,255,0.1)] shadow-[0px_1px_6px_0px_rgba(255,255,255,0.2)]  ",
           )}
         >
           {isActive ? (
@@ -258,7 +256,7 @@ const MenuComponent = ({ isDark }) => {
               <title>Close Menu</title>
               <path
                 d="M12 4L4 12M4 4L12 12"
-                stroke={isDark ? "rgba(255,255,255,0.8)" : "#19363f"}
+                stroke={ "#19363f"}
                 strokeWidth="1.5"
                 strokeLinecap="round"
                 strokeLinejoin="round"
@@ -268,7 +266,7 @@ const MenuComponent = ({ isDark }) => {
             <Image
               src={menuIcon}
               alt="Menu"
-              className={cn("w-[16px] h-[16px]", isDark && "invert")}
+              className={cn("w-[16px] h-[16px]")}
             />
           )}
         </button>

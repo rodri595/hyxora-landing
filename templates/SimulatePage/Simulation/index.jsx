@@ -26,9 +26,9 @@ const StatCards = () => {
     <div className="grid grid-cols-3 gap-[8px] max-lg:grid-cols-1">
       <StatCard
         id="blue"
-        color="#3471FD"
-        badgeBg="rgba(52,113,253,0.2)"
-        glowFill="#3471FD"
+        color="#2D68FF"
+        badgeBg="rgba(45,104,255,0.15)"
+        glowFill="#2D68FF"
         titleTop="Inversión"
         titleBottom="Inicial"
         label="Monto:"
@@ -38,9 +38,9 @@ const StatCards = () => {
       />
       <StatCard
         id="green"
-        color="#26B179"
-        badgeBg="rgba(38,177,121,0.2)"
-        glowFill="white"
+        color="#00A656"
+        badgeBg="rgba(0,166,86,0.15)"
+        glowFill="#00A656"
         titleTop="Contribución"
         titleBottom={frequency === "monthly" ? "Mensual" : "Anual"}
         label="Aportación:"
@@ -87,43 +87,43 @@ const VaultCard = ({ showSimulator, onToggleSimulator }) => {
       {/* Fund name */}
       <div className="flex flex-col justify-between h-[40px] min-w-0 max-md:flex-1">
         {isVaultLoading ? (
-          <span className="w-[96px] h-[12px] rounded-[4px] bg-white/10 animate-pulse" />
+          <span className="w-[96px] h-[12px] rounded-[4px] bg-[#ECECEC] animate-pulse" />
         ) : (
-          <span className="text-[14px] leading-auto  font-[700] text-[#FFF] truncate">
+          <span className="text-[14px] leading-auto  font-[700] text-[#1B1B1B] truncate">
             {vault?.name ?? "Fondo Estable"}
           </span>
         )}
-        <span className="text-[14px] font-[400] text-[#FFF] opacity-70 h-[16px] truncate">
+        <span className="text-[14px] font-[400] text-[#727272] h-[16px] truncate">
           Mejor Fondo Estable
         </span>
       </div>
       {/* Divider */}
-      <div className="w-px h-[32px] bg-white/10 shrink-0" />
+      <div className="w-px h-[32px] bg-[#E2E2E2] shrink-0" />
       {/* APY */}
       <div className="flex flex-col justify-between h-[40px]">
         {isVaultLoading ? (
-          <span className="w-[44px] h-[12px] rounded-[4px] bg-white/10 animate-pulse" />
+          <span className="w-[44px] h-[12px] rounded-[4px] bg-[#ECECEC] animate-pulse" />
         ) : (
-          <span className="text-[14px] font-[700] text-[#26B179] h-[12px]">
+          <span className="text-[14px] font-[700] text-[#00A656] h-[12px]">
             {+(apy * 100).toFixed(2)}%
           </span>
         )}
-        <span className="text-[14px] font-[400] text-[#FFF] opacity-70 h-[16px]">
+        <span className="text-[14px] font-[400] text-[#727272] h-[16px]">
           APY
         </span>
       </div>
       {/* Divider */}
-      <div className="w-px h-[32px] bg-white/10 shrink-0" />
+      <div className="w-px h-[32px] bg-[#E2E2E2] shrink-0" />
       {/* TVL */}
       <div className="flex flex-col justify-between h-[40px]">
         {isVaultLoading ? (
-          <span className="w-[56px] h-[12px] rounded-[4px] bg-white/10 animate-pulse" />
+          <span className="w-[56px] h-[12px] rounded-[4px] bg-[#ECECEC] animate-pulse" />
         ) : (
-          <span className="text-[14px] font-[700] text-[#FFF] h-[12px]">
+          <span className="text-[14px] font-[700] text-[#1B1B1B] h-[12px]">
             {vault ? formatTvl(vault.state?.totalAssetsUsd) : "—"}
           </span>
         )}
-        <span className="text-[14px] font-[400] text-[#FFF] opacity-70 h-[16px]">
+        <span className="text-[14px] font-[400] text-[#727272] h-[16px]">
           TVL
         </span>
       </div>
@@ -136,13 +136,13 @@ const VaultCard = ({ showSimulator, onToggleSimulator }) => {
           "flex items-center justify-center rounded-[6px] size-[24px] ml-auto transition-colors",
           // The simulator is always visible (inline) on mobile, so no toggle.
           "max-md:hidden",
-          showSimulator ? "bg-[#3d3d3d]" : "bg-[#282828] hover:bg-[#3d3d3d]",
+          showSimulator ? "bg-[#E2E2E2]" : "bg-[#F1F1F1] hover:bg-[#E2E2E2]",
         )}
       >
         <Icon
           name={showSimulator ? "hide-view" : "show-view"}
           size={20}
-          className="size-[12px] fill-white"
+          className="size-[12px] fill-[#727272]"
         />
       </button>
     </Card>
@@ -215,23 +215,6 @@ const TogglePanel = ({ show, width, children }) => {
     </div>
   );
 };
-
-// Bottom scrim: dissolves the dark section into the light footer. Alpha ramps
-// along a smoothstep curve (not a single linear stop) so there's no hard top
-// edge or grey "band" — just a soft, even fade to the page surface color.
-const surface = (a) =>
-  `color-mix(in srgb, var(--color-b-surface1) ${a}%, transparent)`;
-const BOTTOM_FADE = `linear-gradient(to bottom,
-  ${surface(0)} 0%,
-  ${surface(2)} 28%,
-  ${surface(8)} 45%,
-  ${surface(20)} 58%,
-  ${surface(40)} 70%,
-  ${surface(64)} 80%,
-  ${surface(85)} 90%,
-  ${surface(96)} 96%,
-  ${surface(100)} 100%)`;
-
 const Simulation = () => {
   const [showTable, setShowTable] = useState(false);
   const [showSimulator, setShowSimulator] = useState(true);
@@ -239,7 +222,7 @@ const Simulation = () => {
   return (
     <section
       id="simulation-section"
-      className="relative w-full bg-[#0D0D0D] pt-[140px] max-md:pt-[100px]"
+      className="relative w-full  pt-[140px] max-md:pt-[100px]"
     >
       <div className="max-w-[1440px] mx-auto px-[50px] flex gap-[8px] w-full justify-between max-lg:px-4">
         <SimulationProvider>
@@ -282,15 +265,6 @@ const Simulation = () => {
           </div>
         </SimulationProvider>
       </div>
-      {/* Bottom fade — sits in normal flow AFTER the content, so the dark
-          section ends here and dissolves into the light footer. The eased
-          (smoothstep) alpha ramp avoids a hard edge or grey band; its
-          near-transparent top stops double as the dark breathing room. */}
-      <div
-        aria-hidden
-        className="pointer-events-none w-full h-[36vh] mt-[100px] max-md:mt-[64px]"
-        style={{ backgroundImage: BOTTOM_FADE }}
-      />
     </section>
   );
 };

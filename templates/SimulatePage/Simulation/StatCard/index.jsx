@@ -78,10 +78,10 @@ const StatCard = ({
             </svg>
           </div>
           <div>
-            <p className="text-[11px] text-white opacity-70 font-medium leading-[15px]">
+            <p className="text-[11px] text-[#727272] font-medium leading-[15px]">
               {titleTop}
             </p>
-            <p className="text-[13px] font-bold text-[#FFF] leading-[15px]">
+            <p className="text-[13px] font-bold text-[#1B1B1B] leading-[15px]">
               {titleBottom}
             </p>
           </div>
@@ -143,10 +143,10 @@ const StatCard = ({
       <div className="flex w-full justify-end gap-[12px] flex-1 pl-6">
         <div className="flex gap-[8px] items-center justify-center shrink-0">
           <div>
-            <p className="text-[11px] text-white opacity-70 font-medium leading-[15px]">
+            <p className="text-[11px] text-[#727272] font-medium leading-[15px]">
               {label}
             </p>
-            <p className="text-[13px] font-bold text-[#FFF] leading-[15px]">
+            <p className="text-[13px] font-bold text-[#1B1B1B] leading-[15px]">
               {prefix}
               <NumberFlow value={numericValue} format={{ useGrouping: true }} />
               {suffix}

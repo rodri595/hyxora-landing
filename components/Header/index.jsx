@@ -23,18 +23,20 @@ import { useWeb3 } from "@/context/Web3Provider";
 
 gsap.registerPlugin(ScrollToPlugin);
 
-// Routes that render with a dark background, so the header switches to dark mode.
-const DARK_ROUTES = ["/simulate"];
-const MenuItem = ({ children, href = "#", isDark, ...props }) => {
+const MenuItem = ({ children, href = "#", ...props }) => {
   return (
     <Link
       href={href}
-      className={`box-border flex h-[28px] items-center justify-center p-[2px] relative rounded-[6px] shrink-0 transition-all ${isDark ? "hover:bg-[rgba(255,255,255,0.08)]" : "hover:bg-[rgba(25,54,63,0.04)]"}`}
+      className={
+        "box-border flex h-[28px] items-center justify-center p-[2px] relative rounded-[6px] shrink-0 transition-all hover:bg-[rgba(25,54,63,0.04)]"
+      }
       {...props}
     >
       <div className="box-border flex gap-[10px] items-center justify-center px-2 py-[6px] relative shrink-0">
         <span
-          className={`font-inter font-medium leading-6 text-[16px] whitespace-nowrap tracking-[-0.64px] transition-colors duration-300 ${isDark ? "text-white" : "text-[#19363f]"}`}
+          className={
+            "font-inter font-medium leading-6 text-[16px] whitespace-nowrap tracking-[-0.64px] transition-colors duration-300 text-[#19363f]"
+          }
         >
           {children}
         </span>
@@ -125,7 +127,7 @@ const ExploreMenuItem = ({
   // Fallback: render as div
   return <div className={baseClassName}>{content}</div>;
 };
-const ExploreDropdown = ({ isDark }) => {
+const ExploreDropdown = () => {
   const { data: paymentsData } = GetMyPayments();
   const hasNft = useMemo(() => {
     if (!paymentsData || paymentsData?.length === 0) return false;
@@ -137,12 +139,10 @@ const ExploreDropdown = ({ isDark }) => {
     <div className="group relative">
       <button
         type="button"
-        className={`box-border flex h-[28px] items-center justify-center gap-2 p-[2px] relative rounded-[6px] shrink-0 transition-all ${isDark ? "hover:bg-[rgba(255,255,255,0.08)]" : "hover:bg-[rgba(25,54,63,0.04)]"}`}
+        className="box-border flex h-[28px] items-center justify-center gap-2 p-[2px] relative rounded-[6px] shrink-0 transition-all hover:bg-[rgba(25,54,63,0.04)]"
       >
         <div className="box-border flex gap-[10px] items-center justify-center px-2 py-[6px] relative shrink-0">
-          <span
-            className={`font-inter font-medium leading-6 text-[16px] whitespace-nowrap tracking-[-0.64px] transition-colors duration-300 ${isDark ? "text-white" : "text-[#19363f]"}`}
-          >
+          <span className="font-inter font-medium leading-6 text-[16px] whitespace-nowrap tracking-[-0.64px] transition-colors duration-300 text-[#19363f]">
             Hyxora
           </span>
         </div>
@@ -243,7 +243,7 @@ const ExploreDropdown = ({ isDark }) => {
     </div>
   );
 };
-const OportunityDropdown = ({ isDark }) => {
+const OportunityDropdown = () => {
   const handleSmoothScroll = (sectionId) => {
     const element = document.querySelector(sectionId);
     if (element) {
@@ -262,12 +262,10 @@ const OportunityDropdown = ({ isDark }) => {
     <div className="group relative">
       <button
         type="button"
-        className={`box-border flex h-[28px] items-center justify-center gap-2 p-[2px] relative rounded-[6px] shrink-0 transition-all ${isDark ? "hover:bg-[rgba(255,255,255,0.08)]" : "hover:bg-[rgba(25,54,63,0.04)]"}`}
+        className="box-border flex h-[28px] items-center justify-center gap-2 p-[2px] relative rounded-[6px] shrink-0 transition-all hover:bg-[rgba(25,54,63,0.04)]"
       >
         <div className="box-border flex gap-[10px] items-center justify-center px-2 py-[6px] relative shrink-0">
-          <span
-            className={`font-inter font-medium leading-6 text-[16px] whitespace-nowrap tracking-[-0.64px] transition-colors duration-300 ${isDark ? "text-white" : "text-[#19363f]"}`}
-          >
+          <span className="font-inter font-medium leading-6 text-[16px] whitespace-nowrap tracking-[-0.64px] transition-colors duration-300 text-[#19363f]">
             Oportunidades DeFi
           </span>
         </div>
@@ -304,12 +302,6 @@ const Header = ({ isFixed }) => {
   const { setIsModalPurchaseNFTOpen } = useWeb3();
 
   const [welcomeOpen, setWelcomeOpen] = useState(false);
-
-  const pathname = usePathname();
-  const isDark = DARK_ROUTES.some(
-    (route) => pathname === route || pathname.startsWith(`${route}/`),
-  );
-
   const handleApuntate = () => setWelcomeOpen(true);
   const handleLogin = () => {
     setWelcomeOpen(false);
@@ -321,9 +313,7 @@ const Header = ({ isFixed }) => {
       <div
         className={cn(
           "relative z-20 backdrop-blur-[10px] border-b box-border w-full transition-colors duration-500",
-          isDark
-            ? "bg-[rgba(13,13,13,0.85)] border-[rgba(255,255,255,0.08)]"
-            : "bg-[rgba(255,255,255,0.8)] border-white",
+          "bg-[rgba(255,255,255,0.8)] border-white",
           isFixed && "fixed! top-0 left-0 right-0",
         )}
       >
@@ -342,9 +332,7 @@ const Header = ({ isFixed }) => {
                   alt="Logo"
                 />
               </div>
-              <span
-                className={`font-inter font-semibold leading-6 text-[18px] whitespace-nowrap tracking-[-0.72px] transition-colors duration-300 ${isDark ? "text-white" : "text-[#19363f]"}`}
-              >
+              <span className="font-inter font-semibold leading-6 text-[18px] whitespace-nowrap tracking-[-0.72px] transition-colors duration-300 text-[#19363f]">
                 Hyxora
               </span>
             </Link>
@@ -352,17 +340,11 @@ const Header = ({ isFixed }) => {
 
           {/* Navigation Menu */}
           <nav className="flex gap-[18px] items-center justify-center flex-1 max-md:hidden max-lg:gap-[8px]">
-            <ExploreDropdown isDark={isDark} />
-            <MenuItem href="/founders" isDark={isDark}>
-              NFT Founders
-            </MenuItem>
-            <OportunityDropdown isDark={isDark} />
-            <MenuItem href="/podcast" isDark={isDark}>
-              Podcast
-            </MenuItem>
-            <MenuItem href="/faq" isDark={isDark}>
-              FAQ
-            </MenuItem>
+            <ExploreDropdown />
+            <MenuItem href="/founders">NFT Founders</MenuItem>
+            <OportunityDropdown />
+            <MenuItem href="/podcast">Podcast</MenuItem>
+            <MenuItem href="/faq">FAQ</MenuItem>
           </nav>
 
           {/* Connect Wallet Button */}
@@ -433,7 +415,7 @@ const Header = ({ isFixed }) => {
                     }}
                   />
                 </button>
-                <User isDark={isDark} />
+                <User />
               </>
             )}
           </div>
@@ -463,7 +445,7 @@ const Header = ({ isFixed }) => {
               />
             </button>
           )}
-          <Menu isDark={isDark} />
+          <Menu />
         </div>
       </div>
 

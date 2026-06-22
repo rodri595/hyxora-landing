@@ -59,14 +59,14 @@ const MiniTable = ({ data, columns, barGradient, accentClass }) => {
           key={headerGroup.id}
           className={cn(
             GRID,
-            "border-b border-[#19222C] sticky top-0 z-10 bg-[#0D0D0D]",
+            "border-b border-[#E2E2E2] sticky top-0 z-10 bg-white",
           )}
         >
           {headerGroup.headers.map((header, i) => (
             <span
               key={header.id}
               className={cn(
-                "text-[10px] font-medium text-[#cdcdcd]",
+                "text-[10px] font-medium text-[#727272]",
                 i > 0 ? "text-right" : "",
               )}
             >
@@ -89,7 +89,7 @@ const MiniTable = ({ data, columns, barGradient, accentClass }) => {
               GRID,
               "h-[16px] overflow-hidden cursor-default transition-opacity duration-200",
               isDimmed && "opacity-40",
-              isHovered && "bg-white/[0.03]",
+              isHovered && "bg-black/[0.03]",
             )}
           >
             <div
@@ -104,7 +104,7 @@ const MiniTable = ({ data, columns, barGradient, accentClass }) => {
                 key={cell.id}
                 className={cn(
                   "relative text-[10px] font-medium",
-                  i === 0 ? accentClass : "text-[#cdcdcd] text-right",
+                  i === 0 ? accentClass : "text-[#727272] text-right",
                 )}
               >
                 {flexRender(cell.column.columnDef.cell, cell.getContext())}
@@ -162,8 +162,8 @@ const TableCard = () => {
   return (
     <Card className="w-full  p-0 flex flex-col overflow-hidden h-auto gap-2">
       {/* Header */}
-      <div className="flex items-center px-[11px] h-[44px] border-b border-[#19222C] shrink-0">
-        <span className="text-[13px] font-semibold text-white tracking-[-0.3px]">
+      <div className="flex items-center px-[11px] h-[44px] border-b border-[#E2E2E2] shrink-0">
+        <span className="text-[13px] font-semibold text-[#1B1B1B] tracking-[-0.3px]">
           Cartera
         </span>
       </div>
@@ -172,23 +172,23 @@ const TableCard = () => {
       <MiniTable
         data={investmentRows}
         columns={investmentColumns}
-        barGradient="linear-gradient(to left, #3471FD, transparent)"
-        accentClass="text-[#3471FD]"
+        barGradient="linear-gradient(to left, #2D68FF, transparent)"
+        accentClass="text-[#2D68FF]"
       />
 
       {/* Ticker divider — final total */}
-      <div className="flex items-center gap-[6px] px-[11px] py-[8px] border-y border-[#19222C] shrink-0">
+      <div className="flex items-center gap-[6px] px-[11px] py-[8px] border-y border-[#E2E2E2] shrink-0">
         <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
           <title>Total al alza</title>
           <path
             d="M5 8.5V1.5M5 1.5L1.5 5M5 1.5L8.5 5"
-            stroke="#26B179"
+            stroke="#00A656"
             strokeWidth="1.2"
             strokeLinecap="round"
             strokeLinejoin="round"
           />
         </svg>
-        <span className="text-[12px] font-semibold text-[#c0dde6]">
+        <span className="text-[12px] font-semibold text-[#1B1B1B]">
           <NumberFlow
             value={finalTotal}
             format={{
@@ -199,7 +199,7 @@ const TableCard = () => {
             }}
           />
         </span>
-        <span className="text-[10px] font-medium text-[#c0dde6] opacity-60">
+        <span className="text-[10px] font-medium text-[#727272]">
           ≈ Total a {horizonLabel}
         </span>
       </div>
@@ -207,23 +207,23 @@ const TableCard = () => {
       <MiniTable
         data={contributionRows}
         columns={contributionColumns}
-        barGradient="linear-gradient(to left, #26B179, transparent)"
-        accentClass="text-[#26b179]"
+        barGradient="linear-gradient(to left, #00A656, transparent)"
+        accentClass="text-[#00A656]"
       />
 
       {/* Footer: base/contribution ratio gauge */}
-      <div className="border-t border-[#19222C] px-[11px] py-[8px] shrink-0 mt-auto">
+      <div className="border-t border-[#E2E2E2] px-[11px] py-[8px] shrink-0 mt-auto">
         <div className="flex h-[16px] items-center gap-[4px]">
           {/* Left end dot + blurred halo */}
           <div className="relative size-[16px] shrink-0">
-            <div className="absolute left-[4px] top-[4px] size-[8px] rounded-full bg-[#3471FD]" />
-            <div className="absolute inset-0 rounded-full bg-[#0D0D0D]/50 backdrop-blur-[2.5px]" />
+            <div className="absolute left-[4px] top-[4px] size-[8px] rounded-full bg-[#2D68FF]" />
+            <div className="absolute inset-0 rounded-full bg-white/50 backdrop-blur-[2.5px]" />
           </div>
 
           {/* Bars */}
           <div className="relative flex h-[8px] flex-1">
             <div
-              className="h-full rounded-l-full bg-[#3471FD]"
+              className="h-full rounded-l-full bg-[#2D68FF]"
               style={{
                 width: `${basePct}%`,
                 clipPath:
@@ -232,7 +232,7 @@ const TableCard = () => {
             />
             <div className="w-[4.5px] shrink-0" />
             <div
-              className="h-full flex-1 rounded-r-full bg-[#26B179]"
+              className="h-full flex-1 rounded-r-full bg-[#00A656]"
               style={{
                 clipPath: "polygon(2.5px 0, 100% 0, 100% 100%, 0 100%)",
               }}
@@ -249,13 +249,13 @@ const TableCard = () => {
             >
               <path
                 d="M5 1L1 14"
-                stroke="#3471FD"
+                stroke="#2D68FF"
                 strokeWidth="2"
                 strokeLinecap="round"
               />
               <path
                 d="M12 1L8 14"
-                stroke="#26B179"
+                stroke="#00A656"
                 strokeWidth="2"
                 strokeLinecap="round"
               />
@@ -264,17 +264,17 @@ const TableCard = () => {
 
           {/* Right end dot + blurred halo */}
           <div className="relative size-[16px] shrink-0">
-            <div className="absolute left-[4px] top-[4px] size-[8px] rounded-full bg-[#26B179]" />
-            <div className="absolute inset-0 rounded-full bg-[#0D0D0D]/50 backdrop-blur-[2.5px]" />
+            <div className="absolute left-[4px] top-[4px] size-[8px] rounded-full bg-[#00A656]" />
+            <div className="absolute inset-0 rounded-full bg-white/50 backdrop-blur-[2.5px]" />
           </div>
         </div>
 
         {/* Labels */}
         <div className="mt-[8px] flex items-center justify-between px-[3px]">
-          <span className="text-[12px] font-medium text-[#c0dde6]">
+          <span className="text-[12px] font-medium text-[#727272]">
             Inv <NumberFlow value={Math.round(basePct)} />%
           </span>
-          <span className="text-[12px] font-medium text-[#c0dde6]">
+          <span className="text-[12px] font-medium text-[#727272]">
             <NumberFlow value={100 - Math.round(basePct)} />% Con
           </span>
         </div>
