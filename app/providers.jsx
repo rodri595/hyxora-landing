@@ -9,14 +9,13 @@ import { PrivyProvider } from "@privy-io/react-auth";
 import { SmartWalletsProvider } from "@privy-io/react-auth/smart-wallets";
 import { base, arbitrum, baseSepolia } from "viem/chains";
 import { Web3Provider } from "@/context/Web3Provider";
-import logoIMG from "@/assets/imgs/brand/logo.svg";
 import { Tooltip } from "react-tooltip";
 
 const queryClient = new QueryClient();
 const appId = process.env.NEXT_PUBLIC_PRIVY_APP_ID;
 const clientId = process.env.NEXT_PUBLIC_PRIVY_CLIENT_ID;
 
-const LENIS_EASING = (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t));
+const LENIS_EASING = (t) => Math.min(1, 1.001 - 2 ** (-10 * t));
 
 const LENIS_DESKTOP = {
   duration: 1.2,
@@ -29,6 +28,9 @@ const LENIS_DESKTOP = {
   orientation: "vertical",
   smoothWheel: true,
   syncTouch: true,
+  autoToggle: true,
+  allowNestedScroll: true,
+  stopInertiaOnNavigate: true,
 };
 
 const LENIS_MOBILE = {
@@ -42,6 +44,9 @@ const LENIS_MOBILE = {
   orientation: "vertical",
   smoothWheel: true,
   syncTouch: true,
+  autoToggle: true,
+  allowNestedScroll: true,
+  stopInertiaOnNavigate: true,
 };
 
 const Providers = ({ children }) => {

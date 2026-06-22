@@ -234,7 +234,9 @@ const MenuComponent = () => {
         <button
           onClick={toggleMenu}
           type="button"
-          className="group hidden max-md:flex rounded-[8px] border-[0.7px] border-[rgba(25,54,63,0.02)] bg-[rgba(25,54,63,0.04)] shadow-[0px_0px_4px_0px_inset_rgba(25,54,63,0.04)] justify-center items-center shrink-0 !h-[32px] !w-[32px] focus:outline-none"
+          className={cn(
+            "group hidden max-md:flex rounded-[8px] border-[0.7px] border-[rgba(25,54,63,0.02)] bg-[rgba(25,54,63,0.04)] shadow-[0px_0px_4px_0px_inset_rgba(25,54,63,0.04)] justify-center items-center shrink-0 !h-[32px] !w-[32px] focus:outline-none",
+          )}
         >
           {isActive ? (
             <svg
@@ -244,16 +246,21 @@ const MenuComponent = () => {
               fill="none"
               xmlns="http://www.w3.org/2000/svg"
             >
+              <title>Close Menu</title>
               <path
                 d="M12 4L4 12M4 4L12 12"
-                stroke="#19363f"
+                stroke={ "#19363f"}
                 strokeWidth="1.5"
                 strokeLinecap="round"
                 strokeLinejoin="round"
               />
             </svg>
           ) : (
-            <Image src={menuIcon} alt="Menu" className="w-[16px] h-[16px]" />
+            <Image
+              src={menuIcon}
+              alt="Menu"
+              className={cn("w-[16px] h-[16px]")}
+            />
           )}
         </button>
         <div

@@ -2,7 +2,7 @@ import { Menu, MenuButton, MenuItems, MenuItem } from "@headlessui/react";
 import Icon from "@/components/Icon";
 import Image from "@/components/Image";
 import Spinner from "@/components/Spinner";
-import Error from "@/components/Error";
+import ErrorComp from "@/components/Error";
 import Link from "next/link";
 import { useWeb3 } from "@/context/Web3Provider";
 import { cn, shortenAddress, copyToClipboard } from "@/utils";
@@ -153,10 +153,10 @@ const User = () => {
     {
       id: 0,
       title: "Mi Wallet",
-      description: !!smartWalletAddress
+      description: smartWalletAddress
         ? shortenAddress(smartWalletAddress)
         : "...",
-      icon: !!smartWalletAddress ? (
+      icon: smartWalletAddress ? (
         <Icon name="wallet" className="size-[16px] aspect-square" size={20} />
       ) : (
         <Spinner />
@@ -258,7 +258,7 @@ const User = () => {
           </div>
           {userInformationError && (
             <div className="flex p-[0_20px] justify-center items-center gap-[10px]">
-              <Error
+              <ErrorComp
                 error={userInformationError}
                 message={
                   userInformationError?.response?.data?.message ||

@@ -137,7 +137,7 @@ export default function RootLayout({ children }) {
       </head>
 
       <body
-        className={`${inter.variable} bg-b-surface1 font-inter text-[1rem]  antialiased `}
+        className={`${inter.variable} bg-[#0D0D0D] font-inter text-[1rem]  antialiased `}
       >
         <Toaster
           toastOptions={{
