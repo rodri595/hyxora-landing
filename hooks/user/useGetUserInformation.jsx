@@ -21,7 +21,8 @@ export const useGetUserInformation = () => {
     gcTime: false,
     refetchOnWindowFocus: true,
     refetchOnMount: false,
-    retry: 2,
+    retry: false,
+
     enabled: Boolean(smartWalletAddress) && authenticated && ready,
   });
 };

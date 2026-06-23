@@ -20,7 +20,8 @@ export const useGetAllPolls = (props) => {
     staleTime: 1 * 60 * 1000, // 5 minutes
     refetchOnWindowFocus: false,
     refetchOnMount: true,
-    retry: 1,
+    retry: false,
+
     enabled:
       typeof props === "undefined"
         ? true
