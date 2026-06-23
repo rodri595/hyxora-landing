@@ -11,7 +11,7 @@ const plans = [
     name: "BASIC",
     description: "Tu Iban, tu Wallets, tus fondos",
     monthlyPrice: 1.99,
-    yearlyPrice: 19.08,
+    yearlyPrice: 19,
     buttonText: "Obtener Basic",
     buttonDisabled: false,
     isPrimary: false,
@@ -36,7 +36,7 @@ const plans = [
       </Fragment>
     ),
     monthlyPrice: 9.99,
-    yearlyPrice: 95.88,
+    yearlyPrice: 96,
     buttonText: "Obtener Premium",
     buttonDisabled: false,
     isPrimary: true,
@@ -102,7 +102,7 @@ const plans = [
 ];
 
 const Plans = () => {
-  const [isYearly, setIsYearly] = useState(false);
+  const [isYearly, setIsYearly] = useState(true);
 
   return (
     <section className="w-full py-16 md:py-24 px-4 ">
@@ -219,7 +219,13 @@ const Plans = () => {
                         </div>
                         <div className="flex flex-col text-xs font-medium text-t-secondary tracking-[-0.01em] leading-4">
                           <span>EUR /</span>
-                          <span>{isYearly ? "año" : "mes"}</span>
+                          <span
+                            className={
+                              isYearly ? " uppercase font-semibold" : ""
+                            }
+                          >
+                            {isYearly ? "año" : "mes"}
+                          </span>
                         </div>
                       </>
                     ) : plan.price !== null ? (
@@ -249,7 +255,11 @@ const Plans = () => {
                     <Button
                       disabled={plan.buttonDisabled}
                       className="w-full h-10 px-6 py-2.5 rounded-xl text-sm font-semibold tracking-[-0.02em]  transition-all disabled:opacity-50 disabled:cursor-not-allowed hover:enabled:brightness-105"
-                      isPrimary={true}
+                      isPrimary
+                      as="link"
+                      href="https://app.hyxora.com/"
+                      target="_blank"
+                      rel="noopener noreferrer"
                     >
                       {plan.buttonText}
                     </Button>
@@ -262,6 +272,10 @@ const Plans = () => {
                           : "bg-gradient-to-b from-[#323232] to-[#222222] text-white hover:brightness-110"
                       }`}
                       isSecondary
+                      as="link"
+                      href="https://app.hyxora.com/"
+                      target="_blank"
+                      rel="noopener noreferrer"
                     >
                       {plan.buttonText}
                     </Button>

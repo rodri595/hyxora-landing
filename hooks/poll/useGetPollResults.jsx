@@ -18,7 +18,8 @@ export const useGetPollResults = (pollNumber) => {
     staleTime: 1 * 60 * 1000, // 1 minute
     refetchOnWindowFocus: false,
     refetchOnMount: true,
-    retry: 1,
+    retry: false,
+
     enabled: Boolean(smartWalletAddress && pollNumber),
   });
 };

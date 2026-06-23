@@ -35,7 +35,7 @@ export const Web3Provider = ({ children }) => {
     enabled: authenticated && ready && !smartWalletClient,
     retry: true,
     retryDelay: 2_000,
-    staleTime: Infinity,
+    staleTime: Number.POSITIVE_INFINITY,
   });
 
   const publicClient = useMemo(
