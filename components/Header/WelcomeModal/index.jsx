@@ -145,7 +145,9 @@ const WelcomeModal = ({ open, onClose, onLogin }) => {
           {/* Terms */}
           <Checkbox
             checked={acceptedTerms}
-            onChange={(e) => setAcceptedTerms(e.target.checked)}
+            onChange={(e) => {
+              setAcceptedTerms(e.target.checked);
+            }}
             required
             className="gap-3 items-start"
             labelClassName="font-normal text-[rgba(25,54,63,0.70)]"

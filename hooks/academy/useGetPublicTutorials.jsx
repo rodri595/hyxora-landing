@@ -27,9 +27,11 @@ export const useGetPublicTutorials = (params = {}) => {
       const response = await apiClient.get(url);
       return response?.data?.data || null;
     },
-    staleTime: 5 * 60 * 1000,
-    refetchOnWindowFocus: false,
+    // staleTime: 5 * 60 * 1000,
+    staleTime: false,
+    gcTime: false,
+    refetchOnWindowFocus: true,
     refetchOnMount: true,
-    retry: 1,
+    retry: false,
   });
 };

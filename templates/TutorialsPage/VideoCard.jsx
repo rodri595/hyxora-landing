@@ -1,6 +1,9 @@
+"use client";
+
 import { cn } from "@/utils";
 import { formatDate, formatDuration } from "@/utils/video";
-
+import { useState } from "react";
+import Image from "@/components/Image";
 const PlayGlyph = ({ className }) => (
   <svg
     width="20"
@@ -21,7 +24,13 @@ const PlayGlyph = ({ className }) => (
 );
 
 const ClockGlyph = () => (
-  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+  <svg
+    width="12"
+    height="12"
+    viewBox="0 0 24 24"
+    fill="none"
+    aria-hidden="true"
+  >
     <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="1.6" />
     <path
       d="M12 7.5V12l3 2"
@@ -34,8 +43,22 @@ const ClockGlyph = () => (
 );
 
 const CalendarGlyph = () => (
-  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-    <rect x="3.5" y="5" width="17" height="15" rx="2.5" stroke="currentColor" strokeWidth="1.6" />
+  <svg
+    width="12"
+    height="12"
+    viewBox="0 0 24 24"
+    fill="none"
+    aria-hidden="true"
+  >
+    <rect
+      x="3.5"
+      y="5"
+      width="17"
+      height="15"
+      rx="2.5"
+      stroke="currentColor"
+      strokeWidth="1.6"
+    />
     <path
       d="M3.5 9.5h17M8 3.5v3M16 3.5v3"
       stroke="currentColor"
@@ -57,32 +80,34 @@ const CalendarGlyph = () => (
 const VideoCard = ({ video, onPlay, className }) => {
   const [from, to] = video.gradient ?? ["#19363F", "#0E2329"];
   const minutes = Math.max(1, Math.round((video.durationSec ?? 0) / 60));
+  // Render the backend cover image when present; otherwise the gradient and its
+  // decorative glow/dots act as the default backdrop.
+  const coverUrl = video.coverImgUrl;
 
   return (
     <button
       type="button"
       onClick={onPlay}
-      className={cn("group/card flex w-full flex-col gap-5 text-left outline-none", className)}
+      className={cn(
+        "group/card flex w-full flex-col gap-5 text-left outline-none",
+        className,
+      )}
     >
       {/* Poster */}
       <div
         className="group/poster relative aspect-[298/220] w-full overflow-hidden rounded-2xl border-[0.7px] border-[rgba(25,54,63,0.04)] shadow-[inset_0px_0px_4px_0px_rgba(25,54,63,0.04)] transition-all duration-300 group-hover/card:shadow-[0px_12px_28px_-8px_rgba(25,54,63,0.28)] group-focus-visible/card:ring-2 group-focus-visible/card:ring-[#19363F]"
-        style={{ background: `linear-gradient(135deg, ${from} 0%, ${to} 100%)` }}
+        style={{
+          background: `linear-gradient(135deg, ${from} 0%, ${to} 100%)`,
+        }}
       >
-        {/* decorative glow */}
-        <div
-          className="pointer-events-none absolute -right-6 -top-10 size-32 rounded-full opacity-40 blur-2xl"
-          style={{ background: "rgba(255,255,255,0.45)" }}
+        <Image
+          src={coverUrl}
+          alt="poster"
+          height={260}
+          width={460}
+          className="absolute inset-0 size-full object-cover transition-transform duration-300 group-hover/card:scale-[1.03]"
         />
-        {/* dot grid */}
-        <div
-          className="pointer-events-none absolute inset-0 opacity-[0.12]"
-          style={{
-            backgroundImage:
-              "radial-gradient(circle at 1px 1px, rgba(255,255,255,0.9) 1px, transparent 0)",
-            backgroundSize: "14px 14px",
-          }}
-        />
+
         {/* bottom shade */}
         <div className="pointer-events-none absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/30 to-transparent" />
 

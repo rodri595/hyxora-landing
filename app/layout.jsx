@@ -1,6 +1,7 @@
 import { Inter } from "next/font/google";
 import Providers from "./providers";
 import "./globals.css";
+import ToastHaptics from "@/components/ToastHaptics";
 import { Toaster } from "react-hot-toast";
 
 const inter = Inter({
@@ -122,23 +123,14 @@ export default function RootLayout({ children }) {
       <head>
         {/* Structured Data */}
         <script type="application/ld+json">{JSON.stringify(jsonLd)}</script>
-        <meta
-          name="viewport"
-          content="width=device-width, initial-scale=1, maximum-scale=1"
-        />
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
         {/* Preconnect for performance */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link
-          rel="preconnect"
-          href="https://fonts.gstatic.com"
-          crossOrigin="anonymous"
-        />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <meta name="apple-mobile-web-app-title" content="Hyxora" />
       </head>
 
-      <body
-        className={`${inter.variable} bg-[#0D0D0D] font-inter text-[1rem]  antialiased `}
-      >
+      <body className={`${inter.variable} bg-[#0D0D0D] font-inter text-[1rem]  antialiased `}>
         <Toaster
           toastOptions={{
             duration: 5000,
@@ -148,6 +140,7 @@ export default function RootLayout({ children }) {
               `,
           }}
         />
+        <ToastHaptics />
 
         <Providers>{children}</Providers>
       </body>

@@ -304,6 +304,7 @@ const CategorySidebar = ({
   category = null,
   tutorialCount = 0,
   initialTab = "detail",
+  openSignal,
   onCreate,
   onUpdate,
   onDelete,
@@ -313,9 +314,13 @@ const CategorySidebar = ({
   const isCreate = !category;
   const [tab, setTab] = useState(initialTab);
 
+  // Re-apply the requested tab on every action click (openSignal bumps each time),
+  // not just when initialTab's value changes — the sidebar stays mounted across
+  // clicks on the same row, so "edit" → "edit" must still snap back to the tab.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: openSignal is an intentional re-trigger, not read in the body.
   useEffect(() => {
     setTab(initialTab);
-  }, [initialTab]);
+  }, [initialTab, openSignal]);
 
   useGSAP(
     () => {

@@ -139,6 +139,10 @@ const TutorialsModule = () => {
   const [sidebarMode, setSidebarMode] = useState("detail"); // "detail" | "create"
   const [displayedId, setDisplayedId] = useState(null);
   const [initialTab, setInitialTab] = useState("detail");
+  // Bumped on every openDetail. The sidebar stays mounted across action clicks on
+  // the same row, so a changing signal is what re-applies the requested tab even
+  // when initialTab's value is unchanged (e.g. "edit" → "edit" from the trash icon).
+  const [openSignal, setOpenSignal] = useState(0);
   // Bumped each time a create session opens. The create sidebars stay mounted
   // (the wrapper only animates width/transform), so keying on this forces a
   // fresh mount and clears any leftover form input.
@@ -170,6 +174,7 @@ const TutorialsModule = () => {
     setInitialTab(tab);
     setSidebarMode("detail");
     setIsOpen(true);
+    setOpenSignal((n) => n + 1);
   }, []);
 
   const onOpenCreate = useCallback(() => {
@@ -208,7 +213,12 @@ const TutorialsModule = () => {
   const handleCreate = useCallback(
     (data) => {
       createTutorial(data, {
-        onSuccess: () => toast.success("Tutorial creado"),
+        onSuccess: () => {
+          toast.success("Tutorial creado");
+          // Remount the create form fresh so the next tutorial starts blank
+          // (clears all fields plus the cover picker's internal preview state).
+          setCreateKey((k) => k + 1);
+        },
         onError: () => toast.error("No se pudo crear el tutorial"),
       });
     },
@@ -527,6 +537,7 @@ const TutorialsModule = () => {
             category={displayedCategory}
             tutorialCount={categoryCounts[displayedCategory.id] ?? 0}
             initialTab={initialTab}
+            openSignal={openSignal}
             onUpdate={handleUpdateCategory}
             onDelete={handleDeleteCategory}
             onClose={handleClose}
@@ -550,6 +561,7 @@ const TutorialsModule = () => {
           key={displayedVideo.id}
           video={displayedVideo}
           initialTab={initialTab}
+          openSignal={openSignal}
           onUpdate={handleUpdate}
           onDelete={handleDelete}
           onClose={handleClose}

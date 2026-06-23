@@ -2,11 +2,16 @@
 
 import { VISIBILITY_OPTIONS } from "@/app/(dashboard)/admin/_data/tutorials";
 import Checkbox from "@/components/Checkbox";
+import CoverImageUpload from "@/components/CoverImageUpload";
 import Field from "@/components/Field";
 import SelectDropdown from "@/components/SelectDropdown";
 import VideoPreview from "@/components/VideoPreview";
 import { useGetAllCategories } from "@/hooks/admin/useGetAllCategories";
-import { detectVideoSource, formatDuration, parseDuration } from "@/utils/video";
+import {
+  detectVideoSource,
+  formatDuration,
+  parseDuration,
+} from "@/utils/video";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -40,11 +45,17 @@ const CreateTutorialSidebar = ({ onClose, onCreate, onCreateCategory }) => {
   const [description, setDescription] = useState("");
   const [categoryId, setCategoryId] = useState("");
   const [url, setUrl] = useState("");
+  const [coverId, setCoverId] = useState("");
   const [duration, setDuration] = useState("");
   const [visibility, setVisibility] = useState("visible");
   const [isPublic, setIsPublic] = useState(false);
+  const [coverUploading, setCoverUploading] = useState(false);
 
   const source = useMemo(() => detectVideoSource(url), [url]);
+  const accent = useMemo(
+    () => (categories ?? []).find((c) => c.id === categoryId)?.accent,
+    [categories, categoryId],
+  );
 
   // Default to the first category once the list has loaded.
   useEffect(() => {
@@ -58,10 +69,10 @@ const CreateTutorialSidebar = ({ onClose, onCreate, onCreateCategory }) => {
       gsap.fromTo(
         panelRef.current,
         { opacity: 0 },
-        { opacity: 1, duration: 0.28, delay: 0.14, ease: "power2.out" }
+        { opacity: 1, duration: 0.28, delay: 0.14, ease: "power2.out" },
       );
     },
-    { scope: panelRef }
+    { scope: panelRef },
   );
 
   // Auto-fill the duration from Vimeo metadata if the admin hasn't typed one.
@@ -76,15 +87,15 @@ const CreateTutorialSidebar = ({ onClose, onCreate, onCreateCategory }) => {
       description: description.trim(),
       categoryId,
       url: url.trim(),
+      coverId: coverId || null,
       durationSec: parseDuration(duration),
       visibility,
       isPublic,
     });
-    onClose?.();
   };
 
   const canSubmit =
-    title.trim() && url.trim() && categoryId && source.provider;
+    title.trim() && url.trim() && categoryId && source.provider && coverId;
 
   return (
     <div
@@ -102,7 +113,13 @@ const CreateTutorialSidebar = ({ onClose, onCreate, onCreateCategory }) => {
           aria-label="Cerrar panel"
           className="flex size-6 shrink-0 items-center justify-center rounded-md text-[rgba(25,54,63,0.4)] transition-colors hover:bg-[rgba(25,54,63,0.06)] hover:text-[#19363F]"
         >
-          <svg width="10" height="10" viewBox="0 0 10 10" fill="none" aria-hidden="true">
+          <svg
+            width="10"
+            height="10"
+            viewBox="0 0 10 10"
+            fill="none"
+            aria-hidden="true"
+          >
             <path
               d="M8.5 1.5l-7 7M1.5 1.5l7 7"
               stroke="currentColor"
@@ -209,6 +226,15 @@ const CreateTutorialSidebar = ({ onClose, onCreate, onCreateCategory }) => {
             inputMode="numeric"
           />
 
+          <CoverImageUpload
+            value={coverId}
+            onChange={setCoverId}
+            onUploadingChange={setCoverUploading}
+            accent={accent}
+            label="Imagen de portada"
+            required
+          />
+
           {/* Preview */}
           <div className="flex flex-col gap-1">
             <span className={labelCls}>Vista previa</span>
@@ -223,11 +249,11 @@ const CreateTutorialSidebar = ({ onClose, onCreate, onCreateCategory }) => {
 
           <button
             type="button"
-            disabled={!canSubmit}
+            disabled={!canSubmit || coverUploading}
             onClick={handleSubmit}
             className="flex h-8 w-full items-center justify-center gap-2 rounded-lg bg-[#19363F] font-inter text-[12px] font-medium tracking-[-0.48px] text-white transition-colors hover:bg-[#0f2228] disabled:cursor-not-allowed disabled:opacity-40"
           >
-            Crear tutorial
+            {coverUploading ? "Subiendo portada…" : "Crear tutorial"}
           </button>
         </div>
       </div>

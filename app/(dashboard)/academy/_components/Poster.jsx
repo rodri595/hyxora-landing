@@ -1,6 +1,8 @@
+"use client";
+
 import { cn } from "@/utils";
 import { formatDuration } from "../_lib";
-
+import Image from "@/components/Image";
 const PlayGlyph = ({ className }) => (
   <svg
     width="18"
@@ -32,6 +34,9 @@ const PlayGlyph = ({ className }) => (
  */
 const Poster = ({ video, className, rounded = true, flipId }) => {
   const [from, to] = video.gradient ?? ["#19363F", "#0E2329"];
+  // Render the backend cover image when present; otherwise (or if it fails to
+  // load) the gradient background shows through as the default.
+  const coverUrl = video.coverImgUrl;
 
   return (
     <div
@@ -39,23 +44,18 @@ const Poster = ({ video, className, rounded = true, flipId }) => {
       className={cn(
         "group/poster relative aspect-video w-full overflow-hidden",
         rounded && "rounded-[10px]",
-        className
+        className,
       )}
       style={{ background: `linear-gradient(135deg, ${from} 0%, ${to} 100%)` }}
     >
-      {/* decorative glow */}
-      <div
-        className="pointer-events-none absolute -right-6 -top-10 size-32 rounded-full opacity-40 blur-2xl"
-        style={{ background: "rgba(255,255,255,0.45)" }}
+      <Image
+        src={coverUrl}
+        alt="poster"
+        height={260}
+        width={460}
+        className="absolute inset-0 size-full object-cover"
       />
-      <div
-        className="pointer-events-none absolute inset-0 opacity-[0.12]"
-        style={{
-          backgroundImage:
-            "radial-gradient(circle at 1px 1px, rgba(255,255,255,0.9) 1px, transparent 0)",
-          backgroundSize: "14px 14px",
-        }}
-      />
+
       {/* bottom shade for legibility of the badge */}
       <div className="pointer-events-none absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/30 to-transparent" />
 

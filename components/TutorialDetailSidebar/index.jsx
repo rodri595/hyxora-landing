@@ -5,13 +5,21 @@ import {
   VISIBILITY_OPTIONS,
 } from "@/app/(dashboard)/admin/_data/tutorials";
 import Checkbox from "@/components/Checkbox";
+import CoverImageUpload from "@/components/CoverImageUpload";
 import Field from "@/components/Field";
 import SelectDropdown from "@/components/SelectDropdown";
 import Tabs from "@/components/Tabs";
+import Image from "@/components/Image";
 import VideoPreview from "@/components/VideoPreview";
 import { useGetAllCategories } from "@/hooks/admin/useGetAllCategories";
 import { cn } from "@/utils";
-import { detectVideoSource, formatDate, formatDuration, parseDuration } from "@/utils/video";
+import {
+  detectVideoSource,
+  formatDate,
+  formatDuration,
+  gradientFromAccent,
+  parseDuration,
+} from "@/utils/video";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -48,12 +56,37 @@ const VisibilityBadge = ({ visibility }) => {
     <span
       className={cn(
         "inline-flex items-center gap-1 rounded-[5px] border px-1.5 py-0.5 font-inter text-[10px] font-medium tracking-[-0.3px]",
-        v.badge
+        v.badge,
       )}
     >
       <span className="size-1.5 rounded-full" style={{ background: v.dot }} />
       {v.label}
     </span>
+  );
+};
+
+// ── CoverThumb ───────────────────────────────────────────────────────────────
+// Read-only 16:9 preview of the tutorial cover. Falls back to the on-brand
+// gradient (derived from the category accent) when there's no image or it fails.
+
+const CoverThumb = ({ coverImgUrl, accent }) => {
+  const [from, to] = gradientFromAccent(accent);
+  const coverUrl = coverImgUrl;
+
+  return (
+    <div
+      className="relative aspect-video w-full overflow-hidden rounded-[8px] border-[0.7px] border-[rgba(25,54,63,0.08)]"
+      style={{ background: `linear-gradient(135deg, ${from} 0%, ${to} 100%)` }}
+    >
+      <Image
+        alt="Portada"
+        src={coverUrl}
+        width={100}
+        height={100}
+        className="absolute inset-0 size-full object-cover"
+        // unoptimized
+      />
+    </div>
   );
 };
 
@@ -111,7 +144,9 @@ const DetailPanel = ({ video }) => {
       </div>
 
       <div className="flex flex-col gap-1">
-        <span className={labelCls}>Enlace{source.provider ? ` · ${source.provider}` : ""}</span>
+        <span className={labelCls}>
+          Enlace{source.provider ? ` · ${source.provider}` : ""}
+        </span>
         <a
           href={video.url}
           target="_blank"
@@ -120,6 +155,11 @@ const DetailPanel = ({ video }) => {
         >
           {video.url}
         </a>
+      </div>
+
+      <div className="flex flex-col gap-1">
+        <span className={labelCls}>Portada</span>
+        <CoverThumb coverImgUrl={video.coverImgUrl} accent={video.accent} />
       </div>
 
       <div className="grid grid-cols-2 gap-3">
@@ -144,7 +184,9 @@ const DetailPanel = ({ video }) => {
 
 const PreviewPanel = ({ video }) => (
   <div className="flex flex-col gap-3 p-4">
-    <VideoPreview url={video.url} />
+    <CoverThumb coverImgUrl={video.coverImgUrl} accent={video.accent} />
+
+    <VideoPreview url={video.url} cover={video.coverImgUrl} />
     <a
       href={video.url}
       target="_blank"
@@ -169,8 +211,18 @@ const ConfirmBlock = ({ message, confirmLabel, onCancel, onConfirm }) => (
         className="mt-px shrink-0"
         aria-hidden="true"
       >
-        <path d="M8 2L14.5 13H1.5L8 2Z" stroke="#dc2626" strokeWidth="1.3" strokeLinejoin="round" />
-        <path d="M8 6.5V9.5M8 11v.5" stroke="#dc2626" strokeWidth="1.3" strokeLinecap="round" />
+        <path
+          d="M8 2L14.5 13H1.5L8 2Z"
+          stroke="#dc2626"
+          strokeWidth="1.3"
+          strokeLinejoin="round"
+        />
+        <path
+          d="M8 6.5V9.5M8 11v.5"
+          stroke="#dc2626"
+          strokeWidth="1.3"
+          strokeLinecap="round"
+        />
       </svg>
       <p className="font-inter text-[11px] leading-relaxed tracking-[-0.44px] text-red-700">
         {message}
@@ -204,18 +256,43 @@ const EditPanel = ({ video, categoryOptions, onUpdate, onDelete, onClose }) => {
     video.categoryId ?? categoryOptions[0]?.value ?? "",
   );
   const [url, setUrl] = useState(video.url ?? "");
+  const [coverId, setCoverId] = useState(video.coverId ?? "");
   const [duration, setDuration] = useState(formatDuration(video.durationSec));
   const [visibility, setVisibility] = useState(video.visibility ?? "visible");
   const [isPublic, setIsPublic] = useState(video.isPublic ?? false);
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [coverUploading, setCoverUploading] = useState(false);
+
+  // Listings return the cover as a URL (`coverImgUrl`), not the `coverId` fileId,
+  // so we show it as the current cover and track removal separately — there's no
+  // baseline fileId to diff against.
+  const currentCoverUrl = video.coverImgUrl;
+  const hasExistingCover = Boolean(video.coverImgUrl || video.coverId);
+  const [coverRemoved, setCoverRemoved] = useState(false);
+
+  const handleCoverChange = (next) => {
+    setCoverId(next);
+    setCoverRemoved(!next && hasExistingCover);
+  };
 
   const source = useMemo(() => detectVideoSource(url), [url]);
+  // The selected category's accent drives the fallback gradient preview.
+  const accent = useMemo(
+    () =>
+      categoryOptions.find((c) => c.value === categoryId)?.accent ??
+      video.accent,
+    [categoryOptions, categoryId, video.accent],
+  );
+
+  const coverChanged =
+    coverId !== (video.coverId ?? "") || (coverRemoved && hasExistingCover);
 
   const hasChanges =
     title !== (video.title ?? "") ||
     description !== (video.description ?? "") ||
     categoryId !== video.categoryId ||
     url !== (video.url ?? "") ||
+    coverChanged ||
     parseDuration(duration) !== video.durationSec ||
     visibility !== video.visibility ||
     isPublic !== (video.isPublic ?? false);
@@ -226,6 +303,10 @@ const EditPanel = ({ video, categoryOptions, onUpdate, onDelete, onClose }) => {
       description: description.trim(),
       categoryId,
       url: url.trim(),
+      // Only send coverId when it actually changed: a new fileId moves the temp
+      // upload to permanent, "" sends null to remove, and omitting it entirely
+      // leaves the existing cover untouched (re-sending a permanent fileId would 400).
+      ...(coverChanged && { coverId: coverId || null }),
       durationSec: parseDuration(duration),
       visibility,
       isPublic,
@@ -251,11 +332,19 @@ const EditPanel = ({ video, categoryOptions, onUpdate, onDelete, onClose }) => {
       <div className="grid grid-cols-2 gap-3">
         <div className="flex flex-col gap-1">
           <span className={labelCls}>Categoría</span>
-          <SelectDropdown value={categoryId} onChange={setCategoryId} options={categoryOptions} />
+          <SelectDropdown
+            value={categoryId}
+            onChange={setCategoryId}
+            options={categoryOptions}
+          />
         </div>
         <div className="flex flex-col gap-1">
           <span className={labelCls}>Visibilidad</span>
-          <SelectDropdown value={visibility} onChange={setVisibility} options={visibilityOptions} />
+          <SelectDropdown
+            value={visibility}
+            onChange={setVisibility}
+            options={visibilityOptions}
+          />
         </div>
       </div>
 
@@ -293,6 +382,15 @@ const EditPanel = ({ video, categoryOptions, onUpdate, onDelete, onClose }) => {
         onChange={(e) => setDuration(e.target.value)}
         inputMode="numeric"
       />
+      <CoverThumb coverImgUrl={video.coverImgUrl} accent={video.accent} />
+
+      <CoverImageUpload
+        value={coverId}
+        onChange={handleCoverChange}
+        currentUrl={currentCoverUrl}
+        onUploadingChange={setCoverUploading}
+        accent={accent}
+      />
 
       <div className="flex flex-col gap-1">
         <span className={labelCls}>Vista previa</span>
@@ -301,11 +399,11 @@ const EditPanel = ({ video, categoryOptions, onUpdate, onDelete, onClose }) => {
 
       <button
         type="button"
-        disabled={!hasChanges || !title.trim() || !url.trim()}
+        disabled={!hasChanges || !title.trim() || !url.trim() || coverUploading}
         onClick={handleSave}
         className="flex h-8 w-full items-center justify-center gap-2 rounded-lg bg-[#19363F] font-inter text-[12px] font-medium tracking-[-0.48px] text-white transition-colors hover:bg-[#0f2228] disabled:cursor-not-allowed disabled:opacity-40"
       >
-        Guardar cambios
+        {coverUploading ? "Subiendo portada…" : "Guardar cambios"}
       </button>
 
       {/* ── Danger zone ── */}
@@ -342,29 +440,45 @@ const SIDEBAR_TABS = [
   { id: "edit", label: "Editar" },
 ];
 
-const TutorialDetailSidebar = ({ video, initialTab = "detail", onUpdate, onDelete, onClose }) => {
+const TutorialDetailSidebar = ({
+  video,
+  initialTab = "detail",
+  openSignal,
+  onUpdate,
+  onDelete,
+  onClose,
+}) => {
   const panelRef = useRef(null);
   const [tab, setTab] = useState(initialTab);
 
   const { data: categories } = useGetAllCategories();
   const categoryOptions = useMemo(
-    () => (categories ?? []).map((c) => ({ value: c.id, label: c.label })),
+    () =>
+      (categories ?? []).map((c) => ({
+        value: c.id,
+        label: c.label,
+        accent: c.accent,
+      })),
     [categories],
   );
 
+  // Re-apply the requested tab on every action click (openSignal bumps each time),
+  // not just when initialTab's value changes — the sidebar stays mounted across
+  // clicks on the same row, so "edit" → "edit" must still snap back to the tab.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: openSignal is an intentional re-trigger, not read in the body.
   useEffect(() => {
     setTab(initialTab);
-  }, [initialTab]);
+  }, [initialTab, openSignal]);
 
   useGSAP(
     () => {
       gsap.fromTo(
         panelRef.current,
         { opacity: 0 },
-        { opacity: 1, duration: 0.28, delay: 0.14, ease: "power2.out" }
+        { opacity: 1, duration: 0.28, delay: 0.14, ease: "power2.out" },
       );
     },
-    { scope: panelRef }
+    { scope: panelRef },
   );
 
   return (
@@ -388,7 +502,13 @@ const TutorialDetailSidebar = ({ video, initialTab = "detail", onUpdate, onDelet
           aria-label="Cerrar panel"
           className="mt-0.5 flex size-6 shrink-0 items-center justify-center rounded-md text-[rgba(25,54,63,0.4)] transition-colors hover:bg-[rgba(25,54,63,0.06)] hover:text-[#19363F]"
         >
-          <svg width="10" height="10" viewBox="0 0 10 10" fill="none" aria-hidden="true">
+          <svg
+            width="10"
+            height="10"
+            viewBox="0 0 10 10"
+            fill="none"
+            aria-hidden="true"
+          >
             <path
               d="M8.5 1.5l-7 7M1.5 1.5l7 7"
               stroke="currentColor"
@@ -400,7 +520,12 @@ const TutorialDetailSidebar = ({ video, initialTab = "detail", onUpdate, onDelet
       </div>
 
       {/* Tabs */}
-      <Tabs tabs={SIDEBAR_TABS} value={tab} onChange={setTab} className="px-4" />
+      <Tabs
+        tabs={SIDEBAR_TABS}
+        value={tab}
+        onChange={setTab}
+        className="px-4"
+      />
 
       {/* Content */}
       <div className="scrollbar-thin scrollbar-thumb-[rgba(25,54,63,0.1)] scrollbar-thumb-rounded scrollbar-track-transparent flex-1 overflow-y-auto">

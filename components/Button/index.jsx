@@ -1,5 +1,8 @@
-import Link from "next/link";
+"use client";
+
 import Icon from "@/components/Icon";
+import { haptic } from "@/utils/haptics";
+import Link from "next/link";
 
 const Button = ({
   className,
@@ -10,13 +13,25 @@ const Button = ({
   isStroke,
   isCircle,
   as = "button",
+  // Haptic preset fired on press. Pass `false` to disable, or a preset name
+  // (e.g. "success", "selection") to override the default.
+  haptic: hapticPattern,
+  onClick,
   ...props
 }) => {
   const isLink = as === "link";
   const Component = isLink ? Link : as;
 
+  const handleClick = (e) => {
+    if (hapticPattern !== false) {
+      haptic(hapticPattern ?? (isPrimary ? "medium" : "light"));
+    }
+    onClick?.(e);
+  };
+
   return (
     <Component
+      onClick={handleClick}
       className={`inline-flex items-center font-inter justify-center h-[38px] px-6 border border-solid rounded-[100px] font-medium text-[16px] leading-6 tracking-[-0.64px] transition-all cursor-pointer disabled:pointer-events-none disabled:opacity-50 relative ${
         isPrimary
           ? "bg-[#19363f] border-[rgba(255,255,255,0.2)] text-white fill-white shadow-[0px_0px_10px_0px_inset_rgba(255,255,255,0.4)] hover:shadow-[0px_0px_15px_0px_inset_rgba(255,255,255,0.5)]"

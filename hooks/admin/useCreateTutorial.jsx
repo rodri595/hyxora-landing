@@ -10,6 +10,7 @@ export const useCreateTutorial = () => {
         description: data.description,
         categoryId: data.categoryId,
         url: data.url,
+        coverId: data.coverId,
         durationSec: data.durationSec,
         isPublic: data.isPublic,
         visibility: data.visibility,

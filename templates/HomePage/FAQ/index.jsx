@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { haptic } from "@/utils/haptics";
 import { useGSAP } from "@gsap/react";
 import { gsap } from "gsap";
+import { useRef, useState } from "react";
 import AnimateHeight from "react-animate-height";
 
 const faqItems = [
@@ -38,8 +39,7 @@ const faqItems = [
   },
   {
     id: 6,
-    question:
-      "¿Qué diferencia hay entre el plan Basic (1,99 €) y el Premium (9,99 €)?",
+    question: "¿Qué diferencia hay entre el plan Basic (1,99 €) y el Premium (9,99 €)?",
     answer:
       "El plan Basic te da acceso a la entrada en el mundo Crypto desde el mundo financiero tradicional: tendrás una cuenta fíat con IBAN , transferencias, tarjeta fiat-crypto, y podrás intercambiar (swap) entre monedas fíat- Crypto y Crypto-Crypto. El plan Premium es el Basic pero añadiendo la entrada en las oportunidades que nos ofrece el mercado de las finanzas descentralizadas DeFi, donde encontrarás opciones un poco más complejas. Además de estas funcionalidades, los accesos a la parte de Academia, Comité Consultivo, etc, así como la propia estética y accesos también serán más completos en Premium que en Basic.",
   },
@@ -99,22 +99,19 @@ const faqItems = [
   },
   {
     id: 16,
-    question:
-      "¿Puedo usar Hyxora para pagar a proveedores o recibir nóminas en el extranjero?",
+    question: "¿Puedo usar Hyxora para pagar a proveedores o recibir nóminas en el extranjero?",
     answer:
       "Próximamente sí. Con tu IBAN puedes recibir nóminas y pagar proveedores exactamente igual que con cualquier banco europeo. Y si quieres pagar más barato y rápido, puedes hacerlo en stablecoins.",
   },
   {
     id: 17,
-    question:
-      "¿Por qué debería usar Hyxora si ya tengo otras plataformas conocidas?",
+    question: "¿Por qué debería usar Hyxora si ya tengo otras plataformas conocidas?",
     answer:
       "Algunas te dan algo de cripto, pero con custodia (ellos guardan tus claves) y rendimientos muy bajos. Otras más enfocadas en el mundo Crypto no tienen IBAN ni están pensadas para el día a día. Hyxora combina lo mejor de los dos mundos: IBAN español, tarjeta para pagar en cualquier cosa, rendimientos reales de DeFi y tus claves siempre en tu poder.",
   },
   {
     id: 18,
-    question:
-      "¿Es verdad que en Hyxora gano más interés que en un plazo fijo del banco?",
+    question: "¿Es verdad que en Hyxora gano más interés que en un plazo fijo del banco?",
     answer:
       "Sí, y con diferencia. Hoy los mejores plazos fijos dan 2-3 %. En Hyxora, con la cesta más conservadora ya superas ampliamente esas cifras y cobras intereses cada día. Y puedes sacar el dinero cuando quieras, sin penalización. Es la consecuencia de no tener intermediarios, el producto puede ser el mismo, pero los rendimientos son muy diferentes.",
   },
@@ -139,8 +136,7 @@ const faqItems = [
   },
   {
     id: 22,
-    question:
-      "¿De verdad no guardáis mis claves privadas como hacen la mayoría?",
+    question: "¿De verdad no guardáis mis claves privadas como hacen la mayoría?",
     answer:
       "No. Desde el primer día tus criptoactivos están en una wallet de la que solo tú tienes las claves y el acceso. Ni nosotros podemos tocarlos pero si podemos hacer que desde la app las recuperes en caso de pérdida de forma totalmente encriptada.",
   },
@@ -170,8 +166,7 @@ const faqItems = [
   },
   {
     id: 27,
-    question:
-      "¿Habrá gobernanza para que los usuarios voten nuevas funcionalidades?",
+    question: "¿Habrá gobernanza para que los usuarios voten nuevas funcionalidades?",
     answer:
       "Sí. Los poseedores del NFT Founder ya forman parte del comité consultivo. Para el. Resto de usuarios existirán fórmulas de comunicación general para consultas también.",
   },
@@ -230,14 +225,7 @@ const FAQItem = ({ item, isOpen, onToggle }) => {
             xmlns="http://www.w3.org/2000/svg"
           >
             <rect x="7" width="2" height="16" rx="1" fill="#19363f" />
-            <rect
-              y="9"
-              width="2"
-              height="16"
-              rx="1"
-              transform="rotate(-90 0 9)"
-              fill="#19363f"
-            />
+            <rect y="9" width="2" height="16" rx="1" transform="rotate(-90 0 9)" fill="#19363f" />
           </svg>
         </div>
       </div>
@@ -260,7 +248,9 @@ const FAQ = ({ showFullList = false }) => {
   const [openId, setOpenId] = useState(null);
 
   const toggleFAQ = (id) => {
-    setOpenId(openId === id ? null : id);
+    const isOpening = openId !== id;
+    haptic(isOpening ? "light" : "soft");
+    setOpenId(isOpening ? id : null);
   };
 
   const displayedItems = showFullList

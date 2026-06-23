@@ -3,7 +3,26 @@
 import { cn } from "@/utils";
 import { detectVideoSource } from "@/utils/video";
 import Player from "@vimeo/player";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
+
+const PlayGlyph = ({ className }) => (
+  <svg
+    width="18"
+    height="18"
+    viewBox="0 0 24 24"
+    fill="none"
+    aria-hidden="true"
+    className={className}
+  >
+    <path
+      d="M8 5.5v13l11-6.5L8 5.5Z"
+      fill="currentColor"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinejoin="round"
+    />
+  </svg>
+);
 
 // ── Vimeo (uses @vimeo/player) ───────────────────────────────────────────────
 // We mount the official Vimeo Player into a container so we can later read
@@ -101,11 +120,29 @@ const EmptyState = ({ message }) => (
  * placeholder. `onReady` receives `{ duration }` once a Vimeo player loads.
  *
  * @param {string} url
+ * @param {string} [cover]   – resolved custom cover URL; shown as a clickable
+ *                             poster facade that mounts the embed on click.
  * @param {(meta: { duration: number }) => void} [onReady]
  * @param {string} [className]
  */
-const VideoPreview = ({ url, onReady, className }) => {
+const VideoPreview = ({ url, cover, onReady, className }) => {
   const { provider, embedUrl } = detectVideoSource(url);
+  const [playing, setPlaying] = useState(false);
+  const [coverFailed, setCoverFailed] = useState(false);
+
+  // Reset the facade when the source video or cover changes (the sidebar reuses
+  // this instance across rows).
+  // biome-ignore lint/correctness/useExhaustiveDependencies: url/cover are intentional reset triggers, not read in the body.
+  useEffect(() => {
+    setPlaying(false);
+    setCoverFailed(false);
+  }, [url, cover]);
+
+  const isPlayable = provider === "vimeo" || provider === "youtube";
+  // When a custom cover exists, show it as a clickable poster first (mirrors the
+  // public poster → player flow); clicking mounts the real embed. Falls back to
+  // the embed directly when there's no cover or the image fails to load.
+  const showFacade = Boolean(cover) && !coverFailed && isPlayable && !playing;
 
   return (
     <div
@@ -114,7 +151,27 @@ const VideoPreview = ({ url, onReady, className }) => {
         className,
       )}
     >
-      {provider === "vimeo" ? (
+      {showFacade ? (
+        <button
+          type="button"
+          onClick={() => setPlaying(true)}
+          aria-label="Reproducir vista previa"
+          className="group/preview absolute inset-0 size-full"
+        >
+          <img
+            src={cover}
+            alt=""
+            onError={() => setCoverFailed(true)}
+            className="absolute inset-0 size-full object-cover"
+          />
+          <div className="pointer-events-none absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/30 to-transparent" />
+          <span className="absolute inset-0 flex items-center justify-center">
+            <span className="flex size-14 items-center justify-center rounded-full bg-white/15 text-white ring-1 ring-white/30 backdrop-blur-sm transition-transform duration-300 group-hover/preview:scale-105">
+              <PlayGlyph className="ml-0.5" />
+            </span>
+          </span>
+        </button>
+      ) : provider === "vimeo" ? (
         <VimeoPreview embedUrl={embedUrl} onReady={onReady} />
       ) : provider === "youtube" ? (
         <YouTubePreview embedUrl={embedUrl} />

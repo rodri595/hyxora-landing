@@ -27,6 +27,8 @@ const CopyButton = ({ text, variant = "light", className, title = "Copiar" }) =>
   useEffect(() => () => clearTimeout(timeoutRef.current), []);
 
   const handleCopy = () => {
+    // copyToClipboard fires a success toast, and ToastHaptics turns that into
+    // a "success" buzz — so no explicit haptic call is needed here.
     copyToClipboard(text);
     setCopied(true);
     clearTimeout(timeoutRef.current);

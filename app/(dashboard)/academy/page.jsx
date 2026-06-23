@@ -5,6 +5,7 @@ import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import Link from "next/link";
 import Icon from "@/components/Icon";
+import Image from "@/components/Image";
 import ErrorComp from "@/components/Error";
 import Spinner from "@/components/Spinner";
 import { useGetTutorials } from "@/hooks/academy/useGetTutorials";
@@ -124,25 +125,21 @@ const ViewToggle = ({ value, onChange }) => {
 
 const FeaturedHero = ({ video }) => {
   const [from, to] = video.gradient;
+  const coverUrl = video.coverImgUrl;
   return (
     <Link
       href={`/academy/${video.slug}`}
       className="group/hero relative flex min-h-[200px] items-end overflow-hidden rounded-2xl p-5 sm:min-h-[260px] sm:p-7"
       style={{ background: `linear-gradient(120deg, ${from} 0%, ${to} 100%)` }}
     >
-      <div
-        className="pointer-events-none absolute -right-10 -top-16 size-64 rounded-full opacity-40 blur-3xl"
-        style={{ background: "rgba(255,255,255,0.5)" }}
+      <Image
+        src={coverUrl}
+        alt=""
+        height={260}
+        width={460}
+        className="pointer-events-none absolute inset-0 size-full object-cover transition-transform duration-500 group-hover/hero:scale-[1.03]"
       />
       <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/45 via-black/10 to-transparent" />
-      <div
-        className="pointer-events-none absolute inset-0 opacity-[0.1]"
-        style={{
-          backgroundImage:
-            "radial-gradient(circle at 1px 1px, rgba(255,255,255,0.9) 1px, transparent 0)",
-          backgroundSize: "16px 16px",
-        }}
-      />
 
       <div className="relative flex max-w-[460px] flex-col gap-2.5">
         <span className="inline-flex w-fit items-center gap-1.5 rounded-full bg-white/15 px-2.5 py-1 font-inter text-[10px] font-semibold uppercase tracking-[0.6px] text-white backdrop-blur-sm ring-1 ring-white/25 max-md:text-[8px]">

@@ -5,6 +5,7 @@ import {
   CloseButton,
 } from "@headlessui/react";
 import Icon from "@/components/Icon";
+import { haptic } from "@/utils/haptics";
 
 const Modal = ({
   className,
@@ -36,7 +37,13 @@ const Modal = ({
         >
           {children}
           {!hideCloseButton && (
-            <CloseButton className="absolute right-5 top-5 z-15 size-10 border border-s-02 bg-surface-01 rounded-xl transition-colors hover:bg-surface-03">
+            <CloseButton
+              onClick={() => {
+                haptic("light");
+                onClose?.();
+              }}
+              className="absolute right-5 top-5 z-15 size-10 border border-s-02 bg-surface-01 rounded-xl transition-colors hover:bg-surface-03"
+            >
               <Icon className="!size-4 fill-primary" name="close" />
             </CloseButton>
           )}

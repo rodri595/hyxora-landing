@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import { cn } from "@/utils";
+import { haptic } from "@/utils/haptics";
 
 /**
  * Checkbox — reusable square checkbox
@@ -40,6 +41,7 @@ const Checkbox = ({
 
   const handleChange = (e) => {
     if (stopPropagation) e.stopPropagation();
+    haptic("selection");
     onChange?.(e);
   };
 
