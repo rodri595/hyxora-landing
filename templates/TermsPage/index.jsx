@@ -1,14 +1,15 @@
 "use client";
 
 import Layout from "@/components/Layout";
+import FeesTable from "@/templates/HomePage/Plans/FeesTable";
 
 const TermsPage = () => {
   return (
     <Layout
       isFixedHeader
-      classContainer="flex flex-1 flex-col gap-[130px] maxmd:gap-[80px] pt-[100px]"
+      classContainer="flex flex-1 flex-col gap-[130px] maxmd:gap-[80px] py-[100px]"
     >
-      <section className="flex flex-col gap-8 max-w-3xl mx-auto w-full py-10 px-4">
+      <section className="flex flex-col gap-8 max-w-[1370px] mx-auto w-full py-10 px-4">
         <div className="flex flex-col gap-2">
           <h1 className="text-4xl font-bold">Términos y Condiciones</h1>
           <p className="text-base font-medium text-t-secondary">
@@ -774,6 +775,7 @@ const TermsPage = () => {
           </div>
         </div>
       </section>
+      <FeesTable />
     </Layout>
   );
 };
