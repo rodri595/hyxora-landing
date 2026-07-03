@@ -278,6 +278,17 @@
     transform: rotate(360deg);
   }
 }
+@keyframes rail-ping {
+  0% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 0.9;
+  }
+  70%,
+  100% {
+    transform: translate(-50%, -50%) scale(2.6);
+    opacity: 0;
+  }
+}
 
 .dropdown-arrow-up:before {
   content: "";

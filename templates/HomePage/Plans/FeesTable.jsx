@@ -17,7 +17,7 @@ const feeGroups = [
     rows: [{ concept: "VIban - USDC", values: ["1,5 %", "0,5 %", "0", "0"] }],
   },
   {
-    category: "Staking",
+    category: "Hyxora In",
     rows: [
       { concept: "Entrada Staking", values: ["1 %", "0", "0", "0"] },
       { concept: "Rewards", values: ["1 %", "0", "0", "0"] },
@@ -61,7 +61,7 @@ const feeGroups = [
     rows: [{ concept: "Off-Ramp", values: ["1 %", "0,5 %", "0,3 %", "0,5 %"] }],
   },
   {
-    category: "ETFs",
+    category: "Hyxora Plus",
     rows: [
       { concept: "Entrada ETF", values: [null, "2 %", "1 %", "2 %"] },
       { concept: "Salida ETF", values: [null, "1 %", "1 %", "1 %"] },
