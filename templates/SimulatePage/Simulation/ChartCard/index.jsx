@@ -43,7 +43,7 @@ const CustomTooltip = ({ active, payload, label }) => {
         </span>
       </div>
       <div className="flex items-center gap-[8px] mb-[6px]">
-        <span className="size-[7px] rounded-full bg-[#00A656] shrink-0" />
+        <span className="size-[7px] rounded-full bg-[#0EA5A6] shrink-0" />
         <span className="text-[#727272]">Contribución:</span>
         <span className="text-[#1B1B1B] font-bold ml-auto pl-[12px]">
           $<NumberFlow value={contrib} format={{ useGrouping: true }} />
@@ -255,7 +255,7 @@ const ChartCanvas = memo(function ChartCanvas({ data }) {
           <Bar
             dataKey="contributions"
             stackId="a"
-            fill="#00A656"
+            fill="#0EA5A6"
             radius={[2, 2, 2, 2]}
             className="bar-contributions"
             shape={cellShape}

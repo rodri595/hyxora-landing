@@ -170,7 +170,7 @@ const ExploreDropdown = () => {
             <div className="flex flex-col gap-[14px] flex-1">
               <ExploreMenuItem
                 image={learningCenterIcon}
-                title="Academia"
+                title="Tutoriales"
                 description="Formate en Hyxora"
                 href={authenticated ? "/academy" : "/tutorials"}
               />

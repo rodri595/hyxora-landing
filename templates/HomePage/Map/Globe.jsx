@@ -4,23 +4,23 @@ import { useEffect, useRef, useCallback } from "react";
 import { useSpring } from "react-spring";
 import { useLenis } from "lenis/react";
 
-// const MARKERS = [
-// { id: "bogota", location: [4.71, -74.07], label: "Bogotá" },
-// {
-//   id: "saopaulo",
-//   location: [-23.55, -46.63],
-//   label: "São Paulo",
-// },
-// {
-//   id: "buenosaires",
-//   location: [-34.6, -58.38],
-//   label: "Buenos Aires",
-// },
-// { id: "caracas", location: [10.48, -66.9], label: "Caracas" },
-// // Central America / Mexico — blended in
-// { id: "panama", location: [8.98, -79.52], label: "Panamá" },
-// { id: "mexico", location: [19.43, -99.13], label: "México" },
-// ];
+const MARKERS = [
+  // { id: "bogota", location: [4.71, -74.07], label: "Bogotá" },
+  // {
+  //   id: "saopaulo",
+  //   location: [-23.55, -46.63],
+  //   label: "São Paulo",
+  // },
+  // {
+  //   id: "buenosaires",
+  //   location: [-34.6, -58.38],
+  //   label: "Buenos Aires",
+  // },
+  // { id: "caracas", location: [10.48, -66.9], label: "Caracas" },
+  // // Central America / Mexico — blended in
+  { id: "panama", location: [8.98, -79.52], label: "Panamá" },
+  // { id: "mexico", location: [19.43, -99.13], label: "México" },
+];
 
 const Globe = () => {
   const lenis = useLenis();
@@ -158,11 +158,11 @@ const Globe = () => {
       arcHeight: 0.1,
       opacity: 0.7,
       markerElevation: 0.0,
-      // markers: MARKERS.map((m) => ({
-      //   location: m.location,
-      //   size: 0.03,
-      //   id: m.id,
-      // })),
+      markers: MARKERS.map((m) => ({
+        location: m.location,
+        size: 0.03,
+        id: m.id,
+      })),
       // arcs: ARCS.map(({ id, from, to }) => ({ id, from, to })),
     });
 
@@ -254,7 +254,7 @@ const Globe = () => {
         }}
       />
       {/* City name labels — only the curated subset with a `label`. */}
-      {/* {MARKERS.map((m) => (
+      {MARKERS.map((m) => (
         <div
           key={m.id}
           className="showcase-default-label "
@@ -266,7 +266,7 @@ const Globe = () => {
         >
           {m.label}
         </div>
-      ))} */}
+      ))}
     </div>
   );
 };

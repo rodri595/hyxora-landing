@@ -182,7 +182,7 @@ const TableCard = () => {
           <title>Total al alza</title>
           <path
             d="M5 8.5V1.5M5 1.5L1.5 5M5 1.5L8.5 5"
-            stroke="#00A656"
+            stroke="#0EA5A6"
             strokeWidth="1.2"
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -207,8 +207,8 @@ const TableCard = () => {
       <MiniTable
         data={contributionRows}
         columns={contributionColumns}
-        barGradient="linear-gradient(to left, #00A656, transparent)"
-        accentClass="text-[#00A656]"
+        barGradient="linear-gradient(to left, #0EA5A6, transparent)"
+        accentClass="text-[#0EA5A6]"
       />
 
       {/* Footer: base/contribution ratio gauge */}
@@ -232,7 +232,7 @@ const TableCard = () => {
             />
             <div className="w-[4.5px] shrink-0" />
             <div
-              className="h-full flex-1 rounded-r-full bg-[#00A656]"
+              className="h-full flex-1 rounded-r-full bg-[#0EA5A6]"
               style={{
                 clipPath: "polygon(2.5px 0, 100% 0, 100% 100%, 0 100%)",
               }}
@@ -255,7 +255,7 @@ const TableCard = () => {
               />
               <path
                 d="M12 1L8 14"
-                stroke="#00A656"
+                stroke="#0EA5A6"
                 strokeWidth="2"
                 strokeLinecap="round"
               />
@@ -264,7 +264,7 @@ const TableCard = () => {
 
           {/* Right end dot + blurred halo */}
           <div className="relative size-[16px] shrink-0">
-            <div className="absolute left-[4px] top-[4px] size-[8px] rounded-full bg-[#00A656]" />
+            <div className="absolute left-[4px] top-[4px] size-[8px] rounded-full bg-[#0EA5A6]" />
             <div className="absolute inset-0 rounded-full bg-white/50 backdrop-blur-[2.5px]" />
           </div>
         </div>

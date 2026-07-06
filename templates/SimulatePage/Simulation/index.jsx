@@ -38,9 +38,9 @@ const StatCards = () => {
       />
       <StatCard
         id="green"
-        color="#00A656"
-        badgeBg="rgba(0,166,86,0.15)"
-        glowFill="#00A656"
+        color="#0EA5A6"
+        badgeBg="rgba(14,165,166,0.15)"
+        glowFill="#0EA5A6"
         titleTop="Contribución"
         titleBottom={frequency === "monthly" ? "Mensual" : "Anual"}
         label="Aportación:"
@@ -104,7 +104,7 @@ const VaultCard = ({ showSimulator, onToggleSimulator }) => {
         {isVaultLoading ? (
           <span className="w-[44px] h-[12px] rounded-[4px] bg-[#ECECEC] animate-pulse" />
         ) : (
-          <span className="text-[14px] font-[700] text-[#00A656] h-[12px]">
+          <span className="text-[14px] font-[700] text-[#0EA5A6] h-[12px]">
             {+(apy * 100).toFixed(2)}%
           </span>
         )}

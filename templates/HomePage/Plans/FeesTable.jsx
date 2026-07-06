@@ -14,7 +14,7 @@ const feeGroups = [
   },
   {
     category: "VIban",
-    rows: [{ concept: "VIban - USDC", values: ["1,5 %", "0,5 %", "0", "0"] }],
+    rows: [{ concept: "VIban - USDC", values: ["1.5 %", "0.5 %", "0", "0"] }],
   },
   {
     category: "Hyxora In",
@@ -24,10 +24,10 @@ const feeGroups = [
       {
         concept: "Withdraw",
         values: [
-          { fee: "0,2 %", note: "Mín $0,5 – Máx $2,25" },
-          { fee: "0,1 %", note: "Mín $0,5 – Máx $2,25" },
-          { fee: "0,1 %", note: "Máx $1,15" },
-          { fee: "0,1 %", note: "Mín $0,5 – Máx $2,25" },
+          { fee: "0.2 %", note: "Mín $0.5 – Máx $2.25" },
+          { fee: "0.1 %", note: "Mín $0.5 – Máx $2.25" },
+          { fee: "0.1 %", note: "Máx $1.15" },
+          { fee: "0.1 %", note: "Mín $0.5 – Máx $2.25" },
         ],
       },
     ],
@@ -38,10 +38,10 @@ const feeGroups = [
       {
         concept: "De Hyxora a Wallet",
         values: [
-          { fee: "0,5 %", note: "Mín $1,15" },
-          "$0,30",
-          "$0,10",
-          "$0,30",
+          { fee: "0.5 %", note: "Mín $1.15" },
+          "$0.30",
+          "$0.10",
+          "$0.30",
         ],
       },
       { concept: "De Hyxora a Hyxora", values: ["0", "0", "0", "0"] },
@@ -52,13 +52,13 @@ const feeGroups = [
     rows: [
       {
         concept: "Crypto a crypto",
-        values: ["0,90 %", "0,50 %", "0,50 %", "0,50 %"],
+        values: ["0.90 %", "0.50 %", "0.50 %", "0.50 %"],
       },
     ],
   },
   {
     category: "Withdraw a Fiat",
-    rows: [{ concept: "Off-Ramp", values: ["1 %", "0,5 %", "0,3 %", "0,5 %"] }],
+    rows: [{ concept: "Off-Ramp", values: ["1 %", "0.5 %", "0.3 %", "0.5 %"] }],
   },
   {
     category: "Hyxora Plus",
@@ -73,11 +73,11 @@ const feeGroups = [
       {
         concept: "Suscripción mensual",
         emphasis: true,
-        values: ["1,99 US$", "9,99 US$", "0,00 US$", "24,99 US$"],
+        values: ["1.99 US$", "9.99 US$", "0.00 US$", "24.99 US$"],
       },
       {
         concept: "Suscripción anual",
-        values: ["19,00 US$", "96,00 US$", "0,00 US$", "240,00 US$"],
+        values: ["19.00 US$", "96.00 US$", "0.00 US$", "240.00 US$"],
       },
     ],
   },
@@ -178,7 +178,10 @@ const FeesTable = () => {
         </div>
 
         {/* Table wrapper */}
-        <div className="overflow-x-auto rounded-xl border-[0.7px] border-[rgba(25,54,63,0.08)] bg-white shadow-[0px_1px_4px_0px_rgba(25,54,63,0.04)] scrollbar-thin scrollbar-thumb-[rgba(25,54,63,0.2)] scrollbar-thumb-rounded-lg">
+        <div
+          data-lenis-prevent
+          className="overflow-x-auto rounded-xl border-[0.7px] border-[rgba(25,54,63,0.08)] bg-white shadow-[0px_1px_4px_0px_rgba(25,54,63,0.04)] scrollbar-thin scrollbar-thumb-[rgba(25,54,63,0.2)] scrollbar-thumb-rounded-lg"
+        >
           <table className="w-full border-separate border-spacing-0">
             <caption className="sr-only">Tabla de comisiones por plan</caption>
             <thead>

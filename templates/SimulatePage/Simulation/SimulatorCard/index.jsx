@@ -212,7 +212,7 @@ const SimulatorCard = () => {
             }
             value={contribution}
             onChange={setContribution}
-            accent="#00A656"
+            accent="#0EA5A6"
           />
         </div>
 
@@ -225,7 +225,7 @@ const SimulatorCard = () => {
             <span className="text-[12px] font-medium text-[#727272] leading-none">
               Retorno estimado
             </span>
-            <span className="text-[14px] font-semibold tracking-[-0.56px] text-[#00A656]">
+            <span className="text-[14px] font-semibold tracking-[-0.56px] text-[#0EA5A6]">
               +<NumberFlow value={projectedReturn} format={USD_FORMAT} />
             </span>
           </div>

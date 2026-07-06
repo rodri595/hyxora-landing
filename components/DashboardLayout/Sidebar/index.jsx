@@ -232,7 +232,7 @@ const Sidebar = ({ isSpecialPage, isSidebarOpen, setIsSidebarOpen }) => {
     },
     {
       id: 5,
-      title: "Academia",
+      title: "Tutoriales",
       description: "Aprende paso a paso",
       icon: (
         <Icon

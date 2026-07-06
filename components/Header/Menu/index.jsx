@@ -46,7 +46,13 @@ const MenuItem = ({
           {icon ? (
             icon
           ) : image ? (
-            <Image src={image} alt={title} width={16} height={16} className="size-[16px] " />
+            <Image
+              src={image}
+              alt={title}
+              width={16}
+              height={16}
+              className="size-[16px] "
+            />
           ) : null}
         </div>
       )}
@@ -68,7 +74,9 @@ const MenuItem = ({
   );
 
   const baseClassName = `box-border flex gap-[15px] items-center p-[6px] relative rounded-[12px] shrink-0 ${
-    disabled ? "cursor-not-allowed opacity-50" : "hover:bg-[rgba(25,54,63,0.02)] transition-all"
+    disabled
+      ? "cursor-not-allowed opacity-50"
+      : "hover:bg-[rgba(25,54,63,0.02)] transition-all"
   } max-h-[46px] ${className}`;
 
   // If disabled, render as div
@@ -88,7 +96,12 @@ const MenuItem = ({
   // If external link, use anchor tag
   if (external || href) {
     return (
-      <Link href={href} rel="noopener noreferrer" className={baseClassName} {...props}>
+      <Link
+        href={href}
+        rel="noopener noreferrer"
+        className={baseClassName}
+        {...props}
+      >
         {content}
       </Link>
     );
@@ -102,11 +115,16 @@ const MenuComponent = () => {
   const { data: paymentsData } = GetMyPayments();
   const hasNft = useMemo(() => {
     if (!paymentsData || paymentsData?.length === 0) return false;
-    return paymentsData.some((payment) => payment?.status === "completed" && payment?.tokenId);
+    return paymentsData.some(
+      (payment) => payment?.status === "completed" && payment?.tokenId,
+    );
   }, [paymentsData]);
   const { data: userInformation } = useGetUserInformation();
   const isAdmin = useMemo(() => {
-    return userInformation?.information?.role?.includes(roleNames?.admin ?? "") ?? false;
+    return (
+      userInformation?.information?.role?.includes(roleNames?.admin ?? "") ??
+      false
+    );
   }, [userInformation]);
   const { logout, smartWalletAddress } = useWeb3();
   const [isActive, setIsActive] = useState(false);
@@ -183,7 +201,7 @@ const MenuComponent = () => {
           opacity: 1,
           duration: 0.5,
           ease: "power3.out",
-        }
+        },
       );
       gsap.fromTo(
         contentRef.current,
@@ -197,7 +215,7 @@ const MenuComponent = () => {
           duration: 0.4,
           delay: 0.2,
           ease: "power2.out",
-        }
+        },
       );
     } else if (menuRef.current) {
       gsap.to(menuRef.current, {
@@ -219,7 +237,7 @@ const MenuComponent = () => {
           onClick={toggleMenu}
           type="button"
           className={cn(
-            "group hidden max-md:flex rounded-[8px] border-[0.7px] border-[rgba(25,54,63,0.02)] bg-[rgba(25,54,63,0.04)] shadow-[0px_0px_4px_0px_inset_rgba(25,54,63,0.04)] justify-center items-center shrink-0 !h-[32px] !w-[32px] focus:outline-none"
+            "group hidden max-md:flex rounded-[8px] border-[0.7px] border-[rgba(25,54,63,0.02)] bg-[rgba(25,54,63,0.04)] shadow-[0px_0px_4px_0px_inset_rgba(25,54,63,0.04)] justify-center items-center shrink-0 !h-[32px] !w-[32px] focus:outline-none",
           )}
         >
           {isActive ? (
@@ -240,7 +258,11 @@ const MenuComponent = () => {
               />
             </svg>
           ) : (
-            <Image src={menuIcon} alt="Menu" className={cn("w-[16px] h-[16px]")} />
+            <Image
+              src={menuIcon}
+              alt="Menu"
+              className={cn("w-[16px] h-[16px]")}
+            />
           )}
         </button>
         <div
@@ -248,7 +270,7 @@ const MenuComponent = () => {
           data-lenis-prevent
           className={cn(
             "fixed top-[52px] left-0 bottom-0 right-0 z-10 hidden flex-col w-full  border-[0.7px]  grow border-[rgba(25,54,63,0.02)] bg-[rgba(250,251,251)] focus:outline-none ",
-            "min-h-[calc(100dvh-52px)] max-h-[calc(100dvh-52px)]"
+            "min-h-[calc(100dvh-52px)] max-h-[calc(100dvh-52px)]",
           )}
         >
           <div
@@ -262,7 +284,11 @@ const MenuComponent = () => {
               className="bg-[#1b5ffd] border border-[rgba(255,255,255,0.2)] border-solid h-[30px] relative rounded-[100px] cursor-pointer mb-2"
             >
               <div className="flex gap-[3px] h-[30px] items-center justify-center overflow-hidden p-[8px] relative rounded-[inherit]">
-                <Image src={fireSVG} alt="Fire Icon" className="relative w-[10px] h-[10px]" />
+                <Image
+                  src={fireSVG}
+                  alt="Fire Icon"
+                  className="relative w-[10px] h-[10px]"
+                />
                 <p className="font-medium text-[12px] text-[#f7f8f8] tracking-[-0.48px] whitespace-nowrap">
                   NFT Founder
                 </p>
@@ -309,7 +335,13 @@ const MenuComponent = () => {
                 <div className="flex flex-col space-y-2 mb-6">
                   {isAdmin && (
                     <MenuItem
-                      icon={<Icon name="diamond" className="w-[16px] h-[16px]" size={20} />}
+                      icon={
+                        <Icon
+                          name="diamond"
+                          className="w-[16px] h-[16px]"
+                          size={20}
+                        />
+                      }
                       title="Admin Panel"
                       description="Gestionar plataforma"
                       className="w-full max-w-none"
@@ -317,14 +349,18 @@ const MenuComponent = () => {
                     />
                   )}
                   <MenuItem
-                    icon={<Icon name="profile" className="w-[16px] h-[16px] " />}
+                    icon={
+                      <Icon name="profile" className="w-[16px] h-[16px] " />
+                    }
                     title="Mi Perfil"
                     description="Tu perfil personal"
                     className="w-full max-w-none"
                     href="/profile"
                   />
                   <MenuItem
-                    icon={<Icon name="documents" className="w-[16px] h-[16px]" />}
+                    icon={
+                      <Icon name="documents" className="w-[16px] h-[16px]" />
+                    }
                     title="Comité Consultivo"
                     description="Únete al comité"
                     className="w-full max-w-none"
@@ -332,7 +368,13 @@ const MenuComponent = () => {
                     disabled={!hasNft}
                   />
                   <MenuItem
-                    icon={<Icon name="sparkle" className="w-[16px] h-[16px]" size={20} />}
+                    icon={
+                      <Icon
+                        name="sparkle"
+                        className="w-[16px] h-[16px]"
+                        size={20}
+                      />
+                    }
                     title="Mis NFTs"
                     description="Tus NFTs coleccionables"
                     className="w-full max-w-none"
@@ -371,7 +413,7 @@ const MenuComponent = () => {
               />
               <MenuItem
                 image={learningCenterIcon}
-                title="Academia"
+                title="Tutoriales"
                 description="Formate en Hyxora"
                 className="w-full max-w-none"
                 href={authenticated ? "/academy" : "/tutorials"}
@@ -425,19 +467,25 @@ const MenuComponent = () => {
             </div>
             <div className="flex flex-col space-y-2 mb-6">
               <MenuItem
-                icon={<Icon name="verification" className="w-[16px] h-[16px] " />}
+                icon={
+                  <Icon name="verification" className="w-[16px] h-[16px] " />
+                }
                 title="Documentación"
                 disabled
                 className="w-full max-w-none"
               />
               <MenuItem
-                icon={<Icon name="verification" className="w-[16px] h-[16px] " />}
+                icon={
+                  <Icon name="verification" className="w-[16px] h-[16px] " />
+                }
                 title="Blog"
                 disabled
                 className="w-full max-w-none"
               />
               <MenuItem
-                icon={<Icon name="verification" className="w-[16px] h-[16px] " />}
+                icon={
+                  <Icon name="verification" className="w-[16px] h-[16px] " />
+                }
                 title="Soporte"
                 className="w-full max-w-none"
                 href="mailto:future@hyxora.com"
@@ -447,11 +495,19 @@ const MenuComponent = () => {
             <div className="flex flex-col mt-auto pt-2 border-t space-y-1 pl-12">
               <span className="text-[rgba(25,54,63,0.70)] leading-[18px] font-inter text-[12px] font-normal tracking-[-0.24px]">
                 Al usar la plataforma aceptas nuestros{" "}
-                <Link href="/terms" target="_blank" className="text-[#19363F] font-bold">
+                <Link
+                  href="/terms"
+                  target="_blank"
+                  className="text-[#19363F] font-bold"
+                >
                   Términos de Uso
                 </Link>{" "}
                 y nuestra{" "}
-                <Link href="/privacy" target="_blank" className="text-[#19363F] font-bold">
+                <Link
+                  href="/privacy"
+                  target="_blank"
+                  className="text-[#19363F] font-bold"
+                >
                   Política de Privacidad
                 </Link>
               </span>
