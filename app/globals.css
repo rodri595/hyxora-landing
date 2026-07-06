@@ -1,7 +1,5 @@
 @import "tailwindcss";
 
-@custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *));
-
 :root {
   --color-bg-surface1: #ffffff;
   --color-bg-surface2: #fdfdfd;
@@ -131,7 +129,6 @@
 }
 
 @theme {
-  --breakpoint-*: initial;
   --breakpoint-sm: 480px;
   --breakpoint-md: 767px;
   --breakpoint-lg: 1023px;
@@ -257,9 +254,6 @@
 }
 
 @layer base {
-  /* html {
-    scrollbar-gutter: stable;
-  } */
   html {
     scrollbar-width: thin;
     scrollbar-color: rgba(150, 150, 150, 0.25) transparent;
@@ -332,6 +326,19 @@ html.lenis body {
     transform: rotate(360deg);
   }
 }
+
+@keyframes rail-ping {
+  0% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 0.9;
+  }
+  70%,
+  100% {
+    transform: translate(-50%, -50%) scale(2.6);
+    opacity: 0;
+  }
+}
+
 .showcases-canvas {
   width: 100%;
   height: 100%;
