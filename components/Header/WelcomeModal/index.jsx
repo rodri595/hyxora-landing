@@ -5,6 +5,7 @@ import Image from "@/components/Image";
 import Error from "@/components/Error";
 import Spinner from "@/components/Spinner";
 import Field from "@/components/Field";
+import Checkbox from "@/components/Checkbox";
 import userIMG from "./users.svg";
 import Modal from "@/components/Modal";
 import { useState } from "react";
@@ -142,33 +143,32 @@ const WelcomeModal = ({ open, onClose, onLogin }) => {
           )}
 
           {/* Terms */}
-          <label className="flex items-center gap-3 cursor-pointer">
-            <input
-              type="checkbox"
-              checked={acceptedTerms}
-              onChange={(e) => setAcceptedTerms(e.target.checked)}
-              required
-              className="accent-[#19363f] w-4 h-4 shrink-0"
-            />
-            <span className=" text-[rgba(25,54,63,0.70)] leading-[18px] font-inter text-[12px] font-normal tracking-[-0.24px]">
-              Al usar la plataforma aceptas nuestros{" "}
-              <Link
-                href="/terms"
-                target="_blank"
-                className="text-[#19363F] font-bold"
-              >
-                Términos de Uso
-              </Link>{" "}
-              y nuestra{" "}
-              <Link
-                href="/privacy"
-                target="_blank"
-                className="text-[#19363F] font-bold"
-              >
-                Política de Privacidad
-              </Link>
-            </span>
-          </label>
+          <Checkbox
+            checked={acceptedTerms}
+            onChange={(e) => {
+              setAcceptedTerms(e.target.checked);
+            }}
+            required
+            className="gap-3 items-start"
+            labelClassName="font-normal text-[rgba(25,54,63,0.70)]"
+          >
+            Al usar la plataforma aceptas nuestros{" "}
+            <Link
+              href="/terms"
+              target="_blank"
+              className="text-[#19363F] font-bold"
+            >
+              Términos de Uso
+            </Link>{" "}
+            y nuestra{" "}
+            <Link
+              href="/privacy"
+              target="_blank"
+              className="text-[#19363F] font-bold"
+            >
+              Política de Privacidad
+            </Link>
+          </Checkbox>
           {isLoadingNewsletter ? (
             <Spinner className="size-[80px]" />
           ) : (

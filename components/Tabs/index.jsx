@@ -1,4 +1,7 @@
+"use client";
+
 import { cn } from "@/utils";
+import { haptic } from "@/utils/haptics";
 
 /**
  * Underline-style tab bar.
@@ -19,7 +22,10 @@ const Tabs = ({ tabs, value, onChange, className }) => (
       <button
         key={tab.id}
         type="button"
-        onClick={() => onChange(tab.id)}
+        onClick={() => {
+          if (tab.id !== value) haptic("selection");
+          onChange(tab.id);
+        }}
         className={cn(
           "py-2.5 mr-4 font-inter text-[11px] font-medium tracking-[-0.44px] border-b-[1.5px] -mb-px transition-colors whitespace-nowrap",
           value === tab.id

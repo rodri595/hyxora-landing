@@ -1,28 +1,29 @@
 "use client";
 
-import menuIcon from "@/assets/imgs/icons/menu.svg";
-import Image from "@/components/Image";
-import Icon from "@/components/Icon";
-import Button from "@/components/Button";
 import trendingIcon from "@/assets//imgs/icons/trending.png";
-import newListingsIcon from "@/assets/imgs/icons/newlisting.png";
-import learningCenterIcon from "@/assets/imgs/icons/learning.png";
-import Link from "next/link";
-import { useLenis } from "lenis/react";
-import { useEffect, useState, useRef, useMemo } from "react";
-import gsap from "gsap";
-import { useGSAP } from "@gsap/react";
-import { ScrollToPlugin } from "gsap/ScrollToPlugin";
 import fireSVG from "@/assets/imgs/icons/fire.svg";
-import { useLogin, usePrivy } from "@privy-io/react-auth";
-import WelcomeModal from "../WelcomeModal";
-import { useWeb3 } from "@/context/Web3Provider";
-import { shortenAddress, copyToClipboard, cn } from "@/utils";
+import learningCenterIcon from "@/assets/imgs/icons/learning.png";
+import menuIcon from "@/assets/imgs/icons/menu.svg";
+import newListingsIcon from "@/assets/imgs/icons/newlisting.png";
 import podcastIMG from "@/assets/imgs/podcast//Logo fondo cuadrodo E Negro.png";
-import { GetMyPayments } from "@/hooks/nfts/GetMyPayments";
-import { useGetUserInformation } from "@/hooks/user/useGetUserInformation";
-import { useSectionScroll } from "@/hooks/useSectionScroll";
+import Button from "@/components/Button";
+import Icon from "@/components/Icon";
+import Image from "@/components/Image";
 import { roleNames } from "@/constants/roles";
+import { useWeb3 } from "@/context/Web3Provider";
+import { GetMyPayments } from "@/hooks/nfts/GetMyPayments";
+import { useSectionScroll } from "@/hooks/useSectionScroll";
+import { useGetUserInformation } from "@/hooks/user/useGetUserInformation";
+import { cn, copyToClipboard, shortenAddress } from "@/utils";
+import { haptic } from "@/utils/haptics";
+import { useGSAP } from "@gsap/react";
+import { useLogin, usePrivy } from "@privy-io/react-auth";
+import gsap from "gsap";
+import { ScrollToPlugin } from "gsap/ScrollToPlugin";
+import { useLenis } from "lenis/react";
+import Link from "next/link";
+import { useEffect, useMemo, useRef, useState } from "react";
+import WelcomeModal from "../WelcomeModal";
 gsap.registerPlugin(ScrollToPlugin);
 
 // MenuItem component for the mobile menu
@@ -143,6 +144,7 @@ const MenuComponent = () => {
   };
 
   const toggleMenu = () => {
+    haptic(isActive ? "soft" : "light");
     setIsActive((prev) => !prev);
   };
 
@@ -234,7 +236,9 @@ const MenuComponent = () => {
         <button
           onClick={toggleMenu}
           type="button"
-          className="group hidden max-md:flex rounded-[8px] border-[0.7px] border-[rgba(25,54,63,0.02)] bg-[rgba(25,54,63,0.04)] shadow-[0px_0px_4px_0px_inset_rgba(25,54,63,0.04)] justify-center items-center shrink-0 !h-[32px] !w-[32px] focus:outline-none"
+          className={cn(
+            "group hidden max-md:flex rounded-[8px] border-[0.7px] border-[rgba(25,54,63,0.02)] bg-[rgba(25,54,63,0.04)] shadow-[0px_0px_4px_0px_inset_rgba(25,54,63,0.04)] justify-center items-center shrink-0 !h-[32px] !w-[32px] focus:outline-none",
+          )}
         >
           {isActive ? (
             <svg
@@ -244,16 +248,21 @@ const MenuComponent = () => {
               fill="none"
               xmlns="http://www.w3.org/2000/svg"
             >
+              <title>Close Menu</title>
               <path
                 d="M12 4L4 12M4 4L12 12"
-                stroke="#19363f"
+                stroke={"#19363f"}
                 strokeWidth="1.5"
                 strokeLinecap="round"
                 strokeLinejoin="round"
               />
             </svg>
           ) : (
-            <Image src={menuIcon} alt="Menu" className="w-[16px] h-[16px]" />
+            <Image
+              src={menuIcon}
+              alt="Menu"
+              className={cn("w-[16px] h-[16px]")}
+            />
           )}
         </button>
         <div
@@ -404,17 +413,24 @@ const MenuComponent = () => {
               />
               <MenuItem
                 image={learningCenterIcon}
-                title="Academia"
+                title="Tutoriales"
                 description="Formate en Hyxora"
                 className="w-full max-w-none"
-                disabled
+                href={authenticated ? "/academy" : "/tutorials"}
               />
               <MenuItem
-                title="Podcast de Hyxora"
-                description="El Elefante Desnudo"
+                title="Podcasts"
+                description="Escucha nuestros podcasts"
                 className="w-full max-w-none"
                 href="/podcast"
                 image={podcastIMG}
+              />
+              <MenuItem
+                title="Simulador de Inversión"
+                description="Simulador de inversiones"
+                className="w-full max-w-none"
+                href="/simulate"
+                image={newListingsIcon}
               />
             </div>
             {/* Información Section */}

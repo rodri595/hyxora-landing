@@ -1,5 +1,6 @@
 "use client";
 import { useState, useMemo } from "react";
+import { usePathname } from "next/navigation";
 import Link from "next/link";
 import Image from "@/components/Image";
 import Button from "@/components/Button";
@@ -22,11 +23,17 @@ const MenuItem = ({ children, href = "#", ...props }) => {
   return (
     <Link
       href={href}
-      className="box-border flex h-[28px] items-center justify-center p-[2px] relative rounded-[6px] shrink-0 hover:bg-[rgba(25,54,63,0.04)] transition-all"
+      className={
+        "box-border flex h-[28px] items-center justify-center p-[2px] relative rounded-[6px] shrink-0 transition-all hover:bg-[rgba(25,54,63,0.04)]"
+      }
       {...props}
     >
       <div className="box-border flex gap-[10px] items-center justify-center px-2 py-[6px] relative shrink-0">
-        <span className="font-inter font-medium leading-6 text-[#19363f] text-[16px] whitespace-nowrap tracking-[-0.64px]">
+        <span
+          className={
+            "font-inter font-medium leading-6 text-[16px] whitespace-nowrap tracking-[-0.64px] transition-colors duration-300 text-[#19363f]"
+          }
+        >
           {children}
         </span>
       </div>
@@ -118,6 +125,8 @@ const ExploreMenuItem = ({
 };
 const ExploreDropdown = () => {
   const { data: paymentsData } = GetMyPayments();
+  const { authenticated } = usePrivy();
+
   const hasNft = useMemo(() => {
     if (!paymentsData || paymentsData?.length === 0) return false;
     return paymentsData.some(
@@ -128,10 +137,10 @@ const ExploreDropdown = () => {
     <div className="group relative">
       <button
         type="button"
-        className="box-border flex h-[28px] items-center justify-center gap-2 p-[2px] relative rounded-[6px] shrink-0 hover:bg-[rgba(25,54,63,0.04)] transition-all"
+        className="box-border flex h-[28px] items-center justify-center gap-2 p-[2px] relative rounded-[6px] shrink-0 transition-all hover:bg-[rgba(25,54,63,0.04)]"
       >
         <div className="box-border flex gap-[10px] items-center justify-center px-2 py-[6px] relative shrink-0">
-          <span className="font-inter font-medium leading-6 text-[#19363f] text-[16px] whitespace-nowrap tracking-[-0.64px]">
+          <span className="font-inter font-medium leading-6 text-[16px] whitespace-nowrap tracking-[-0.64px] transition-colors duration-300 text-[#19363f]">
             Hyxora
           </span>
         </div>
@@ -161,9 +170,9 @@ const ExploreDropdown = () => {
             <div className="flex flex-col gap-[14px] flex-1">
               <ExploreMenuItem
                 image={learningCenterIcon}
-                title="Academia"
+                title="Tutoriales"
                 description="Formate en Hyxora"
-                disabled
+                href={authenticated ? "/academy" : "/tutorials"}
               />
               <ExploreMenuItem
                 image={topGainersIcon}
@@ -173,7 +182,11 @@ const ExploreDropdown = () => {
               />
             </div>
             {/* Banner */}
-            <div className="flex flex-1">
+            <Link
+              target="_blank"
+              href="https://app.hyxora.com/"
+              className="flex flex-1"
+            >
               <div
                 className="relative flex items-end justify-center p-[12px] rounded-[12px] overflow-clip w-full"
                 style={{
@@ -221,7 +234,7 @@ const ExploreDropdown = () => {
                   </div>
                 </div>
               </div>
-            </div>
+            </Link>
           </div>
         </div>
       </div>
@@ -234,10 +247,10 @@ const OportunityDropdown = () => {
     <div className="group relative">
       <button
         type="button"
-        className="box-border flex h-[28px] items-center justify-center gap-2 p-[2px] relative rounded-[6px] shrink-0 hover:bg-[rgba(25,54,63,0.04)] transition-all"
+        className="box-border flex h-[28px] items-center justify-center gap-2 p-[2px] relative rounded-[6px] shrink-0 transition-all hover:bg-[rgba(25,54,63,0.04)]"
       >
         <div className="box-border flex gap-[10px] items-center justify-center px-2 py-[6px] relative shrink-0">
-          <span className="font-inter font-medium leading-6 text-[#19363f] text-[16px] whitespace-nowrap tracking-[-0.64px]">
+          <span className="font-inter font-medium leading-6 text-[16px] whitespace-nowrap tracking-[-0.64px] transition-colors duration-300 text-[#19363f]">
             Oportunidades DeFi
           </span>
         </div>
@@ -246,7 +259,7 @@ const OportunityDropdown = () => {
       {/* <div className="absolute top-full left-1/2  pt-4 -translate-x-1/2 transition-all group-hover:opacity-100 group-hover:visible "> */}
       <div className="absolute top-full left-1/2  pt-4 -translate-x-1/2 invisible opacity-0 transition-all group-hover:opacity-100 group-hover:visible pointer-events-none group-hover:pointer-events-auto">
         <div className="relative backdrop-blur-[15px] bg-[rgba(250,251,251)] border-[0.7px] border-[rgba(25,54,63,0.02)] border-solid flex flex-col gap-[10px] items-start overflow-clip p-[14px] rounded-[16px] shadow-[0px_3px_4px_-4px_rgba(25,54,63,0.05),0px_8px_8px_-4px_rgba(25,54,63,0.1)] shadow-[0px_0px_4px_0px_inset_rgba(25,54,63,0.04)]">
-          <div className="flex gap-[20px] items-stretch w-full h-[106px]">
+          <div className="flex gap-[20px] items-stretch w-full ">
             {/* Column 1 */}
             <div className="flex flex-col gap-[14px] flex-1">
               <ExploreMenuItem
@@ -260,6 +273,12 @@ const OportunityDropdown = () => {
                 title="Oportunidades"
                 description="Oportunidades en Hyxora"
                 onClick={() => handleSmoothScroll("#opportunities-section")}
+              />
+              <ExploreMenuItem
+                image={learningCenterIcon}
+                title="Simulador"
+                description="Simulador de inversiones"
+                href="/simulate"
               />
             </div>
           </div>
@@ -283,9 +302,11 @@ const Header = ({ isFixed }) => {
   return (
     <>
       <div
-        className={`relative z-20 backdrop-blur-[10px] bg-[rgba(255,255,255,0.8)] border-b border-white box-border  w-full ${
-          isFixed ? "fixed! top-0 left-0 right-0" : ""
-        }`}
+        className={cn(
+          "relative z-20 backdrop-blur-[10px] border-b box-border w-full transition-colors duration-500",
+          "bg-[rgba(255,255,255,0.8)] border-white",
+          isFixed && "fixed! top-0 left-0 right-0",
+        )}
       >
         <div className="box-border max-w-[1440px] w-full flex items-center h-[52px] px-[50px] py-3 mx-auto max-lg:px-4  max-md:px-4  max-md:py-[10px]">
           {/* Logo */}
@@ -293,14 +314,16 @@ const Header = ({ isFixed }) => {
             <Link href="/" className="flex gap-2 items-center shrink-0  ">
               <div className="relative shrink-0 size-6">
                 <Image
-                  className="w-full h-full object-contain"
+                  className={
+                    "w-full h-full object-contain transition-[filter] duration-300"
+                  }
                   src={brandIMG}
                   width={24}
                   height={24}
                   alt="Logo"
                 />
               </div>
-              <span className="font-inter font-semibold leading-6 text-[#19363f] text-[18px] whitespace-nowrap tracking-[-0.72px]">
+              <span className="font-inter font-semibold leading-6 text-[18px] whitespace-nowrap tracking-[-0.72px] transition-colors duration-300 text-[#19363f]">
                 Hyxora
               </span>
             </Link>
@@ -363,10 +386,10 @@ const Header = ({ isFixed }) => {
                   type="button"
                   onClick={() => setIsModalPurchaseNFTOpen(true)}
                   className={cn(
-                    "bg-[#1b5ffd] border border-[rgba(255,255,255,0.2)] border-solid h-[30px] relative rounded-[100px] cursor-pointer ",
+                    "bg-[#1b5ffd] border border-[rgba(255,255,255,0.2)] border-solid h-[30px] relative rounded-[100px] cursor-pointer overflow-hidden ",
                   )}
                 >
-                  <div className="flex gap-[3px] h-[30px] items-center justify-center overflow-hidden p-[8px] relative rounded-[inherit]">
+                  <div className="flex gap-0.75 h-full items-center justify-center overflow-hidden p-2 relative rounded-[inherit]">
                     <Image
                       src={fireSVG}
                       alt="Fire Icon"

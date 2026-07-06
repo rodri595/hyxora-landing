@@ -1,6 +1,7 @@
 "use client";
 
 import { cn } from "@/utils";
+import { haptic } from "@/utils/haptics";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import { useLenis } from "lenis/react";
@@ -42,6 +43,7 @@ const SectionRail = () => {
   const expandedRef = useRef(false);
   const chipShownRef = useRef(false);
   const lastScrollRef = useRef(null);
+  const activeIndexRef = useRef(0);
 
   const [items, setItems] = useState([]);
   const [activeIndex, setActiveIndex] = useState(0);
@@ -119,7 +121,9 @@ const SectionRail = () => {
       for (const el of labelRefs.current) {
         if (el) gsap.set(el, { yPercent: -50, x: 12, autoAlpha: 0 });
       }
-      setActiveIndex(getActiveIndex(window.scrollY));
+      const initialIndex = getActiveIndex(window.scrollY);
+      setActiveIndex(initialIndex);
+      activeIndexRef.current = initialIndex;
 
       settersRef.current = {
         fill: gsap.quickTo(fillRef.current, "scaleY", {
@@ -313,7 +317,10 @@ const SectionRail = () => {
       idleRef.current?.restart(true);
     }
 
-    setActiveIndex(getActiveIndex(instance.scroll));
+    const nextIndex = getActiveIndex(instance.scroll);
+    if (scrolled && nextIndex !== activeIndexRef.current) haptic("soft");
+    activeIndexRef.current = nextIndex;
+    setActiveIndex(nextIndex);
   });
 
   const expand = contextSafe(() => {
@@ -347,6 +354,7 @@ const SectionRail = () => {
   const scrollToSection = (index) => {
     const el = dataRef.current.els[index];
     if (!el || !lenis) return;
+    if (index !== activeIndexRef.current) haptic("selection");
     lenis.scrollTo(el, { offset: SCROLL_OFFSET, duration: 1.4 });
   };
 

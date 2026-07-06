@@ -14,17 +14,10 @@ const Layout = ({
 }) => {
   return (
     <div
-      className={`flex flex-col min-h-screen ${
+      className={`flex flex-col min-h-screen bg-b-surface1 ${
         isVisiblePlan ? "relative" : ""
       } ${className || ""}`}
     >
-      {isVisiblePlan && (
-        <>
-          <div className="fixed left-0 top-0 right-0 z-2 h-32 pointer-events-none bg-linear-to-b from-b-surface1 from-50% to-transparent max-md:h-22 max-md:from-80%"></div>
-          <div className="fixed left-0 bottom-0 right-0 z-2 h-32 pointer-events-none bg-linear-to-t from-b-surface1 from-50% to-transparent max-md:h-22 max-md:from-80%"></div>
-        </>
-      )}
-
       <Header isFixed={isFixedHeader} />
       <div className={`${classContainer || ""}`}>{children}</div>
       {!isHiddenFooter && <Footer />}

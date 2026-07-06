@@ -15,6 +15,7 @@ import CopyButton from "@/components/CopyButton";
 
 import posterIMG from "@/assets/imgs/brand/poster.jpeg";
 import Video from "@/components/Video";
+import Checkbox from "@/components/Checkbox";
 const FEATURES = [
   "Propiedad Real",
   "Privilegios Vitalicios",
@@ -27,40 +28,6 @@ const UNITS_AVAILABLE = 350;
 const PRICE = "3.000€";
 const PRICEIVA = "3.630€ (IVA incluido)";
 const DEFAULT_CONCEPT = "Compra NFT Founder_";
-/* ─── Dark inline checkbox ─── */
-const DarkCheckbox = ({ checked, onChange, children }) => (
-  <label className="flex items-center gap-2 cursor-pointer select-none">
-    <input
-      type="checkbox"
-      checked={checked}
-      onChange={onChange}
-      className="sr-only"
-    />
-    <div
-      className={`shrink-0 size-4 rounded-sm border transition-all flex items-center justify-center ${
-        checked
-          ? "bg-[#1b5ffd] border-[#1b5ffd]"
-          : "bg-[rgba(255,255,255,0.06)] border-[rgba(255,255,255,0.15)]"
-      }`}
-    >
-      {checked && (
-        <svg width="8" height="6" viewBox="0 0 10 8" fill="none">
-          <title>Checked</title>
-          <path
-            d="M1 4L3.5 6.5L9 1"
-            stroke="white"
-            strokeWidth="1.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </svg>
-      )}
-    </div>
-    <span className="text-[11px] text-[rgba(255,255,255,0.55)] leading-none tracking-[-0.22px]">
-      {children}
-    </span>
-  </label>
-);
 
 /* ─── Main component ─── */
 const PurchaseNFTModal = () => {
@@ -352,9 +319,12 @@ const PurchaseNFTModal = () => {
             </div>
 
             {/* Terms checkbox */}
-            <DarkCheckbox
+            <Checkbox
               checked={accepted}
               onChange={(e) => setAccepted(e.target.checked)}
+              boxClassName="size-4 rounded-sm"
+              checkedBoxClassName="bg-[#1b5ffd] border-[#1b5ffd]"
+              labelClassName="text-[11px] font-normal leading-none text-[rgba(255,255,255,0.55)] tracking-[-0.22px]"
             >
               Acepto los{" "}
               <Link
@@ -365,7 +335,7 @@ const PurchaseNFTModal = () => {
                 Términos y Condiciones
               </Link>
               .
-            </DarkCheckbox>
+            </Checkbox>
 
             {/* CTA */}
             <button

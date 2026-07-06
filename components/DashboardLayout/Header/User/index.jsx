@@ -4,6 +4,7 @@ import Image from "@/components/Image";
 import Icon from "@/components/Icon";
 import Link from "next/link";
 import { cn, shortenAddress, copyToClipboard } from "@/utils";
+import { haptic } from "@/utils/haptics";
 
 const MenuItemButton = ({
   title,
@@ -138,7 +139,10 @@ const UserDashboard = ({ isSpecialPage }) => {
 
   return (
     <Menu className="relative outline-none" as="div">
-      <MenuButton className="group flex gap-[4px] justify-center items-center outline-none">
+      <MenuButton
+        onClick={() => haptic("light")}
+        className="group flex gap-[4px] justify-center items-center outline-none"
+      >
         <Icon
           name="chevron"
           size={20}
@@ -171,14 +175,14 @@ const UserDashboard = ({ isSpecialPage }) => {
         modal={false}
       >
         <div className="flex p-[0_20px] pb-[8px] justify-center items-center gap-[10px]">
-          <label
+          <span
             className={cn(
               "text-[#19363F] leading-normal font-inter text-[16px] font-medium tracking-[-0.64px]",
               isSpecialPage && "text-[#fff]",
             )}
           >
             Menu
-          </label>
+          </span>
         </div>
         <div className="flex p-[6px_12px] justify-center items-start gap-0 w-full flex-col">
           {navigation.map((item) => (

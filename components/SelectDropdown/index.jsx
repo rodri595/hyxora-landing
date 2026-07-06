@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { cn } from "@/utils";
+import { haptic } from "@/utils/haptics";
 
 const ChevronIcon = () => (
   <svg
@@ -57,7 +58,10 @@ const SelectDropdown = ({ value, onChange, options = [], className }) => {
     <div className={cn("relative w-full", className)}>
       <button
         type="button"
-        onClick={() => setOpen((v) => !v)}
+        onClick={() => {
+          haptic("selection");
+          setOpen((v) => !v);
+        }}
         className="w-full flex items-center justify-between gap-2 h-8 px-2.5 rounded-lg border-[0.7px] border-[rgba(25,54,63,0.12)] bg-white font-inter text-[12px] tracking-[-0.48px] text-[#19363F] hover:border-[rgba(25,54,63,0.3)] transition-colors cursor-pointer"
       >
         <span>{selected?.label ?? "—"}</span>
@@ -91,6 +95,7 @@ const SelectDropdown = ({ value, onChange, options = [], className }) => {
                 key={opt.value}
                 type="button"
                 onClick={() => {
+                  haptic("selection");
                   onChange(opt.value);
                   setOpen(false);
                 }}

@@ -33,7 +33,7 @@ const Field = ({
   // iOS Safari zooms in when focusing a control under 16px; bump the font only
   // on iOS so the compact design is preserved on every other platform.
   const isIOS = useIsIOS();
-  const noZoomText = isIOS ? "text-[16px]" : "";
+  const noZoomText = isIOS ? "text-[16px]!" : "";
   return (
     <div className={`${className || ""}`}>
       {label && (
@@ -65,8 +65,8 @@ const Field = ({
               "w-full h-20 px-5.5 py-4 border-[1.5px] border-s-01 rounded-xl text-[13px] text-primary transition-colors resize-none outline-0 focus:border-s-02",
               hasTrailing && "pr-10",
               mono && "font-mono",
-              noZoomText,
               classInput,
+              noZoomText,
             )}
             {...props}
           />
@@ -79,8 +79,8 @@ const Field = ({
                 : "bg-[rgba(25,54,63,0.02)] border-[rgba(25,54,63,0.02)] text-[#5E7279] shadow-[0px_0px_4px_0px_inset_rgba(25,54,63,0.04)] focus:bg-white focus:border-[rgba(25,54,63,0.04)] focus:shadow-[0px_0px_4px_0px_inset_rgba(25,54,63,0.04)]",
               hasTrailing && "pr-10",
               mono && "font-mono",
-              noZoomText,
               classInput,
+              noZoomText,
             )}
             type={type || "text"}
             {...props}

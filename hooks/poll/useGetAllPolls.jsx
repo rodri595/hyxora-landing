@@ -14,7 +14,7 @@ export const useGetAllPolls = (props) => {
   return useQuery({
     queryKey: ["allPolls"],
     queryFn: async () => {
-      const response = await apiClient.get(`/poll/all`);
+      const response = await apiClient.get("/poll/all");
       return response?.data?.data?.polls || [];
     },
     staleTime: 1 * 60 * 1000, // 5 minutes
