@@ -328,7 +328,7 @@ const PurchaseNFTModal = () => {
             >
               Acepto los{" "}
               <Link
-                href="/terms"
+                href="/nft-terms"
                 target="_blank"
                 className="text-[rgba(255,255,255,0.70)] underline hover:text-white transition-colors"
               >
@@ -749,7 +749,10 @@ const PurchaseNFTModal = () => {
                     <span className="text-[11px] font-semibold text-white tracking-[-0.22px] break-all">
                       ES64 0182 0187 2902 0163 5449
                     </span>
-                    <CopyButton text="ES64 0182 0187 2902 0163 5449" variant="dark" />
+                    <CopyButton
+                      text="ES64 0182 0187 2902 0163 5449"
+                      variant="dark"
+                    />
                   </div>
                 </div>
                 <div className="flex flex-col gap-0.5">
@@ -944,7 +947,10 @@ const PurchaseNFTModal = () => {
                   <span className="text-[13px] font-semibold text-white tracking-[-0.26px]">
                     ES64 0182 0187 2902 0163 5449
                   </span>
-                  <CopyButton text="ES64 0182 0187 2902 0163 5449" variant="dark" />
+                  <CopyButton
+                    text="ES64 0182 0187 2902 0163 5449"
+                    variant="dark"
+                  />
                 </div>
               </div>
               <div className="flex flex-col gap-0.5">
@@ -987,7 +993,10 @@ const PurchaseNFTModal = () => {
                 <p className="text-[13px] font-semibold text-white tracking-[-0.26px]">
                   Compra NFT Founder_{username}
                 </p>
-                <CopyButton text={`Compra NFT Founder_${username}`} variant="dark" />
+                <CopyButton
+                  text={`Compra NFT Founder_${username}`}
+                  variant="dark"
+                />
               </div>
             </div>
 
