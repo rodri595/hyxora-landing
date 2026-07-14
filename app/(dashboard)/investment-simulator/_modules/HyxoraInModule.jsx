@@ -10,8 +10,8 @@ const OPPORTUNITIES = [
     risk: "low",
     apy: 4.54,
     token: "gtUSDCp",
-    invested: "30.94806989",
-    progress: 88,
+    invested: "0.00000000",
+    progress: 0,
     managedCapital: "$424,578,616.00",
   },
   {
@@ -32,8 +32,8 @@ const OPPORTUNITIES = [
     risk: "moderate",
     apy: 5.61,
     token: "fUSDC",
-    invested: "20.01658371",
-    progress: 4,
+    invested: "0.00000000",
+    progress: 0,
     managedCapital: "$8,763,416.33",
   },
 ];
@@ -43,7 +43,7 @@ const RISK_STYLES = {
   moderate: { label: "Moderado", className: "bg-[#D9C43C] text-[#19363F]" },
 };
 
-const investedTotal = "$50.96";
+const investedTotal = "$0.00";
 const bestReturn = Math.max(...OPPORTUNITIES.map((o) => o.apy));
 
 const StatBlock = ({ label, children }) => (

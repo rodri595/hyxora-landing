@@ -1,22 +1,23 @@
 "use client";
 
-import { useRef, useState, useEffect } from "react";
+import Field from "@/components/Field";
 import SelectDropdown from "@/components/SelectDropdown";
-import { useGSAP } from "@gsap/react";
-import gsap from "gsap";
-import { cn } from "@/utils";
+import Tabs from "@/components/Tabs";
 import { useEditUserInfo } from "@/hooks/admin/useEditUserInfo";
 import { useSetRole } from "@/hooks/admin/useSetRole";
-import Tabs from "@/components/Tabs";
-import Field from "@/components/Field";
+import { useGetSimAccount } from "@/hooks/simulator/useGetSimAccount";
+import { useUpdateSimUser } from "@/hooks/simulator/useUpdateSimUser";
+import { cn } from "@/utils";
+import { useGSAP } from "@gsap/react";
+import gsap from "gsap";
+import { useEffect, useRef, useState } from "react";
 
 gsap.registerPlugin(useGSAP);
 
 const parsePaymentInfo = (dataStr) => {
   try {
     const d = JSON.parse(dataStr ?? "{}");
-    if (d?.moonpay?.normalizedPrice)
-      return { amount: `${d.moonpay.normalizedPrice} EUR` };
+    if (d?.moonpay?.normalizedPrice) return { amount: `${d.moonpay.normalizedPrice} EUR` };
     if (d?.stripe?.paymentLink?.url) return { url: d.stripe.paymentLink.url };
     if (d?.transfer?.reference) return { ref: d.transfer.reference };
     return {};
@@ -35,8 +36,7 @@ const STATUS_CLASSES = {
 
 const PaymentCard = ({ payment }) => {
   const info = parsePaymentInfo(payment.data);
-  const statusCls =
-    STATUS_CLASSES[payment.status] ?? "bg-[rgba(25,54,63,0.06)] text-[#19363F]";
+  const statusCls = STATUS_CLASSES[payment.status] ?? "bg-[rgba(25,54,63,0.06)] text-[#19363F]";
 
   return (
     <div className="flex flex-col gap-2 p-3 rounded-[10px] border-[0.7px] border-[rgba(25,54,63,0.08)] bg-[rgba(25,54,63,0.01)]">
@@ -48,7 +48,7 @@ const PaymentCard = ({ payment }) => {
           <span
             className={cn(
               "inline-flex items-center px-1.5 py-0.5 rounded-sm font-inter text-[10px] font-medium tracking-[-0.4px]",
-              statusCls,
+              statusCls
             )}
           >
             {payment.status}
@@ -118,20 +118,12 @@ const PaymentCard = ({ payment }) => {
 // ── PaymentsPanel ──────────────────────────────────────────────────────────────
 
 const PaymentsPanel = ({ payments }) => {
-  const sorted = [...payments].sort(
-    (a, b) => new Date(b.createdAt) - new Date(a.createdAt),
-  );
+  const sorted = [...payments].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
   if (!sorted.length) {
     return (
       <div className="flex flex-col items-center justify-center gap-2 py-12">
-        <svg
-          width="24"
-          height="24"
-          viewBox="0 0 24 24"
-          fill="none"
-          aria-hidden="true"
-        >
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true">
           <rect
             x="2"
             y="5"
@@ -141,12 +133,7 @@ const PaymentsPanel = ({ payments }) => {
             stroke="rgba(25,54,63,0.2)"
             strokeWidth="1.5"
           />
-          <path
-            d="M2 10h20"
-            stroke="rgba(25,54,63,0.2)"
-            strokeWidth="1.5"
-            strokeLinecap="round"
-          />
+          <path d="M2 10h20" stroke="rgba(25,54,63,0.2)" strokeWidth="1.5" strokeLinecap="round" />
         </svg>
         <p className="font-inter text-[11px] tracking-[-0.44px] text-[rgba(25,54,63,0.35)]">
           Sin pagos registrados
@@ -177,8 +164,7 @@ const EditPanel = ({ user }) => {
   const { mutate: changeRole, isPending: savingRole } = useSetRole();
 
   const isSaving = savingInfo || savingRole;
-  const hasChanges =
-    phone !== (user.phoneNumber ?? "") || roleValue !== (user.role ?? "");
+  const hasChanges = phone !== (user.phoneNumber ?? "") || roleValue !== (user.role ?? "");
 
   const handleSave = () => {
     if (phone !== (user.phoneNumber ?? "")) {
@@ -192,20 +178,9 @@ const EditPanel = ({ user }) => {
   return (
     <div className="flex flex-col gap-4 p-4">
       {/* Read-only */}
-      <Field
-        label="Email"
-        value={user.email || "—"}
-        copy={user.email}
-        readOnly
-      />
+      <Field label="Email" value={user.email || "—"} copy={user.email} readOnly />
 
-      <Field
-        label="Wallet"
-        value={user.address || "—"}
-        copy={user.address}
-        readOnly
-        mono
-      />
+      <Field label="Wallet" value={user.address || "—"} copy={user.address} readOnly mono />
 
       {/* Editable */}
       <Field
@@ -244,11 +219,92 @@ const EditPanel = ({ user }) => {
   );
 };
 
+// ── SimuladorPanel ─────────────────────────────────────────────────────────────
+
+const SIM_STATUS_OPTIONS = [
+  { value: "active", label: "Activo" },
+  { value: "suspended", label: "Sin acceso" },
+];
+const SIM_ROLE_OPTIONS = [
+  { value: "user", label: "User" },
+  { value: "admin", label: "Admin" },
+];
+
+// Edits the matched SIM user (keyed by its Privy DID, `simUser.id`) — NOT the
+// main-backend user id. `status` is the whitelist: "active" = access.
+const SimuladorPanel = ({ simUser }) => {
+  const { mutate: updateSimUser, isPending } = useUpdateSimUser();
+  const [status, setStatus] = useState(simUser?.status ?? "suspended");
+  const [role, setRole] = useState(simUser?.role ?? "user");
+
+  if (!simUser) {
+    return (
+      <div className="flex flex-col items-center justify-center gap-2 py-12 px-4">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <circle cx="12" cy="8" r="3.5" stroke="rgba(25,54,63,0.2)" strokeWidth="1.5" />
+          <path
+            d="M5 20c0-3.5 3.1-6 7-6s7 2.5 7 6"
+            stroke="rgba(25,54,63,0.2)"
+            strokeWidth="1.5"
+            strokeLinecap="round"
+          />
+        </svg>
+        <p className="font-inter text-[11px] tracking-[-0.44px] text-[rgba(25,54,63,0.35)] text-center">
+          El usuario aún no ha ingresado al simulador
+        </p>
+      </div>
+    );
+  }
+
+  const hasChanges =
+    status !== (simUser.status ?? "suspended") || role !== (simUser.role ?? "user");
+
+  const handleSave = () => {
+    updateSimUser({ id: simUser.id, status, role });
+  };
+
+  return (
+    <div className="flex flex-col gap-4 p-4">
+      <Field label="Email" value={simUser.email || "—"} copy={simUser.email} readOnly />
+
+      <Field label="DID" value={simUser.id || "—"} copy={simUser.id} readOnly mono />
+
+      <div className="flex flex-col gap-1">
+        <span className="font-inter text-[10px] font-medium tracking-[-0.4px] text-[rgba(25,54,63,0.4)] uppercase">
+          Estado
+        </span>
+        <SelectDropdown value={status} onChange={setStatus} options={SIM_STATUS_OPTIONS} />
+      </div>
+
+      <div className="flex flex-col gap-1">
+        <span className="font-inter text-[10px] font-medium tracking-[-0.4px] text-[rgba(25,54,63,0.4)] uppercase">
+          Rol
+        </span>
+        <SelectDropdown value={role} onChange={setRole} options={SIM_ROLE_OPTIONS} />
+      </div>
+
+      <div className="pt-1">
+        <button
+          type="button"
+          disabled={!hasChanges || isPending}
+          onClick={handleSave}
+          className="w-full h-8 rounded-lg bg-[#19363F] text-white font-inter text-[12px] font-medium tracking-[-0.48px] disabled:opacity-40 disabled:cursor-not-allowed hover:bg-[#0f2228] transition-colors"
+        >
+          {isPending ? "Guardando..." : "Guardar cambios"}
+        </button>
+      </div>
+    </div>
+  );
+};
+
 // ── UserDetailSidebar ──────────────────────────────────────────────────────────
 
-const UserDetailSidebar = ({ user, mode: initialMode = "edit", onClose }) => {
+const UserDetailSidebar = ({ user, simUser, mode: initialMode = "edit", onClose }) => {
   const panelRef = useRef(null);
   const [mode, setMode] = useState(initialMode);
+  const { data: simAccount } = useGetSimAccount();
+  // The Simulador tab is only for viewers who are admins on the simulator backend.
+  const isSimAdmin = simAccount?.user?.role === "admin";
 
   useEffect(() => {
     setMode(initialMode);
@@ -261,10 +317,10 @@ const UserDetailSidebar = ({ user, mode: initialMode = "edit", onClose }) => {
       gsap.fromTo(
         panelRef.current,
         { opacity: 0 },
-        { opacity: 1, duration: 0.28, delay: 0.14, ease: "power2.out" },
+        { opacity: 1, duration: 0.28, delay: 0.14, ease: "power2.out" }
       );
     },
-    { scope: panelRef },
+    { scope: panelRef }
   );
 
   const payments = user.payments ?? [];
@@ -281,9 +337,7 @@ const UserDetailSidebar = ({ user, mode: initialMode = "edit", onClose }) => {
             {user.email}
           </p>
           <p className="font-mono text-[10px] tracking-tight text-[rgba(25,54,63,0.4)] truncate">
-            {user.address
-              ? `${user.address.slice(0, 8)}…${user.address.slice(-6)}`
-              : "—"}
+            {user.address ? `${user.address.slice(0, 8)}…${user.address.slice(-6)}` : "—"}
           </p>
         </div>
         <button
@@ -292,13 +346,7 @@ const UserDetailSidebar = ({ user, mode: initialMode = "edit", onClose }) => {
           aria-label="Cerrar panel"
           className="size-6 shrink-0 flex items-center justify-center rounded-md text-[rgba(25,54,63,0.4)] hover:bg-[rgba(25,54,63,0.06)] hover:text-[#19363F] transition-colors mt-0.5"
         >
-          <svg
-            width="10"
-            height="10"
-            viewBox="0 0 10 10"
-            fill="none"
-            aria-hidden="true"
-          >
+          <svg width="10" height="10" viewBox="0 0 10 10" fill="none" aria-hidden="true">
             <path
               d="M8.5 1.5l-7 7M1.5 1.5l7 7"
               stroke="currentColor"
@@ -314,6 +362,7 @@ const UserDetailSidebar = ({ user, mode: initialMode = "edit", onClose }) => {
         tabs={[
           { id: "edit", label: "Editar" },
           { id: "payments", label: `Pagos (${payments.length})` },
+          ...(isSimAdmin ? [{ id: "simulator", label: "Simulador" }] : []),
         ]}
         value={mode}
         onChange={setMode}
@@ -324,6 +373,8 @@ const UserDetailSidebar = ({ user, mode: initialMode = "edit", onClose }) => {
       <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-[rgba(25,54,63,0.1)] scrollbar-thumb-rounded scrollbar-track-transparent">
         {mode === "edit" ? (
           <EditPanel user={user} />
+        ) : mode === "simulator" && isSimAdmin ? (
+          <SimuladorPanel simUser={simUser} />
         ) : (
           <PaymentsPanel payments={payments} />
         )}

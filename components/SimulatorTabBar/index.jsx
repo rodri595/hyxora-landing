@@ -1,5 +1,6 @@
 "use client";
 import Tabs from "@/components/Tabs";
+import { useGetSimAccount } from "@/hooks/simulator/useGetSimAccount";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense } from "react";
 
@@ -17,6 +18,7 @@ const formatUSD = (value) =>
 const SimulatorTabBarInner = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { data: account } = useGetSimAccount();
   const activeTab = searchParams.get("tab") ?? SIMULATOR_TABS[0].id;
 
   return (
@@ -33,7 +35,7 @@ const SimulatorTabBarInner = () => {
         </span>
         <span className="flex items-center gap-1.5 rounded-[100px] border-[0.7px] border-[rgba(25,54,63,0.08)] bg-[rgba(25,54,63,0.04)] px-3 py-1 font-inter text-[11px] font-semibold tracking-[-0.44px] text-[#19363F]">
           <span className="size-[6px] rounded-full bg-[#84CC16]" />
-          {formatUSD(10000)}
+          {formatUSD((account?.cashBalanceCents ?? 0) / 100)}
         </span>
       </div>
     </div>

@@ -1,8 +1,9 @@
 "use client";
 import { SIMULATOR_TABS } from "@/components/SimulatorTabBar";
 import Spinner from "@/components/Spinner";
-import { useSearchParams } from "next/navigation";
-import { Suspense, lazy } from "react";
+import { useGetSimAccount } from "@/hooks/simulator/useGetSimAccount";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Suspense, lazy, useEffect } from "react";
 
 const AssetsModule = lazy(() => import("./_modules/AssetsModule"));
 const HyxoraInModule = lazy(() => import("./_modules/HyxoraInModule"));
@@ -13,7 +14,28 @@ const moduleMap = {
 };
 
 const SimulatorContent = () => {
+  const router = useRouter();
   const searchParams = useSearchParams();
+  const { data: account, isLoading } = useGetSimAccount();
+
+  const isAllowed = account?.user?.status === "active" || account?.user?.role === "admin";
+
+  useEffect(() => {
+    if (!isLoading && !isAllowed) {
+      router.replace("/");
+    }
+  }, [isLoading, isAllowed, router]);
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center w-full h-full">
+        <Spinner />
+      </div>
+    );
+  }
+
+  if (!isAllowed) return null;
+
   const activeTab = searchParams.get("tab") ?? SIMULATOR_TABS[0].id;
 
   const Module = moduleMap[activeTab] ?? moduleMap.assets;
