@@ -41,7 +41,7 @@ const MenuItemButton = ({
             "hover:border-[rgba(255,255,255,0.1)] hover:bg-[rgba(255,255,255,0.1)] hover:shadow-[0px_0px_4px_0px_rgba(255,255,255,0.1)_inset] ",
           isSpecialPage && active
             ? "bg-[rgba(255,255,255,0.1)] border-[rgba(255,255,255,0.1)] shadow-[0px_1px_6px_0px_rgba(255,255,255,0.2)]  "
-            : "border-transparent",
+            : "border-transparent"
         )}
         onClick={onClick}
       >
@@ -52,7 +52,7 @@ const MenuItemButton = ({
                 "bg-[rgba(25,54,63,0.04)] group-hover:bg-transparent border-[0.7px] border-[rgba(25,54,63,0.02)] border-solid group-hover:border-transparent transition duration-200 ease-out ",
                 "rounded-[8px] shrink-0 size-[34px] shadow-[0px_0px_4px_0px_inset_rgba(25,54,63,0.04)] group-hover:shadow-[none] flex justify-center items-center",
                 isSpecialPage &&
-                  "bg-[rgba(255,255,255,0.1)] group-hover:bg-transparent border-[rgba(255,255,255,0.1)] group-hover:border-transparent shadow-[0px_0px_4px_0px_inset_rgba(255,255,255,0.1)] group-hover:shadow-[none]",
+                  "bg-[rgba(255,255,255,0.1)] group-hover:bg-transparent border-[rgba(255,255,255,0.1)] group-hover:border-transparent shadow-[0px_0px_4px_0px_inset_rgba(255,255,255,0.1)] group-hover:shadow-[none]"
               )}
             >
               {icon ? (
@@ -72,7 +72,7 @@ const MenuItemButton = ({
               className={cn(
                 "font-inter font-medium text-[12px] tracking-[-0.56px] leading-[10px]",
                 disabled && "text-[rgba(25,54,63,0.4)]",
-                isSpecialPage && "text-[#fff]",
+                isSpecialPage && "text-[#fff]"
               )}
             >
               {title}
@@ -81,9 +81,7 @@ const MenuItemButton = ({
               <p
                 className={cn(
                   "font-inter font-normal text-[12px] tracking-[-0.24px] whitespace-nowrap leading-[12px]",
-                  isSpecialPage
-                    ? "text-[rgba(255,255,255,0.7)]"
-                    : "text-[rgba(25,54,63,0.7)]",
+                  isSpecialPage ? "text-[rgba(255,255,255,0.7)]" : "text-[rgba(25,54,63,0.7)]"
                 )}
               >
                 {description}
@@ -108,7 +106,7 @@ const MenuItemButton = ({
           "hover:border-[rgba(255,255,255,0.1)] hover:bg-[rgba(255,255,255,0.1)] hover:shadow-[0px_0px_4px_0px_rgba(255,255,255,0.1)_inset] ",
         isSpecialPage && active
           ? "bg-[rgba(255,255,255,0.1)] border-[rgba(255,255,255,0.1)] shadow-[0px_1px_6px_0px_rgba(255,255,255,0.2)]  "
-          : "border-transparent",
+          : "border-transparent"
       )}
       onClick={onClick}
     >
@@ -119,7 +117,7 @@ const MenuItemButton = ({
               "bg-[rgba(25,54,63,0.04)] group-hover:bg-transparent border-[0.7px] border-[rgba(25,54,63,0.02)] border-solid group-hover:border-transparent transition duration-200 ease-out ",
               "rounded-[8px] shrink-0 size-[34px] shadow-[0px_0px_4px_0px_inset_rgba(25,54,63,0.04)] group-hover:shadow-[none] flex justify-center items-center",
               isSpecialPage &&
-                "bg-[rgba(255,255,255,0.1)] group-hover:bg-transparent border-[rgba(255,255,255,0.1)] group-hover:border-transparent shadow-[0px_0px_4px_0px_inset_rgba(255,255,255,0.1)] group-hover:shadow-[none]",
+                "bg-[rgba(255,255,255,0.1)] group-hover:bg-transparent border-[rgba(255,255,255,0.1)] group-hover:border-transparent shadow-[0px_0px_4px_0px_inset_rgba(255,255,255,0.1)] group-hover:shadow-[none]"
             )}
           >
             {icon ? (
@@ -139,7 +137,7 @@ const MenuItemButton = ({
             className={cn(
               "font-inter font-medium text-[12px] tracking-[-0.56px] leading-[10px]",
               disabled && "text-[rgba(25,54,63,0.4)]",
-              isSpecialPage && "text-[#fff]",
+              isSpecialPage && "text-[#fff]"
             )}
           >
             {title}
@@ -148,9 +146,7 @@ const MenuItemButton = ({
             <p
               className={cn(
                 "font-inter font-normal text-[12px] tracking-[-0.24px] whitespace-nowrap leading-[12px]",
-                isSpecialPage
-                  ? "text-[rgba(255,255,255,0.7)]"
-                  : "text-[rgba(25,54,63,0.7)]",
+                isSpecialPage ? "text-[rgba(255,255,255,0.7)]" : "text-[rgba(25,54,63,0.7)]"
               )}
             >
               {description}
@@ -166,14 +162,11 @@ const MenuItemButton = ({
 const Sidebar = ({ isSpecialPage, isSidebarOpen, setIsSidebarOpen }) => {
   const { logout } = useWeb3();
   const pathname = usePathname();
-  const { data: userInformation, isLoading: isLoadingUserInformation } =
-    useGetUserInformation();
+  const { data: userInformation, isLoading: isLoadingUserInformation } = useGetUserInformation();
   const { data: paymentsData } = GetMyPayments();
   const hasNft = useMemo(() => {
     if (!paymentsData || paymentsData?.length === 0) return false;
-    return paymentsData.some(
-      (payment) => payment?.status === "completed" && payment?.tokenId,
-    );
+    return paymentsData.some((payment) => payment?.status === "completed" && payment?.tokenId);
   }, [paymentsData]);
   const toggleMenu = () => {
     setIsSidebarOpen((prev) => !prev);
@@ -182,10 +175,7 @@ const Sidebar = ({ isSpecialPage, isSidebarOpen, setIsSidebarOpen }) => {
     setIsSidebarOpen(false);
   };
   const isAdmin = useMemo(() => {
-    return (
-      userInformation?.information?.role?.includes(roleNames?.admin ?? "") ??
-      false
-    );
+    return userInformation?.information?.role?.includes(roleNames?.admin ?? "") ?? false;
   }, [userInformation]);
   const navigation = [
     {
@@ -244,6 +234,20 @@ const Sidebar = ({ isSpecialPage, isSidebarOpen, setIsSidebarOpen }) => {
       ),
       href: "/academy",
     },
+    {
+      id: 6,
+      title: "Simulador de Inversión",
+      description: "Aprende a invertir",
+      icon: (
+        <Icon
+          name="flash-think"
+          className="size-[16px] aspect-square"
+          size={20}
+          fill={isSpecialPage ? "#fff" : "#19363F"}
+        />
+      ),
+      href: "/investment-simulator",
+    },
   ];
   return (
     <aside
@@ -252,7 +256,7 @@ const Sidebar = ({ isSpecialPage, isSidebarOpen, setIsSidebarOpen }) => {
         "max-lg:fixed max-lg:inset-0 max-lg:z-50 max-lg:transition-transform max-lg:duration-300 max-lg:ease-out relative",
         isSidebarOpen && "max-lg:translate-x-0",
         !isSidebarOpen && "max-lg:-translate-x-full",
-        isSpecialPage && "bg-[#151515] ",
+        isSpecialPage && "bg-[#151515] "
       )}
       data-lenis-prevent
     >
@@ -262,7 +266,7 @@ const Sidebar = ({ isSpecialPage, isSidebarOpen, setIsSidebarOpen }) => {
         className={cn(
           "group hidden max-lg:flex rounded-[8px] border-[0.7px] border-[rgba(25,54,63,0.02)] bg-[rgba(25,54,63,0.04)] shadow-[0px_0px_4px_0px_inset_rgba(25,54,63,0.04)] justify-center items-center shrink-0 !h-[32px] !w-[32px] focus:outline-none absolute top-[16px] right-[16px] z-50",
           isSpecialPage &&
-            "bg-[rgba(255,255,255,0.1)] border-[rgba(255,255,255,0.1)] text-[#fff] hover:bg-[rgba(255,255,255,0.2)] hover:border-[rgba(255,255,255,0.2)]",
+            "bg-[rgba(255,255,255,0.1)] border-[rgba(255,255,255,0.1)] text-[#fff] hover:bg-[rgba(255,255,255,0.2)] hover:border-[rgba(255,255,255,0.2)]"
         )}
       >
         <svg
@@ -287,7 +291,7 @@ const Sidebar = ({ isSpecialPage, isSidebarOpen, setIsSidebarOpen }) => {
         <p
           className={cn(
             "font-inter text-[#19363F] text-[12px] tracking-[-0.56px] leading-[14px] font-bold",
-            isSpecialPage && "text-[#fff]",
+            isSpecialPage && "text-[#fff]"
           )}
         >
           Explorar
@@ -336,13 +340,7 @@ const Sidebar = ({ isSpecialPage, isSidebarOpen, setIsSidebarOpen }) => {
           isSpecialPage={isSpecialPage}
           title="Sign out"
           description="Cerrar sesión"
-          icon={
-            <Icon
-              fill="red"
-              name="logout"
-              className="size-[16px] aspect-square"
-            />
-          }
+          icon={<Icon fill="red" name="logout" className="size-[16px] aspect-square" />}
           onClick={() => logout()}
           className="shrink-0"
         />
