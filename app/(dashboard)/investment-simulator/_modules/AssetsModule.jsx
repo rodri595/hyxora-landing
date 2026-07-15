@@ -1,101 +1,29 @@
 "use client";
+import Spinner from "@/components/Spinner";
 import Tabs from "@/components/Tabs";
 import { useGetSimAccount } from "@/hooks/simulator/useGetSimAccount";
+import { useGetTokens } from "@/hooks/token/useGetTokens";
 import { cn } from "@/utils";
 import { useGSAP } from "@gsap/react";
+import NumberFlow from "@number-flow/react";
 import gsap from "gsap";
-import { useMemo, useRef, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
+import TokenDetailSidebar from "./TokenDetailSidebar";
 
 gsap.registerPlugin(useGSAP);
 
-// Catálogo del wireframe — los precios siguen siendo placeholders; el feed de
-// precios en vivo llega después. usd/holdings se sobrescriben con datos reales.
-const PORTFOLIO = [
-  {
-    symbol: "EUR",
-    name: "Euro Digital",
-    ticker: "EUR",
-    color: "#6D4AFF",
-    category: "stablecoins",
-    usd: 0,
-    pct: 0,
-    price: "$1.14",
-    change: -0.2,
-    holdings: "0",
-  },
-  {
-    symbol: "USD",
-    name: "Dólar Digital",
-    ticker: "USD",
-    color: "#84CC16",
-    category: "stablecoins",
-    usd: 0,
-    pct: 0,
-    price: "$1.00",
-    change: 0.079,
-    holdings: "0",
-  },
-  {
-    symbol: "XAUT",
-    name: "Oro Digital",
-    ticker: "XAUT",
-    color: "#EAB308",
-    category: "activos",
-    usd: 0,
-    pct: 0,
-    price: "$3,342.10",
-    change: 0.12,
-    holdings: "0",
-  },
-  {
-    symbol: "SPY",
-    name: "S&P 500 xStock",
-    ticker: "SPY",
-    color: "#DC2626",
-    category: "hyxora-plus",
-    usd: 0,
-    pct: 0,
-    price: "$752.12",
-    change: -0.51,
-    holdings: "0",
-  },
-  {
-    symbol: "GOOGL",
-    name: "GOOGL xStock",
-    ticker: "GOOGL",
-    color: "#2563EB",
-    category: "hyxora-plus",
-    usd: 0,
-    pct: 0,
-    price: "$185.20",
-    change: 0.34,
-    holdings: "0",
-  },
-  {
-    symbol: "BTC",
-    name: "Bitcoin",
-    ticker: "BTC",
-    color: "#F7931A",
-    category: "activos",
-    usd: 0,
-    pct: 0,
-    price: "$118,342.00",
-    change: 1.24,
-    holdings: "0",
-  },
-  {
-    symbol: "ETH",
-    name: "Ethereum",
-    ticker: "ETH",
-    color: "#627EEA",
-    category: "activos",
-    usd: 0,
-    pct: 0,
-    price: "$4,286.50",
-    change: -0.86,
-    holdings: "0",
-  },
-];
+const SIDEBAR_WIDTH = 320;
+
+export const USD_FORMAT = { style: "currency", currency: "USD" };
+export const UNITS_FORMAT = { maximumFractionDigits: 6 };
+const PCT_FORMAT = { minimumFractionDigits: 1, maximumFractionDigits: 1 };
+
+// Los xStocks (SPY, GOOGL…) todavía no llegan por el API — la pestaña
+// "Hyxora Plus" muestra estado vacío hasta entonces.
+const CATEGORY_BY_SYMBOL = {
+  USDC: "stablecoins",
+  EURC: "stablecoins",
+};
 
 const TABS = [
   { id: "todos", label: "Todos" },
@@ -125,17 +53,26 @@ const SEG_STYLE = {
   },
 };
 
-const formatUSD = (value) =>
+export const formatUSD = (value) =>
   new Intl.NumberFormat("en-US", {
     style: "currency",
     currency: "USD",
   }).format(value);
 
-// Muestra las unidades con un máximo de 6 decimales, "0" cuando no hay tenencia.
-const formatUnits = (units) => {
-  const n = Number(units);
-  if (!Number.isFinite(n) || n === 0) return "0";
-  return String(Number(n.toFixed(6)));
+export const truncateAddress = (address) => {
+  if (!address) return "";
+  return `${address.slice(0, 10)}...${address.slice(-10)}`;
+};
+
+// token.data es un JSON string con { description: { en, es } }.
+export const parseTokenDescription = (raw) => {
+  if (!raw) return "";
+  try {
+    const description = JSON.parse(raw)?.description;
+    return description?.es || description?.en || "";
+  } catch {
+    return "";
+  }
 };
 
 const Card = ({ className, children, ...props }) => (
@@ -162,63 +99,88 @@ const ChartPlaceholder = ({ label, className }) => (
   </div>
 );
 
-const AssetBadge = ({ asset, size = 34 }) => (
-  <div
-    className="flex items-center justify-center rounded-full shrink-0 font-inter font-bold text-white"
-    style={{
-      width: size,
-      height: size,
-      backgroundColor: asset.color,
-      fontSize: size * 0.32,
-    }}
-  >
-    {asset.ticker.slice(0, 1)}
-  </div>
-);
+export const TokenBadge = ({ token, size = 34 }) =>
+  token?.imageUrl ? (
+    <img
+      src={token.imageUrl}
+      alt={token.displaySymbol}
+      className="rounded-full shrink-0 object-cover bg-[rgba(25,54,63,0.06)]"
+      style={{ width: size, height: size }}
+    />
+  ) : (
+    <div
+      className="flex items-center justify-center rounded-full shrink-0 font-inter font-bold text-white bg-[#19363F]"
+      style={{ width: size, height: size, fontSize: size * 0.32 }}
+    >
+      {token?.displaySymbol?.slice(0, 1)}
+    </div>
+  );
 
-const ChangeChip = ({ change }) => (
-  <span
-    className={cn(
-      "rounded-[100px] px-2 py-0.5 font-inter text-[10px] font-medium tracking-[-0.4px]",
-      change >= 0 ? "bg-[#DCFCE7] text-[#15803D]" : "bg-[#FEE2E2] text-[#DC2626]"
-    )}
-  >
-    {change >= 0 ? "+" : ""}
-    {change}%
-  </span>
-);
+export const ChangeChip = ({ change }) => {
+  const value = Number(change) || 0;
+  return (
+    <span
+      className={cn(
+        "rounded-[100px] px-2 py-0.5 font-inter text-[10px] font-medium tracking-[-0.4px]",
+        value >= 0 ? "bg-[#DCFCE7] text-[#15803D]" : "bg-[#FEE2E2] text-[#DC2626]"
+      )}
+    >
+      {value >= 0 ? "+" : ""}
+      {value.toFixed(2)}%
+    </span>
+  );
+};
 
 const AssetsModule = () => {
   const [tab, setTab] = useState("todos");
-  const { data } = useGetSimAccount();
+  const { data: tokens, isLoading, isError } = useGetTokens();
+  const { data: account } = useGetSimAccount();
+
+  // `isOpen` maneja las animaciones. `displayedToken` persiste durante la
+  // animación de cierre para que el contenido no desaparezca a mitad de camino.
+  const [isOpen, setIsOpen] = useState(false);
+  const [displayedToken, setDisplayedToken] = useState(null);
 
   const rootRef = useRef(null);
-  const bigNumRef = useRef(null);
-  const counterProxy = useRef({ val: 0 });
   const lastGrow = useRef({ invertido: 0, disponible: 0, otras: 0 });
   const mmBarRef = useRef(null);
   const mmGridRef = useRef(null);
 
-  // Une el catálogo con las tenencias reales (todo en centavos enteros).
-  const enriched = useMemo(() => {
-    const bySymbol = new Map((data?.holdings ?? []).map((h) => [h.symbol, h]));
-    return PORTFOLIO.map((asset) => {
-      const h = bySymbol.get(asset.symbol);
-      const investedCents = h?.investedCents ?? 0;
-      return {
-        ...asset,
-        usd: investedCents / 100,
-        holdings: formatUnits(h?.units),
-      };
-    });
-  }, [data]);
+  // Desktop (lg+): wrapper inline cuyo ancho anima GSAP.
+  const desktopWrapRef = useRef(null);
+  // Mobile/tablet (<lg): panel overlay fijo + backdrop.
+  const mobileWrapRef = useRef(null);
+  const backdropRef = useRef(null);
+
+  const holdingsBySymbol = useMemo(() => {
+    const map = {};
+    for (const holding of account?.holdings ?? []) {
+      map[holding.symbol] = holding;
+    }
+    return map;
+  }, [account]);
+
+  // Une el catálogo del API con las tenencias reales (todo en centavos enteros).
+  const enriched = useMemo(
+    () =>
+      (tokens ?? []).map((token) => {
+        const holding = holdingsBySymbol[token.symbol];
+        return {
+          ...token,
+          category: CATEGORY_BY_SYMBOL[token.symbol] ?? "activos",
+          usd: (holding?.investedCents ?? 0) / 100,
+          units: Number(holding?.units ?? 0),
+        };
+      }),
+    [tokens, holdingsBySymbol]
+  );
 
   const visibleAssets = useMemo(
     () => (tab === "todos" ? enriched : enriched.filter((a) => a.category === tab)),
     [enriched, tab]
   );
 
-  const cash = (data?.cashBalanceCents ?? 0) / 100;
+  const cash = (account?.cashBalanceCents ?? 0) / 100;
   const investedInTab = visibleAssets.reduce((acc, a) => acc + a.usd, 0);
   const totalInvested = enriched.reduce((acc, a) => acc + a.usd, 0);
   const investedOutside = totalInvested - investedInTab;
@@ -239,7 +201,17 @@ const AssetsModule = () => {
     { key: "otras", label: "Otras inversiones", value: investedOutside },
   ];
 
-  // Barra + contador: reaccionan al cambio de pestaña y a los datos reales.
+  const openToken = useCallback((token) => {
+    setDisplayedToken(token);
+    setIsOpen(true);
+  }, []);
+
+  const handleClose = useCallback(() => setIsOpen(false), []);
+
+  const clearDisplayed = useCallback(() => setDisplayedToken(null), []);
+
+  // Barra de distribución: reacciona al cambio de pestaña y a los datos reales.
+  // (Los contadores numéricos los anima NumberFlow.)
   useGSAP(
     () => {
       const scope = rootRef.current;
@@ -251,9 +223,6 @@ const AssetsModule = () => {
         invertido: investedInTab,
         disponible: cash,
         otras: investedOutside,
-      };
-      const setNumber = (v) => {
-        if (bigNumRef.current) bigNumRef.current.textContent = formatUSD(v);
       };
 
       mm.add("(prefers-reduced-motion: no-preference)", () => {
@@ -267,14 +236,6 @@ const AssetsModule = () => {
             { flexGrow: val, duration: 0.5, ease: "power3.out", overwrite: true }
           );
         }
-        gsap.to(counterProxy.current, {
-          val: investedInTab,
-          duration: 0.5,
-          ease: "power3.out",
-          overwrite: true,
-          snap: { val: 0.01 },
-          onUpdate: () => setNumber(counterProxy.current.val),
-        });
       });
 
       mm.add("(prefers-reduced-motion: reduce)", () => {
@@ -282,8 +243,6 @@ const AssetsModule = () => {
           const el = scope.querySelector(`[data-seg="${key}"]`);
           if (el) gsap.set(el, { flexGrow: val });
         }
-        counterProxy.current.val = investedInTab;
-        setNumber(investedInTab);
       });
 
       Object.assign(lastGrow.current, targets);
@@ -291,7 +250,7 @@ const AssetsModule = () => {
     { scope: rootRef, dependencies: [tab, investedInTab, cash, investedOutside] }
   );
 
-  // Stagger de las tarjetas del grid — sólo al cambiar de pestaña.
+  // Stagger de las tarjetas del grid — al cambiar de pestaña o al llegar datos.
   useGSAP(
     () => {
       const scope = rootRef.current;
@@ -316,131 +275,264 @@ const AssetsModule = () => {
         gsap.from(cards, { opacity: 0, duration: 0.2, overwrite: true });
       });
     },
-    { scope: rootRef, dependencies: [tab] }
+    { scope: rootRef, dependencies: [tab, visibleAssets.length] }
+  );
+
+  // ── Desktop animation (lg+): ancho del wrapper ────────────────────────────
+  useGSAP(
+    () => {
+      const el = desktopWrapRef.current;
+      if (!el) return;
+      if (isOpen) {
+        gsap.to(el, {
+          width: SIDEBAR_WIDTH,
+          marginLeft: 16,
+          duration: 0.38,
+          ease: "power3.out",
+          overwrite: true,
+        });
+      } else {
+        gsap.to(el, {
+          width: 0,
+          marginLeft: 0,
+          duration: 0.26,
+          ease: "power2.in",
+          overwrite: true,
+          onComplete: clearDisplayed,
+        });
+      }
+    },
+    { dependencies: [isOpen] }
+  );
+
+  // ── Mobile/tablet animation (<lg): overlay + backdrop ─────────────────────
+  useGSAP(
+    () => {
+      const panel = mobileWrapRef.current;
+      const backdrop = backdropRef.current;
+      if (!panel || !backdrop) return;
+      if (isOpen) {
+        gsap.set(backdrop, { pointerEvents: "auto" });
+        gsap.to(panel, {
+          x: "0%",
+          duration: 0.35,
+          ease: "power3.out",
+          overwrite: true,
+        });
+        gsap.to(backdrop, { opacity: 1, duration: 0.25, overwrite: true });
+      } else {
+        gsap.set(backdrop, { pointerEvents: "none" });
+        gsap.to(panel, {
+          x: "100%",
+          duration: 0.26,
+          ease: "power2.in",
+          overwrite: true,
+          onComplete: clearDisplayed,
+        });
+        gsap.to(backdrop, { opacity: 0, duration: 0.22, overwrite: true });
+      }
+    },
+    { dependencies: [isOpen] }
   );
 
   return (
-    <div ref={rootRef} className="flex flex-col gap-4 w-full">
-      {/* ── Fila superior: balance + distribución ─────────────────── */}
-      <div className="grid grid-cols-[1fr_2fr] gap-4 w-full max-lg:grid-cols-1">
-        {/* Balance total del tab activo */}
-        <Card className="flex flex-col justify-between gap-6">
-          <div className="flex flex-col gap-1">
-            <h2 className="font-inter text-[16px] font-semibold tracking-[-0.64px] text-[#19363F]">
-              Activos Digitales
-            </h2>
-            <p className="font-inter text-[12px] tracking-[-0.48px] text-[rgba(25,54,63,0.5)]">
-              Administra tus activos y balances de práctica
-            </p>
-          </div>
-          <p
-            ref={bigNumRef}
-            className="font-inter text-[40px] font-bold tracking-[-1.6px] text-[#19363F] leading-none"
-          >
-            {formatUSD(investedInTab)}
-          </p>
-          <span className="self-start rounded-[100px] bg-[rgba(25,54,63,0.04)] px-3 py-1 font-inter text-[10px] tracking-[-0.4px] text-[rgba(25,54,63,0.5)]">
-            Última actualización: ahora
-          </span>
-        </Card>
-
-        {/* Distribución del portafolio — tarjeta estilo presupuesto */}
-        <Card className="flex flex-col gap-3">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <span className="text-[15px] leading-none">{meta.emoji}</span>
-              <h2 className="font-inter text-[15px] font-semibold tracking-[-0.6px] text-[#19363F]">
-                {meta.title}
+    <div className="flex flex-row w-full items-stretch">
+      <div ref={rootRef} className="flex flex-col gap-4 flex-1 w-0 min-w-0">
+        {/* ── Fila superior: balance + distribución ─────────────────── */}
+        <div className="grid grid-cols-[1fr_2fr] gap-4 w-full max-lg:grid-cols-1">
+          {/* Balance total del tab activo */}
+          <Card className="flex flex-col justify-between gap-6">
+            <div className="flex flex-col gap-1">
+              <h2 className="font-inter text-[16px] font-semibold tracking-[-0.64px] text-[#19363F]">
+                Activos Digitales
               </h2>
+              <p className="font-inter text-[12px] tracking-[-0.48px] text-[rgba(25,54,63,0.5)]">
+                Administra tus activos y balances de práctica
+              </p>
             </div>
-            <span className="font-inter text-[15px] font-semibold tracking-[-0.6px] text-[#16A34A]">
-              {pctOfPortfolio.toFixed(1)}%
+            <NumberFlow
+              value={investedInTab}
+              format={USD_FORMAT}
+              className="font-inter text-[40px] font-bold tracking-[-1.6px] text-[#19363F] leading-none"
+            />
+            <span className="self-start rounded-[100px] bg-[rgba(25,54,63,0.04)] px-3 py-1 font-inter text-[10px] tracking-[-0.4px] text-[rgba(25,54,63,0.5)]">
+              Última actualización: ahora
             </span>
-          </div>
+          </Card>
 
-          <div className="flex h-[30px] w-full gap-[6px]">
-            {barSegments.length ? (
-              barSegments.map((seg) => (
-                <div
-                  key={seg.key}
-                  data-seg={seg.key}
-                  className="h-full rounded-[10px]"
-                  style={{ flexBasis: 0, minWidth: 24, ...SEG_STYLE[seg.key] }}
-                />
-              ))
-            ) : (
-              <div className="h-full w-full rounded-[10px] bg-[rgba(25,54,63,0.06)]" />
-            )}
-          </div>
-
-          <div className="flex items-baseline justify-between">
-            <span className="font-inter text-[16px] font-bold tracking-[-0.64px] text-[#7C5CFC]">
-              {formatUSD(investedInTab)}
-            </span>
-            <span className="font-inter text-[15px] tracking-[-0.6px] text-[rgba(25,54,63,0.5)]">
-              {formatUSD(totalPortfolio)}
-            </span>
-          </div>
-
-          <div className="h-px w-full bg-[rgba(25,54,63,0.08)]" />
-
-          <div className="flex flex-col gap-2">
-            {legend.map((item) => (
-              <div key={item.key} className="flex items-center gap-2">
-                <span className="size-[13px] rounded-full shrink-0" style={SEG_STYLE[item.key]} />
-                <p className="font-inter text-[13px] tracking-[-0.52px] text-[rgba(25,54,63,0.5)]">
-                  {item.label}: {formatUSD(item.value)}
-                </p>
+          {/* Distribución del portafolio — tarjeta estilo presupuesto */}
+          <Card className="flex flex-col gap-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span className="text-[15px] leading-none">{meta.emoji}</span>
+                <h2 className="font-inter text-[15px] font-semibold tracking-[-0.6px] text-[#19363F]">
+                  {meta.title}
+                </h2>
               </div>
-            ))}
-          </div>
-        </Card>
-      </div>
+              <NumberFlow
+                value={pctOfPortfolio}
+                format={PCT_FORMAT}
+                suffix="%"
+                className="font-inter text-[15px] font-semibold tracking-[-0.6px] text-[#16A34A]"
+              />
+            </div>
 
-      {/* ── Tabs ──────────────────────────────────────────────────── */}
-      <Tabs tabs={TABS} value={tab} onChange={setTab} />
+            <div className="flex h-[30px] w-full gap-[6px]">
+              {barSegments.length ? (
+                barSegments.map((seg) => (
+                  <div
+                    key={seg.key}
+                    data-seg={seg.key}
+                    className="h-full rounded-[10px]"
+                    style={{ flexBasis: 0, minWidth: 24, ...SEG_STYLE[seg.key] }}
+                  />
+                ))
+              ) : (
+                <div className="h-full w-full rounded-[10px] bg-[rgba(25,54,63,0.06)]" />
+              )}
+            </div>
 
-      {/* ── Grid de activos ───────────────────────────────────────── */}
-      <div className="grid grid-cols-3 gap-4 w-full max-xl:grid-cols-2 max-md:grid-cols-1">
-        {visibleAssets.map((asset) => (
-          <Card
-            key={asset.symbol}
-            data-card
-            className="flex flex-col gap-4 p-4 cursor-pointer hover:shadow-[0px_2px_10px_0px_rgba(25,54,63,0.1)] transition-shadow"
-          >
-            <div className="flex justify-between items-start">
-              <div className="flex items-center gap-3">
-                <AssetBadge asset={asset} />
-                <div className="flex flex-col">
-                  <p className="font-inter text-[10px] tracking-[-0.4px] text-[rgba(25,54,63,0.4)]">
-                    {asset.ticker}
-                  </p>
-                  <p className="font-inter text-[13px] font-semibold tracking-[-0.52px] text-[#19363F]">
-                    {asset.name}
+            <div className="flex items-baseline justify-between">
+              <NumberFlow
+                value={investedInTab}
+                format={USD_FORMAT}
+                className="font-inter text-[16px] font-bold tracking-[-0.64px] text-[#7C5CFC]"
+              />
+              <NumberFlow
+                value={totalPortfolio}
+                format={USD_FORMAT}
+                className="font-inter text-[15px] tracking-[-0.6px] text-[rgba(25,54,63,0.5)]"
+              />
+            </div>
+
+            <div className="h-px w-full bg-[rgba(25,54,63,0.08)]" />
+
+            <div className="flex flex-col gap-2">
+              {legend.map((item) => (
+                <div key={item.key} className="flex items-center gap-2">
+                  <span className="size-[13px] rounded-full shrink-0" style={SEG_STYLE[item.key]} />
+                  <p className="font-inter text-[13px] tracking-[-0.52px] text-[rgba(25,54,63,0.5)]">
+                    {item.label}: <NumberFlow value={item.value} format={USD_FORMAT} />
                   </p>
                 </div>
-              </div>
-              <div className="flex flex-col items-end gap-1">
-                <ChangeChip change={asset.change} />
-                <p className="font-inter text-[11px] tracking-[-0.44px] text-[rgba(25,54,63,0.5)]">
-                  {asset.price}
-                </p>
-              </div>
+              ))}
             </div>
-            <div className="flex flex-col gap-0.5">
-              <p className="font-inter text-[20px] font-bold tracking-[-0.8px] text-[#19363F]">
-                {asset.holdings}{" "}
-                <span className="text-[12px] font-normal text-[rgba(25,54,63,0.4)]">
-                  {asset.ticker}
-                </span>
-              </p>
-              <p className="font-inter text-[11px] tracking-[-0.44px] text-[rgba(25,54,63,0.5)]">
-                ≈{formatUSD(asset.usd)}
-              </p>
-            </div>
-            <ChartPlaceholder label="Sparkline precio" className="h-[60px] w-full" />
           </Card>
-        ))}
+        </div>
+
+        {/* ── Tabs ──────────────────────────────────────────────────── */}
+        <Tabs tabs={TABS} value={tab} onChange={setTab} />
+
+        {/* ── Grid de activos ───────────────────────────────────────── */}
+        {isLoading ? (
+          <div className="flex items-center justify-center py-16 w-full">
+            <Spinner />
+          </div>
+        ) : isError ? (
+          <div className="flex items-center justify-center py-16 w-full">
+            <p className="font-inter text-[13px] tracking-[-0.52px] text-[rgba(25,54,63,0.5)]">
+              No se pudieron cargar los activos. Inténtalo de nuevo.
+            </p>
+          </div>
+        ) : visibleAssets.length === 0 ? (
+          <div className="flex items-center justify-center py-16 w-full">
+            <p className="font-inter text-[13px] tracking-[-0.52px] text-[rgba(25,54,63,0.5)]">
+              No hay activos en esta categoría por ahora.
+            </p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-3 gap-4 w-full max-xl:grid-cols-2 max-md:grid-cols-1">
+            {visibleAssets.map((asset) => (
+              <button
+                key={asset.address}
+                type="button"
+                data-card
+                onClick={() => openToken(asset)}
+                className="text-left rounded-[16px] border-[0.7px] border-[rgba(25,54,63,0.08)] bg-white p-4 shadow-[0px_1px_6px_0px_rgba(25,54,63,0.05)] flex flex-col gap-4 cursor-pointer hover:shadow-[0px_2px_10px_0px_rgba(25,54,63,0.1)] transition-shadow"
+              >
+                <div className="flex justify-between items-start">
+                  <div className="flex items-center gap-3">
+                    <TokenBadge token={asset} />
+                    <div className="flex flex-col">
+                      <p className="font-inter text-[10px] tracking-[-0.4px] text-[rgba(25,54,63,0.4)]">
+                        {asset.displaySymbol}
+                      </p>
+                      <p className="font-inter text-[13px] font-semibold tracking-[-0.52px] text-[#19363F]">
+                        {asset.name}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex flex-col items-end gap-1">
+                    <ChangeChip change={asset.priceData?.priceChange24h} />
+                    <p className="font-inter text-[11px] tracking-[-0.44px] text-[rgba(25,54,63,0.5)]">
+                      {formatUSD(Number(asset.priceData?.price) || 0)}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex flex-col gap-0.5">
+                  <p className="font-inter text-[20px] font-bold tracking-[-0.8px] text-[#19363F]">
+                    <NumberFlow value={asset.units} format={UNITS_FORMAT} />{" "}
+                    <span className="text-[12px] font-normal text-[rgba(25,54,63,0.4)]">
+                      {asset.displaySymbol}
+                    </span>
+                  </p>
+                  <p className="font-inter text-[11px] tracking-[-0.44px] text-[rgba(25,54,63,0.5)]">
+                    ≈<NumberFlow value={asset.usd} format={USD_FORMAT} />
+                  </p>
+                </div>
+                <ChartPlaceholder label="Sparkline precio" className="h-[60px] w-full" />
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* ── Desktop (lg+): wrapper inline — GSAP anima su ancho ── */}
+      <div
+        ref={desktopWrapRef}
+        style={{ width: 0, marginLeft: 0 }}
+        className="hidden lg:block shrink-0 overflow-hidden"
+      >
+        {displayedToken ? (
+          <TokenDetailSidebar
+            key={displayedToken.address}
+            token={displayedToken}
+            holding={holdingsBySymbol[displayedToken.symbol]}
+            cashBalanceCents={account?.cashBalanceCents ?? 0}
+            onClose={handleClose}
+          />
+        ) : null}
+      </div>
+
+      {/* ── Mobile/tablet (<lg): backdrop ── */}
+      <div
+        ref={backdropRef}
+        className="lg:hidden fixed inset-0 z-40 bg-black/30"
+        style={{ opacity: 0, pointerEvents: "none" }}
+        role="button"
+        tabIndex={-1}
+        aria-label="Cerrar panel"
+        onClick={handleClose}
+        onKeyDown={(e) => {
+          if (e.key === "Escape") handleClose();
+        }}
+      />
+
+      {/* ── Mobile/tablet (<lg): panel overlay — GSAP anima translateX ── */}
+      <div
+        ref={mobileWrapRef}
+        className="lg:hidden fixed inset-y-0 right-0 z-50 w-[min(320px,100vw)] p-2"
+        style={{ transform: "translateX(100%)" }}
+      >
+        {displayedToken ? (
+          <TokenDetailSidebar
+            key={displayedToken.address}
+            token={displayedToken}
+            holding={holdingsBySymbol[displayedToken.symbol]}
+            cashBalanceCents={account?.cashBalanceCents ?? 0}
+            onClose={handleClose}
+          />
+        ) : null}
       </div>
     </div>
   );
