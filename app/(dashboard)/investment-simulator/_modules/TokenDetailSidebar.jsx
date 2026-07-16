@@ -277,6 +277,11 @@ const TokenDetailSidebar = ({ token, holding, cashBalanceCents, onClose }) => {
               <Row label="Tu balance invertido">
                 <NumberFlow value={investedUsd} format={USD_FORMAT} />
               </Row>
+              {hasPosition && validPrice && (
+                <Row label="Valor actual">
+                  <NumberFlow value={heldUnits * priceUsd} format={USD_FORMAT} />
+                </Row>
+              )}
               {hasPosition && (
                 <Row label="Unidades">
                   <NumberFlow

@@ -1,4 +1,5 @@
 "use client";
+import DataTable from "@/components/DataTable";
 import Spinner from "@/components/Spinner";
 import Tabs from "@/components/Tabs";
 import { useGetSimAccount } from "@/hooks/simulator/useGetSimAccount";
@@ -87,18 +88,6 @@ const Card = ({ className, children, ...props }) => (
   </div>
 );
 
-// Placeholder de gráfico para el wireframe
-const ChartPlaceholder = ({ label, className }) => (
-  <div
-    className={cn(
-      "flex items-center justify-center rounded-[12px] border border-dashed border-[rgba(25,54,63,0.2)] bg-[rgba(25,54,63,0.02)]",
-      className
-    )}
-  >
-    <p className="font-inter text-[10px] tracking-[-0.4px] text-[rgba(25,54,63,0.4)]">{label}</p>
-  </div>
-);
-
 export const TokenBadge = ({ token, size = 34 }) =>
   token?.imageUrl ? (
     <img
@@ -131,6 +120,85 @@ export const ChangeChip = ({ change }) => {
   );
 };
 
+// Columnas TanStack para el DataTable de activos. Los estilos base de celda
+// (font, tamaño, color) los pone DataTable; aquí solo overrides.
+const ASSET_COLUMNS = [
+  {
+    accessorKey: "name",
+    header: "Activo",
+    cell: ({ row }) => (
+      <div className="flex items-center gap-3">
+        <TokenBadge token={row.original} size={30} />
+        <div className="flex flex-col">
+          <p className="font-inter text-[13px] font-semibold tracking-[-0.52px] text-[#19363F]">
+            {row.original.name}
+          </p>
+          <p className="font-inter text-[10px] tracking-[-0.4px] text-[rgba(25,54,63,0.4)]">
+            {row.original.displaySymbol}
+          </p>
+        </div>
+      </div>
+    ),
+  },
+  {
+    id: "price",
+    accessorFn: (row) => Number(row.priceData?.price) || 0,
+    header: "Precio",
+    cell: ({ getValue }) => formatUSD(getValue()),
+  },
+  {
+    id: "change24h",
+    accessorFn: (row) => Number(row.priceData?.priceChange24h) || 0,
+    header: "24h",
+    cell: ({ getValue }) => <ChangeChip change={getValue()} />,
+  },
+  {
+    accessorKey: "units",
+    header: "Unidades",
+    cell: ({ row }) =>
+      row.original.units > 0 ? (
+        <>
+          <NumberFlow value={row.original.units} format={UNITS_FORMAT} />{" "}
+          <span className="text-[10px] text-[rgba(25,54,63,0.4)]">
+            {row.original.displaySymbol}
+          </span>
+        </>
+      ) : (
+        <span className="text-[rgba(25,54,63,0.25)]">—</span>
+      ),
+  },
+  {
+    accessorKey: "usd",
+    header: "Valor",
+    cell: ({ row }) =>
+      row.original.units > 0 ? (
+        <span className="font-semibold">
+          <NumberFlow value={row.original.usd} format={USD_FORMAT} />
+        </span>
+      ) : (
+        <span className="text-[rgba(25,54,63,0.25)]">—</span>
+      ),
+  },
+  {
+    accessorKey: "pnl",
+    header: "Rendimiento",
+    cell: ({ row }) =>
+      row.original.units > 0 ? (
+        <span
+          className={cn(
+            "font-semibold",
+            row.original.pnl >= 0 ? "text-[#15803D]" : "text-[#DC2626]"
+          )}
+        >
+          {row.original.pnl >= 0 ? "+" : "-"}
+          {formatUSD(Math.abs(row.original.pnl))}
+        </span>
+      ) : (
+        <span className="text-[rgba(25,54,63,0.25)]">—</span>
+      ),
+  },
+];
+
 const AssetsModule = () => {
   const [tab, setTab] = useState("todos");
   const { data: tokens, isLoading, isError } = useGetTokens();
@@ -160,16 +228,24 @@ const AssetsModule = () => {
     return map;
   }, [account]);
 
-  // Une el catálogo del API con las tenencias reales (todo en centavos enteros).
+  // Une el catálogo del API con las tenencias reales. `usd` es el valor de
+  // mercado (unidades × precio actual) — el costo invertido va en `invested`
+  // para poder mostrar el rendimiento.
   const enriched = useMemo(
     () =>
       (tokens ?? []).map((token) => {
         const holding = holdingsBySymbol[token.symbol];
+        const units = Number(holding?.units ?? 0);
+        const invested = (holding?.investedCents ?? 0) / 100;
+        const price = Number(token.priceData?.price);
+        const usd = Number.isFinite(price) && price > 0 ? units * price : invested;
         return {
           ...token,
           category: CATEGORY_BY_SYMBOL[token.symbol] ?? "activos",
-          usd: (holding?.investedCents ?? 0) / 100,
-          units: Number(holding?.units ?? 0),
+          usd,
+          invested,
+          pnl: usd - invested,
+          units,
         };
       }),
     [tokens, holdingsBySymbol]
@@ -250,7 +326,7 @@ const AssetsModule = () => {
     { scope: rootRef, dependencies: [tab, investedInTab, cash, investedOutside] }
   );
 
-  // Stagger de las tarjetas del grid — al cambiar de pestaña o al llegar datos.
+  // Stagger de las filas de la tabla — al cambiar de pestaña o al llegar datos.
   useGSAP(
     () => {
       const scope = rootRef.current;
@@ -258,21 +334,22 @@ const AssetsModule = () => {
       mmGridRef.current?.revert();
       const mm = gsap.matchMedia();
       mmGridRef.current = mm;
-      const cards = scope.querySelectorAll("[data-card]");
-      if (!cards.length) return;
+      const rows = scope.querySelectorAll("[data-row]");
+      if (!rows.length) return;
 
       mm.add("(prefers-reduced-motion: no-preference)", () => {
-        gsap.from(cards, {
-          y: 8,
+        gsap.from(rows, {
+          y: 14,
           opacity: 0,
-          duration: 0.3,
+          duration: 0.4,
           ease: "power2.out",
-          stagger: 0.03,
+          stagger: 0.045,
           overwrite: true,
+          clearProps: "opacity,transform",
         });
       });
       mm.add("(prefers-reduced-motion: reduce)", () => {
-        gsap.from(cards, { opacity: 0, duration: 0.2, overwrite: true });
+        gsap.from(rows, { opacity: 0, duration: 0.2, overwrite: true });
       });
     },
     { scope: rootRef, dependencies: [tab, visibleAssets.length] }
@@ -423,7 +500,7 @@ const AssetsModule = () => {
         {/* ── Tabs ──────────────────────────────────────────────────── */}
         <Tabs tabs={TABS} value={tab} onChange={setTab} />
 
-        {/* ── Grid de activos ───────────────────────────────────────── */}
+        {/* ── Tabla de activos ──────────────────────────────────────── */}
         {isLoading ? (
           <div className="flex items-center justify-center py-16 w-full">
             <Spinner />
@@ -441,49 +518,14 @@ const AssetsModule = () => {
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-3 gap-4 w-full max-xl:grid-cols-2 max-md:grid-cols-1">
-            {visibleAssets.map((asset) => (
-              <button
-                key={asset.address}
-                type="button"
-                data-card
-                onClick={() => openToken(asset)}
-                className="text-left rounded-[16px] border-[0.7px] border-[rgba(25,54,63,0.08)] bg-white p-4 shadow-[0px_1px_6px_0px_rgba(25,54,63,0.05)] flex flex-col gap-4 cursor-pointer hover:shadow-[0px_2px_10px_0px_rgba(25,54,63,0.1)] transition-shadow"
-              >
-                <div className="flex justify-between items-start">
-                  <div className="flex items-center gap-3">
-                    <TokenBadge token={asset} />
-                    <div className="flex flex-col">
-                      <p className="font-inter text-[10px] tracking-[-0.4px] text-[rgba(25,54,63,0.4)]">
-                        {asset.displaySymbol}
-                      </p>
-                      <p className="font-inter text-[13px] font-semibold tracking-[-0.52px] text-[#19363F]">
-                        {asset.name}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex flex-col items-end gap-1">
-                    <ChangeChip change={asset.priceData?.priceChange24h} />
-                    <p className="font-inter text-[11px] tracking-[-0.44px] text-[rgba(25,54,63,0.5)]">
-                      {formatUSD(Number(asset.priceData?.price) || 0)}
-                    </p>
-                  </div>
-                </div>
-                <div className="flex flex-col gap-0.5">
-                  <p className="font-inter text-[20px] font-bold tracking-[-0.8px] text-[#19363F]">
-                    <NumberFlow value={asset.units} format={UNITS_FORMAT} />{" "}
-                    <span className="text-[12px] font-normal text-[rgba(25,54,63,0.4)]">
-                      {asset.displaySymbol}
-                    </span>
-                  </p>
-                  <p className="font-inter text-[11px] tracking-[-0.44px] text-[rgba(25,54,63,0.5)]">
-                    ≈<NumberFlow value={asset.usd} format={USD_FORMAT} />
-                  </p>
-                </div>
-                <ChartPlaceholder label="Sparkline precio" className="h-[60px] w-full" />
-              </button>
-            ))}
-          </div>
+          <DataTable
+            key={tab}
+            data={visibleAssets}
+            columns={ASSET_COLUMNS}
+            filename="activos"
+            searchPlaceholder="Buscar activo..."
+            onRowClick={openToken}
+          />
         )}
       </div>
 

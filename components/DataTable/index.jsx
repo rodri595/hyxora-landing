@@ -1,16 +1,16 @@
 "use client";
 
-import {
-  useReactTable,
-  getCoreRowModel,
-  getSortedRowModel,
-  getFilteredRowModel,
-  flexRender,
-} from "@tanstack/react-table";
-import { useState, useMemo, useRef } from "react";
+import Checkbox from "@/components/Checkbox";
 import Field from "@/components/Field";
 import { cn } from "@/utils";
-import Checkbox from "@/components/Checkbox";
+import {
+  flexRender,
+  getCoreRowModel,
+  getFilteredRowModel,
+  getSortedRowModel,
+  useReactTable,
+} from "@tanstack/react-table";
+import { useMemo, useRef, useState } from "react";
 import * as XLSX from "xlsx";
 
 // ─── Export helpers ───────────────────────────────────────────────────────────
@@ -35,7 +35,7 @@ const exportToCSV = (rows, filename) => {
           const val = String(row[k] ?? "").replace(/"/g, '""');
           return `"${val}"`;
         })
-        .join(","),
+        .join(",")
     )
     .join("\n");
   const blob = new Blob([`${header}\n${body}`], {
@@ -69,10 +69,7 @@ const SortIcon = ({ direction }) => (
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       aria-hidden="true"
-      className={cn(
-        "transition-opacity",
-        direction === "asc" ? "opacity-100" : "opacity-30",
-      )}
+      className={cn("transition-opacity", direction === "asc" ? "opacity-100" : "opacity-30")}
     >
       <path d="M3 0L6 4H0L3 0Z" fill="#19363F" />
     </svg>
@@ -83,10 +80,7 @@ const SortIcon = ({ direction }) => (
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       aria-hidden="true"
-      className={cn(
-        "transition-opacity",
-        direction === "desc" ? "opacity-100" : "opacity-30",
-      )}
+      className={cn("transition-opacity", direction === "desc" ? "opacity-100" : "opacity-30")}
     >
       <path d="M3 4L0 0H6L3 4Z" fill="#19363F" />
     </svg>
@@ -140,12 +134,7 @@ const RowCheckbox = ({ checked, indeterminate, onChange }) => (
     onClick={(e) => e.stopPropagation()}
     onKeyDown={() => {}}
   >
-    <Checkbox
-      checked={checked}
-      indeterminate={indeterminate}
-      onChange={onChange}
-      stopPropagation
-    />
+    <Checkbox checked={checked} indeterminate={indeterminate} onChange={onChange} stopPropagation />
   </div>
 );
 
@@ -169,7 +158,7 @@ const ExportDropdown = ({ onExport, count }) => {
           "flex items-center gap-1.5 h-7.5 px-2.5 rounded-lg border-[0.7px] border-[rgba(25,54,63,0.08)] bg-white",
           "font-inter font-medium text-[11px] tracking-[-0.44px] text-[rgba(25,54,63,0.7)]",
           "hover:bg-[rgba(25,54,63,0.03)] transition-colors",
-          "shadow-[0px_0px_4px_0px_inset_rgba(25,54,63,0.04)]",
+          "shadow-[0px_0px_4px_0px_inset_rgba(25,54,63,0.04)]"
         )}
       >
         <svg
@@ -235,6 +224,7 @@ const ExportDropdown = ({ onExport, count }) => {
  * @param {string} filename        - Base filename for exports (no extension)
  * @param {string} title           - Optional table title shown above toolbar
  * @param {string} searchPlaceholder
+ * @param {function} onRowClick    - Optional; called with row.original on click/Enter
  */
 const DataTable = ({
   data = [],
@@ -242,6 +232,7 @@ const DataTable = ({
   filename = "export",
   title,
   searchPlaceholder = "Buscar...",
+  onRowClick,
 }) => {
   const [sorting, setSorting] = useState([]);
   const [globalFilter, setGlobalFilter] = useState("");
@@ -271,7 +262,7 @@ const DataTable = ({
       },
       ...columns,
     ],
-    [columns],
+    [columns]
   );
 
   const table = useReactTable({
@@ -333,9 +324,7 @@ const DataTable = ({
         <div className="flex items-center gap-2">
           {/* Row count */}
           <span className="font-inter text-[11px] tracking-[-0.44px] text-[rgba(25,54,63,0.45)] whitespace-nowrap">
-            {selectedCount > 0
-              ? `${selectedCount} seleccionados`
-              : `${totalRows} filas`}
+            {selectedCount > 0 ? `${selectedCount} seleccionados` : `${totalRows} filas`}
           </span>
           <ExportDropdown onExport={handleExport} count={selectedCount} />
         </div>
@@ -354,33 +343,24 @@ const DataTable = ({
                   <th
                     key={header.id}
                     style={{
-                      width:
-                        header.column.getSize() !== 150
-                          ? header.column.getSize()
-                          : undefined,
+                      width: header.column.getSize() !== 150 ? header.column.getSize() : undefined,
                     }}
                     className={cn(
                       "px-3 py-2 text-left font-inter font-medium text-[11px] tracking-[-0.44px] text-[rgba(25,54,63,0.55)] whitespace-nowrap select-none",
                       header.column.getCanSort() &&
-                        "cursor-pointer hover:text-[#19363F] transition-colors",
+                        "cursor-pointer hover:text-[#19363F] transition-colors"
                     )}
                     onClick={header.column.getToggleSortingHandler()}
                     onKeyDown={(e) => {
-                      if (e.key === "Enter")
-                        header.column.getToggleSortingHandler()?.(e);
+                      if (e.key === "Enter") header.column.getToggleSortingHandler()?.(e);
                     }}
                   >
                     <span className="inline-flex items-center">
                       {header.isPlaceholder
                         ? null
-                        : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext(),
-                          )}
+                        : flexRender(header.column.columnDef.header, header.getContext())}
                       {header.column.getCanSort() && (
-                        <SortIcon
-                          direction={header.column.getIsSorted() || null}
-                        />
+                        <SortIcon direction={header.column.getIsSorted() || null} />
                       )}
                     </span>
                   </th>
@@ -402,10 +382,16 @@ const DataTable = ({
               table.getRowModel().rows.map((row, i) => (
                 <tr
                   key={row.id}
-                  // onClick={row.getToggleSelectedHandler()}
+                  data-row
+                  tabIndex={onRowClick ? 0 : undefined}
+                  onClick={onRowClick ? () => onRowClick(row.original) : undefined}
                   onKeyDown={(e) => {
-                    if (e.key === " " || e.key === "Enter")
+                    if (e.key === "Enter" && onRowClick) {
+                      e.preventDefault();
+                      onRowClick(row.original);
+                    } else if (e.key === " " || e.key === "Enter") {
                       row.getToggleSelectedHandler()(e);
+                    }
                   }}
                   className={cn(
                     "border-b-[0.7px] border-[rgba(25,54,63,0.05)] cursor-pointer transition-colors ",
@@ -413,7 +399,7 @@ const DataTable = ({
                       ? "bg-[rgba(25,54,63,0.03)]"
                       : i % 2 === 0
                         ? "bg-white hover:bg-[rgba(25,54,63,0.02)]"
-                        : "bg-[rgba(25,54,63,0.01)] hover:bg-[rgba(25,54,63,0.02)]",
+                        : "bg-[rgba(25,54,63,0.01)] hover:bg-[rgba(25,54,63,0.02)]"
                   )}
                 >
                   {row.getVisibleCells().map((cell) => (
@@ -421,10 +407,7 @@ const DataTable = ({
                       key={cell.id}
                       className="px-3 py-2.5 font-inter text-[12px] tracking-[-0.48px] text-[#19363F] whitespace-nowrap"
                     >
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext(),
-                      )}
+                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
                     </td>
                   ))}
                 </tr>
