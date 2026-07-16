@@ -1,7 +1,6 @@
 "use client";
 import DataTable from "@/components/DataTable";
 import Spinner from "@/components/Spinner";
-import Tabs from "@/components/Tabs";
 import { useGetSimAccount } from "@/hooks/simulator/useGetSimAccount";
 import { useGetTokens } from "@/hooks/token/useGetTokens";
 import { cn } from "@/utils";
@@ -19,38 +18,12 @@ export const USD_FORMAT = { style: "currency", currency: "USD" };
 export const UNITS_FORMAT = { maximumFractionDigits: 6 };
 const PCT_FORMAT = { minimumFractionDigits: 1, maximumFractionDigits: 1 };
 
-// Los xStocks (SPY, GOOGL…) todavía no llegan por el API — la pestaña
-// "Hyxora Plus" muestra estado vacío hasta entonces.
-const CATEGORY_BY_SYMBOL = {
-  USDC: "stablecoins",
-  EURC: "stablecoins",
-};
-
-const TABS = [
-  { id: "todos", label: "Todos" },
-  { id: "activos", label: "Activos" },
-  { id: "hyxora-plus", label: "Hyxora Plus" },
-  { id: "stablecoins", label: "Stablecoins" },
-];
-
-const TAB_META = {
-  todos: { emoji: "💼", title: "Portafolio completo" },
-  activos: { emoji: "🪙", title: "Activos" },
-  "hyxora-plus": { emoji: "📈", title: "Hyxora Plus" },
-  stablecoins: { emoji: "💵", title: "Stablecoins" },
-};
-
 // Colores de la referencia (tienen prioridad sobre los neutros del proyecto).
 const SEG_STYLE = {
   invertido: { backgroundColor: "#7DD3FC" },
   disponible: {
     backgroundColor: "#7C5CFC",
     backgroundImage: "linear-gradient(180deg, rgba(255,255,255,0.22), rgba(255,255,255,0))",
-  },
-  otras: {
-    backgroundColor: "#EDE9FE",
-    backgroundImage:
-      "repeating-linear-gradient(45deg, rgba(255,255,255,0.7) 0, rgba(255,255,255,0.7) 1.5px, transparent 1.5px, transparent 6px)",
   },
 };
 
@@ -200,7 +173,6 @@ const ASSET_COLUMNS = [
 ];
 
 const AssetsModule = () => {
-  const [tab, setTab] = useState("todos");
   const { data: tokens, isLoading, isError } = useGetTokens();
   const { data: account } = useGetSimAccount();
 
@@ -210,7 +182,7 @@ const AssetsModule = () => {
   const [displayedToken, setDisplayedToken] = useState(null);
 
   const rootRef = useRef(null);
-  const lastGrow = useRef({ invertido: 0, disponible: 0, otras: 0 });
+  const lastGrow = useRef({ invertido: 0, disponible: 0 });
   const mmBarRef = useRef(null);
   const mmGridRef = useRef(null);
 
@@ -248,7 +220,6 @@ const AssetsModule = () => {
         const usd = Number.isFinite(price) && price > 0 ? units * price : invested;
         return {
           ...token,
-          category: CATEGORY_BY_SYMBOL[token.symbol] ?? "activos",
           usd,
           invested,
           pnl: usd - invested,
@@ -258,30 +229,19 @@ const AssetsModule = () => {
     [tokens, holdingFor]
   );
 
-  const visibleAssets = useMemo(
-    () => (tab === "todos" ? enriched : enriched.filter((a) => a.category === tab)),
-    [enriched, tab]
-  );
-
   const cash = (account?.cashBalanceCents ?? 0) / 100;
-  const investedInTab = visibleAssets.reduce((acc, a) => acc + a.usd, 0);
   const totalInvested = enriched.reduce((acc, a) => acc + a.usd, 0);
-  const investedOutside = totalInvested - investedInTab;
   const totalPortfolio = cash + totalInvested;
-  const pctOfPortfolio = totalPortfolio > 0 ? (investedInTab / totalPortfolio) * 100 : 0;
-
-  const meta = TAB_META[tab];
+  const pctOfPortfolio = totalPortfolio > 0 ? (totalInvested / totalPortfolio) * 100 : 0;
 
   const barSegments = [
-    { key: "invertido", value: investedInTab },
+    { key: "invertido", value: totalInvested },
     { key: "disponible", value: cash },
-    { key: "otras", value: investedOutside },
   ].filter((s) => s.value > 0);
 
   const legend = [
-    { key: "invertido", label: "Invertido", value: investedInTab },
+    { key: "invertido", label: "Invertido", value: totalInvested },
     { key: "disponible", label: "Disponible", value: cash },
-    { key: "otras", label: "Otras inversiones", value: investedOutside },
   ];
 
   const openToken = useCallback((token) => {
@@ -293,7 +253,7 @@ const AssetsModule = () => {
 
   const clearDisplayed = useCallback(() => setDisplayedToken(null), []);
 
-  // Barra de distribución: reacciona al cambio de pestaña y a los datos reales.
+  // Barra de distribución: reacciona a los datos reales.
   // (Los contadores numéricos los anima NumberFlow.)
   useGSAP(
     () => {
@@ -303,9 +263,8 @@ const AssetsModule = () => {
       const mm = gsap.matchMedia();
       mmBarRef.current = mm;
       const targets = {
-        invertido: investedInTab,
+        invertido: totalInvested,
         disponible: cash,
-        otras: investedOutside,
       };
 
       mm.add("(prefers-reduced-motion: no-preference)", () => {
@@ -330,10 +289,10 @@ const AssetsModule = () => {
 
       Object.assign(lastGrow.current, targets);
     },
-    { scope: rootRef, dependencies: [tab, investedInTab, cash, investedOutside] }
+    { scope: rootRef, dependencies: [totalInvested, cash] }
   );
 
-  // Stagger de las filas de la tabla — al cambiar de pestaña o al llegar datos.
+  // Stagger de las filas de la tabla — al llegar datos.
   useGSAP(
     () => {
       const scope = rootRef.current;
@@ -359,7 +318,7 @@ const AssetsModule = () => {
         gsap.from(rows, { opacity: 0, duration: 0.2, overwrite: true });
       });
     },
-    { scope: rootRef, dependencies: [tab, visibleAssets.length] }
+    { scope: rootRef, dependencies: [enriched.length] }
   );
 
   // ── Desktop animation (lg+): ancho del wrapper ────────────────────────────
@@ -424,7 +383,7 @@ const AssetsModule = () => {
       <div ref={rootRef} className="flex flex-col gap-4 flex-1 w-0 min-w-0">
         {/* ── Fila superior: balance + distribución ─────────────────── */}
         <div className="grid grid-cols-[1fr_2fr] gap-4 w-full max-lg:grid-cols-1">
-          {/* Balance total del tab activo */}
+          {/* Balance total invertido */}
           <Card className="flex flex-col justify-between gap-6">
             <div className="flex flex-col gap-1">
               <h2 className="font-inter text-[16px] font-semibold tracking-[-0.64px] text-[#19363F]">
@@ -435,7 +394,7 @@ const AssetsModule = () => {
               </p>
             </div>
             <NumberFlow
-              value={investedInTab}
+              value={totalInvested}
               format={USD_FORMAT}
               className="font-inter text-[40px] font-bold tracking-[-1.6px] text-[#19363F] leading-none"
             />
@@ -448,9 +407,9 @@ const AssetsModule = () => {
           <Card className="flex flex-col gap-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <span className="text-[15px] leading-none">{meta.emoji}</span>
+                <span className="text-[15px] leading-none">💼</span>
                 <h2 className="font-inter text-[15px] font-semibold tracking-[-0.6px] text-[#19363F]">
-                  {meta.title}
+                  Portafolio completo
                 </h2>
               </div>
               <NumberFlow
@@ -478,7 +437,7 @@ const AssetsModule = () => {
 
             <div className="flex items-baseline justify-between">
               <NumberFlow
-                value={investedInTab}
+                value={totalInvested}
                 format={USD_FORMAT}
                 className="font-inter text-[16px] font-bold tracking-[-0.64px] text-[#7C5CFC]"
               />
@@ -504,9 +463,6 @@ const AssetsModule = () => {
           </Card>
         </div>
 
-        {/* ── Tabs ──────────────────────────────────────────────────── */}
-        <Tabs tabs={TABS} value={tab} onChange={setTab} />
-
         {/* ── Tabla de activos ──────────────────────────────────────── */}
         {isLoading ? (
           <div className="flex items-center justify-center py-16 w-full">
@@ -518,16 +474,15 @@ const AssetsModule = () => {
               No se pudieron cargar los activos. Inténtalo de nuevo.
             </p>
           </div>
-        ) : visibleAssets.length === 0 ? (
+        ) : enriched.length === 0 ? (
           <div className="flex items-center justify-center py-16 w-full">
             <p className="font-inter text-[13px] tracking-[-0.52px] text-[rgba(25,54,63,0.5)]">
-              No hay activos en esta categoría por ahora.
+              No hay activos por ahora.
             </p>
           </div>
         ) : (
           <DataTable
-            key={tab}
-            data={visibleAssets}
+            data={enriched}
             columns={ASSET_COLUMNS}
             filename="activos"
             searchPlaceholder="Buscar activo..."
