@@ -114,6 +114,7 @@ const TokenDetailSidebar = ({ token, holding, cashBalanceCents, onClose }) => {
       {
         type: "buy",
         symbol: token.symbol,
+        address: token.address,
         amountCents: amount * 100,
         units,
         priceUsd,
@@ -135,6 +136,7 @@ const TokenDetailSidebar = ({ token, holding, cashBalanceCents, onClose }) => {
       {
         type: "sell",
         symbol: token.symbol,
+        address: token.address,
         amountCents,
         units,
         priceUsd,

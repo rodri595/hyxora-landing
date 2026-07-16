@@ -26,6 +26,9 @@ export const simTransactions = sqliteTable(
     type: text("type").notNull(),
     // Asset ticker (e.g. "XAUT", "SPY") or opportunity id; null for cash-only deposit/withdrawal.
     symbol: text("symbol"),
+    // Token contract address — the UNIQUE position key for tokens (the catalog
+    // repeats symbols across chains, e.g. two USDC). Null for vaults/cash-only.
+    address: text("address"),
     // Always positive; sign is implied by type (buy/withdrawal subtract cash, sell/deposit add cash).
     amountCents: integer("amount_cents").notNull(),
     // Asset units bought/sold.

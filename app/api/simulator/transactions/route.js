@@ -51,7 +51,7 @@ export async function POST(request) {
       return Response.json({ error: "Invalid request body" }, { status: 400 });
     }
 
-    const { type, symbol, amountCents, units, priceUsd, note } = body;
+    const { type, symbol, address, amountCents, units, priceUsd, note } = body;
 
     // deposit/withdrawal are admin-only flows; reject them here.
     if (type !== "buy" && type !== "sell") {
@@ -67,13 +67,15 @@ export async function POST(request) {
       return Response.json({ error: "units must be a positive number" }, { status: 400 });
     }
 
+    const tokenAddress = typeof address === "string" && address ? address : null;
+
     if (type === "buy") {
       const balance = await getCashBalanceCents(user);
       if (amountCents > balance) {
         return Response.json({ error: "Insufficient balance" }, { status: 409 });
       }
     } else {
-      const held = await getHeldUnits(user.id, symbol);
+      const held = await getHeldUnits(user.id, symbol, tokenAddress);
       if (units > held + 1e-9) {
         return Response.json({ error: "Insufficient units" }, { status: 409 });
       }
@@ -85,6 +87,7 @@ export async function POST(request) {
         userId: user.id,
         type,
         symbol,
+        address: tokenAddress,
         amountCents,
         units,
         priceUsd: typeof priceUsd === "number" ? priceUsd : null,

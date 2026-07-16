@@ -220,13 +220,20 @@ const AssetsModule = () => {
   const mobileWrapRef = useRef(null);
   const backdropRef = useRef(null);
 
-  const holdingsBySymbol = useMemo(() => {
+  // Posiciones por address (el catálogo repite símbolos entre cadenas — hay
+  // dos USDC y dos XAUT); symbol solo como fallback para filas legadas.
+  const holdingsByKey = useMemo(() => {
     const map = {};
     for (const holding of account?.holdings ?? []) {
-      map[holding.symbol] = holding;
+      map[holding.address ?? holding.symbol] = holding;
     }
     return map;
   }, [account]);
+
+  const holdingFor = useCallback(
+    (token) => holdingsByKey[token.address] ?? holdingsByKey[token.symbol],
+    [holdingsByKey]
+  );
 
   // Une el catálogo del API con las tenencias reales. `usd` es el valor de
   // mercado (unidades × precio actual) — el costo invertido va en `invested`
@@ -234,7 +241,7 @@ const AssetsModule = () => {
   const enriched = useMemo(
     () =>
       (tokens ?? []).map((token) => {
-        const holding = holdingsBySymbol[token.symbol];
+        const holding = holdingFor(token);
         const units = Number(holding?.units ?? 0);
         const invested = (holding?.investedCents ?? 0) / 100;
         const price = Number(token.priceData?.price);
@@ -248,7 +255,7 @@ const AssetsModule = () => {
           units,
         };
       }),
-    [tokens, holdingsBySymbol]
+    [tokens, holdingFor]
   );
 
   const visibleAssets = useMemo(
@@ -539,7 +546,7 @@ const AssetsModule = () => {
           <TokenDetailSidebar
             key={displayedToken.address}
             token={displayedToken}
-            holding={holdingsBySymbol[displayedToken.symbol]}
+            holding={holdingFor(displayedToken)}
             cashBalanceCents={account?.cashBalanceCents ?? 0}
             onClose={handleClose}
           />
@@ -570,7 +577,7 @@ const AssetsModule = () => {
           <TokenDetailSidebar
             key={displayedToken.address}
             token={displayedToken}
-            holding={holdingsBySymbol[displayedToken.symbol]}
+            holding={holdingFor(displayedToken)}
             cashBalanceCents={account?.cashBalanceCents ?? 0}
             onClose={handleClose}
           />
