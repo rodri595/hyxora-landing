@@ -142,7 +142,7 @@ const TermsPage = () => {
                 «Patrocinio de Comisiones de Red» o «Paymaster»: mecanismo
                 técnico de abstracción de cuenta (actualmente a través de
                 Pimlico, u otro proveedor que HYXORA designe) por el que HYXORA
-                puede asumir el coste de las comisiones de red (gas) de
+                puede asumir el costo de las comisiones de red (gas) de
                 operaciones iniciadas y firmadas por el Usuario, sin que ello
                 confiera a HYXORA control alguno sobre la Cuenta Inteligente.
               </li>
@@ -490,7 +490,7 @@ const TermsPage = () => {
             </p>
             <p>
               HYXORA podrá, como mejora de experiencia de usuario, asumir el
-              coste de las comisiones de red (gas) mediante un mecanismo de
+              costo de las comisiones de red (gas) mediante un mecanismo de
               Patrocinio de Comisiones de Red (Paymaster). Dicho patrocinio se
               limita estrictamente al pago del gas de operaciones que el propio
               Usuario inicia y firma criptográficamente, y no confiere a HYXORA
@@ -714,9 +714,9 @@ const TermsPage = () => {
                 pudiendo llegar a cero.
               </li>
             </ul>
-            <h3>10.6 Retiradas</h3>
+            <h3>10.6 Retiros</h3>
             <p>
-              La disponibilidad y los plazos de retirada dependen exclusivamente
+              La disponibilidad y los plazos de retiro dependen exclusivamente
               de las condiciones técnicas y de liquidez de cada Protocolo DeFi y
               no son controlados ni garantizados por HYXORA.
             </p>
@@ -1095,7 +1095,7 @@ const TermsPage = () => {
             <p>
               El Usuario mantendrá indemne a HYXORA y a las personas indicadas
               en la cláusula 19.2 frente a cualquier reclamación, pérdida, daño,
-              sanción, coste o gasto razonable (incluidos honorarios de defensa
+              sanción, costo o gasto razonable (incluidos honorarios de defensa
               jurídica) derivados de:
             </p>
             <ul>

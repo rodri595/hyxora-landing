@@ -19,7 +19,7 @@ const Whatis = () => {
             <FeatureCard
               videoSrc="/videos/cards_line.mp4"
               title="Multiproducto Financiero"
-              description="Dispóndras de información de todos tus activos y funcionalidades dentro de la app en tiempo real"
+              description="Dispondrás de información de todos tus activos y funcionalidades dentro de la app en tiempo real"
               className="max-w-[529px] grow max-lg:w-full"
               data-cursor-text="Multiproducto Financiero"
             />

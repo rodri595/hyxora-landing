@@ -377,7 +377,7 @@ const Header = ({ isFixed }) => {
                   type="button"
                   onClick={handleApuntate}
                 >
-                  Apúntate
+                  Regístrate
                 </Button>
               </>
             ) : (

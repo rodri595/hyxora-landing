@@ -308,7 +308,7 @@ const MenuComponent = () => {
                 type="button"
                 onClick={handleApuntate}
               >
-                Apúntate
+                Regístrate
               </Button>
             ) : (
               <Button

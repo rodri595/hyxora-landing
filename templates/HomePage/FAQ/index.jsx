@@ -33,9 +33,9 @@ const faqItems = [
   },
   {
     id: 5,
-    question: "¿Puedo tener un IBAN normal como en mi banco de toda la vida?",
+    question: "¿Puedo tener un IBAN normal como en mi banco de siempre?",
     answer:
-      "Sí pero próximamente. Recibirás un IBAN personal a tu nombre. Puedes domiciliar nómina, recibos y hacer/recibe transferencias SEPA a terceros, es decir prácticamente la operativa del día a día que haces habitualmente.",
+      "Sí pero próximamente. Recibirás un IBAN personal a tu nombre. Puedes recibir tu sueldo, pagar tus servicios y hacer/recibir transferencias SEPA a terceros, es decir prácticamente la operativa del día a día que haces habitualmente.",
   },
   {
     id: 6,
@@ -69,21 +69,21 @@ const faqItems = [
   },
   {
     id: 11,
-    question: "¿Cómo gano dinero con las cestas de tokens?",
+    question: "¿Cómo gano dinero con las canastas de tokens?",
     answer:
-      "Depositas euros digitales en cestas pre-configuradas (nosotros elegimos los mejores protocolos). Dispón tanto de tu dinero como de los rendimientos que esté produciendo en cualquier momento desde la propia app.",
+      "Depositas euros digitales en canastas pre-configuradas (nosotros elegimos los mejores protocolos). Dispón tanto de tu dinero como de los rendimientos que esté produciendo en cualquier momento desde la propia app.",
   },
   {
     id: 12,
     question: "¿Qué rendimiento puedo esperar realmente?",
     answer:
-      "En 2025 las cestas estables rondan 5-8 % y las de mayor rendimiento 9-12 %. El rendimiento real depende del mercado, pero siempre lo mostramos en tiempo real y sin sorpresas.",
+      "En 2025 las canastas estables rondan 5-8 % y las de mayor rendimiento 9-12 %. El rendimiento real depende del mercado, pero siempre lo mostramos en tiempo real y sin sorpresas.",
   },
   {
     id: 13,
-    question: "¿Puedo perder dinero en las cestas o staking?",
+    question: "¿Puedo perder dinero en las canastas o staking?",
     answer:
-      'El riesgo es inherente a la inversión teniendo en cuenta que la volatilidad de las cestas "estables" o basadas en stablecoins, es prácticamente nula respecto a aquellas basadas en activos de mayor movimiento en el mercado. Pero tenemos que tener en cuenta que estamos en un mercado con volatilidad y el riesgo de pérdida siempre está presente.',
+      'El riesgo es inherente a la inversión teniendo en cuenta que la volatilidad de las canastas "estables" o basadas en stablecoins, es prácticamente nula respecto a aquellas basadas en activos de mayor movimiento en el mercado. Pero tenemos que tener en cuenta que estamos en un mercado con volatilidad y el riesgo de pérdida siempre está presente.',
   },
   {
     id: 14,
@@ -93,34 +93,34 @@ const faqItems = [
   },
   {
     id: 15,
-    question: "¿Qué pasa si pierdo el móvil o la frase de recuperación?",
+    question: "¿Qué pasa si pierdo el celular o la frase de recuperación?",
     answer:
       "Tenemos un sistema de recuperación + soporte 24 h. Con tu documento y algunos datos podemos ayudarte a recuperar el acceso en menos de 48 h.",
   },
   {
     id: 16,
-    question: "¿Puedo usar Hyxora para pagar a proveedores o recibir nóminas en el extranjero?",
+    question: "¿Puedo usar Hyxora para pagar a proveedores o recibir mi sueldo desde el extranjero?",
     answer:
-      "Próximamente sí. Con tu IBAN puedes recibir nóminas y pagar proveedores exactamente igual que con cualquier banco europeo. Y si quieres pagar más barato y rápido, puedes hacerlo en stablecoins.",
+      "Próximamente sí. Con tu IBAN puedes recibir tu sueldo y pagar a proveedores exactamente igual que con cualquier banco europeo. Y si quieres pagar más barato y rápido, puedes hacerlo en stablecoins.",
   },
   {
     id: 17,
     question: "¿Por qué debería usar Hyxora si ya tengo otras plataformas conocidas?",
     answer:
-      "Algunas te dan algo de cripto, pero con custodia (ellos guardan tus claves) y rendimientos muy bajos. Otras más enfocadas en el mundo Crypto no tienen IBAN ni están pensadas para el día a día. Hyxora combina lo mejor de los dos mundos: IBAN español, tarjeta para pagar en cualquier cosa, rendimientos reales de DeFi y tus claves siempre en tu poder.",
+      "Algunas te dan algo de cripto, pero con custodia (ellos guardan tus claves) y rendimientos muy bajos. Otras más enfocadas en el mundo Crypto no tienen IBAN ni están pensadas para el día a día. Hyxora combina lo mejor de los dos mundos: IBAN europeo, tarjeta para pagar cualquier cosa, rendimientos reales de DeFi y tus claves siempre en tu poder.",
   },
   {
     id: 18,
     question: "¿Es verdad que en Hyxora gano más interés que en un plazo fijo del banco?",
     answer:
-      "Sí, y con diferencia. Hoy los mejores plazos fijos dan 2-3 %. En Hyxora, con la cesta más conservadora ya superas ampliamente esas cifras y cobras intereses cada día. Y puedes sacar el dinero cuando quieras, sin penalización. Es la consecuencia de no tener intermediarios, el producto puede ser el mismo, pero los rendimientos son muy diferentes.",
+      "Sí, y con diferencia. Hoy los mejores plazos fijos dan 2-3 %. En Hyxora, con la canasta más conservadora ya superas ampliamente esas cifras y cobras intereses cada día. Y puedes sacar el dinero cuando quieras, sin penalización. Es la consecuencia de no tener intermediarios, el producto puede ser el mismo, pero los rendimientos son muy diferentes.",
   },
   {
     id: 19,
     question:
-      "¿Cómo es posible que ofrezcáis mayores rendimientos si los bancos tradicionales dan 1-2 %?",
+      "¿Cómo es posible que ofrezcan mayores rendimientos si los bancos tradicionales dan 1-2 %?",
     answer:
-      "Los bancos prestan tu dinero y se quedan la mayor parte del margen. En DeFi, tú prestas directamente tus euros digitales a otros usuarios o protocolos y te llevas casi todo el interés. Hyxora se encarga de elegir los sitios más seguros y rentables para que tú no tengas que buscarlos. Todo a un par de golpes de clic.",
+      "Los bancos prestan tu dinero y se quedan la mayor parte del margen. En DeFi, tú prestas directamente tus euros digitales a otros usuarios o protocolos y te llevas casi todo el interés. Hyxora se encarga de elegir los sitios más seguros y rentables para que tú no tengas que buscarlos. Todo con un par de clics.",
   },
   {
     id: 20,
@@ -130,13 +130,13 @@ const faqItems = [
   },
   {
     id: 21,
-    question: "¿Puedo sacar mi dinero cuando quiera o hay permanencia?",
+    question: "¿Puedo retirar mi dinero cuando quiera o hay un plazo mínimo?",
     answer:
-      "Liquidez total. Puedes pasar de vuelta a euros y enviarlos a cualquier banco en segundos, 24/7, sin permanencia ni penalización.",
+      "Liquidez total. Puedes pasar de vuelta a euros y enviarlos a cualquier banco en segundos, 24/7, sin plazos mínimos ni penalización.",
   },
   {
     id: 22,
-    question: "¿De verdad no guardáis mis claves privadas como hacen la mayoría?",
+    question: "¿De verdad no guardan mis claves privadas como hacen la mayoría?",
     answer:
       "No. Desde el primer día tus criptoactivos están en una wallet de la que solo tú tienes las claves y el acceso. Ni nosotros podemos tocarlos pero si podemos hacer que desde la app las recuperes en caso de pérdida de forma totalmente encriptada.",
   },
@@ -144,25 +144,25 @@ const faqItems = [
     id: 23,
     question: "¿Cómo funcionan las remesas o transferencias internacionales?",
     answer:
-      "Si tanto el emisor como el destinatario están en Hyxora, puedes hacer una transferencia inmediata por Crypto de una Wallet a otra sin coste y en segundos desde cualquier parte del mundo. Es uno de nuestros productos estrella. Si la otra persona no está en Hyxora, es exactamente igual pero tendrá un coste, pequeño pero lo tendrá.",
+      "Si tanto el emisor como el destinatario están en Hyxora, puedes hacer una transferencia inmediata por Crypto de una Wallet a otra sin costo y en segundos desde cualquier parte del mundo. Es uno de nuestros productos estrella. Si la otra persona no está en Hyxora, es exactamente igual pero tendrá un costo, pequeño pero lo tendrá.",
   },
   {
     id: 24,
     question: "¿Qué son los Founder y qué ventajas extras tienen?",
     answer:
-      "Son plazas limitadas para los pioneros que ademas recibirán un 10% conjunto del Equity de Hyxora pasando a ser Co-fundadores. Además, tienen privilegios específicos como la suscripción gratuita Premium de por vida, no tienen o si tienen fees , son aun más bajos que en Premium y Basic, acceso al Comité Consultivo, accesos exclusivos y reconocimiento especial en la comunidad. Para más info, ve a la sección de www.hyxora.com/nftfounder",
+      "Son cupos limitados para los pioneros que además recibirán un 10% conjunto del Equity de Hyxora pasando a ser Co-fundadores. Además, tienen privilegios específicos como la suscripción gratuita Premium de por vida, no tienen o si tienen fees , son aun más bajos que en Premium y Basic, acceso al Comité Consultivo, accesos exclusivos y reconocimiento especial en la comunidad. Para más info, ve a la sección de www.hyxora.com/nftfounder",
   },
   {
     id: 25,
     question: "¿Hyxora va a seguir añadiendo más productos DeFi?",
     answer:
-      "Sí. Roadmap 2026-2027: lending (préstamos con garantía), pools de liquidez propios, tarjetas crypto internacionales sin conversión, crédito sobre colateral crypto y más cestas avanzadas.",
+      "Sí. Roadmap 2026-2027: lending (préstamos con garantía), pools de liquidez propios, tarjetas crypto internacionales sin conversión, crédito sobre colateral crypto y más canastas avanzadas.",
   },
   {
     id: 26,
-    question: "¿Puedo crear mis propias cestas personalizadas?",
+    question: "¿Puedo crear mis propias canastas personalizadas?",
     answer:
-      "Sí pero en un futuro próximo. En Premium tendrás un editor de cestas donde puedes elegir porcentajes y protocolos tú mismo.",
+      "Sí pero en un futuro próximo. En Premium tendrás un editor de canastas donde puedes elegir porcentajes y protocolos tú mismo.",
   },
   {
     id: 27,
