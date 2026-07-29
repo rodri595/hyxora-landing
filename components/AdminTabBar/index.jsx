@@ -8,6 +8,7 @@ export const ADMIN_TABS = [
   { id: "emails", label: "Emails" },
   { id: "polls", label: "Polls" },
   { id: "tutorials", label: "Tutoriales" },
+  { id: "quiz", label: "Quiz" },
 ];
 
 const AdminTabBarInner = () => {
