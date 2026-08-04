@@ -7,7 +7,7 @@ import { useQuery } from "@tanstack/react-query";
  * @return {Object}
  */
 export const useGetPollResults = (pollNumber) => {
-  const { smartWalletAddress } = useWeb3();
+  const { smartWalletAddress, isSessionReady } = useWeb3();
 
   return useQuery({
     queryKey: ["getPollResults", pollNumber, smartWalletAddress],
@@ -20,6 +20,6 @@ export const useGetPollResults = (pollNumber) => {
     refetchOnMount: true,
     retry: false,
 
-    enabled: Boolean(smartWalletAddress && pollNumber),
+    enabled: Boolean(smartWalletAddress && pollNumber && isSessionReady),
   });
 };

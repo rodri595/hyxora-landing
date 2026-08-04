@@ -4,7 +4,7 @@ import { usePrivy } from "@privy-io/react-auth";
 import { useWeb3 } from "@/context/Web3Provider";
 
 export const GetNftsRemaining = (props) => {
-  const { smartWalletAddress } = useWeb3();
+  const { smartWalletAddress, isSessionReady } = useWeb3();
   const { authenticated, ready } = usePrivy();
 
   return useQuery({
@@ -17,6 +17,10 @@ export const GetNftsRemaining = (props) => {
     enabled:
       typeof props === "undefined"
         ? true
-        : props.enabled && !!smartWalletAddress && authenticated && ready,
+        : props.enabled &&
+          !!smartWalletAddress &&
+          authenticated &&
+          ready &&
+          isSessionReady,
   });
 };

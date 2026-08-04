@@ -11,7 +11,7 @@ import { useQuery } from "@tanstack/react-query";
  * `{ answers, completedAt, emailProgress }` or `null`.
  */
 export const useGetMySurveyResponse = () => {
-  const { smartWalletAddress } = useWeb3();
+  const { smartWalletAddress, isSessionReady } = useWeb3();
   const { authenticated, ready } = usePrivy();
 
   return useQuery({
@@ -31,6 +31,7 @@ export const useGetMySurveyResponse = () => {
     refetchOnMount: true,
     retry: false,
 
-    enabled: Boolean(smartWalletAddress) && authenticated && ready,
+    enabled:
+      Boolean(smartWalletAddress) && authenticated && ready && isSessionReady,
   });
 };

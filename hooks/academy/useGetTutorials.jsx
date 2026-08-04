@@ -10,7 +10,7 @@ import { usePrivy } from "@privy-io/react-auth";
  * @return {Object}
  */
 export const useGetTutorials = (params = {}) => {
-  const { smartWalletAddress } = useWeb3();
+  const { smartWalletAddress, isSessionReady } = useWeb3();
   const { authenticated, ready } = usePrivy();
   const { categoryId, q, sort } = params;
 
@@ -32,6 +32,7 @@ export const useGetTutorials = (params = {}) => {
     refetchOnWindowFocus: false,
     refetchOnMount: true,
     retry: 1,
-    enabled: Boolean(smartWalletAddress) && authenticated && ready,
+    enabled:
+      Boolean(smartWalletAddress) && authenticated && ready && isSessionReady,
   });
 };

@@ -12,7 +12,7 @@ import { useMemo } from "react";
  * `{ user, answers, completedAt, emailProgress }`.
  */
 export const useGetAllSurveyResponses = () => {
-  const { smartWalletAddress } = useWeb3();
+  const { smartWalletAddress, isSessionReady } = useWeb3();
   const { authenticated, ready } = usePrivy();
   const { data: userInformation } = useGetUserInformation();
 
@@ -32,6 +32,11 @@ export const useGetAllSurveyResponses = () => {
     refetchOnWindowFocus: false,
     refetchOnMount: false,
     retry: false,
-    enabled: Boolean(smartWalletAddress) && authenticated && ready && isAdmin,
+    enabled:
+      Boolean(smartWalletAddress) &&
+      authenticated &&
+      ready &&
+      isSessionReady &&
+      isAdmin,
   });
 };

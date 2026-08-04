@@ -7,7 +7,7 @@ import { useMemo } from "react";
 import { roleNames } from "@/constants/roles";
 
 export const useGetAllEmails = (params = {}) => {
-  const { smartWalletAddress } = useWeb3();
+  const { smartWalletAddress, isSessionReady } = useWeb3();
   const { authenticated, ready } = usePrivy();
   const { data: userInformation } = useGetUserInformation();
   const { to } = params;
@@ -35,6 +35,11 @@ export const useGetAllEmails = (params = {}) => {
     refetchOnWindowFocus: false,
     refetchOnMount: false,
     retry: false,
-    enabled: Boolean(smartWalletAddress) && authenticated && ready && isAdmin,
+    enabled:
+      Boolean(smartWalletAddress) &&
+      authenticated &&
+      ready &&
+      isSessionReady &&
+      isAdmin,
   });
 };
