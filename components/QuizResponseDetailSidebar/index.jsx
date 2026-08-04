@@ -1,10 +1,8 @@
 "use client";
 
-import { quizQuestions } from "@/constants/quiz";
-import { cn } from "@/utils";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
-import { useRef, useState } from "react";
+import { useRef } from "react";
 
 gsap.registerPlugin(useGSAP);
 
@@ -17,50 +15,10 @@ const fmt = (ts) =>
     minute: "2-digit",
   });
 
-// ── ConfirmBlock ───────────────────────────────────────────────────────────────
-
-const ConfirmBlock = ({ message, confirmLabel, onCancel, onConfirm }) => (
-  <div className="flex flex-col gap-2 p-3 rounded-lg border-[0.7px] border-red-200 bg-red-50">
-    <div className="flex items-start gap-2">
-      <svg
-        width="14"
-        height="14"
-        viewBox="0 0 16 16"
-        fill="none"
-        className="shrink-0 mt-px"
-        aria-hidden="true"
-      >
-        <path d="M8 2L14.5 13H1.5L8 2Z" stroke="#dc2626" strokeWidth="1.3" strokeLinejoin="round" />
-        <path d="M8 6.5V9.5M8 11v.5" stroke="#dc2626" strokeWidth="1.3" strokeLinecap="round" />
-      </svg>
-      <p className="font-inter text-[11px] tracking-[-0.44px] text-red-700 leading-relaxed">
-        {message}
-      </p>
-    </div>
-    <div className="flex gap-2">
-      <button
-        type="button"
-        onClick={onCancel}
-        className="flex-1 h-7 rounded-lg border-[0.7px] border-[rgba(25,54,63,0.15)] bg-white text-[rgba(25,54,63,0.6)] font-inter text-[11px] font-medium tracking-[-0.44px] hover:bg-[rgba(25,54,63,0.04)] transition-colors"
-      >
-        Cancelar
-      </button>
-      <button
-        type="button"
-        onClick={onConfirm}
-        className="flex-1 h-7 rounded-lg bg-red-600 text-white font-inter text-[11px] font-medium tracking-[-0.44px] hover:bg-red-700 transition-colors"
-      >
-        {confirmLabel}
-      </button>
-    </div>
-  </div>
-);
-
 // ── QuizResponseDetailSidebar ────────────────────────────────────────────────────
 
-const QuizResponseDetailSidebar = ({ response, onClose, onDelete }) => {
+const QuizResponseDetailSidebar = ({ questions = [], response, onClose }) => {
   const panelRef = useRef(null);
-  const [confirmDelete, setConfirmDelete] = useState(false);
 
   useGSAP(
     () => {
@@ -73,10 +31,7 @@ const QuizResponseDetailSidebar = ({ response, onClose, onDelete }) => {
     { scope: panelRef }
   );
 
-  const handleDelete = () => {
-    onDelete(response.id);
-    onClose();
-  };
+  const { sent = 0, total = 0 } = response.emailProgress ?? {};
 
   return (
     <div
@@ -87,10 +42,11 @@ const QuizResponseDetailSidebar = ({ response, onClose, onDelete }) => {
       <div className="flex items-start justify-between gap-3 px-4 py-3 border-b-[0.7px] border-[rgba(25,54,63,0.08)] shrink-0">
         <div className="flex flex-col gap-0.5 min-w-0">
           <p className="font-inter font-semibold text-[12px] tracking-[-0.48px] text-[#19363F] truncate">
-            {response.email}
+            {response.user?.email}
           </p>
           <p className="font-inter text-[10px] tracking-[-0.4px] text-[rgba(25,54,63,0.4)] truncate">
-            Respondido el {fmt(response.submittedAt)}
+            {response.user?.name ? `${response.user.name} — ` : ""}
+            Respondido el {fmt(response.completedAt)}
           </p>
         </div>
         <button
@@ -113,33 +69,29 @@ const QuizResponseDetailSidebar = ({ response, onClose, onDelete }) => {
       {/* Content */}
       <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-[rgba(25,54,63,0.1)] scrollbar-thumb-rounded scrollbar-track-transparent">
         <div className="flex flex-col gap-4 p-4">
-          {quizQuestions.map((q, qi) => {
-            const selectedId = response.answers[q.id];
-            const optionIndex = q.options.findIndex((o) => o.id === selectedId);
-            const option = q.options[optionIndex];
+          {questions.map((q, qi) => {
+            // Answers come back keyed by question number, holding the exact
+            // option text — there is no option id to resolve against.
+            const option = response.answers?.[String(q.questionNumber)];
+            const optionIndex = q.options.indexOf(option);
             const letter = String.fromCharCode(65 + Math.max(optionIndex, 0));
 
             return (
-              <div key={q.id} className="flex flex-col gap-1.5">
+              <div key={q.questionNumber} className="flex flex-col gap-1.5">
                 <span className="font-inter text-[10px] font-medium tracking-[-0.4px] text-[rgba(25,54,63,0.4)] uppercase">
                   Pregunta {qi + 1}
                 </span>
                 <p className="font-inter text-[11px] tracking-[-0.44px] text-[rgba(25,54,63,0.6)] leading-snug">
-                  {q.question}
+                  {q.questionText}
                 </p>
                 {option ? (
                   <div className="flex items-start gap-2 p-2.5 rounded-lg border-[0.7px] border-[rgba(25,54,63,0.08)] bg-[rgba(25,54,63,0.015)]">
                     <span className="size-4 shrink-0 rounded-full bg-[#19363F] text-white font-inter text-[9px] font-semibold flex items-center justify-center mt-px">
                       {letter}
                     </span>
-                    <div className="flex flex-col gap-1 min-w-0">
-                      <p className="font-inter text-[11px] tracking-[-0.44px] text-[#19363F] leading-snug">
-                        {option.label}
-                      </p>
-                      <span className="font-inter text-[10px] tracking-[-0.4px] text-[rgba(25,54,63,0.35)]">
-                        segmento: {option.value}
-                      </span>
-                    </div>
+                    <p className="font-inter text-[11px] tracking-[-0.44px] text-[#19363F] leading-snug min-w-0">
+                      {option}
+                    </p>
                   </div>
                 ) : (
                   <p className="font-inter text-[11px] tracking-[-0.44px] text-[rgba(25,54,63,0.35)]">
@@ -150,27 +102,22 @@ const QuizResponseDetailSidebar = ({ response, onClose, onDelete }) => {
             );
           })}
 
-          {/* Danger zone */}
+          {/* Email campaign progress — sent by the backend cron, read-only here */}
           <div className="flex flex-col gap-2 border-t-[0.7px] border-[rgba(25,54,63,0.08)] pt-3">
-            {confirmDelete ? (
-              <ConfirmBlock
-                message="¿Confirmas que quieres eliminar este cuestionario? El usuario podrá volver a completarlo desde cero."
-                confirmLabel="Sí, eliminar"
-                onCancel={() => setConfirmDelete(false)}
-                onConfirm={handleDelete}
+            <div className="flex items-baseline justify-between gap-2">
+              <span className="font-inter text-[10px] font-medium tracking-[-0.4px] text-[rgba(25,54,63,0.4)] uppercase">
+                Emails enviados
+              </span>
+              <span className="font-inter text-[11px] font-medium tabular-nums tracking-[-0.44px] text-[#19363F]">
+                {sent}/{total}
+              </span>
+            </div>
+            <div className="h-[3px] w-full overflow-hidden rounded-full bg-[rgba(25,54,63,0.08)]">
+              <div
+                className="h-full origin-left rounded-full bg-[#19363F] transition-transform duration-500 ease-out"
+                style={{ transform: `scaleX(${total ? sent / total : 0})` }}
               />
-            ) : (
-              <button
-                type="button"
-                onClick={() => setConfirmDelete(true)}
-                className={cn(
-                  "w-full h-8 rounded-lg border-[0.7px] border-[rgba(25,54,63,0.15)] text-[rgba(25,54,63,0.5)]",
-                  "font-inter text-[12px] font-medium tracking-[-0.48px] hover:border-red-200 hover:bg-red-50 hover:text-red-600 transition-colors"
-                )}
-              >
-                Eliminar cuestionario
-              </button>
-            )}
+            </div>
           </div>
         </div>
       </div>
