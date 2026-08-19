@@ -231,10 +231,11 @@ const SIM_ROLE_OPTIONS = [
 ];
 
 // Edits the matched SIM user (keyed by its Privy DID, `simUser.id`) — NOT the
-// main-backend user id. `status` is the whitelist: "active" = access.
+// main-backend user id. `status` is access control: "active" = access (the default
+// for everyone), "suspended" = an admin revoked this account.
 const SimuladorPanel = ({ simUser }) => {
   const { mutate: updateSimUser, isPending } = useUpdateSimUser();
-  const [status, setStatus] = useState(simUser?.status ?? "suspended");
+  const [status, setStatus] = useState(simUser?.status ?? "active");
   const [role, setRole] = useState(simUser?.role ?? "user");
 
   if (!simUser) {
@@ -256,8 +257,7 @@ const SimuladorPanel = ({ simUser }) => {
     );
   }
 
-  const hasChanges =
-    status !== (simUser.status ?? "suspended") || role !== (simUser.role ?? "user");
+  const hasChanges = status !== (simUser.status ?? "active") || role !== (simUser.role ?? "user");
 
   const handleSave = () => {
     updateSimUser({ id: simUser.id, status, role });

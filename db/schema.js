@@ -7,8 +7,9 @@ export const simUsers = sqliteTable("sim_users", {
   wallet: text("wallet"),
   // "user" | "admin"
   role: text("role").notNull().default("user"),
-  // "active" | "suspended" — new users start suspended (whitelist); an admin activates them.
-  status: text("status").notNull().default("suspended"),
+  // "active" | "suspended" — the simulator is open to everyone, so new users start
+  // active; an admin can still suspend an individual account to revoke access.
+  status: text("status").notNull().default("active"),
   // Money stored as integer cents. Default $10,000.
   initialBalanceCents: integer("initial_balance_cents").notNull().default(1000000),
   createdAt: integer("created_at", { mode: "timestamp" }).$defaultFn(() => new Date()),

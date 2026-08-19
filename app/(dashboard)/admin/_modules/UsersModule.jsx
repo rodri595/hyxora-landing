@@ -25,7 +25,7 @@ const TABS = [
   { id: "nft-buyers", label: "Compradores NFT" },
 ];
 
-// Simulator status badge — "active" (whitelisted) vs "suspended" (no access).
+// Simulator status badge — "active" (default, has access) vs "suspended" (revoked by an admin).
 const SIM_STATUS_STYLES = {
   active: "bg-emerald-50 text-emerald-700 border-emerald-200",
   suspended: "bg-[rgba(25,54,63,0.06)] text-[rgba(25,54,63,0.55)] border-[rgba(25,54,63,0.1)]",
