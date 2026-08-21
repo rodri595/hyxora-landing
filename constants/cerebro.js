@@ -74,3 +74,12 @@ export const cerebroTxUrl = (chainId, txHash) => {
   const explorer = cerebroExplorers[chainId];
   return explorer && txHash ? `${explorer}/tx/${txHash}` : null;
 };
+
+/**
+ * Plans come back lowercase ("premium"); the admin tables show them capitalised.
+ *
+ * @param {string | null | undefined} plan
+ * @return {string}
+ */
+export const cerebroPlanLabel = (plan) =>
+  typeof plan === "string" && plan.length > 0 ? plan[0].toUpperCase() + plan.slice(1) : "—";

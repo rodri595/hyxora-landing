@@ -1,47 +1,15 @@
 "use client";
 
 import DataTable from "@/components/DataTable";
-import { cerebroChains, cerebroOperationLabels, cerebroTxUrl } from "@/constants/cerebro";
+import { cerebroChains, cerebroOperationLabels } from "@/constants/cerebro";
 import { useGetFeesDiagnostics } from "@/hooks/cerebro/useGetFeesDiagnostics";
-import { formatDateTime, formatNumber, formatUsd, shortenHash } from "@/utils/format";
+import { formatDateTime, formatNumber, formatUsd } from "@/utils/format";
 import { useMemo } from "react";
 import Panel, { RefreshButton } from "../../shared/Panel";
 import PendingEndpoint from "../../shared/PendingEndpoint";
 import QueryState from "../../shared/QueryState";
+import TxLink from "../../shared/TxLink";
 import { DIAGNOSTICS_LIMIT, REVENUE_DAYS } from "./constants";
-
-const ExternalIcon = () => (
-  <svg width="10" height="10" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-    <path
-      d="M6 3h7v7M13 3 4 12"
-      stroke="currentColor"
-      strokeWidth="1.4"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-  </svg>
-);
-
-const TxCell = ({ chainId, txHash }) => {
-  const url = cerebroTxUrl(chainId, txHash);
-  const label = shortenHash(txHash, { lead: 8, tail: 4 });
-
-  if (!url) {
-    return <span className="font-mono text-[10px] text-[rgba(25,54,63,0.5)]">{label}</span>;
-  }
-
-  return (
-    <a
-      href={url}
-      target="_blank"
-      rel="noreferrer"
-      className="inline-flex items-center gap-1 font-mono text-[10px] text-[rgba(25,54,63,0.6)] hover:text-[#19363F] transition-colors"
-    >
-      {label}
-      <ExternalIcon />
-    </a>
-  );
-};
 
 const columns = [
   {
@@ -85,7 +53,7 @@ const columns = [
   {
     accessorKey: "txHash",
     header: "Tx",
-    cell: (info) => <TxCell chainId={info.row.original.chainId} txHash={info.getValue()} />,
+    cell: (info) => <TxLink chainId={info.row.original.chainId} txHash={info.getValue()} />,
   },
 ];
 

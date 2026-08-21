@@ -7,6 +7,7 @@ import {
   flexRender,
   getCoreRowModel,
   getFilteredRowModel,
+  getPaginationRowModel,
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
@@ -302,6 +303,124 @@ const ColumnToggle = ({ table }) => {
   );
 };
 
+// ─── Pagination ───────────────────────────────────────────────────────────────
+
+const PageArrow = ({ direction = "right", double = false }) => (
+  <svg
+    width="12"
+    height="12"
+    viewBox="0 0 16 16"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+    aria-hidden="true"
+    className={cn("shrink-0", direction === "left" && "rotate-180")}
+  >
+    <path
+      d={double ? "M4 4l4 4-4 4M9 4l4 4-4 4" : "M6 3l5 5-5 5"}
+      stroke="currentColor"
+      strokeWidth="1.4"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </svg>
+);
+
+const PageButton = ({ onClick, disabled, label, children }) => (
+  <button
+    type="button"
+    onClick={onClick}
+    disabled={disabled}
+    aria-label={label}
+    title={label}
+    className={cn(
+      "flex items-center gap-1 h-7 px-2 rounded-lg border-[0.7px] font-inter text-[11px] font-medium tracking-[-0.44px] transition-colors",
+      disabled
+        ? "border-[rgba(25,54,63,0.06)] text-[rgba(25,54,63,0.25)] cursor-not-allowed"
+        : "border-[rgba(25,54,63,0.12)] text-[#19363F] hover:bg-[rgba(25,54,63,0.04)]"
+    )}
+  >
+    {children}
+  </button>
+);
+
+/**
+ * Page bar shown under the table when `enablePagination` is on.
+ *
+ * `getRowCount()` covers both modes: client-side it's the filtered row count, so
+ * searching re-bases "Mostrando X–Y de Z"; server-side it's the `rowCount` the API
+ * reported, which is larger than the rows actually loaded.
+ */
+const PaginationBar = ({ table, pageSizeOptions }) => {
+  const { pageIndex, pageSize } = table.getState().pagination;
+  const total = table.getRowCount();
+  const pageCount = table.getPageCount();
+  const first = total === 0 ? 0 : pageIndex * pageSize + 1;
+  const last = Math.min(total, (pageIndex + 1) * pageSize);
+
+  return (
+    <div className="flex items-center justify-between gap-3 flex-wrap mt-2.5">
+      <div className="flex items-center gap-2">
+        <span className="font-inter text-[11px] tabular-nums tracking-[-0.44px] text-[rgba(25,54,63,0.45)] whitespace-nowrap">
+          Mostrando {first}–{last} de {total}
+        </span>
+
+        {pageSizeOptions.length > 1 && (
+          <select
+            value={pageSize}
+            onChange={(e) => table.setPageSize(Number(e.target.value))}
+            aria-label="Filas por página"
+            className="h-7 rounded-lg border-[0.7px] border-[rgba(25,54,63,0.12)] bg-white px-1.5 font-inter text-[11px] font-medium tracking-[-0.44px] text-[#19363F] cursor-pointer hover:bg-[rgba(25,54,63,0.04)] transition-colors"
+          >
+            {pageSizeOptions.map((size) => (
+              <option key={size} value={size}>
+                {size} / pág.
+              </option>
+            ))}
+          </select>
+        )}
+      </div>
+
+      <div className="flex items-center gap-1.5">
+        <PageButton
+          onClick={() => table.setPageIndex(0)}
+          disabled={!table.getCanPreviousPage()}
+          label="Primera página"
+        >
+          <PageArrow direction="left" double />
+        </PageButton>
+        <PageButton
+          onClick={() => table.previousPage()}
+          disabled={!table.getCanPreviousPage()}
+          label="Página anterior"
+        >
+          <PageArrow direction="left" />
+          Anterior
+        </PageButton>
+
+        <span className="font-inter text-[11px] tabular-nums tracking-[-0.44px] text-[rgba(25,54,63,0.5)] px-1 whitespace-nowrap">
+          Página {pageCount === 0 ? 0 : pageIndex + 1} de {pageCount}
+        </span>
+
+        <PageButton
+          onClick={() => table.nextPage()}
+          disabled={!table.getCanNextPage()}
+          label="Página siguiente"
+        >
+          Siguiente
+          <PageArrow />
+        </PageButton>
+        <PageButton
+          onClick={() => table.setPageIndex(pageCount - 1)}
+          disabled={!table.getCanNextPage()}
+          label="Última página"
+        >
+          <PageArrow double />
+        </PageButton>
+      </div>
+    </div>
+  );
+};
+
 // ─── Main DataTable ───────────────────────────────────────────────────────────
 
 const ALIGN_CLASS = {
@@ -343,6 +462,29 @@ const ALIGN_CLASS = {
  * @param {number} [maxHeight]               - Max body height in px before scrolling.
  *   Only meaningful with `bare`; otherwise the table flex-fills its parent.
  * @param {React.ReactNode} [toolbarExtra]   - Extra controls, rendered left of Export.
+ * @param {boolean} [enablePagination]      - Pagination with a page bar under the
+ *   table. Default false, so existing tables keep rendering every row.
+ * @param {number} [pageSize]               - Rows per page. Default 25.
+ * @param {number[]} [pageSizeOptions]      - Page-size choices. A single-entry array
+ *   hides the selector.
+ * @param {boolean} [isFetching]            - Dims the rows while a server round-trip
+ *   is in flight, so a stale page reads as stale.
+ *
+ * Server-driven mode — for an endpoint that paginates, sorts and searches itself.
+ * Turn on the `manual*` flag for each concern the server owns and pass the matching
+ * controlled state; TanStack then stops doing that work client-side. The `on*Change`
+ * handlers receive TanStack updaters, so a `useState` setter can be passed straight in.
+ *
+ * @param {boolean} [manualPagination]      - Server owns paging. Requires `rowCount`.
+ * @param {boolean} [manualSorting]         - Server owns sorting.
+ * @param {boolean} [manualFiltering]       - Server owns the search.
+ * @param {number} [rowCount]               - Total rows on the server, for the pager.
+ * @param {SortingState} [sorting]          - Controlled sorting. Overrides `initialSorting`.
+ * @param {Function} [onSortingChange]
+ * @param {{ pageIndex: number, pageSize: number }} [pagination] - Controlled pagination.
+ * @param {Function} [onPaginationChange]
+ * @param {string} [globalFilter]           - Controlled search text.
+ * @param {Function} [onGlobalFilterChange]
  * @param {string} [className]
  */
 const DataTable = ({
@@ -363,12 +505,34 @@ const DataTable = ({
   emptyLabel = "Sin resultados",
   maxHeight,
   toolbarExtra,
+  enablePagination = false,
+  pageSize = 25,
+  pageSizeOptions = [10, 25, 50, 100],
+  isFetching = false,
+  manualPagination = false,
+  manualSorting = false,
+  manualFiltering = false,
+  rowCount,
+  sorting: sortingProp,
+  onSortingChange: onSortingChangeProp,
+  pagination: paginationProp,
+  onPaginationChange: onPaginationChangeProp,
+  globalFilter: globalFilterProp,
+  onGlobalFilterChange: onGlobalFilterChangeProp,
   className,
 }) => {
-  const [sorting, setSorting] = useState(initialSorting);
-  const [globalFilter, setGlobalFilter] = useState("");
+  const [internalSorting, setInternalSorting] = useState(initialSorting);
+  const [internalGlobalFilter, setInternalGlobalFilter] = useState("");
   const [rowSelection, setRowSelection] = useState({});
   const [columnVisibility, setColumnVisibility] = useState({});
+  const [internalPagination, setInternalPagination] = useState({ pageIndex: 0, pageSize });
+
+  const sorting = sortingProp ?? internalSorting;
+  const setSorting = onSortingChangeProp ?? setInternalSorting;
+  const globalFilter = globalFilterProp ?? internalGlobalFilter;
+  const setGlobalFilter = onGlobalFilterChangeProp ?? setInternalGlobalFilter;
+  const pagination = paginationProp ?? internalPagination;
+  const setPagination = onPaginationChangeProp ?? setInternalPagination;
 
   const tableColumns = useMemo(() => {
     if (!enableSelection) return columns;
@@ -401,15 +565,25 @@ const DataTable = ({
   const table = useReactTable({
     data,
     columns: tableColumns,
-    state: { sorting, globalFilter, rowSelection, columnVisibility },
+    state: { sorting, globalFilter, rowSelection, columnVisibility, pagination },
     enableRowSelection: enableSelection,
     onRowSelectionChange: setRowSelection,
     onSortingChange: setSorting,
     onGlobalFilterChange: setGlobalFilter,
     onColumnVisibilityChange: setColumnVisibility,
+    onPaginationChange: setPagination,
+    manualPagination,
+    manualSorting,
+    manualFiltering,
+    // Only meaningful when the server paginates; otherwise TanStack counts the rows.
+    rowCount: manualPagination ? rowCount : undefined,
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
+    // Left undefined when off, which is what makes TanStack render every row. In
+    // server mode the response *is* the page, so slicing it again would hide rows.
+    getPaginationRowModel:
+      enablePagination && !manualPagination ? getPaginationRowModel() : undefined,
   });
 
   const selectedRows = table.getSelectedRowModel().rows.map((r) => r.original);
@@ -425,7 +599,7 @@ const DataTable = ({
   };
 
   const selectedCount = Object.keys(rowSelection).length;
-  const totalRows = table.getFilteredRowModel().rows.length;
+  const totalRows = table.getRowCount();
 
   const showToolbar =
     Boolean(title) ||
@@ -492,6 +666,7 @@ const DataTable = ({
         style={maxHeight ? { maxHeight } : undefined}
         className={cn(
           "overflow-auto",
+          isFetching && "opacity-55 transition-opacity",
           bare
             ? "rounded-lg border-[0.7px] border-[rgba(25,54,63,0.06)]"
             : "flex-1 min-h-0 rounded-xl border-[0.7px] border-[rgba(25,54,63,0.08)] bg-white shadow-[0px_1px_4px_0px_rgba(25,54,63,0.04)]"
@@ -616,6 +791,8 @@ const DataTable = ({
           )}
         </table>
       </div>
+
+      {enablePagination && <PaginationBar table={table} pageSizeOptions={pageSizeOptions} />}
     </div>
   );
 };

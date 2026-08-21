@@ -10,19 +10,8 @@ import Panel, { RefreshButton } from "../../shared/Panel";
 import PendingEndpoint from "../../shared/PendingEndpoint";
 import QueryState from "../../shared/QueryState";
 import StatCard from "../../shared/StatCard";
+import { sumDefined } from "../../shared/aggregate";
 import { REVENUE_DAYS } from "./constants";
-
-/**
- * Sum that stays null when nothing came back, so a missing block shows "—"
- * instead of a confident $0.
- *
- * @param {...(number | null | undefined)} values
- * @return {number | null}
- */
-const addUsd = (...values) => {
-  const numbers = values.filter((value) => typeof value === "number" && Number.isFinite(value));
-  return numbers.length > 0 ? numbers.reduce((total, value) => total + value, 0) : null;
-};
 
 /**
  * One-line summary strip for a revenue stream that sits outside the main EVM
@@ -98,10 +87,10 @@ const RevenueSummaryPanel = () => {
   const costsEvm = costs.data?.evm;
   const costsSolana = costs.data?.solana;
 
-  const revenue30d = addUsd(feesEvm?.last30dUsd, feesSolana?.last30dUsd);
-  const revenue7d = addUsd(feesEvm?.last7dUsd, feesSolana?.last7dUsd);
-  const revenueLifetime = addUsd(feesEvm?.lifetimeUsd, feesSolana?.lifetimeUsd);
-  const cost30d = addUsd(costsEvm?.last30dUsd, costsSolana?.last30dUsd);
+  const revenue30d = sumDefined(feesEvm?.last30dUsd, feesSolana?.last30dUsd);
+  const revenue7d = sumDefined(feesEvm?.last7dUsd, feesSolana?.last7dUsd);
+  const revenueLifetime = sumDefined(feesEvm?.lifetimeUsd, feesSolana?.lifetimeUsd);
+  const cost30d = sumDefined(costsEvm?.last30dUsd, costsSolana?.last30dUsd);
   const margin30d = revenue30d === null || cost30d === null ? null : revenue30d - cost30d;
 
   // Both halves have to be present: a Solana net of $0 because the cost side is
