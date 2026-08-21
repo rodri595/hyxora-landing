@@ -1,6 +1,6 @@
-import { useQuery } from "@tanstack/react-query";
-import { usePrivy } from "@privy-io/react-auth";
 import { useAuth } from "@/hooks/useAuth";
+import { usePrivy } from "@privy-io/react-auth";
+import { useQuery } from "@tanstack/react-query";
 
 /**
  * Exchanges the Privy access token for a backend session as soon as Privy is
@@ -21,7 +21,13 @@ export function useSessionSync() {
       return authenticate(accessToken);
     },
     enabled: ready && authenticated,
-    retry: 2,
+    // A 4xx means the token itself was rejected — replaying it just triples the
+    // failed calls. Only retry the transient (network / 5xx) case.
+    retry: (failureCount, error) => {
+      const status = error?.response?.status;
+      if (status >= 400 && status < 500) return false;
+      return failureCount < 2;
+    },
     retryDelay: 500,
     staleTime: Number.POSITIVE_INFINITY,
     gcTime: Number.POSITIVE_INFINITY,

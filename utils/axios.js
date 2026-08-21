@@ -8,10 +8,20 @@ const apiClient = axios.create({
   withCredentials: !isDev,
 });
 
-// Add request interceptor to include JWT token in development
+// Endpoints that mint/clear the session themselves. They carry their own
+// Authorization (a Privy access token) and must never be given the session JWT:
+// retrying them on 401 loops, and overwriting their header 400s.
+const AUTH_ENDPOINTS = ["/authenticate", "/logout"];
+
+const isAuthEndpoint = (url) => AUTH_ENDPOINTS.some((path) => url?.startsWith(path));
+
+// In dev `withCredentials` is off, so the session cookie never rides along —
+// replay it from sessionStorage instead. Only ever fills a header the caller
+// left empty: `/authenticate` sends a Privy token here, and clobbering it with
+// a Hyxora session JWT is what the backend rejects with 400.
 apiClient.interceptors.request.use(
   (config) => {
-    if (isDev) {
+    if (isDev && !config.headers.Authorization && !isAuthEndpoint(config.url)) {
       const jwt = sessionStorage.getItem("jwt");
       if (jwt) {
         config.headers.Authorization = `Bearer ${jwt}`;
@@ -23,9 +33,6 @@ apiClient.interceptors.request.use(
     return Promise.reject(error);
   }
 );
-
-// Endpoints that mint/clear the session themselves — retrying them on 401 loops
-const AUTH_ENDPOINTS = ["/authenticate", "/logout"];
 
 // One shared re-auth in flight, so a burst of parallel 401s triggers a single
 // /authenticate instead of one per request
@@ -68,7 +75,7 @@ apiClient.interceptors.response.use(
       error?.response?.status === 401 &&
       config &&
       !config._sessionRetry &&
-      !AUTH_ENDPOINTS.some((path) => config.url?.startsWith(path));
+      !isAuthEndpoint(config.url);
 
     if (!isRetryable) return Promise.reject(error);
 
