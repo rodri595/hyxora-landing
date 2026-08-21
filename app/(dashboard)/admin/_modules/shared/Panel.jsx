@@ -1,0 +1,79 @@
+"use client";
+
+import Spinner from "@/components/Spinner";
+import { cn } from "@/utils";
+
+const RefreshIcon = () => (
+  <svg width="12" height="12" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+    <path
+      d="M14 8a6 6 0 1 1-1.76-4.24M14 2v4h-4"
+      stroke="currentColor"
+      strokeWidth="1.3"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </svg>
+);
+
+/**
+ * Refresh button used in the panel headers.
+ *
+ * @param {Object} props
+ * @param {() => void} props.onClick
+ * @param {boolean} [props.isLoading]
+ * @param {string} [props.label]
+ */
+export const RefreshButton = ({ onClick, isLoading = false, label = "Actualizar" }) => (
+  <button
+    type="button"
+    onClick={onClick}
+    disabled={isLoading}
+    className={cn(
+      "flex items-center gap-1.5 shrink-0 px-2.5 py-1.5 rounded-lg border-[0.7px] font-inter text-[11px] font-medium tracking-[-0.44px] transition-colors",
+      isLoading
+        ? "border-[rgba(25,54,63,0.08)] text-[rgba(25,54,63,0.35)] cursor-not-allowed"
+        : "border-[rgba(25,54,63,0.12)] text-[#19363F] hover:bg-[rgba(25,54,63,0.04)]"
+    )}
+  >
+    {isLoading ? <Spinner className="size-3" /> : <RefreshIcon />}
+    {label}
+  </button>
+);
+
+/**
+ * Card shell shared by every Sistema panel.
+ *
+ * @param {Object} props
+ * @param {string} props.title
+ * @param {React.ReactNode} [props.description]
+ * @param {React.ReactNode} [props.action] Rendered top-right, typically a RefreshButton.
+ * @param {"neutral" | "warning"} [props.tone] Tints the border when something needs attention.
+ * @param {React.ReactNode} [props.children]
+ */
+const Panel = ({ title, description, action, tone = "neutral", children }) => (
+  <section
+    className={cn(
+      "flex flex-col rounded-xl border-[0.7px] bg-white px-4 py-3.5",
+      tone === "warning"
+        ? "border-red-200 shadow-[0px_2px_12px_0px_rgba(220,38,38,0.06)]"
+        : "border-[rgba(25,54,63,0.08)] shadow-[0px_2px_12px_0px_rgba(25,54,63,0.06)]"
+    )}
+  >
+    <div className="flex items-start justify-between gap-4 mb-1">
+      <h3 className="font-inter text-[13px] font-semibold text-[#19363F] tracking-[-0.52px]">
+        {title}
+      </h3>
+      {action}
+    </div>
+
+    {description && (
+      <p className="font-inter text-[11px] leading-[1.6] text-[rgba(25,54,63,0.5)] tracking-[-0.44px] max-w-[820px]">
+        {description}
+      </p>
+    )}
+
+    {children && <div className="mt-3.5">{children}</div>}
+  </section>
+);
+
+export default Panel;

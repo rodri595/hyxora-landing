@@ -9,6 +9,8 @@ export const ADMIN_TABS = [
   { id: "polls", label: "Polls" },
   { id: "tutorials", label: "Tutoriales" },
   { id: "quiz", label: "Quiz" },
+  { id: "comisiones", label: "Comisiones" },
+  { id: "cerebro", label: "Cerebro" },
 ];
 
 const AdminTabBarInner = () => {
@@ -21,7 +23,7 @@ const AdminTabBarInner = () => {
       tabs={ADMIN_TABS}
       value={activeTab}
       onChange={(id) => router.push(`/admin?tab=${id}`)}
-      className="w-full"
+      className="w-full overflow-x-auto"
     />
   );
 };
