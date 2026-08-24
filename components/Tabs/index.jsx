@@ -14,8 +14,8 @@ import { haptic } from "@/utils/haptics";
 const Tabs = ({ tabs, value, onChange, className }) => (
   <div
     className={cn(
-      "flex shrink-0 border-b-[0.7px] border-[rgba(25,54,63,0.08)]",
-      className,
+      "flex shrink-0 border-b-[0.7px] border-[rgba(25,54,63,0.08)]  overflow-y-hidden",
+      className
     )}
   >
     {tabs.map((tab) => (
@@ -30,7 +30,7 @@ const Tabs = ({ tabs, value, onChange, className }) => (
           "py-2.5 mr-4 font-inter text-[11px] font-medium tracking-[-0.44px] border-b-[1.5px] -mb-px transition-colors whitespace-nowrap",
           value === tab.id
             ? "border-[#19363F] text-[#19363F] "
-            : "border-transparent text-[rgba(25,54,63,0.45)] hover:text-[rgba(25,54,63,0.7)]",
+            : "border-transparent text-[rgba(25,54,63,0.45)] hover:text-[rgba(25,54,63,0.7)]"
         )}
       >
         {tab.label}
