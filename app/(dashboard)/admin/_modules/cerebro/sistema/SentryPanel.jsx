@@ -6,11 +6,17 @@ import PendingEndpoint from "../../shared/PendingEndpoint";
 /**
  * Errores de la app (Sentry).
  *
- * Not in the v1 API. The project already depends on @sentry/react for the
- * landing itself, but that's the browser SDK — it reports errors, it can't read
- * issues back. Listing unresolved issues needs Sentry's Web API with an auth
- * token, which must stay server-side; proxying it through Cerebro is the right
- * shape, or a Next.js route here if the backend team would rather not own it.
+ * Not in the v1 API — and, verified 2026-08-24, **not in the ported dashboard
+ * either**: the whole hyxora-admin repo mentions Sentry exactly once, in
+ * `docs/AUDIT_2026-06-04.md`. There is no panel to port and no endpoint behind
+ * it. This section is a feature someone specified but nobody built, so decide
+ * whether it's wanted before wiring anything.
+ *
+ * If it is: the project already depends on @sentry/react for the landing, but
+ * that's the browser SDK — it reports errors, it can't read issues back.
+ * Listing unresolved issues needs Sentry's Web API with an auth token, which
+ * must stay server-side. That fits `/api/monitoring/*` alongside the other
+ * credentialed checks rather than needing anything from the backend team.
  */
 const SentryPanel = () => (
   <Panel

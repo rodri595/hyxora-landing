@@ -1,29 +1,64 @@
 # Hyxora Landing — project instructions
 
-## Two backends, two axios clients — never mix them
+## Three backends, three axios clients — never mix them
 
-This app talks to two separate APIs. Picking the wrong client is the single
+This app talks to three separate APIs. Picking the wrong client is the single
 easiest mistake to make here, so the rule is mechanical:
 
 | Client | Base URL | Auth | Response shape |
 |---|---|---|---|
 | `@/utils/axios` (`apiClient`) | `NEXT_PUBLIC_HYXORA_API` | Session JWT cookie, auto re-auth on 401 | `data.data.<key>` |
 | `@/utils/cerebroAxios` (`cerebroClient`) | `NEXT_PUBLIC_CEREBRO_API` | Raw Privy bearer token per request | raw JSON, no envelope |
+| `@/utils/appApiAxios` (`appApiClient`) | `/api/app-api` (local proxy) | Privy bearer → proxy swaps in the bot token | `data.data` |
+| `@/utils/monitoringAxios` (`monitoringClient`) | `/api/monitoring` (our own routes) | Privy bearer → `requireAdmin` | plain JSON, per route |
 
 **Cerebro** (`admin.hyxora.com/api/v1`) is a cross-project analytics API built by
 another team. It is read-only — every endpoint in `admin.md` is a GET — and it
 authorises against its own server-side `ADMIN_ALLOWLIST_PRIVY_IDS`, which we
 cannot check client-side. A non-allowlisted user just gets a 401; surface it.
 
+**app-api** (`app-api.hyxora.com`) is the mobile/web *app* backend — a different
+host from `NEXT_PUBLIC_HYXORA_API`, even though both expose `/admin/*` paths.
+Its OpenAPI spec is at `/api-docs`. It authenticates with a shared **bot token**
+(`Authorization: Bot <token>`) that unlocks `/admin/users`, every user's
+portfolio and transactions, and `/bank/{wallet}/kyc`.
+
+> That token must never reach the browser. It lives in `HYXORA_BOT_TOKEN`
+> (server-only, no `NEXT_PUBLIC_`) and only `app/api/app-api/[...path]/route.js`
+> reads it. That route is a **keyhole, not a tunnel**: it forwards an explicit
+> allowlist of GET paths and nothing else, so adding a panel means adding its
+> endpoint there deliberately. It authorises by replaying the caller's Privy
+> token against Cerebro, keeping one allowlist rather than a second copy.
+
+**`/api/monitoring/*`** are our own route handlers, for things no API serves:
+service pings, the Solana fee-payer balance, the Zerion treasury scan and live
+`eth_gasPrice`. They hold `ZERION_API_KEY`, the per-chain RPC URLs and
+`SOLANA_RPC_URL` — all server-only, all gated by `requireAdmin`
+(`utils/server/requireAdmin.js`), which defers to the same Cerebro allowlist.
+
+> **Never import `utils/server/*` from a client component.** It is what stands
+> between a public marketing site and every user's KYC.
+
 ### The rule
 
 > **Everything under `app/(dashboard)/admin/_modules/cerebro/` calls the Cerebro
-> API and nothing else.** No `apiClient`, no `hooks/admin/*`, no third API.
+> API**, with two deliberate exceptions, each marked by a «Disponible en Cerebro»
+> divider separating the foreign panels above from the Cerebro ones below:
+>
+> - **Planes** — the first four panels are the plan *schema* (pricing, fee
+>   matrix, whitelists). Cerebro serves no schema at all; its `/fees/*` report
+>   revenue *collected*. They read app-api via `appApiClient`.
+> - **Sistema** — the first three panels are live infrastructure checks (pings,
+>   Solana RPC, Zerion). They read `/api/monitoring/*` via `monitoringClient`.
+>
+> `Costos → GasLimitsPanel` also joins both: live prices from `/api/monitoring`,
+> ceilings from app-api. Two requests on purpose, so one failing source doesn't
+> blank the other.
 
-If the Cerebro section needs data that `admin.md` doesn't document, **do not
-reach across to the Hyxora API for it.** Render the `PendingEndpoint` component
-naming the endpoint we'd need, the same way `MonitoringPanel` and `SentryPanel`
-do. `admin.md` at the repo root is the source of truth for what Cerebro serves.
+Anywhere else in `cerebro/`, if the section needs data `admin.md` doesn't
+document, **check app-api's spec before reaching for `apiClient`.** If neither
+serves it, render the `PendingEndpoint` component naming the endpoint we'd need,
+the way `SponsorshipPanel` and `SentryPanel` do.
 
 Never invent placeholder numbers for a missing endpoint. These panels show
 balances, fees and error counts — a mocked figure is something someone acts on.
@@ -31,8 +66,15 @@ balances, fees and error counts — a mocked figure is something someone acts on
 ## Hooks live with their API
 
 - `hooks/cerebro/` → Cerebro only, gated by `useCerebroAccess()` (`ready && authenticated`).
+- `hooks/appApi/` → app-api via the proxy, gated by `useAppApiAccess()` (same
+  precondition — the proxy does the real authorisation). Types in
+  `hooks/appApi/types.js`. **Money is in minor units and fees in basis points**:
+  `price: 1900` is €19.00, `feeBps: 20` is 0.20%.
 - `hooks/admin/` → Hyxora backend admin endpoints, gated by the `roleNames.admin`
-  check against `useGetUserInformation()` plus `isSessionReady`.
+  check against `useGetUserInformation()` plus `isSessionReady`. Note
+  `useGetFeeSchema`/`useGetWhitelist` here overlap with `hooks/appApi/` — they ask
+  `api.hyxora.com` for same-named paths with guessed field names, and feed the
+  separate `comisiones/` tab. Reconcile before adding a third copy.
 - One hook per file, named `useGetX.jsx` / `useX.jsx`, JS not TS.
 - Cerebro hooks carry JSDoc `@param`/`@return` with `@import` types from
   `hooks/cerebro/types.js`. Keep that up when adding endpoints.
