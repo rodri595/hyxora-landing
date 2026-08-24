@@ -1,5 +1,6 @@
 "use client";
 
+import SelectDropdown from "@/components/SelectDropdown";
 import {
   cerebroChains,
   cerebroOperationLabels,
@@ -15,14 +16,26 @@ import { QUICK_RANGES, USER_OPTIONS_LIMIT } from "./constants";
 const CONTROL =
   "h-9 w-full rounded-lg border-[0.7px] border-[rgba(25,54,63,0.12)] bg-white px-2.5 font-inter text-[12px] tracking-[-0.48px] text-[#19363F] transition-colors hover:border-[rgba(25,54,63,0.2)] focus:outline-none focus:border-[#19363F]";
 
-const FilterField = ({ label, htmlFor, children }) => (
-  <label className="flex flex-col gap-1.5" htmlFor={htmlFor}>
-    <span className="font-inter text-[10px] font-medium uppercase tracking-[0.6px] text-[rgba(25,54,63,0.4)]">
-      {label}
-    </span>
-    {children}
-  </label>
-);
+/**
+ * SelectDropdown's trigger is a button, not a form control, so wrapping it in a
+ * `<label htmlFor>` would point at nothing. Fields with an `htmlFor` render a
+ * real label for the date inputs; the dropdowns get a plain heading and carry
+ * their accessible name on the button itself via `ariaLabel`.
+ */
+const FilterField = ({ label, htmlFor, children }) => {
+  const Wrapper = htmlFor ? "label" : "div";
+  return (
+    <Wrapper className="flex flex-col gap-1.5" htmlFor={htmlFor}>
+      <span className="font-inter text-[10px] font-medium uppercase tracking-[0.6px] text-[rgba(25,54,63,0.4)]">
+        {label}
+      </span>
+      {children}
+    </Wrapper>
+  );
+};
+
+/** Matches the h-9 of the date inputs beside it; SelectDropdown defaults to h-8. */
+const DROPDOWN = "[&>button]:h-9";
 
 const DownloadIcon = () => (
   <svg width="12" height="12" viewBox="0 0 16 16" fill="none" aria-hidden="true">
@@ -83,6 +96,46 @@ const FilterBar = ({ filters, onApply, onExport, canExport = false }) => {
   const userTotal = users.data?.total ?? 0;
   const usersTruncated = userTotal > userOptions.length;
 
+  // Each list leads with an empty-value "all" row — the dropdown has no separate
+  // "clear" affordance, so removing a filter has to be a selectable option.
+  const operationOptions = useMemo(
+    () => [
+      { value: "", label: "Todas las funcionalidades" },
+      ...cerebroOperations.map((operation) => ({
+        value: operation,
+        label: cerebroOperationLabels[operation] ?? operation,
+      })),
+    ],
+    []
+  );
+
+  const planOptions = useMemo(
+    () => [
+      { value: "", label: "Todos los planes" },
+      ...cerebroPlans.map((plan) => ({ value: plan, label: cerebroPlanLabel(plan) })),
+    ],
+    []
+  );
+
+  const chainOptions = useMemo(
+    () => [
+      { value: "", label: "Todas las redes" },
+      ...Object.entries(cerebroChains).map(([chainId, name]) => ({ value: chainId, label: name })),
+    ],
+    []
+  );
+
+  const userSelectOptions = useMemo(
+    () => [
+      { value: "", label: "Todos los usuarios" },
+      ...userOptions.map((user) => ({
+        value: user.privyId,
+        label: user.email || user.username || user.privyId,
+      })),
+    ],
+    [userOptions]
+  );
+
   return (
     <section className="flex flex-col gap-3.5 rounded-xl border-[0.7px] border-[rgba(25,54,63,0.08)] bg-white px-4 py-3.5 shadow-[0px_2px_12px_0px_rgba(25,54,63,0.06)]">
       <div className="flex flex-wrap items-center gap-2">
@@ -130,68 +183,44 @@ const FilterBar = ({ filters, onApply, onExport, canExport = false }) => {
           />
         </FilterField>
 
-        <FilterField label="Funcionalidad" htmlFor="cerebro-op">
-          <select
-            id="cerebro-op"
+        <FilterField label="Funcionalidad">
+          <SelectDropdown
             value={staged.op ?? ""}
-            onChange={(event) => set("op", event.target.value)}
-            className={cn(CONTROL, "cursor-pointer")}
-          >
-            <option value="">Todas las funcionalidades</option>
-            {cerebroOperations.map((operation) => (
-              <option key={operation} value={operation}>
-                {cerebroOperationLabels[operation] ?? operation}
-              </option>
-            ))}
-          </select>
+            onChange={(next) => set("op", next)}
+            options={operationOptions}
+            ariaLabel="Funcionalidad"
+            className={DROPDOWN}
+          />
         </FilterField>
 
-        <FilterField label="Plan" htmlFor="cerebro-plan">
-          <select
-            id="cerebro-plan"
+        <FilterField label="Plan">
+          <SelectDropdown
             value={staged.plan ?? ""}
-            onChange={(event) => set("plan", event.target.value)}
-            className={cn(CONTROL, "cursor-pointer")}
-          >
-            <option value="">Todos los planes</option>
-            {cerebroPlans.map((plan) => (
-              <option key={plan} value={plan}>
-                {cerebroPlanLabel(plan)}
-              </option>
-            ))}
-          </select>
+            onChange={(next) => set("plan", next)}
+            options={planOptions}
+            ariaLabel="Plan"
+            className={DROPDOWN}
+          />
         </FilterField>
 
-        <FilterField label="Red" htmlFor="cerebro-chain">
-          <select
-            id="cerebro-chain"
+        <FilterField label="Red">
+          <SelectDropdown
             value={staged.chain ?? ""}
-            onChange={(event) => set("chain", event.target.value)}
-            className={cn(CONTROL, "cursor-pointer")}
-          >
-            <option value="">Todas las redes</option>
-            {Object.entries(cerebroChains).map(([chainId, name]) => (
-              <option key={chainId} value={chainId}>
-                {name}
-              </option>
-            ))}
-          </select>
+            onChange={(next) => set("chain", next)}
+            options={chainOptions}
+            ariaLabel="Red"
+            className={DROPDOWN}
+          />
         </FilterField>
 
-        <FilterField label="Usuario" htmlFor="cerebro-user">
-          <select
-            id="cerebro-user"
+        <FilterField label="Usuario">
+          <SelectDropdown
             value={staged.user ?? ""}
-            onChange={(event) => set("user", event.target.value)}
-            className={cn(CONTROL, "cursor-pointer")}
-          >
-            <option value="">Todos los usuarios</option>
-            {userOptions.map((user) => (
-              <option key={user.privyId} value={user.privyId}>
-                {user.email || user.username || user.privyId}
-              </option>
-            ))}
-          </select>
+            onChange={(next) => set("user", next)}
+            options={userSelectOptions}
+            ariaLabel="Usuario"
+            className={DROPDOWN}
+          />
         </FilterField>
       </div>
 

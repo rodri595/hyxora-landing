@@ -18,10 +18,33 @@ const CEREBRO_API = process.env.NEXT_PUBLIC_CEREBRO_API || "https://admin.hyxora
 
 /** Verdicts are cached briefly so a tab full of panels costs one Cerebro call, not eight. */
 const VERDICT_TTL_MS = 60_000;
+
+/**
+ * Privy rotates access tokens, so every refresh produces a new digest and a new
+ * entry. Without a bound this Map would grow for the life of the server process.
+ * Expired entries are swept on write, and the cap is a backstop for the case
+ * where a burst arrives faster than entries expire.
+ */
+const MAX_VERDICTS = 500;
 const verdicts = new Map();
 
 /** Privy tokens are bearer credentials — key the cache by digest, never hold the raw token. */
 const digest = (token) => createHash("sha256").update(token).digest("hex");
+
+const remember = (key, ok) => {
+  const now = Date.now();
+
+  for (const [entryKey, entry] of verdicts) {
+    if (entry.expiresAt <= now) verdicts.delete(entryKey);
+  }
+
+  // Map iterates in insertion order, so the first key is the oldest.
+  while (verdicts.size >= MAX_VERDICTS) {
+    verdicts.delete(verdicts.keys().next().value);
+  }
+
+  verdicts.set(key, { ok, expiresAt: now + VERDICT_TTL_MS });
+};
 
 /**
  * @param {string} token Caller's Privy access token.
@@ -35,10 +58,17 @@ const isAllowlistedAdmin = async (token) => {
   const response = await fetch(`${CEREBRO_API}/system/health`, {
     headers: { Authorization: `Bearer ${token}` },
     cache: "no-store",
+    signal: AbortSignal.timeout(10_000),
   });
 
+  // 5xx means Cerebro is unwell, not that the caller is unauthorised. Caching a
+  // `false` for that would lock every admin out for a minute past the recovery.
+  if (response.status >= 500) {
+    throw new Error(`Cerebro respondió ${response.status}`);
+  }
+
   const ok = response.ok;
-  verdicts.set(key, { ok, expiresAt: Date.now() + VERDICT_TTL_MS });
+  remember(key, ok);
   return ok;
 };
 

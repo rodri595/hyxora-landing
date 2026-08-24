@@ -2,6 +2,7 @@
 
 import Checkbox from "@/components/Checkbox";
 import Field from "@/components/Field";
+import SelectDropdown from "@/components/SelectDropdown";
 import { cn } from "@/utils";
 import {
   flexRender,
@@ -365,18 +366,21 @@ const PaginationBar = ({ table, pageSizeOptions }) => {
         </span>
 
         {pageSizeOptions.length > 1 && (
-          <select
-            value={pageSize}
-            onChange={(e) => table.setPageSize(Number(e.target.value))}
-            aria-label="Filas por página"
-            className="h-7 rounded-lg border-[0.7px] border-[rgba(25,54,63,0.12)] bg-white px-1.5 font-inter text-[11px] font-medium tracking-[-0.44px] text-[#19363F] cursor-pointer hover:bg-[rgba(25,54,63,0.04)] transition-colors"
-          >
-            {pageSizeOptions.map((size) => (
-              <option key={size} value={size}>
-                {size} / pág.
-              </option>
-            ))}
-          </select>
+          <SelectDropdown
+            value={String(pageSize)}
+            onChange={(next) => table.setPageSize(Number(next))}
+            options={pageSizeOptions.map((size) => ({
+              value: String(size),
+              label: `${size} / pág.`,
+            }))}
+            ariaLabel="Filas por página"
+            // The bar sits at the bottom of the table, often inside a scrolling
+            // container, so the panel opens upward or it would be clipped.
+            dropUp
+            // Dense bar: fixed narrow width, h-7 to match the page buttons
+            // rather than SelectDropdown's default h-8.
+            className="w-24 shrink-0 [&>button]:h-7"
+          />
         )}
       </div>
 
