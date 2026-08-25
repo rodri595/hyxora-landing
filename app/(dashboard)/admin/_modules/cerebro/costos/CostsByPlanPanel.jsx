@@ -9,24 +9,7 @@ import { useMemo } from "react";
 import Panel, { RefreshButton } from "../../shared/Panel";
 import PendingEndpoint from "../../shared/PendingEndpoint";
 import QueryState from "../../shared/QueryState";
-import { ratio, sumColumn, sumColumnDefined } from "../../shared/aggregate";
-
-/**
- * First finite number among alternative spellings of the same field. Numeric
- * strings count: the upstream query aggregates Postgres `numeric`, which some
- * serialisers hand over quoted.
- *
- * @param {...(number | string | null | undefined)} values
- * @return {number | null}
- */
-const firstNumber = (...values) => {
-  for (const value of values) {
-    if (value === null || value === undefined || value === "") continue;
-    const parsed = Number(value);
-    if (Number.isFinite(parsed)) return parsed;
-  }
-  return null;
-};
+import { firstNumber, ratio, sumColumn, sumColumnDefined } from "../../shared/aggregate";
 
 /**
  * `admin.md` documents this row as `usersCount` / `opsCount` / `marginUsd`, and the

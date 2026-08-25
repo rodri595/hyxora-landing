@@ -8,6 +8,12 @@ import { useQuery } from "@tanstack/react-query";
  * GET /costs/by-operation — cost broken down by operation type, including the
  * matching fee and margin so a single row is enough for a P&L cell.
  *
+ * Rows do not match the shape `admin.md` documents — they come back under the names
+ * the upstream query produced (`operationType`, `ops`, `totalCostUsd`, `totalFeeUsd`,
+ * `netUsd`), alongside the per-op detail the doc omits entirely (`successfulOps`,
+ * `avgGasUsed`, `bundlerUsd`, `paymasterUsd`, `minCostUsd`, `maxCostUsd`).
+ * `toOperationRow()` in the panel reads both spellings.
+ *
  * @param {Object} [params]
  * @param {number} [params.days] Days to include. API default 30, max 365.
  * @return {import("@tanstack/react-query").UseQueryResult<CostByOperationRow[]>} `data` is the

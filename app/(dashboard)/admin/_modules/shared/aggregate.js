@@ -49,3 +49,24 @@ export const ratio = (numerator, denominator) => {
  */
 export const sumColumnDefined = (table, key) =>
   sumDefined(...table.getFilteredRowModel().rows.map((row) => row.original[key]));
+
+/**
+ * First finite number among alternative spellings of the same field. Numeric
+ * strings count: several Cerebro endpoints aggregate Postgres `numeric`, which the
+ * serialiser hands over quoted.
+ *
+ * Cerebro's endpoints are ports of the old dashboard's SQL, and a few answer with
+ * the field names that query's mapper produced rather than the ones `admin.md`
+ * documents — reading both spellings at the edge is cheaper than guessing which.
+ *
+ * @param {...(number | string | null | undefined)} values
+ * @return {number | null}
+ */
+export const firstNumber = (...values) => {
+  for (const value of values) {
+    if (value === null || value === undefined || value === "") continue;
+    const parsed = Number(value);
+    if (Number.isFinite(parsed)) return parsed;
+  }
+  return null;
+};
