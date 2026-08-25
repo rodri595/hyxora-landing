@@ -28,12 +28,19 @@ export const cerebroOperations = [
   "unknown",
 ];
 
-/** Chain IDs Cerebro reports on, keyed by chainId. */
+/**
+ * Chain IDs Cerebro reports on, keyed by chainId.
+ *
+ * HyperEVM is **999**, not 13381: the old dashboard's registry
+ * (`hyxora-admin-main/src/lib/chains.ts`) is what the indexers stamp on every
+ * `sponsored_user_ops` row, and Cerebro groups by that column. 13381 was a guess,
+ * and it is what left «Por cadena» rendering "Chain 999".
+ */
 export const cerebroChains = {
   137: "Polygon",
   8453: "Base",
   56: "BSC",
-  13381: "HyperEVM",
+  999: "HyperEVM",
   // Not an EVM chain id — Solana has none. 101 is the cluster number the backend
   // stamps on Solana rows so they can share a column with the EVM ones, and it
   // arrives on the /costs/recent and /fees/recent feeds. Those rows also carry
@@ -166,14 +173,14 @@ export const cerebroOperationLabel = (operation) => {
  * `utils/explorer.js` can't be used here: it only knows the chains the app itself
  * transacts on and falls back to Sepolia Etherscan for everything else, which would
  * produce dead links for Cerebro's Polygon/BSC rows.
- *
- * HyperEVM (13381) is deliberately absent — no confirmed explorer, and a wrong link
- * is worse than plain text. Its hashes render unlinked until we have one.
  */
 export const cerebroExplorers = {
   137: "https://polygonscan.com",
   8453: "https://basescan.org",
   56: "https://bscscan.com",
+  // The explorer the old dashboard's registry links HyperEVM rows to, on the same
+  // /tx/ path as every Etherscan fork.
+  999: "https://hyperevmscan.io",
   // Solscan takes a signature on the same /tx/ path an EVM explorer takes a hash,
   // so Solana rows on the recent feeds link without a special case.
   101: "https://solscan.io",

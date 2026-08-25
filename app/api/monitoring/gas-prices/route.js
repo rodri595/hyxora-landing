@@ -16,7 +16,7 @@ const CHAINS = [
   { chain: "base", label: "Base", chainId: 8453, envVar: "BASE_RPC_URL" },
   { chain: "polygon", label: "Polygon", chainId: 137, envVar: "POLYGON_RPC_URL" },
   { chain: "bsc", label: "BSC", chainId: 56, envVar: "BSC_RPC_URL" },
-  { chain: "hyperevm", label: "HyperEVM", chainId: 13381, envVar: "HYPEREVM_RPC_URL" },
+  { chain: "hyperevm", label: "HyperEVM", chainId: 999, envVar: "HYPEREVM_RPC_URL" },
 ];
 
 const WEI_PER_GWEI = 1e9;

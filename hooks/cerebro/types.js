@@ -11,7 +11,7 @@
  *   | "stake" | "unstake" | "claim" | "approve" | "other"} CerebroOperation
  */
 
-/** @typedef {137 | 8453 | 56 | 13381 | number} CerebroChainId */
+/** @typedef {137 | 8453 | 56 | 999 | number} CerebroChainId */
 
 /** @typedef {string} IsoDate ISO-8601 timestamp, e.g. "2025-01-15T12:34:56.000Z" */
 
@@ -95,9 +95,13 @@
 /**
  * @typedef {Object} CostByChainRow
  * @property {CerebroChainId} chainId
- * @property {string} chainName
+ * @property {string} [chainName] Documented by `admin.md`, not actually sent —
+ * resolve the label with `cerebroChainLabel()`.
  * @property {number} costUsd
- * @property {number} opsCount
+ * @property {number} [ops] The name the API answers with, as the old dashboard's
+ * query did.
+ * @property {number} [opsCount] The name `admin.md` documents. Read both with
+ * `firstNumber()`.
  */
 
 /**

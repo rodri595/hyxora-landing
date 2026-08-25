@@ -7,7 +7,6 @@ import CostsSummaryPanel from "./costos/CostsSummaryPanel";
 import DailyGasPanel from "./costos/DailyGasPanel";
 import ExpensiveOpsPanel from "./costos/ExpensiveOpsPanel";
 import GasLimitsPanel from "./costos/GasLimitsPanel";
-import RecentSponsoredOpsPanel from "./costos/RecentSponsoredOpsPanel";
 
 /**
  * Cerebro API only, bar the gas ceilings (see CLAUDE.md). Panel order mirrors the
@@ -27,7 +26,6 @@ const CostosModule = () => (
     <CostsByPlanPanel />
     <CostsByOperationPanel />
     <CostsByChainPanel />
-    <RecentSponsoredOpsPanel />
     <ExpensiveOpsPanel />
   </div>
 );

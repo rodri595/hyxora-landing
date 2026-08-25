@@ -1,30 +1,62 @@
 "use client";
 
 import DataTable from "@/components/DataTable";
-import { cerebroChains } from "@/constants/cerebro";
+import { cerebroChainLabel } from "@/constants/cerebro";
 import { useGetCostsByChain } from "@/hooks/cerebro/useGetCostsByChain";
+import { cn } from "@/utils";
 import { formatNumber, formatUsd } from "@/utils/format";
 import { useMemo } from "react";
 import Panel, { RefreshButton } from "../../shared/Panel";
 import QueryState from "../../shared/QueryState";
-import { sumColumn } from "../../shared/aggregate";
+import { firstNumber, sumColumn, sumColumnDefined } from "../../shared/aggregate";
 import { COST_DAYS } from "./constants";
+
+/**
+ * `admin.md` documents this row as `chainName` / `opsCount`, and the API answers
+ * with what the old dashboard's query produced — `chain_id` + `cost` + `ops`, no
+ * name at all (`getCostsByChain` in `hyxora-admin-main/src/lib/queries.ts`; the
+ * page resolved the label itself through `chainById()`). `costUsd` was the one
+ * spelling the doc got right, which is why it was the only column that rendered.
+ *
+ * Same fix as `/costs/by-plan` and `/costs/by-operation`: read both spellings at
+ * the edge, and resolve the chain through `cerebroChainLabel()`.
+ *
+ * @param {Object} row
+ * @return {{ chainId: number | string, chainName: string, opsCount: number | null, costUsd: number | null }}
+ */
+const toChainRow = (row) => ({
+  chainId: row.chainId ?? row.chain_id,
+  chainName: cerebroChainLabel({
+    ...row,
+    chainId: row.chainId ?? row.chain_id,
+  }),
+  opsCount: firstNumber(row.opsCount, row.ops, row.ops_count),
+  costUsd: firstNumber(row.costUsd, row.cost_usd, row.cost),
+});
+
+const CountCell = ({ value }) => (
+  <span
+    className={cn(
+      "tabular-nums",
+      value === null ? "text-[rgba(25,54,63,0.3)]" : "text-[rgba(25,54,63,0.7)]"
+    )}
+  >
+    {formatNumber(value)}
+  </span>
+);
 
 /**
  * Sponsored gas per network. Same query and window as the operation counter in the
  * «Gastos» card above, so react-query serves both from one request.
+ *
+ * EVM only, like the old dashboard's table: Solana sponsorship is tracked in its
+ * own `solana_fee_payer_costs` table and reaches us through `/costs/totals`, which
+ * is where the summary card above already adds it in.
  */
 const CostsByChainPanel = () => {
   const { data, error, isLoading, isFetching, refetch } = useGetCostsByChain({ days: COST_DAYS });
 
-  const rows = useMemo(
-    () =>
-      (data ?? []).map((row) => ({
-        ...row,
-        chainName: row.chainName ?? cerebroChains[row.chainId] ?? `Chain ${row.chainId}`,
-      })),
-    [data]
-  );
+  const rows = useMemo(() => (data ?? []).map(toChainRow), [data]);
 
   const columns = useMemo(
     () => [
@@ -38,12 +70,8 @@ const CostsByChainPanel = () => {
         accessorKey: "opsCount",
         header: "Operaciones",
         meta: { align: "right" },
-        cell: (info) => (
-          <span className="tabular-nums text-[rgba(25,54,63,0.7)]">
-            {formatNumber(info.getValue())}
-          </span>
-        ),
-        footer: ({ table }) => formatNumber(sumColumn(table, "opsCount")),
+        cell: (info) => <CountCell value={info.getValue()} />,
+        footer: ({ table }) => formatNumber(sumColumnDefined(table, "opsCount")),
       },
       {
         accessorKey: "costUsd",
