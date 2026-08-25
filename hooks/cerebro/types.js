@@ -136,13 +136,35 @@
  */
 
 /**
+ * A row of `/costs/expensive`.
+ *
+ * `admin.md` documents `timestamp`, an `operation` tag and a nested `user`
+ * object. The endpoint is a port of the old dashboard's
+ * `getExpensiveSponsoredOps` and sends that query's names instead:
+ * `blockTimestamp`, the user joined in flat next to the raw `sender`, and no
+ * operation at all — `sponsored_user_ops.action_type` holds the tag but the
+ * query never selected it. `chainId`, `txHash` and `costUsd` are the only three
+ * names both shapes share, which is exactly the set that rendered.
+ *
+ * Both spellings are typed as optional here and `toExpensiveOpRow()` in
+ * `costos/ExpensiveOpsPanel` reads either, so the panel keeps working if the
+ * doc is made true upstream.
+ *
  * @typedef {Object} ExpensiveOperationRow
  * @property {CerebroChainId} chainId
  * @property {string} txHash
- * @property {IsoDate} timestamp
- * @property {number} costUsd
- * @property {CerebroOperation} operation
- * @property {{ privyId: string, email: string }} user
+ * @property {IsoDate} [timestamp] Documented spelling of `blockTimestamp`.
+ * @property {IsoDate} [blockTimestamp]
+ * @property {number} costUsd Pimlico bill — chain gas plus its surcharge.
+ * @property {number} [bundlerCostUsd] Raw on-chain gas, what the explorer shows.
+ * @property {number} [gasUsed]
+ * @property {boolean} [success]
+ * @property {CerebroOperation} [operation] Not currently sent — see above.
+ * @property {string} [sender] Safe that signed the op; the join key for the user.
+ * @property {string | null} [privyId] Null on an orphan op — no known wallet matched.
+ * @property {string | null} [email]
+ * @property {string | null} [twitterUsername]
+ * @property {{ privyId: string, email: string }} [user] Documented nesting of the three above.
  */
 
 /* -------------------------------------------------------------------------- */

@@ -137,6 +137,12 @@ other Cerebro table stores an integer `chain_id`. Resolve chains through
 `cerebroChainLabel()` (`constants/cerebro.js`), which reads either — indexing
 `cerebroChains` by `chainId` alone is what left «Redes» rendering "Chain undefined".
 
+Its «Chain IDs Reference» is wrong too: it lists HyperEVM as **13381**, and the id
+the indexers actually stamp is **999** (`hyxora-admin-main/src/lib/chains.ts` is the
+registry both they and Cerebro read). Copying the doc's number is what left «Por
+cadena» rendering "Chain 999". Worth reporting upstream — the doc is unedited here
+on purpose, so it still diffs cleanly against the Cerebro team's next version.
+
 ## Conventions
 
 - Formatter is Biome (`npm run lint:fix`). **Scope it to files you changed** —
