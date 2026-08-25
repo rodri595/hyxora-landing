@@ -4,7 +4,7 @@ import { usePrivy } from "@privy-io/react-auth";
 import { useWeb3 } from "@/context/Web3Provider";
 
 export const GetMyPayments = (props) => {
-  const { smartWalletAddress } = useWeb3();
+  const { smartWalletAddress, isSessionReady } = useWeb3();
   const { authenticated, ready } = usePrivy();
   return useQuery({
     queryKey: ["myPayments", smartWalletAddress],
@@ -13,6 +13,6 @@ export const GetMyPayments = (props) => {
       const response = await apiClient.get("/payment/list");
       return response?.data?.data || [];
     },
-    enabled: !!smartWalletAddress && authenticated && ready,
+    enabled: !!smartWalletAddress && authenticated && ready && isSessionReady,
   });
 };

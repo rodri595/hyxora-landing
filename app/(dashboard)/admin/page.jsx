@@ -8,19 +8,24 @@ const UsersModule = lazy(() => import("./_modules/UsersModule"));
 const EmailsModule = lazy(() => import("./_modules/EmailsModule"));
 const PollsModule = lazy(() => import("./_modules/PollsModule"));
 const TutorialsModule = lazy(() => import("./_modules/TutorialsModule"));
+const QuizModule = lazy(() => import("./_modules/QuizModule"));
+const ComisionesModule = lazy(() => import("./_modules/ComisionesModule"));
+const CerebroModule = lazy(() => import("./_modules/CerebroModule"));
 
 const moduleMap = {
   users: UsersModule,
   emails: EmailsModule,
   polls: PollsModule,
   tutorials: TutorialsModule,
+  quiz: QuizModule,
+  comisiones: ComisionesModule,
+  cerebro: CerebroModule,
 };
 
 const AdminContent = () => {
   const searchParams = useSearchParams();
   const activeTab = searchParams.get("tab") ?? ADMIN_TABS[0].id;
-  const activeTabData =
-    ADMIN_TABS.find((t) => t.id === activeTab) ?? ADMIN_TABS[0];
+  const activeTabData = ADMIN_TABS.find((t) => t.id === activeTab) ?? ADMIN_TABS[0];
 
   const Module = moduleMap[activeTab];
 
