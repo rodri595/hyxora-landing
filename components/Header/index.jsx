@@ -5,6 +5,7 @@ import Link from "next/link";
 import Image from "@/components/Image";
 import Button from "@/components/Button";
 import WelcomeModal from "./WelcomeModal";
+import AppLaunchHint from "./AppLaunchHint";
 import brandIMG from "@/assets/imgs/brand/logo.svg";
 import trendingIcon from "@/assets//imgs/icons/trending.png";
 import newListingsIcon from "@/assets/imgs/icons/newlisting.png";
@@ -308,7 +309,7 @@ const Header = ({ isFixed }) => {
           isFixed && "fixed! top-0 left-0 right-0",
         )}
       >
-        <div className="box-border max-w-[1440px] w-full flex items-center h-[52px] px-[50px] py-3 mx-auto max-lg:px-4  max-md:px-4  max-md:py-[10px]">
+        <div className="relative box-border max-w-[1440px] w-full flex items-center h-[52px] px-[50px] py-3 mx-auto max-lg:px-4  max-md:px-4  max-md:py-[10px]">
           {/* Logo */}
           <div className="flex items-center justify-start gap-2 flex-1">
             <Link href="/" className="flex gap-2 items-center shrink-0  ">
@@ -437,6 +438,10 @@ const Header = ({ isFixed }) => {
             </button>
           )}
           <Menu />
+
+          {/* Post-login nudge: points at the avatar (burger on mobile) and
+              carries the app link for browsers that blocked the new tab. */}
+          <AppLaunchHint />
         </div>
       </div>
 

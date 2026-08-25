@@ -5,7 +5,9 @@ import ErrorComp from "@/components/Error";
 import Icon from "@/components/Icon";
 import Image from "@/components/Image";
 import Spinner from "@/components/Spinner";
+import { HYXORA_APP_URL } from "@/constants/links";
 import { roleNames } from "@/constants/roles";
+import { useAppLaunch } from "@/context/AppLaunchProvider";
 import { useWeb3 } from "@/context/Web3Provider";
 import { GetMyPayments } from "@/hooks/nfts/GetMyPayments";
 //
@@ -139,6 +141,7 @@ const MenuItemButton = ({
 
 const User = () => {
   const { logout, smartWalletAddress } = useWeb3();
+  const { hintOpen, dismissHint } = useAppLaunch();
   const {
     data: userInformation,
     isLoading: isLoadingUserInformation,
@@ -201,7 +204,21 @@ const User = () => {
         {({ open }) => (
           <>
             <MenuOpenHaptic open={open} />
-            <MenuButton className="bg-[#1b5ffd] border border-[rgba(255,255,255,0.2)] border-solid h-[30px] relative rounded-[100px] cursor-pointer overflow-hidden aspect-square">
+            {/* Post-login halo — drops the moment the menu is opened, since
+                by then the user has found the control it was pointing at. */}
+            {hintOpen && !open && (
+              <span
+                aria-hidden
+                className="pointer-events-none absolute inset-0 rounded-[100px] bg-[#1b5ffd] opacity-40 animate-ping"
+              />
+            )}
+            <MenuButton
+              onClick={dismissHint}
+              className={cn(
+                "bg-[#1b5ffd] border border-[rgba(255,255,255,0.2)] border-solid h-[30px] relative rounded-[100px] cursor-pointer overflow-hidden aspect-square",
+                hintOpen && "ring-2 ring-[#1b5ffd] ring-offset-2 ring-offset-white"
+              )}
+            >
               <div className="flex gap-[3px] h-[30px] items-center justify-center overflow-hidden p-[8px] relative rounded-[inherit]">
                 <Icon name="profile" className="size-full" size={20} fill="#fff" />
               </div>
@@ -244,6 +261,14 @@ const User = () => {
                     />
                   )
                 )}
+                <MenuItemButton
+                  title="Ir a la App"
+                  description="Abre tu dashboard"
+                  icon={<Icon name="external-link" className="size-[16px] aspect-square" />}
+                  href={HYXORA_APP_URL}
+                  target="_blank"
+                  onClick={dismissHint}
+                />
                 {navigation?.map((item) => (
                   <MenuItemButton key={item.id} {...item} />
                 ))}

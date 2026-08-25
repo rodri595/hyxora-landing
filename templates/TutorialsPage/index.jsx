@@ -10,18 +10,25 @@ import VideoCard from "./VideoCard";
 import VideoModal from "./VideoModal";
 import { decoratePublicTutorial } from "./_lib";
 
+// Undated tutorials sink to the bottom instead of leading the oldest-first grid.
+const publishedTime = (video) => {
+  const t = Date.parse(video?.publishedAt ?? video?.createdAt ?? "");
+  return Number.isNaN(t) ? Number.POSITIVE_INFINITY : t;
+};
+
 const TutorialsPage = () => {
   const [active, setActive] = useState(null);
 
-  const { data, isLoading, isError, isFetching, refetch } =
-    useGetPublicTutorials();
+  const { data, isLoading, isError, isFetching, refetch } = useGetPublicTutorials();
 
   // The endpoint mirrors the authenticated one (`{ tutorials, featured,
   // categories }`); the public grid only needs the flat tutorials list. Stay
-  // resilient if the backend returns a bare array instead.
+  // resilient if the backend returns a bare array instead. The endpoint does
+  // not guarantee an order, so sort oldest first here — the learning center
+  // reads as a course, so the earliest tutorial is where you start.
   const videos = useMemo(() => {
     const list = Array.isArray(data) ? data : (data?.tutorials ?? []);
-    return list.map(decoratePublicTutorial);
+    return list.map(decoratePublicTutorial).sort((a, b) => publishedTime(a) - publishedTime(b));
   }, [data]);
 
   return (
@@ -39,8 +46,8 @@ const TutorialsPage = () => {
             Aprende el mundo cripto, de cero a experto.
           </h1>
           <p className="max-w-[475px] text-center font-inter text-[16px] font-normal leading-6 tracking-[-0.32px] text-[rgba(25,54,63,0.7)] max-md:text-[14px]">
-            Aquí entenderás el mundo de las criptomonedas y la blockchain de
-            forma fácil, interactiva y confiable.
+            Aquí entenderás el mundo de las criptomonedas y la blockchain de forma fácil,
+            interactiva y confiable.
           </p>
         </div>
 
@@ -56,11 +63,7 @@ const TutorialsPage = () => {
               message="No se pudieron cargar los tutoriales. Inténtalo de nuevo."
               className="max-w-sm"
             />
-            <Button
-              isSecondary
-              onClick={() => refetch()}
-              disabled={isFetching}
-            >
+            <Button isSecondary onClick={() => refetch()} disabled={isFetching}>
               {isFetching ? "Cargando…" : "Reintentar"}
             </Button>
           </div>
@@ -76,21 +79,13 @@ const TutorialsPage = () => {
         ) : (
           <div className="grid w-full grid-cols-4 gap-x-4 gap-y-[60px] max-lg:grid-cols-2 max-md:gap-y-10 max-sm:grid-cols-1">
             {videos.map((video) => (
-              <VideoCard
-                key={video.id}
-                video={video}
-                onPlay={() => setActive(video)}
-              />
+              <VideoCard key={video.id} video={video} onPlay={() => setActive(video)} />
             ))}
           </div>
         )}
       </section>
 
-      <VideoModal
-        open={!!active}
-        video={active}
-        onClose={() => setActive(null)}
-      />
+      <VideoModal open={!!active} video={active} onClose={() => setActive(null)} />
     </Layout>
   );
 };

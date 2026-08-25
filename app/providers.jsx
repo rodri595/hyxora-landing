@@ -9,6 +9,7 @@ import { PrivyProvider } from "@privy-io/react-auth";
 import { SmartWalletsProvider } from "@privy-io/react-auth/smart-wallets";
 import { base, arbitrum, baseSepolia } from "viem/chains";
 import { Web3Provider } from "@/context/Web3Provider";
+import { AppLaunchProvider } from "@/context/AppLaunchProvider";
 import { Tooltip } from "react-tooltip";
 
 const queryClient = new QueryClient();
@@ -124,11 +125,13 @@ const Providers = ({ children }) => {
         >
           <SmartWalletsProvider>
             <Web3Provider>
-              <ThemeProvider defaultTheme="light" disableTransitionOnChange>
-                <ReactLenis root options={scrollSettings}>
-                  {children}
-                </ReactLenis>
-              </ThemeProvider>
+              <AppLaunchProvider>
+                <ThemeProvider defaultTheme="light" disableTransitionOnChange>
+                  <ReactLenis root options={scrollSettings}>
+                    {children}
+                  </ReactLenis>
+                </ThemeProvider>
+              </AppLaunchProvider>
             </Web3Provider>
           </SmartWalletsProvider>
         </PrivyProvider>
