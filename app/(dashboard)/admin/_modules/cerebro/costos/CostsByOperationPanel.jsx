@@ -195,7 +195,7 @@ const CostsByOperationPanel = () => {
 
         <div className="mt-2.5">
           <PendingEndpoint
-            needs="El dashboard original enseña cinco columnas más por operación que Cerebro no devuelve: tasa de éxito, gas medio en unidades, el reparto entre bundler y paymaster, y el rango de coste por op (mín – máx). También ofrece «Histórico»; aquí el máximo es 365 porque `days` no acepta más."
+            needs="El dashboard original enseña cinco columnas más por operación que Cerebro no devuelve, todas agregados de la misma consulta sobre `sponsored_user_ops`: éxito = ops con `success` sobre el total; gas medio = `avg(actual_gas_used)`, en unidades de gas y no en USD; el reparto bundler/paymaster sale de prorratear `cost_usd` por `chain_gas_cost_wei / actual_gas_cost_wei` — esa parte es el bundler y el resto el paymaster; y el rango es `min(cost_usd)` excluyendo ceros junto a `max(cost_usd)`. También ofrece «Histórico»; aquí el máximo es 365 porque `days` no acepta más."
             fields={[
               "/costs/by-operation → successRate, avgGasUnits, bundlerUsd, paymasterUsd, minCostUsd, maxCostUsd",
               "days=0 (o all=true) para el histórico completo",

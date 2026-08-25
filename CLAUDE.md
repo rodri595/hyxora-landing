@@ -36,13 +36,12 @@ service pings, the Solana fee-payer balance, the Zerion treasury scan and live
 `SOLANA_RPC_URL` — all server-only, all gated by `requireAdmin`
 (`utils/server/requireAdmin.js`), which defers to the same Cerebro allowlist.
 
-> `holdings-index` is the one route there that holds no credential. It is a
-> *fan-out*: it replays the caller's own Privy bearer against Cerebro's `/users`
-> and `/users/{privyId}` to rebuild a join Cerebro doesn't expose (see Balances
-> below). It lives server-side because the sweep is one request per user with a
-> balance — ~100 parallel XHRs if a panel did it — and because the result is one
-> cached index rather than a query per lookup. Add a route here for the same two
-> reasons, not just to hide a key.
+> Every route there holds a credential, and that is the bar for adding one.
+> `holdings-index` used to be the exception — a *fan-out* that replayed the
+> caller's own Privy bearer against `/users` and `/users/{privyId}` to rebuild a
+> join Cerebro didn't expose. `/holdings/holders` (2026-08-25) does that join in
+> SQL upstream, so the route is gone. Take the lesson with it: a fan-out here is a
+> workaround for a missing endpoint, and it is worth asking for the endpoint first.
 
 > **Never import `utils/server/*` from a client component.** It is what stands
 > between a public marketing site and every user's KYC.
@@ -50,30 +49,41 @@ service pings, the Solana fee-payer balance, the Zerion treasury scan and live
 ### The rule
 
 > **Everything under `app/(dashboard)/admin/_modules/cerebro/` calls the Cerebro
-> API**, with three deliberate exceptions. Planes and Sistema each mark theirs
-> with a «Disponible en Cerebro» divider separating the foreign panels above from
-> the Cerebro ones below; Balances mixes both sources inside one panel instead:
+> API**, with two deliberate exceptions. Planes and Sistema each mark theirs with
+> a «Disponible en Cerebro» divider separating the foreign panels above from the
+> Cerebro ones below:
 >
 > - **Planes** — the first four panels are the plan *schema* (pricing, fee
 >   matrix, whitelists). Cerebro serves no schema at all; its `/fees/*` report
 >   revenue *collected*. They read app-api via `appApiClient`.
 > - **Sistema** — the first three panels are live infrastructure checks (pings,
 >   Solana RPC, Zerion). They read `/api/monitoring/*` via `monitoringClient`.
-> - **Balances** — expanding a row of the tokens table lists who holds it, from
->   `/api/monitoring/holdings-index`. `/holdings` is an aggregate with no way to
->   ask who is behind a number. The two sources are fetched separately on purpose,
->   so a failing sweep costs the holder lists and leaves Cerebro's numbers standing.
->   Note the tokens table is capped at 100 rows by `/holdings`, so an asset below
->   that cut has no row to expand and no other way to reach its holders.
+>   `SponsorshipPanel` straddles the line on purpose: the Solana half is ours
+>   because it queries the RPC on request, the Pimlico half is Cerebro's because
+>   the remaining credit can only come from an unfiltered op ledger.
 >
-> `Costos → GasLimitsPanel` also joins both: live prices from `/api/monitoring`,
+> Balances used to be a third exception and no longer is. It expands a row into
+> its holder list via `/holdings/holders`, fetched separately from `/holdings` and
+> lazily — an unopened row costs nothing, and a failing holder query costs that
+> list while leaving the aggregates standing. Two caveats worth keeping in the
+> copy: the tables are capped at 100 rows by `/holdings`, so an asset below the
+> cut has no row to expand; and `/holdings/holders` matches on symbol or vault
+> name and **not on chain**, so a holder's `valueUsd` is their exposure across
+> every network in `chains`, not just the one on the row.
+>
+> `Costos → GasLimitsPanel` still joins both: live prices from `/api/monitoring`,
 > ceilings from app-api. Two requests on purpose, so one failing source doesn't
 > blank the other.
 
 Anywhere else in `cerebro/`, if the section needs data `admin.md` doesn't
 document, **check app-api's spec before reaching for `apiClient`.** If neither
 serves it, render the `PendingEndpoint` component naming the endpoint we'd need,
-the way `SponsorshipPanel` and `SentryPanel` do.
+the way `TvlFreshnessPanel` and `UserActivationPanel` do.
+
+Those asks do get answered: on 2026-08-25 six of them shipped as endpoints and
+the panels were rewired (`/costs/recent`, `/fees/recent`, `/holdings/holders`,
+`/users/trends`, `/system/sentry`, `/system/monitoring.pimlicoRunway`). Write the
+`needs` copy as a request a person will read, not as a tombstone.
 
 Never invent placeholder numbers for a missing endpoint. These panels show
 balances, fees and error counts — a mocked figure is something someone acts on.

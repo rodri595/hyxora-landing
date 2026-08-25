@@ -4,10 +4,11 @@ import DataTable from "@/components/DataTable";
 import { cerebroChainLabel } from "@/constants/cerebro";
 import { useGetHoldings } from "@/hooks/cerebro/useGetHoldings";
 import { formatNumber, formatUsd } from "@/utils/format";
-import { useMemo } from "react";
+import { useCallback, useMemo } from "react";
 import Panel, { RefreshButton } from "../../shared/Panel";
 import QueryState from "../../shared/QueryState";
 import { sumColumn } from "../../shared/aggregate";
+import AssetHolders from "./AssetHolders";
 import { HOLDINGS_LIMIT } from "./constants";
 
 const columns = [
@@ -56,6 +57,10 @@ const columns = [
  * Aggregate vault exposure across every user. Same `/holdings` request as the token
  * table above — react-query serves both from one response, so refreshing either
  * updates both.
+ *
+ * Rows expand the same way the token rows do. `/holdings/holders` matches on vault
+ * *name* as well as token symbol, which is what made this possible: the fan-out it
+ * replaced only ever indexed token positions, so vaults never had a list to open.
  */
 const TopVaultsPanel = () => {
   const { data, error, isLoading, isFetching, refetch } = useGetHoldings({
@@ -71,10 +76,27 @@ const TopVaultsPanel = () => {
     [data]
   );
 
+  // Searched by name, not symbol: two vaults on different protocols can share a
+  // share-token symbol, and the name is what /holdings/holders indexes them under.
+  const renderSubRow = useCallback(
+    (vault) => (
+      <AssetHolders
+        query={vault.vaultName ?? vault.symbol}
+        row={vault}
+        label={`${vault.vaultName ?? vault.symbol} en ${vault.chainName}`}
+      />
+    ),
+    []
+  );
+
+  // A row with no name and no symbol has nothing to search on, so it stays flat
+  // rather than opening onto a query that cannot be made.
+  const isRowExpandable = useCallback((vault) => Boolean(vault?.vaultName || vault?.symbol), []);
+
   return (
     <Panel
       title="Principales vaults entre todos los usuarios"
-      description="Depósitos agregados en USD por vault, sumando las posiciones de todos los usuarios. Solo aparecen los vaults con saldo."
+      description="Depósitos agregados en USD por vault, sumando las posiciones de todos los usuarios. Solo aparecen los vaults con saldo. Abre una fila para ver quién está dentro."
       action={<RefreshButton onClick={() => refetch()} isLoading={isFetching} />}
     >
       <QueryState
@@ -91,6 +113,8 @@ const TopVaultsPanel = () => {
           initialSorting={[{ id: "totalUsd", desc: true }]}
           enableSelection={false}
           enableFooter
+          renderSubRow={renderSubRow}
+          isRowExpandable={isRowExpandable}
           bare
           dense
         />

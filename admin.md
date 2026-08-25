@@ -10,6 +10,10 @@ Authorization: Bearer <privy-access-token>
 
 The token must belong to a user in the `ADMIN_ALLOWLIST_PRIVY_IDS` allowlist.
 
+> Sixteen endpoints shipped on 2026-08-25 and are documented in a separate section
+> at the end of this file, «Endpoints added 2026-08-25». Six of them closed gaps the
+> admin dashboard had filed as `PendingEndpoint`.
+
 ---
 
 ## Endpoints
@@ -851,3 +855,464 @@ No rate limiting is currently enforced. However, please respect the cache TTLs a
 - All USD amounts are stored at ingest time using historical prices. EUR conversion is done at render time using current FX rates.
 - The `daily_snapshots` table is a chart cache only — never the source of truth for current numbers.
 - Per-user TVL snapshot dates differ (activity-driven refresh) — always use the latest date per user, not a global max.
+
+---
+
+# Endpoints added 2026-08-25
+
+Sixteen endpoints the backend team shipped after the sections above were written,
+several of them in answer to gaps this dashboard had filed as `PendingEndpoint`.
+All verified reachable on `admin.hyxora.com/api/v1` (401 without a token, not 404).
+
+> **The reference we were sent restates the older endpoints too, and its examples
+> for those are wrong in at least one place.** It shows `/overview` returning
+> `medianTvl` as a plain number and `usersByPlan` as an object map; the API sends
+> `medianTvl` as `{ usersWithTvl, medianUsd, meanUsd, totalUsd }` and the plan
+> breakdowns as `{ plan, count }[]`, which is what the sections above document and
+> what the panels read. Treat this appendix as authoritative about *which*
+> endpoints exist and approximate about their field names — the same caveat that
+> already applies to `/holdings` (documented `chainId`, sends `chain`).
+
+---
+
+## Costs
+
+### GET /costs/recent
+
+The full sponsored-operation feed, EVM and Solana interleaved by time. Not the
+same thing as `/costs/expensive`, which caps at 200 rows above a threshold and
+reports no total.
+
+**Query Parameters:**
+
+- `page` (optional): default 1
+- `pageSize` (optional): default 10, max 100
+
+**Response:** rows are **snake_cased** — indexer rows passed through, unlike every
+other endpoint here.
+
+```json
+{
+  "rows": [
+    {
+      "chain_id": 137,
+      "tx_hash": "0x...",
+      "log_index": 0,
+      "sender": "0x...",
+      "block_timestamp": "2026-08-24T12:00:00Z",
+      "cost_usd": "0.05",
+      "bundler_cost_usd": "0.045",
+      "source": "evm"
+    }
+  ],
+  "page": 1,
+  "pageSize": 10,
+  "total": 45678
+}
+```
+
+`cost_usd` is gas paid on chain; `bundler_cost_usd` is what Pimlico invoices with
+its markup. Both are needed to reconcile against dashboard.pimlico.io. Solana rows
+carry `source: "solana"`, `chain_id: 101` and the fee-payer (not a user) in
+`sender`; `source` is the field to trust when it disagrees with `chain_id`.
+
+**Cache:** 2 minutes · **Used by:** `costos/RecentSponsoredOpsPanel`
+
+---
+
+### GET /costs/gas-limits
+
+Gas ceiling configuration, proxied from the Hyxora backend.
+
+```json
+{
+  "rows": [
+    {
+      "chainKey": "polygon",
+      "chainName": "Polygon",
+      "currentGwei": 500,
+      "maxGwei": 1000,
+      "source": "override",
+      "updatedAt": "2026-08-20T10:00:00Z",
+      "pctOfLimit": 50.0
+    }
+  ],
+  "backendOk": true
+}
+```
+
+**Cache:** 2 minutes · **Not wired.** `costos/GasLimitsPanel` already joins live
+`eth_gasPrice` from `/api/monitoring/gas-prices` with the ceilings from app-api.
+This is a third route to the same ceilings and would not add the live half.
+
+---
+
+## Fees
+
+### GET /fees/recent
+
+Individual treasury inflows, EVM and Solana, newest first. Replaces
+`/fees/diagnostics` for this purpose — that one is a tagging debug endpoint with
+no pagination, no total, no payer and no token.
+
+**Query Parameters:**
+
+- `page` (optional): default 1
+- `pageSize` (optional): default 10, max 100
+- `includeNonWhitelisted` (optional): default `false`
+
+```json
+{
+  "rows": [
+    {
+      "chainId": 137,
+      "txHash": "0x...",
+      "fromAddress": "0x...",
+      "toAddress": "0x...",
+      "amountUsd": 0.15,
+      "tokenSymbol": "USDC",
+      "operationType": "swap",
+      "blockTimestamp": "2026-08-24T12:00:00Z"
+    }
+  ],
+  "page": 1,
+  "pageSize": 10,
+  "total": 45678
+}
+```
+
+No `days` parameter — this walks the whole ledger, unlike the rest of the Ingresos
+tab, which is scoped to 30 days.
+
+**Cache:** 2 minutes · **Used by:** `ingresos/LatestUserFeesPanel`
+
+---
+
+### GET /transactions/recent
+
+Same shape, same parameters, same rows as `/fees/recent`. Nothing reads it — one
+feed is enough, and two panels showing the same rows under different titles would
+invite the reader to add them up.
+
+**Cache:** 2 minutes
+
+---
+
+## Holdings
+
+### GET /holdings/holders
+
+Which users hold a given token or vault. The join `/holdings` could never expose:
+it is an aggregate with no way to ask who is behind a number.
+
+**Query Parameters:**
+
+- `query` (**required**): token symbol or vault name. Empty is a 400.
+- `limit` (optional): default 100, max 500
+- `asOfDate` (optional): `YYYY-MM-DD`. Omit for each user's latest snapshot, which
+  is what `/holdings` aggregates.
+
+```json
+{
+  "holders": [
+    {
+      "privyId": "did:privy:...",
+      "email": "user@example.com",
+      "twitterUsername": "@user",
+      "plan": "premium",
+      "tvlRefreshedAt": "2026-08-24T10:00:00Z",
+      "valueUsd": 5000,
+      "symbols": ["USDC", "USDT"],
+      "chains": ["Polygon", "Base"]
+    }
+  ],
+  "query": "USDC",
+  "limit": 100
+}
+```
+
+Matches on symbol / vault name and **not on chain**, so a holder appears once with
+`valueUsd` summed across every network in `chains`. A row in the Balances tables is
+a (symbol, chain) pair, so the panel narrows by `chains` and marks any holder whose
+figure spans more than one.
+
+**Cache:** 5 minutes · **Used by:** `balances/AssetHolders`, under both tables.
+
+> This is what retired `/api/monitoring/holdings-index`, a route that rebuilt the
+> same join by fanning out over `/users` and `/users/{privyId}` — one upstream
+> request per user with a balance.
+
+---
+
+## Users
+
+### GET /users/top-fee-payers
+
+Top revenue contributors in the window.
+
+**Query Parameters:** `limit` (default 20, max 100), `days` (default 30, max 365)
+
+```json
+{
+  "rows": [
+    {
+      "safeAddress": "0x...",
+      "privyId": "did:privy:...",
+      "email": "user@example.com",
+      "twitterUsername": "@user",
+      "totalUsd": 567.89
+    }
+  ],
+  "limit": 20,
+  "days": 30
+}
+```
+
+Returns the head of the list and no grand total, so a share computed off these rows
+is a share of the table, not of all revenue.
+
+**Cache:** 5 minutes · **Used by:** `usuarios/TopFeePayersPanel`
+
+---
+
+### GET /users/renewals
+
+Memberships expiring within `days`. **Counts only** — not the users behind them.
+
+**Query Parameters:** `days` (default 30, max 365)
+
+```json
+{
+  "total": 45,
+  "byPlan": { "basic": 20, "premium": 15, "business": 8, "founder": 2 }
+}
+```
+
+**Cache:** 5 minutes · **Used by:** `planes/RenewalsPanel`
+
+---
+
+### GET /users/trends
+
+Daily signups plus the `daily_snapshots` series. **The first TVL history the API
+exposes** — every other TVL field here is a snapshot of right now.
+
+**Query Parameters:** `days` (default 90, max 365)
+
+```json
+{
+  "signups": [{ "date": "2026-08-24", "count": 5 }],
+  "snapshots": [
+    {
+      "date": "2026-08-24",
+      "totalUsers": 1234,
+      "usersByPlan": { "basic": 700, "premium": 400 },
+      "tvlUsd": 12345678.9,
+      "gasCostUsd": 1234.56,
+      "feesUsd": 2345.67,
+      "marginUsd": 1111.11
+    }
+  ],
+  "days": 90
+}
+```
+
+Read `snapshots` as the chart cache the Notes section says it is: the shape, never
+the current figure. `usuarios/AppTvlPanel` keeps its headline on `/overview` for
+exactly that reason, and says so where the two disagree.
+
+**Cache:** 5 minutes · **Used by:** `usuarios/AppTvlPanel`
+
+---
+
+### GET /users/[privyId]/vaults · /pnl · /relay
+
+Per-user vault positions, EVM+Solana PnL summary, and Relay bridge destinations
+keyed by origin tx hash. All proxied from the Hyxora backend, **cached 4 hours**.
+
+**Not wired.** There is no per-user detail view in this dashboard yet — `/users`
+opens no drawer — so there is nowhere to put them. They are the three to reach for
+when one is built.
+
+---
+
+## Chains
+
+### GET /chains
+
+Per-chain summary: TVL, 30-day ops, cost, fees, margin and both indexer cursors,
+plus a separate `solana` block.
+
+```json
+{
+  "chains": [
+    {
+      "chainId": 137,
+      "name": "Polygon",
+      "tvlUsd": 5000000,
+      "ops30d": 12345,
+      "cost30dUsd": 1234.56,
+      "fees30dUsd": 2345.67,
+      "feesCount30d": 12345,
+      "margin30dUsd": 1111.11,
+      "useropsLastBlock": 45678901,
+      "treasuryLastBlock": 45678900
+    }
+  ],
+  "solana": {
+    "tvlUsd": 1000000,
+    "earnings30dUsd": 234.56,
+    "costs30dUsd": 123.45,
+    "margin30dUsd": 111.11
+  }
+}
+```
+
+Window is fixed at 30 days; no parameters.
+
+**Cache:** 5 minutes · **Hook written (`useGetChainsSummary`), panel not switched.**
+`redes/ChainsPanel` currently assembles the same table from four endpoints, which is
+why its TVL column only covers the top 100 `/holdings` rows. Switching it is a
+straight win but replaces a working panel against shapes nobody has seen a real
+response for — do it once someone can diff the two side by side.
+
+---
+
+## Founder Economics
+
+### GET /founder-economics
+
+What the Founder NFT tier brings in against what it costs to carry. The same block
+is embedded in `/overview/extended`.
+
+```json
+{
+  "founderCount": 14,
+  "syncedFounderCount": 12,
+  "unsyncedCount": 2,
+  "onChainSupply": 100,
+  "onChainHolders": 85,
+  "activeFounders": 10,
+  "conservativeRevenueUsd": 5000,
+  "estimatedRevenueUsd": 7500,
+  "founderGasSubsidizedUsd": 250,
+  "avgGasPerFounder": 17.86,
+  "avgGasPerActiveFounder": 25.0,
+  "netPerFounderUsd": 357.14,
+  "subsidyRatioPct": 3.33,
+  "note": "Revenue estimates based on on-chain activity"
+}
+```
+
+Both revenue figures are estimates derived from on-chain activity, not invoices —
+`note` says so and the panel renders it rather than hiding it.
+
+**Cache:** 5 minutes · **Used by:** `planes/FounderEconomicsPanel`
+
+---
+
+## System
+
+### GET /system/monitoring
+
+Service liveness, Solana funding, **Pimlico runway**, liquidatable holdings.
+
+```json
+{
+  "services": [
+    {
+      "name": "API",
+      "env": "prod",
+      "url": "https://app-api.hyxora.com",
+      "status": "up",
+      "httpStatus": 200,
+      "latencyMs": 123,
+      "error": null
+    }
+  ],
+  "solanaFunding": { "address": "...", "sol": 5.5, "usd": 825, "priceUsd": 150, "minSol": 1.0, "low": false },
+  "pimlicoRunway": {
+    "balanceUsd": 5000,
+    "asOf": "2026-08-24T10:00:00Z",
+    "spentSince": 1000,
+    "remaining": 4000,
+    "burnPerDay": 100,
+    "daysLeft": 40,
+    "minUsd": 1000,
+    "low": false
+  },
+  "liquidatableHoldings": { "wallets": [], "totalUsd": 1000, "actionable": true, "threshold": 500 }
+}
+```
+
+**Only `pimlicoRunway` is read.** The other three overlap with `/api/monitoring/*`
+routes of ours that hit the RPCs and Zerion on request, so ours are true *now*
+rather than whenever a cron last ran — see CLAUDE.md. `pimlicoRunway` cannot be
+ours: Pimlico's API exposes the configured limit and never the remaining credit, so
+it has to be derived from a recorded deposit minus the *unfiltered* op ledger, and
+`/costs/*` drops test accounts and retired chains that Pimlico still bills for.
+
+`balanceUsd` is a deposit on record at `asOf`, not a live balance. If nobody updates
+it after a top-up the runway walks to zero on a healthy account — the panel says so.
+
+**Cache:** 1 minute · **Used by:** `sistema/SponsorshipPanel`
+
+---
+
+### GET /system/sentry
+
+Unresolved issues, 24-hour event counts, new issues, users affected.
+
+```json
+{
+  "configured": true,
+  "ok": true,
+  "error": null,
+  "org": "hyxora",
+  "project": "hyxora-app",
+  "unresolvedCount": 5,
+  "atLimit": false,
+  "events24h": 123,
+  "newIssues24h": 2,
+  "usersAffected": 15,
+  "issues": [
+    {
+      "id": "123",
+      "shortId": "HYXORA-123",
+      "title": "TypeError: Cannot read property 'x' of undefined",
+      "culprit": "src/components/Dashboard.tsx",
+      "level": "error",
+      "count": 45,
+      "userCount": 10,
+      "firstSeen": "2026-08-20T10:00:00Z",
+      "lastSeen": "2026-08-24T11:00:00Z",
+      "permalink": "https://sentry.io/...",
+      "events24h": 12,
+      "isNew": false
+    }
+  ]
+}
+```
+
+**Reports its own failures in the body, not in the status code.** No token upstream
+is `configured: false`; Sentry refusing is `ok: false` with `error` set. Both come
+back 200 with an empty `issues`, and neither means "no errors" — check the flags
+before rendering anything reassuring.
+
+**Cache:** 2 minutes · **Used by:** `sistema/SentryPanel`
+
+---
+
+## Overview
+
+### GET /overview/extended
+
+Everything `/overview` has, restructured under `users` / `operations` / `holdings`,
+plus `avgFeePerTx`, `mostActiveChain` and the whole `founderEconomics` block.
+
+**Query Parameters:** `plan` (optional)
+
+**Cache:** 5 minutes · **Not wired.** The Resumen tab already assembles these from
+`/overview`, `/pnl/*` and `/costs/*` with per-panel windows and filters this
+endpoint does not take. Worth revisiting only if Resumen is rebuilt around one
+request — and note the nesting differs from `/overview`, so it is not a drop-in.

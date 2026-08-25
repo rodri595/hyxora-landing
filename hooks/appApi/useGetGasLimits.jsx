@@ -5,9 +5,13 @@ import { useQuery } from "@tanstack/react-query";
 /**
  * GET /admin/gas-limits — the configured gas ceiling per chain.
  *
- * Returns `{ chain, maxGasGwei }` only; there is no "current price" here and no
- * flag for whether a ceiling is a default or a hand-set override. The live
- * prices come from `useGetGasPrices`, and the panel joins the two on `chain`.
+ * Returns `{ chain, maxGasGwei }` only, and **only for chains someone saved**: a
+ * chain missing from this list is not unlimited, it runs on the app's hardcoded
+ * default (`appApiDefaultMaxGasGwei` in `constants/appApi.js`). That absence is
+ * exactly what the panel's «Origen» column reads as «Predeterminado».
+ *
+ * There is no "current price" here — that comes from `useGetGasPrices`, and the
+ * panel joins the two on `chain`.
  *
  * @return {import("@tanstack/react-query").UseQueryResult<Array>}
  */

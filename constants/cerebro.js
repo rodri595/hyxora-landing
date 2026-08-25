@@ -34,6 +34,11 @@ export const cerebroChains = {
   8453: "Base",
   56: "BSC",
   13381: "HyperEVM",
+  // Not an EVM chain id — Solana has none. 101 is the cluster number the backend
+  // stamps on Solana rows so they can share a column with the EVM ones, and it
+  // arrives on the /costs/recent and /fees/recent feeds. Those rows also carry
+  // `source: "solana"`, which is the field to trust when the two disagree.
+  101: "Solana",
 };
 
 /**
@@ -169,6 +174,9 @@ export const cerebroExplorers = {
   137: "https://polygonscan.com",
   8453: "https://basescan.org",
   56: "https://bscscan.com",
+  // Solscan takes a signature on the same /tx/ path an EVM explorer takes a hash,
+  // so Solana rows on the recent feeds link without a special case.
+  101: "https://solscan.io",
 };
 
 /**

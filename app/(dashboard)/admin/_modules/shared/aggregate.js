@@ -38,3 +38,14 @@ export const ratio = (numerator, denominator) => {
   }
   return numerator / denominator;
 };
+
+/**
+ * Same as `sumColumn` but null when no row carried a usable number — a column the
+ * API didn't send totals to "—" instead of a confident 0.
+ *
+ * @param {import("@tanstack/react-table").Table<any>} table
+ * @param {string} key
+ * @return {number | null}
+ */
+export const sumColumnDefined = (table, key) =>
+  sumDefined(...table.getFilteredRowModel().rows.map((row) => row.original[key]));

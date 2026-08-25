@@ -110,13 +110,25 @@
  */
 
 /**
+ * Rows arrive with the field names of the query behind the endpoint, not the ones
+ * `admin.md` documents — `totalUsers` / `ops` / `netUsd` rather than `usersCount` /
+ * `opsCount` / `marginUsd`, with `costUsd` and `feesUsd` the only two the doc got
+ * right. `toPlanRow()` in `costos/CostsByPlanPanel` reads either spelling.
+ *
  * @typedef {Object} CostByPlanRow
  * @property {CerebroPlan} plan
- * @property {number} usersCount
- * @property {number} opsCount
+ * @property {number} [usersCount] Documented spelling of `totalUsers`.
+ * @property {number} [totalUsers] Every user on the plan, active or not.
+ * @property {number} [activeUsers] Users with at least one sponsored op. Undocumented.
+ * @property {number} [opsCount] Documented spelling of `ops`.
+ * @property {number} [ops]
  * @property {number} costUsd
+ * @property {number} [avgCostPerActiveUser] Mean cost per *active* user. Undocumented,
+ * and not derivable from `costUsd` and `activeUsers` — upstream it averages per user
+ * over those with spend, weighting each active user equally rather than by spend.
  * @property {number} feesUsd
- * @property {number} marginUsd
+ * @property {number} [marginUsd] Documented spelling of `netUsd`.
+ * @property {number} [netUsd]
  */
 
 /**
@@ -270,6 +282,239 @@
  * @property {boolean} system.backendCacheOk
  * @property {{ freshness: IsoDate, usersWithTvl: number, usersWithoutTvl: number }} tvl
  * @property {{ latestTreasuryFee: IsoDate, latestUserOp: IsoDate }} data
+ */
+
+/**
+ * Holder of one asset, from GET /holdings/holders.
+ *
+ * `valueUsd` is that user's exposure to the searched symbol summed across every
+ * chain in `chains` — the query matches on symbol / vault name, not on network, so
+ * a row is one user per asset and not one user per (asset, chain).
+ *
+ * @typedef {Object} AssetHolder
+ * @property {string} privyId
+ * @property {string | null} email
+ * @property {string | null} twitterUsername
+ * @property {CerebroPlan | null} plan
+ * @property {IsoDate | null} tvlRefreshedAt When Zerion last refreshed this user.
+ * @property {number} valueUsd
+ * @property {string[]} symbols
+ * @property {string[]} chains Rendered chain names, not ids.
+ */
+
+/**
+ * @typedef {Object} HoldersResult
+ * @property {AssetHolder[]} holders
+ * @property {string} query
+ * @property {number} limit
+ */
+
+/* -------------------------------------------------------------------------- */
+/* Recent feeds                                                                */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * One sponsored operation from GET /costs/recent.
+ *
+ * Snake-cased, unlike every other endpoint here — these are the indexer rows passed
+ * through. `source` says which ledger a row came from, and Solana rows carry the
+ * fee-payer in `sender` rather than a user address.
+ *
+ * @typedef {Object} RecentSponsoredOpRow
+ * @property {CerebroChainId} chain_id
+ * @property {string} tx_hash
+ * @property {number} log_index
+ * @property {string} sender
+ * @property {IsoDate} block_timestamp
+ * @property {string | number} cost_usd Gas paid on chain.
+ * @property {string | number} bundler_cost_usd What Pimlico invoices, markup included.
+ * @property {"evm" | "solana"} source
+ */
+
+/**
+ * @typedef {Object} RecentSponsoredOpsPage
+ * @property {RecentSponsoredOpRow[]} rows
+ * @property {number} page
+ * @property {number} pageSize
+ * @property {number} total
+ */
+
+/**
+ * One treasury inflow from GET /fees/recent (and the identical GET /transactions/recent).
+ *
+ * @typedef {Object} RecentFeeRow
+ * @property {CerebroChainId} chainId
+ * @property {string} txHash
+ * @property {string} fromAddress Who paid.
+ * @property {string} toAddress Treasury wallet it landed in.
+ * @property {number} amountUsd
+ * @property {string} tokenSymbol
+ * @property {CerebroOperation} operationType
+ * @property {IsoDate} blockTimestamp
+ */
+
+/**
+ * @typedef {Object} RecentFeesPage
+ * @property {RecentFeeRow[]} rows
+ * @property {number} page
+ * @property {number} pageSize
+ * @property {number} total
+ */
+
+/* -------------------------------------------------------------------------- */
+/* Trends, cohorts & founders                                                  */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * One row of `daily_snapshots`. admin.md's own note applies: this table is a chart
+ * cache, never the source of truth for a current figure — read the headline from
+ * /overview and only the shape from here.
+ *
+ * @typedef {Object} DailySnapshot
+ * @property {DayString} date
+ * @property {number} totalUsers
+ * @property {Record<CerebroPlan, number>} usersByPlan
+ * @property {number} tvlUsd
+ * @property {number} gasCostUsd
+ * @property {number} feesUsd
+ * @property {number} marginUsd
+ */
+
+/**
+ * @typedef {Object} UserTrends
+ * @property {{ date: DayString, count: number }[]} signups
+ * @property {DailySnapshot[]} snapshots
+ * @property {number} days
+ */
+
+/**
+ * @typedef {Object} TopFeePayerRow
+ * @property {string} safeAddress
+ * @property {string} privyId
+ * @property {string | null} email
+ * @property {string | null} twitterUsername
+ * @property {number} totalUsd
+ */
+
+/**
+ * Counts only — the endpoint returns how many memberships lapse in the window, not
+ * which users they belong to.
+ *
+ * @typedef {Object} Renewals
+ * @property {number} total
+ * @property {Record<CerebroPlan, number>} byPlan
+ */
+
+/**
+ * Founder NFT programme economics. Revenue is an estimate the backend derives from
+ * on-chain activity; `note` says on what basis, and is meant to be shown.
+ *
+ * @typedef {Object} FounderEconomics
+ * @property {number} founderCount In our database.
+ * @property {number} syncedFounderCount Matched to an on-chain holder.
+ * @property {number} unsyncedCount
+ * @property {number} onChainSupply
+ * @property {number} onChainHolders
+ * @property {number} activeFounders Founders who actually operated.
+ * @property {number} conservativeRevenueUsd
+ * @property {number} estimatedRevenueUsd
+ * @property {number} founderGasSubsidizedUsd
+ * @property {number} avgGasPerFounder
+ * @property {number} avgGasPerActiveFounder
+ * @property {number} netPerFounderUsd
+ * @property {number} subsidyRatioPct
+ * @property {string} [note]
+ */
+
+/* -------------------------------------------------------------------------- */
+/* Chains                                                                      */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * @typedef {Object} ChainSummaryRow
+ * @property {CerebroChainId} chainId
+ * @property {string} name
+ * @property {number} tvlUsd
+ * @property {number} ops30d
+ * @property {number} cost30dUsd
+ * @property {number} fees30dUsd
+ * @property {number} feesCount30d
+ * @property {number} margin30dUsd
+ * @property {number | null} useropsLastBlock Indexer cursor.
+ * @property {number | null} treasuryLastBlock Indexer cursor.
+ */
+
+/**
+ * @typedef {Object} ChainsSummary
+ * @property {ChainSummaryRow[]} chains
+ * @property {{ tvlUsd: number, earnings30dUsd: number, costs30dUsd: number, margin30dUsd: number }} solana
+ */
+
+/* -------------------------------------------------------------------------- */
+/* Monitoring & Sentry                                                         */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * The operational block. Everything except `pimlicoRunway` is also computed by our
+ * own `/api/monitoring/*` routes, which hit the RPCs and Zerion live; prefer those
+ * for anything that has to be true *now*.
+ *
+ * @typedef {Object} SystemMonitoring
+ * @property {{ name: string, env: string, url: string, status: "up" | "down", httpStatus: number | null, latencyMs: number | null, error: string | null }[]} services
+ * @property {{ address: string, sol: number, usd: number, priceUsd: number, minSol: number, low: boolean }} solanaFunding
+ * @property {PimlicoRunway | null} pimlicoRunway
+ * @property {{ wallets: Object[], totalUsd: number, actionable: boolean, threshold: number }} liquidatableHoldings
+ */
+
+/**
+ * Remaining Pimlico credit. Pimlico's own API reports the configured limit and never
+ * the balance left, so this is derived: a recorded deposit minus every sponsored op
+ * indexed since `asOf`. `daysLeft` divides what is left by `burnPerDay`.
+ *
+ * @typedef {Object} PimlicoRunway
+ * @property {number} balanceUsd Deposit on record at `asOf`.
+ * @property {IsoDate} asOf
+ * @property {number} spentSince
+ * @property {number} remaining
+ * @property {number} burnPerDay
+ * @property {number} daysLeft
+ * @property {number} minUsd Floor that flips `low`.
+ * @property {boolean} low
+ */
+
+/**
+ * GET /system/sentry. Carries its own failure state rather than a status code:
+ * `configured` false means no token upstream, `ok` false means Sentry refused.
+ * Both come back 200.
+ *
+ * @typedef {Object} SentryReport
+ * @property {boolean} configured
+ * @property {boolean} ok
+ * @property {string | null} error
+ * @property {string} [org]
+ * @property {string} [project]
+ * @property {number} unresolvedCount
+ * @property {boolean} atLimit True when `unresolvedCount` hit the API's page cap.
+ * @property {number} events24h
+ * @property {number} newIssues24h
+ * @property {number} usersAffected
+ * @property {SentryIssue[]} issues
+ */
+
+/**
+ * @typedef {Object} SentryIssue
+ * @property {string} id
+ * @property {string} shortId
+ * @property {string} title
+ * @property {string} culprit
+ * @property {"error" | "warning" | "info" | "fatal" | "debug" | string} level
+ * @property {number} count Events all time.
+ * @property {number} userCount
+ * @property {IsoDate} firstSeen
+ * @property {IsoDate} lastSeen
+ * @property {string} permalink
+ * @property {number} events24h
+ * @property {boolean} isNew
  */
 
 export {};

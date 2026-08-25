@@ -9,6 +9,10 @@ import { useQuery } from "@tanstack/react-query";
  *
  * Takes no parameters (unlike the other /costs breakdowns, there is no `days`).
  *
+ * Rows do not match the shape `admin.md` documents — the counts and the margin come
+ * back under the names the upstream query produced (`totalUsers`, `ops`, `netUsd`).
+ * `toPlanRow()` in the panel reads both spellings.
+ *
  * @return {import("@tanstack/react-query").UseQueryResult<CostByPlanRow[]>} `data` is the
  * unwrapped `rows` array.
  */

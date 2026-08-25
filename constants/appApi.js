@@ -66,3 +66,20 @@ export const fromMinorUnits = (value) =>
  */
 export const bpsToPercent = (bps) =>
   typeof bps === "number" && Number.isFinite(bps) ? bps / 100 : null;
+
+/**
+ * Gas ceilings the **app** falls back to when `/admin/gas-limits` has no row for
+ * a chain. Not served by any endpoint: they are hardcoded in the app repo
+ * (`hyxora-app/constants/gasLimits.ts` → `DEFAULT_MAX_GAS_PRICES`), and the app's
+ * own admin screen shows them under a «Predeterminado» badge exactly like this.
+ *
+ * Mirrored here so the Costos table can show a ceiling for every chain instead
+ * of a dash — but they are a *copy*, so a change in the app repo has to be
+ * repeated here. That is why the row says where its number came from.
+ */
+export const appApiDefaultMaxGasGwei = {
+  base: 0.1,
+  bsc: 1,
+  hyperevm: 15,
+  polygon: 750,
+};

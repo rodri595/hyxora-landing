@@ -29,3 +29,10 @@ export const EXPENSIVE_LIMIT = 200;
 
 /** Line/area colour for cost series — red, to read against the green of Ingresos. */
 export const COST_LINE = "#F43F5E";
+
+/**
+ * Rows per page on «Últimas ops patrocinadas». 10 is the API default and 100 its
+ * maximum; 25 matches the other tables on the tab.
+ */
+export const RECENT_OPS_PAGE_SIZE = 25;
+export const RECENT_OPS_PAGE_SIZES = [10, 25, 50, 100];

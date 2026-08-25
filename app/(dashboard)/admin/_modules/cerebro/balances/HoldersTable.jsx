@@ -31,9 +31,30 @@ const SnapshotCell = ({ value }) => {
 };
 
 /**
- * Symbol and chain are deliberately absent: this only ever renders inside an
- * expanded token row, where both are the row directly above. Repeating them on
- * every line would be the same two values copied down the table.
+ * The value a holder has in this asset.
+ *
+ * `/holdings/holders` sums across networks, so when a holder appears on more than
+ * one the figure is wider than the row it was opened from. Marked rather than
+ * silently shown as if it belonged to this chain alone.
+ */
+const ValueCell = ({ value, chainCount, chainsLabel }) => (
+  <span
+    className="font-medium tabular-nums text-[#19363F]"
+    title={chainsLabel ? `Redes: ${chainsLabel}` : undefined}
+  >
+    {formatUsd(value, { decimals: 2 })}
+    {chainCount > 1 && (
+      <span className="ml-1 font-normal text-[10px] text-[rgba(25,54,63,0.35)]">
+        ×{chainCount} redes
+      </span>
+    )}
+  </span>
+);
+
+/**
+ * The symbol is deliberately absent: this only ever renders inside an expanded row,
+ * where it is the row directly above. Repeating it on every line would be the same
+ * value copied down the table.
  */
 const columns = [
   {
@@ -53,7 +74,12 @@ const columns = [
     ),
   },
   {
-    accessorKey: "refreshedAt",
+    accessorKey: "chainsLabel",
+    header: "Redes",
+    cell: (info) => <span className="text-[rgba(25,54,63,0.45)]">{info.getValue() || "—"}</span>,
+  },
+  {
+    accessorKey: "tvlRefreshedAt",
     header: "Snapshot",
     cell: (info) => <SnapshotCell value={info.getValue()} />,
   },
@@ -62,22 +88,24 @@ const columns = [
     header: "Valor",
     meta: { align: "right" },
     cell: (info) => (
-      <span className="font-medium tabular-nums text-[#19363F]">
-        {formatUsd(info.getValue(), { decimals: 2 })}
-      </span>
+      <ValueCell
+        value={info.getValue()}
+        chainCount={info.row.original.chainCount}
+        chainsLabel={info.row.original.chainsLabel}
+      />
     ),
   },
 ];
 
 /**
- * Who holds one token — one row per user, their exposure summed across their Safes.
+ * Who holds one asset — one row per user.
  *
  * No toolbar: every flag that would draw one is off, so the nested table reads as
  * part of the row it opened from rather than as a second table with its own search
  * and export sitting inside the first.
  *
  * @param {Object} props
- * @param {Object[]} props.holders Rows from `holdersOfToken`.
+ * @param {Object[]} props.holders Rows from `holdersOnChain`.
  * @param {string} [props.emptyLabel]
  */
 const HoldersTable = ({ holders, emptyLabel }) => (

@@ -1,9 +1,11 @@
 "use client";
 
 import FeeMatrixPanel from "./planes/FeeMatrixPanel";
+import FounderEconomicsPanel from "./planes/FounderEconomicsPanel";
 import PlanDistributionPanel from "./planes/PlanDistributionPanel";
 import PlanEconomicsPanel from "./planes/PlanEconomicsPanel";
 import PlanesPanel from "./planes/PlanesPanel";
+import RenewalsPanel from "./planes/RenewalsPanel";
 import WhitelistedTokensPanel from "./planes/WhitelistedTokensPanel";
 import WhitelistedVaultsPanel from "./planes/WhitelistedVaultsPanel";
 
@@ -16,8 +18,9 @@ import WhitelistedVaultsPanel from "./planes/WhitelistedVaultsPanel";
  * revenue collected, not the fee table. They come from the Hyxora app backend
  * through `/api/app-api`, which holds the bot token server-side.
  *
- * Below the divider is the plan data Cerebro does serve: distribution and
- * economics, i.e. what those plans actually earned.
+ * Below the divider is the plan data Cerebro does serve: distribution, economics,
+ * what is up for renewal, and the Founder tier's own P&L — i.e. what those plans
+ * actually earned and cost.
  */
 const PlanesModule = () => (
   <div className="flex flex-col gap-3.5 py-3 pb-8">
@@ -35,6 +38,8 @@ const PlanesModule = () => (
 
     <PlanDistributionPanel />
     <PlanEconomicsPanel />
+    <RenewalsPanel />
+    <FounderEconomicsPanel />
   </div>
 );
 

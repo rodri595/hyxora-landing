@@ -12,6 +12,7 @@ export { useGetCostsByChain } from "./useGetCostsByChain";
 export { useGetCostsByOperation } from "./useGetCostsByOperation";
 export { useGetCostsByPlan } from "./useGetCostsByPlan";
 export { useGetExpensiveOperations } from "./useGetExpensiveOperations";
+export { useGetCostsRecent } from "./useGetCostsRecent";
 
 export { useGetFeesTotals } from "./useGetFeesTotals";
 export { useGetFeesByOperation } from "./useGetFeesByOperation";
@@ -19,11 +20,22 @@ export { useGetTreasuryByToken } from "./useGetTreasuryByToken";
 export { useGetTreasuryByChain } from "./useGetTreasuryByChain";
 export { useGetNftFees } from "./useGetNftFees";
 export { useGetFeesDiagnostics } from "./useGetFeesDiagnostics";
+export { useGetFeesRecent } from "./useGetFeesRecent";
 
 export { useGetUserStats } from "./useGetUserStats";
 export { useGetUsers } from "./useGetUsers";
 export { useGetUserDetail } from "./useGetUserDetail";
 export { useGetUserTransactions } from "./useGetUserTransactions";
+export { useGetUserTrends } from "./useGetUserTrends";
+export { useGetTopFeePayers } from "./useGetTopFeePayers";
+export { useGetRenewals } from "./useGetRenewals";
 
 export { useGetHoldings } from "./useGetHoldings";
+export { useGetHoldingsHolders } from "./useGetHoldingsHolders";
+
+export { useGetChainsSummary } from "./useGetChainsSummary";
+export { useGetFounderEconomics } from "./useGetFounderEconomics";
+
 export { useGetSystemHealth } from "./useGetSystemHealth";
+export { useGetSystemMonitoring } from "./useGetSystemMonitoring";
+export { useGetSentryReport } from "./useGetSentryReport";

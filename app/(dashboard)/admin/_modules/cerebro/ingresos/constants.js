@@ -30,3 +30,10 @@ export const REVENUE_COLORS = [
 
 /** Line/area colour for revenue series. */
 export const REVENUE_LINE = "#10B981";
+
+/**
+ * Rows per page on «Últimas comisiones de usuario». 10 is the API default and 100
+ * its maximum; 25 matches the other tables.
+ */
+export const FEES_PAGE_SIZE = 25;
+export const FEES_PAGE_SIZES = [10, 25, 50, 100];

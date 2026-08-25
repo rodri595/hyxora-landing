@@ -1,6 +1,7 @@
 "use client";
 
 import DataTable from "@/components/DataTable";
+import { appApiDefaultMaxGasGwei } from "@/constants/appApi";
 import { useGetGasLimits } from "@/hooks/appApi/useGetGasLimits";
 import { useGetGasPrices } from "@/hooks/monitoring/useGetGasPrices";
 import { cn } from "@/utils";
@@ -15,35 +16,48 @@ const USAGE_WARNING_PCT = 70;
 const columns = [
   {
     accessorKey: "label",
-    header: "Red",
+    header: "Cadena",
     cell: (info) => <span className="font-medium text-[#19363F]">{info.getValue()}</span>,
   },
   {
     accessorKey: "currentGwei",
-    header: "Gas actual",
+    header: "Gas actual (gwei)",
     meta: { align: "right" },
     cell: (info) => {
       const { error } = info.row.original;
       if (error) return <span className="font-inter text-[10px] text-red-600">{error}</span>;
       return (
         <span className="tabular-nums text-[rgba(25,54,63,0.7)]">
-          {formatNumber(info.getValue(), { decimals: 3 })} gwei
+          {formatNumber(info.getValue(), { decimals: 3 })}
         </span>
       );
     },
   },
   {
     accessorKey: "maxGwei",
-    header: "Límite",
+    header: "Límite máx (gwei)",
     meta: { align: "right" },
     cell: (info) => {
       const value = info.getValue();
       return value === null ? (
         <span className="text-[rgba(25,54,63,0.3)]">—</span>
       ) : (
-        <span className="tabular-nums text-[rgba(25,54,63,0.7)]">
-          {formatNumber(value, { decimals: 3 })} gwei
+        <span className="tabular-nums font-medium text-[#19363F]">
+          {formatNumber(value, { decimals: 2 })}
         </span>
+      );
+    },
+  },
+  {
+    accessorKey: "source",
+    header: "Origen",
+    cell: (info) => {
+      const source = info.getValue();
+      if (source === null) return <span className="text-[rgba(25,54,63,0.3)]">—</span>;
+      return source === "override" ? (
+        <span className="font-medium text-[#19363F]">Configurado</span>
+      ) : (
+        <span className="text-[rgba(25,54,63,0.45)]">Predeterminado</span>
       );
     },
   },
@@ -77,27 +91,35 @@ const columns = [
  * when the ceilings are unavailable, which matters because the bot token and
  * the RPC keys fail independently.
  *
- * `source` ("default" vs hand-set override) is not in the API; the original
- * column can't be reproduced and is left out rather than guessed.
+ * `/admin/gas-limits` only returns rows someone *saved*: a chain nobody has
+ * overridden simply isn't in the response, which is why this table used to show
+ * a dash for every ceiling. The app itself falls back to a hardcoded default in
+ * that case, so we mirror those defaults (`appApiDefaultMaxGasGwei`) and say in
+ * the «Origen» column which of the two a row is showing — the same split the
+ * app's own admin screen draws with its «Predeterminado» / «Anulación» badges.
  */
 const GasLimitsPanel = () => {
   const prices = useGetGasPrices();
   const limits = useGetGasLimits();
 
   const rows = useMemo(() => {
-    const ceilings = new Map(
+    const overrides = new Map(
       (limits.data ?? []).map((limit) => [String(limit.chain).toLowerCase(), limit.maxGasGwei])
     );
 
     return (prices.data?.rows ?? []).map((row) => {
       // app-api spells Polygon both ways; accept either.
-      const maxGwei =
-        ceilings.get(row.chain) ?? (row.chain === "polygon" ? ceilings.get("matic") : undefined);
-      const ceiling = typeof maxGwei === "number" ? maxGwei : null;
+      const override =
+        overrides.get(row.chain) ?? (row.chain === "polygon" ? overrides.get("matic") : undefined);
+      const fallback = appApiDefaultMaxGasGwei[row.chain];
+
+      const isOverride = typeof override === "number";
+      const ceiling = isOverride ? override : typeof fallback === "number" ? fallback : null;
 
       return {
         ...row,
         maxGwei: ceiling,
+        source: ceiling === null ? null : isOverride ? "override" : "default",
         usagePct:
           ceiling && ceiling > 0 && typeof row.currentGwei === "number"
             ? (row.currentGwei / ceiling) * 100
@@ -142,14 +164,16 @@ const GasLimitsPanel = () => {
 
         {limits.error && (
           <p className="font-inter text-[10px] leading-[1.5] tracking-[-0.4px] text-amber-700 mt-2">
-            Los límites no se pudieron leer ({limits.error.message}), así que la columna «Límite» y
-            el uso salen vacíos. Los precios actuales son reales.
+            No se pudieron leer las anulaciones ({limits.error.message}), así que todas las filas
+            salen como «Predeterminado». Si alguna red tiene un límite configurado a mano, aquí se
+            está viendo el valor equivocado.
           </p>
         )}
 
         <p className="font-inter text-[10px] leading-[1.5] tracking-[-0.4px] text-[rgba(25,54,63,0.4)] mt-2">
           Vista de solo lectura: los límites se editan en el Panel de Admin de la app (Configuración
-          → Límites de Gas), no aquí.
+          → Límites de Gas), no aquí. «Predeterminado» significa que nadie ha guardado un límite
+          para esa red y la app usa su valor por defecto.
         </p>
       </QueryState>
     </Panel>
