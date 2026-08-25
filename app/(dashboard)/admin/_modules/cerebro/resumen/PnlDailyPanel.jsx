@@ -1,7 +1,7 @@
 "use client";
 
 import { useGetPnlDaily } from "@/hooks/cerebro/useGetPnlDaily";
-import { formatUsd, toDayString } from "@/utils/format";
+import { formatUsdAxis, formatUsdPrecise, toDayString } from "@/utils/format";
 import { useMemo } from "react";
 import {
   Bar,
@@ -13,6 +13,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import { TooltipSurface, tooltipWrapperStyle, useHeldTooltip } from "../../shared/ChartTooltip";
 import Panel, { RefreshButton } from "../../shared/Panel";
 import QueryState from "../../shared/QueryState";
 import { COST_COLOR, REVENUE_COLOR, bucketFor } from "./constants";
@@ -22,40 +23,59 @@ const GRID = "rgba(25,54,63,0.08)";
 
 const BUCKET_LABEL = { day: "día", week: "semana", month: "mes" };
 
-const ChartTooltip = ({ active, payload, label }) => {
-  if (!active || !payload?.length) return null;
+const ChartTooltip = (props) => {
+  const { visible, payload, label } = useHeldTooltip(props.active, props.payload, props.label);
+  if (!payload) return null;
   const point = payload[0]?.payload;
 
+  const fees = point?.feesUsd ?? 0;
+  const cost = point?.costUsd ?? 0;
+  const margin = point?.marginUsd ?? fees - cost;
+
   return (
-    <div className="rounded-xl border-[0.7px] border-[#E2E2E2] bg-white/90 px-3 py-2 shadow-[0_6px_14px_-4px_rgba(25,54,63,0.15)] backdrop-blur-[15px]">
+    <TooltipSurface visible={visible}>
       <p className="font-inter text-[10px] font-medium tracking-[-0.4px] text-[rgba(25,54,63,0.45)] mb-1.5">
         {label}
       </p>
 
-      {[
-        { key: "feesUsd", name: "Ingresos", color: REVENUE_COLOR },
-        { key: "costUsd", name: "Gastos", color: COST_COLOR },
-      ].map((row) => (
-        <div key={row.key} className="flex items-center gap-2">
-          <span className="size-[7px] shrink-0 rounded-full" style={{ background: row.color }} />
-          <span className="font-inter text-[11px] tracking-[-0.44px] text-[rgba(25,54,63,0.6)]">
-            {row.name}
-          </span>
-          <span className="font-inter text-[11px] font-semibold tabular-nums tracking-[-0.44px] text-[#19363F] ml-auto pl-4">
-            {formatUsd(point?.[row.key], { decimals: 4 })}
-          </span>
-        </div>
-      ))}
+      {fees === 0 && cost === 0 ? (
+        <p className="font-inter text-[11px] tracking-[-0.44px] text-[rgba(25,54,63,0.4)]">
+          Sin actividad
+        </p>
+      ) : (
+        <>
+          {[
+            { key: "fees", name: "Ingresos", value: fees, color: REVENUE_COLOR },
+            { key: "cost", name: "Gastos", value: cost, color: COST_COLOR },
+          ].map((row) => (
+            <div key={row.key} className="flex items-center gap-2">
+              <span
+                className="size-[7px] shrink-0 rounded-full"
+                style={{ background: row.color }}
+              />
+              <span className="font-inter text-[11px] tracking-[-0.44px] text-[rgba(25,54,63,0.6)]">
+                {row.name}
+              </span>
+              <span className="font-inter text-[11px] font-semibold tabular-nums tracking-[-0.44px] text-[#19363F] ml-auto pl-4">
+                {formatUsdPrecise(row.value)}
+              </span>
+            </div>
+          ))}
 
-      <div className="mt-1.5 pt-1.5 border-t-[0.7px] border-[rgba(25,54,63,0.08)] flex items-center gap-2">
-        <span className="font-inter text-[11px] tracking-[-0.44px] text-[rgba(25,54,63,0.6)]">
-          Margen
-        </span>
-        <span className="font-inter text-[11px] font-semibold tabular-nums tracking-[-0.44px] text-[#19363F] ml-auto pl-4">
-          {formatUsd(point?.marginUsd, { decimals: 4 })}
-        </span>
-      </div>
-    </div>
+          <div className="mt-1.5 pt-1.5 border-t-[0.7px] border-[rgba(25,54,63,0.08)] flex items-center gap-2">
+            <span className="font-inter text-[11px] tracking-[-0.44px] text-[rgba(25,54,63,0.6)]">
+              Margen
+            </span>
+            <span
+              className="font-inter text-[11px] font-semibold tabular-nums tracking-[-0.44px] ml-auto pl-4"
+              style={{ color: margin < 0 ? COST_COLOR : REVENUE_COLOR }}
+            >
+              {formatUsdPrecise(margin)}
+            </span>
+          </div>
+        </>
+      )}
+    </TooltipSurface>
   );
 };
 
@@ -116,7 +136,8 @@ const PnlDailyPanel = ({ filters }) => {
   return (
     <Panel
       title="Costos vs. ingresos"
-      description={`Ingresos contra costes agrupados por ${BUCKET_LABEL[bucket]}, del ${filters.from} al ${filters.to} — verde son comisiones recibidas, rojo el gas que subvencionamos. Pasa el cursor por una barra para ver el margen.`}
+      meta={`${filters.from} → ${filters.to}`}
+      description={`Ingresos contra costes agrupados por ${BUCKET_LABEL[bucket]} — verde son las comisiones recibidas, rojo el gas que subvencionamos. Pasa el cursor por una barra para ver el margen.`}
       action={<RefreshButton onClick={() => refetch()} isLoading={isFetching} />}
     >
       <QueryState
@@ -138,13 +159,17 @@ const PnlDailyPanel = ({ filters }) => {
               minTickGap={20}
             />
             <YAxis
-              tickFormatter={(value) => formatUsd(value, { decimals: 0 })}
+              tickFormatter={formatUsdAxis}
               tick={{ fontSize: 10, fill: AXIS }}
               tickLine={false}
               axisLine={false}
               width={52}
             />
-            <Tooltip content={<ChartTooltip />} cursor={{ fill: "rgba(25,54,63,0.04)" }} />
+            <Tooltip
+              content={<ChartTooltip />}
+              cursor={{ fill: "rgba(25,54,63,0.04)" }}
+              wrapperStyle={tooltipWrapperStyle}
+            />
             <Legend
               align="right"
               verticalAlign="top"

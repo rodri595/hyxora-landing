@@ -1,7 +1,7 @@
 "use client";
 
 import { useGetCostsDaily } from "@/hooks/cerebro/useGetCostsDaily";
-import { formatUsd, lastNDays, toDayString } from "@/utils/format";
+import { formatUsdAxis, formatUsdPrecise, lastNDays, toDayString } from "@/utils/format";
 import { useMemo } from "react";
 import {
   Area,
@@ -13,6 +13,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import { TooltipSurface, tooltipWrapperStyle, useHeldTooltip } from "../../shared/ChartTooltip";
 import Panel, { RefreshButton } from "../../shared/Panel";
 import QueryState from "../../shared/QueryState";
 import { COST_DAYS, COST_LINE } from "./constants";
@@ -20,12 +21,13 @@ import { COST_DAYS, COST_LINE } from "./constants";
 const AXIS = "rgba(25,54,63,0.4)";
 const GRID = "rgba(25,54,63,0.08)";
 
-const ChartTooltip = ({ active, payload, label }) => {
-  if (!active || !payload?.length) return null;
+const ChartTooltip = (props) => {
+  const { visible, payload, label } = useHeldTooltip(props.active, props.payload, props.label);
+  if (!payload) return null;
   const point = payload[0]?.payload;
 
   return (
-    <div className="rounded-xl border-[0.7px] border-[#E2E2E2] bg-white/90 px-3 py-2 shadow-[0_6px_14px_-4px_rgba(25,54,63,0.15)] backdrop-blur-[15px]">
+    <TooltipSurface visible={visible}>
       <p className="font-inter text-[10px] font-medium tracking-[-0.4px] text-[rgba(25,54,63,0.45)] mb-1">
         {label}
       </p>
@@ -35,10 +37,10 @@ const ChartTooltip = ({ active, payload, label }) => {
           Gastos
         </span>
         <span className="font-inter text-[11px] font-semibold tabular-nums tracking-[-0.44px] text-[#19363F] ml-auto pl-3">
-          {formatUsd(point?.costUsd, { decimals: 4 })}
+          {formatUsdPrecise(point?.costUsd)}
         </span>
       </div>
-    </div>
+    </TooltipSurface>
   );
 };
 
@@ -110,13 +112,17 @@ const DailyGasPanel = () => {
               minTickGap={16}
             />
             <YAxis
-              tickFormatter={(value) => formatUsd(value, { decimals: 2 })}
+              tickFormatter={formatUsdAxis}
               tick={{ fontSize: 10, fill: AXIS }}
               tickLine={false}
               axisLine={false}
               width={52}
             />
-            <Tooltip content={<ChartTooltip />} cursor={{ stroke: GRID }} />
+            <Tooltip
+              content={<ChartTooltip />}
+              cursor={{ stroke: GRID }}
+              wrapperStyle={tooltipWrapperStyle}
+            />
             <Legend
               align="right"
               verticalAlign="top"

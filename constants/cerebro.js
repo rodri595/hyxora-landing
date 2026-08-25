@@ -1,19 +1,31 @@
 /** Membership plans accepted by the `plan` filter. */
 export const cerebroPlans = ["basic", "premium", "business", "founder"];
 
-/** Operation types accepted by the `op` filter and returned in `operation` fields. */
+/**
+ * Operation types accepted by the `op` filter and returned in `operation` fields.
+ *
+ * This is Cerebro's own tagger vocabulary, not the app backend's `action` enum —
+ * see `constants/appApi.js` for that one. `transfer` is deliberately absent: rows
+ * tagged before the tagger could tell the two apart are folded into
+ * `external_transfer` server-side.
+ *
+ * The tagger gains categories faster than this list does — «alta de wallet» turned
+ * up without warning — so nothing here may assume the list is exhaustive. Resolve
+ * labels through `cerebroOperationLabel()` rather than indexing the map directly.
+ */
 export const cerebroOperations = [
   "swap",
   "bridge",
   "deposit",
   "withdraw",
+  "internal_transfer",
+  "external_transfer",
   "onramp",
   "offramp",
-  "stake",
-  "unstake",
-  "claim",
-  "approve",
-  "other",
+  "xstock_buy",
+  "xstock_sell",
+  "receive",
+  "unknown",
 ];
 
 /** Chain IDs Cerebro reports on, keyed by chainId. */
@@ -31,22 +43,71 @@ export const cerebroUserSorts = ["created", "tvl", "cost", "fees", "net", "plan"
 export const cerebroTreasurySources = ["user-fees", "treasury-management", "all"];
 
 /**
- * Spanish labels for `cerebroOperations`, used across the admin UI. The keys are
- * the API vocabulary — the ported dashboard shows extra categories (xStock, deploy,
- * transferencias internas) that Cerebro folds into these eleven.
+ * Spanish labels for `cerebroOperations`, plus the aliases the API still emits for
+ * older rows. Sentence case, matching the rest of the admin copy.
  */
 export const cerebroOperationLabels = {
   swap: "Swap",
   bridge: "Bridge",
   deposit: "Depósito en vault",
   withdraw: "Retiro de vault",
+  internal_transfer: "Transferencia interna",
+  external_transfer: "Transferencia externa",
+  transfer: "Transferencia externa",
   onramp: "On-ramp",
   offramp: "Off-ramp",
-  stake: "Stake",
-  unstake: "Unstake",
-  claim: "Reclamar",
-  approve: "Aprobación",
-  other: "Otros",
+  xstock_buy: "Compra xStock",
+  xstock_sell: "Venta xStock",
+  xstock_fees: "Comisiones y gas xStock (Solana)",
+  xstock_fee: "Comisiones xStock (Solana)",
+  xstock_sponsorship: "Patrocinio xStock (Solana)",
+  xstocks: "xStocks",
+  receive: "Recepción",
+  send: "Envío",
+  fee: "Comisión",
+  unknown: "Sin clasificar",
+};
+
+/** Casings the humaniser must not lowercase away. */
+const operationWordCasing = {
+  xstock: "xStock",
+  xstocks: "xStocks",
+  nft: "NFT",
+  evm: "EVM",
+  usd: "USD",
+  eur: "EUR",
+  sepa: "SEPA",
+};
+
+/**
+ * Display label for an operation key.
+ *
+ * Falls back to humanising the key rather than to a dash: the tagger adds
+ * categories on its own schedule, and a legend of "—" rows is worse than an
+ * unaccented «Alta de wallet». A key with no entry above is a copy gap, not
+ * missing data.
+ *
+ * @param {string | null | undefined} operation
+ * @return {string}
+ */
+export const cerebroOperationLabel = (operation) => {
+  if (typeof operation !== "string" || operation.trim() === "") {
+    return cerebroOperationLabels.unknown;
+  }
+
+  const key = operation.trim();
+  const known = cerebroOperationLabels[key] ?? cerebroOperationLabels[key.toLowerCase()];
+  if (known) return known;
+
+  const words = key
+    .replace(/([a-z0-9])([A-Z])/g, "$1 $2")
+    .split(/[^\p{L}\p{N}]+/u)
+    .filter(Boolean)
+    .map((word) => operationWordCasing[word.toLowerCase()] ?? word.toLowerCase());
+
+  if (words.length === 0) return cerebroOperationLabels.unknown;
+  const [first, ...rest] = words;
+  return [first[0].toUpperCase() + first.slice(1), ...rest].join(" ");
 };
 
 /**

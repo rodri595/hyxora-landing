@@ -6,6 +6,7 @@ import { useGetNftFees } from "@/hooks/cerebro/useGetNftFees";
 import { cn } from "@/utils";
 import { formatNumber, formatUsd } from "@/utils/format";
 import { useCallback } from "react";
+import { AnimatedMoney } from "../../shared/AnimatedValue";
 import Panel, { RefreshButton } from "../../shared/Panel";
 import PendingEndpoint from "../../shared/PendingEndpoint";
 import QueryState from "../../shared/QueryState";
@@ -109,22 +110,22 @@ const RevenueSummaryPanel = () => {
       <QueryState isLoading={isLoading} error={error}>
         <div className="flex flex-wrap gap-2.5">
           <StatCard
-            value={formatUsd(revenue30d)}
+            value={<AnimatedMoney value={revenue30d} />}
             label={`Ingresos ${REVENUE_DAYS}d`}
             hint="Comisiones de usuario EVM + tesoro de comisiones Solana"
           />
           <StatCard
-            value={formatUsd(revenue7d)}
+            value={<AnimatedMoney value={revenue7d} />}
             label="Ingresos 7d"
             hint="Última semana — tendencia a corto plazo"
           />
           <StatCard
-            value={formatUsd(revenueLifetime)}
+            value={<AnimatedMoney value={revenueLifetime} />}
             label="Ingresos (histórico)"
             hint="Todo el histórico, EVM + Solana"
           />
           <StatCard
-            value={formatUsd(margin30d)}
+            value={<AnimatedMoney value={margin30d} />}
             label={`Margen ${REVENUE_DAYS}d`}
             tone={margin30d !== null && margin30d < 0 ? "warning" : "neutral"}
             hint={`Ingresos ${formatUsd(revenue30d)} − gastos ${formatUsd(cost30d)}`}

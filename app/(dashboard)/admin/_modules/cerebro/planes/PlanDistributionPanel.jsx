@@ -3,6 +3,7 @@
 import { useGetOverview } from "@/hooks/cerebro/useGetOverview";
 import { formatNumber } from "@/utils/format";
 import { useMemo } from "react";
+import { AnimatedCount } from "../../shared/AnimatedValue";
 import Panel, { RefreshButton } from "../../shared/Panel";
 import QueryState from "../../shared/QueryState";
 import StatCard from "../../shared/StatCard";
@@ -42,7 +43,7 @@ const PlanDistributionPanel = () => {
           {rows.map((row) => (
             <StatCard
               key={row.plan}
-              value={formatNumber(row.users)}
+              value={<AnimatedCount value={row.users} />}
               label={row.plan}
               hint={`${formatNumber(row.registered)} registrados`}
               tone={row.registered > 0 ? "neutral" : "muted"}

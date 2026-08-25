@@ -59,22 +59,52 @@ export const REVENUE_COLOR = "#10B981";
 export const COST_COLOR = "#F43F5E";
 
 /**
- * Donut slice colours, in draw order. Blue leads because swap dominates both
- * breakdowns in every window we've seen.
+ * Donut slice colours keyed by operation, not by slice index.
+ *
+ * The two donuts on «Resumen» are read side by side — the whole point is to see
+ * where a functionality earns more than it costs. Colouring by position would
+ * paint swap blue in one ring and green in the other the moment the orderings
+ * diverge, which they always do: wallet sign-ups cost gas and earn nothing.
  */
-export const SLICE_COLORS = [
-  "#2D68FF",
-  "#F59E0B",
-  "#D946EF",
+export const OPERATION_COLORS = {
+  swap: "#3B82F6",
+  deposit: "#10B981",
+  withdraw: "#F59E0B",
+  external_transfer: "#8B5CF6",
+  transfer: "#8B5CF6",
+  internal_transfer: "#6366F1",
+  bridge: "#06B6D4",
+  onramp: "#14B8A6",
+  offramp: "#EC4899",
+  xstock_buy: "#D946EF",
+  xstock_sell: "#F43F5E",
+  xstock_fees: "#EC4899",
+  xstocks: "#D946EF",
+  receive: "#0EA5E9",
+  unknown: "#F97316",
+};
+
+/** Rotation for operations the map doesn't name yet. Bright, never grey. */
+const FALLBACK_COLORS = [
   "#10B981",
+  "#3B82F6",
+  "#F59E0B",
   "#8B5CF6",
-  "#0EA5A6",
   "#F43F5E",
-  "#0F172A",
-  "#64748B",
-  "#EAB308",
+  "#06B6D4",
+  "#6366F1",
+  "#EC4899",
   "#14B8A6",
+  "#0EA5E9",
 ];
+
+/**
+ * @param {string | null | undefined} operation
+ * @param {number} index Position in the sorted slice list, for the fallback.
+ * @return {string} Hex colour.
+ */
+export const operationColor = (operation, index) =>
+  OPERATION_COLORS[operation] ?? FALLBACK_COLORS[index % FALLBACK_COLORS.length];
 
 /**
  * Daily bars stop being readable long before a year fits on screen, so the bucket

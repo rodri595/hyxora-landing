@@ -2,6 +2,7 @@
 
 import { useGetUserStats } from "@/hooks/cerebro/useGetUserStats";
 import { formatNumber } from "@/utils/format";
+import { AnimatedCount } from "../../shared/AnimatedValue";
 import Panel, { RefreshButton } from "../../shared/Panel";
 import PendingEndpoint from "../../shared/PendingEndpoint";
 import QueryState from "../../shared/QueryState";
@@ -28,21 +29,21 @@ const UserActivationPanel = () => {
     >
       <QueryState isLoading={isLoading} error={error}>
         <div className="flex flex-wrap gap-2.5">
-          <StatCard value={formatNumber(total)} label="Usuarios totales" />
+          <StatCard value={<AnimatedCount value={total} />} label="Usuarios totales" />
           <StatCard
-            value={formatNumber(withoutWallet)}
+            value={<AnimatedCount value={withoutWallet} />}
             label="Sin wallet"
             tone={withoutWallet > 0 ? "muted" : "neutral"}
             hint="total − con wallet"
           />
-          <StatCard value={formatNumber(withWallet)} label="Con wallet" />
+          <StatCard value={<AnimatedCount value={withWallet} />} label="Con wallet" />
           <StatCard
-            value={formatNumber(withTvl)}
+            value={<AnimatedCount value={withTvl} />}
             label="Con saldo"
             tone={withTvl > 0 ? "warning" : "neutral"}
           />
           <StatCard
-            value={formatNumber(active)}
+            value={<AnimatedCount value={active} />}
             label="Activos"
             tone={active > 0 ? "good" : "neutral"}
           />

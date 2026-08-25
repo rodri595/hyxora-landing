@@ -5,8 +5,9 @@ import { useGetCostsTotals } from "@/hooks/cerebro/useGetCostsTotals";
 import { useGetHoldings } from "@/hooks/cerebro/useGetHoldings";
 import { useGetOverview } from "@/hooks/cerebro/useGetOverview";
 import { useGetPnlOperations } from "@/hooks/cerebro/useGetPnlOperations";
-import { formatNumber, formatUsd } from "@/utils/format";
+import { formatNumber, formatUsd, formatUsdPrecise } from "@/utils/format";
 import { useCallback, useMemo } from "react";
+import { AnimatedCount, AnimatedMoney } from "../../shared/AnimatedValue";
 import { RefreshButton } from "../../shared/Panel";
 import QueryState from "../../shared/QueryState";
 import StatCard from "../../shared/StatCard";
@@ -89,29 +90,29 @@ const SummaryStatsPanel = ({ filters }) => {
 
           <div className="flex flex-wrap gap-2.5">
             <StatCard
-              value={formatUsd(totals?.feesUsd)}
+              value={<AnimatedMoney value={totals?.feesUsd} precise />}
               label="Ingresos"
               hint={`${filters.from} → ${filters.to}`}
             />
             <StatCard
-              value={formatUsd(totals?.costUsd, { decimals: 4 })}
+              value={<AnimatedMoney value={totals?.costUsd} precise />}
               label="Gastos"
               hint={`${formatNumber(totals?.opsCount)} ops`}
             />
             <StatCard
-              value={formatUsd(totals?.marginUsd)}
+              value={<AnimatedMoney value={totals?.marginUsd} precise />}
               label="Margen"
               tone={
                 typeof totals?.marginUsd === "number" && totals.marginUsd < 0
                   ? "warning"
                   : "neutral"
               }
-              hint={`Ingresos ${formatUsd(totals?.feesUsd)} − gastos ${formatUsd(totals?.costUsd, {
-                decimals: 4,
-              })}`}
+              hint={`Ingresos ${formatUsdPrecise(totals?.feesUsd)} − gastos ${formatUsdPrecise(
+                totals?.costUsd
+              )}`}
             />
             <StatCard
-              value={formatNumber(totals?.opsCount)}
+              value={<AnimatedCount value={totals?.opsCount} />}
               label="Txs patrocinadas"
               hint={`${formatNumber(totals?.usersCount)} usuarios activos · ${formatNumber(
                 lifetimeOps
@@ -125,7 +126,7 @@ const SummaryStatsPanel = ({ filters }) => {
 
           <div className="flex flex-wrap gap-2.5">
             <StatCard
-              value={formatUsd(overview.data?.medianTvl?.totalUsd, { decimals: 0 })}
+              value={<AnimatedMoney value={overview.data?.medianTvl?.totalUsd} decimals={0} />}
               label="TVL"
               hint="Suma de los portafolios de los usuarios"
             />

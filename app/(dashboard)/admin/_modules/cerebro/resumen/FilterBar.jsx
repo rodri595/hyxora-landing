@@ -3,7 +3,7 @@
 import SelectDropdown from "@/components/SelectDropdown";
 import {
   cerebroChains,
-  cerebroOperationLabels,
+  cerebroOperationLabel,
   cerebroOperations,
   cerebroPlanLabel,
   cerebroPlans,
@@ -103,7 +103,7 @@ const FilterBar = ({ filters, onApply, onExport, canExport = false }) => {
       { value: "", label: "Todas las funcionalidades" },
       ...cerebroOperations.map((operation) => ({
         value: operation,
-        label: cerebroOperationLabels[operation] ?? operation,
+        label: cerebroOperationLabel(operation),
       })),
     ],
     []

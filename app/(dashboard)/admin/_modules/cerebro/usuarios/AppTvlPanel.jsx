@@ -2,6 +2,7 @@
 
 import { useGetOverview } from "@/hooks/cerebro/useGetOverview";
 import { formatNumber, formatUsd } from "@/utils/format";
+import { AnimatedCount, AnimatedMoney } from "../../shared/AnimatedValue";
 import Panel, { RefreshButton } from "../../shared/Panel";
 import PendingEndpoint from "../../shared/PendingEndpoint";
 import QueryState from "../../shared/QueryState";
@@ -36,22 +37,22 @@ const AppTvlPanel = () => {
       <QueryState isLoading={isLoading} error={error}>
         <div className="flex flex-wrap gap-2.5">
           <StatCard
-            value={formatUsd(tvl?.totalUsd, { decimals: 0 })}
+            value={<AnimatedMoney value={tvl?.totalUsd} decimals={0} />}
             label="TVL total"
             hint="Suma de todas las posiciones rastreadas"
           />
           <StatCard
-            value={formatUsd(tvl?.medianUsd, { decimals: 2 })}
+            value={<AnimatedMoney value={tvl?.medianUsd} />}
             label="Mediana por usuario"
             hint="La mitad de los usuarios está por debajo"
           />
           <StatCard
-            value={formatUsd(tvl?.meanUsd, { decimals: 2 })}
+            value={<AnimatedMoney value={tvl?.meanUsd} />}
             label="Media por usuario"
             hint="Se dispara con una sola cartera grande"
           />
           <StatCard
-            value={formatNumber(tvl?.usersWithTvl)}
+            value={<AnimatedCount value={tvl?.usersWithTvl} />}
             label="Usuarios con TVL"
             hint="Solo cuentan los que tienen saldo"
           />

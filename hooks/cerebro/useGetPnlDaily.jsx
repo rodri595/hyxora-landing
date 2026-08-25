@@ -9,6 +9,10 @@ import { useQuery } from "@tanstack/react-query";
  *
  * `from` and `to` are required by the API; the query stays disabled until both are set.
  *
+ * Bucket starts come back keyed `day` on the deployed API and `date` in
+ * `admin.md`; both are read and normalised to `date`, the same way
+ * `useGetPnlOperations` pins `operation`.
+ *
  * @param {Object} [params]
  * @param {DayString} [params.from] Start date, "YYYY-MM-DD". Required by the API.
  * @param {DayString} [params.to] End date, "YYYY-MM-DD". Required by the API.
@@ -30,7 +34,10 @@ export const useGetPnlDaily = (params = {}) => {
       const response = await cerebroClient.get("/pnl/daily", {
         params: cleanParams({ from, to, plan, op, chain, user, bucket }),
       });
-      return response?.data?.series ?? [];
+      return (response?.data?.series ?? []).map((point) => ({
+        ...point,
+        date: point.date ?? point.day ?? null,
+      }));
     },
     staleTime: 2 * 60 * 1000,
     refetchOnWindowFocus: false,

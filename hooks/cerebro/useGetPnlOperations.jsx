@@ -10,6 +10,11 @@ import { useQuery } from "@tanstack/react-query";
  *
  * `from` and `to` are required by the API; the query stays disabled until both are set.
  *
+ * Rows come back keyed `op` on the deployed API and `operation` in `admin.md`;
+ * both are read and normalised to `operation` here so no panel has to guess. Get
+ * this wrong and the donuts still draw — the values are on other fields — with
+ * every legend row reading "—", which is why it's pinned at the hook.
+ *
  * @param {Object} [params]
  * @param {DayString} [params.from] Start date, "YYYY-MM-DD". Required by the API.
  * @param {DayString} [params.to] End date, "YYYY-MM-DD". Required by the API.
@@ -30,7 +35,16 @@ export const useGetPnlOperations = (params = {}) => {
       const response = await cerebroClient.get("/pnl/operations", {
         params: cleanParams({ from, to, plan, op, chain, user }),
       });
-      return response?.data ?? null;
+      const payload = response?.data ?? null;
+      if (!payload) return null;
+
+      return {
+        ...payload,
+        rows: (payload.rows ?? []).map((row) => ({
+          ...row,
+          operation: row.operation ?? row.op ?? null,
+        })),
+      };
     },
     staleTime: 2 * 60 * 1000,
     refetchOnWindowFocus: false,

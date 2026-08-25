@@ -2,6 +2,7 @@
 
 import { useGetSolanaFunding } from "@/hooks/monitoring/useGetSolanaFunding";
 import { formatNumber, formatUsd, shortenHash } from "@/utils/format";
+import { AnimatedCount } from "../../shared/AnimatedValue";
 import Panel, { RefreshButton } from "../../shared/Panel";
 import PendingEndpoint from "../../shared/PendingEndpoint";
 import QueryState from "../../shared/QueryState";
@@ -36,7 +37,7 @@ const SponsorshipPanel = () => {
       <QueryState isLoading={isLoading} error={error}>
         <div className="flex flex-wrap gap-2">
           <StatCard
-            value={`${formatNumber(data?.sol, { decimals: 4 })} SOL`}
+            value={<AnimatedCount value={data?.sol} decimals={4} suffix=" SOL" />}
             label="Saldo del fee-payer"
             tone={low ? "warning" : "good"}
             hint={
@@ -46,13 +47,13 @@ const SponsorshipPanel = () => {
             }
           />
           <StatCard
-            value={`${formatNumber(data?.minSol, { decimals: 2 })} SOL`}
+            value={<AnimatedCount value={data?.minSol} decimals={2} suffix=" SOL" />}
             label="Mínimo configurado"
             tone="muted"
             hint="SOLANA_FUNDING_MIN_SOL"
           />
           <StatCard
-            value={ratio === null ? "—" : `${formatNumber(ratio, { decimals: 1 })}×`}
+            value={<AnimatedCount value={ratio} decimals={1} suffix="×" />}
             label="Veces sobre el mínimo"
             tone={low ? "warning" : ratio !== null && ratio < 2 ? "warning" : "neutral"}
             hint={low ? "Por debajo del mínimo — recargar" : "Por encima del mínimo"}

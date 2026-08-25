@@ -5,6 +5,7 @@ import { useGetCostsTotals } from "@/hooks/cerebro/useGetCostsTotals";
 import { useGetFeesTotals } from "@/hooks/cerebro/useGetFeesTotals";
 import { formatNumber, formatUsd } from "@/utils/format";
 import { useCallback } from "react";
+import { AnimatedMoney } from "../../shared/AnimatedValue";
 import Panel, { RefreshButton } from "../../shared/Panel";
 import PendingEndpoint from "../../shared/PendingEndpoint";
 import QueryState from "../../shared/QueryState";
@@ -71,22 +72,22 @@ const CostsSummaryPanel = () => {
       <QueryState isLoading={isLoading} error={error}>
         <div className="flex flex-wrap gap-2.5">
           <StatCard
-            value={formatUsd(cost30d)}
+            value={<AnimatedMoney value={cost30d} />}
             label={`Gastos ${COST_DAYS}d`}
             hint="Gas patrocinado (Pimlico EVM + patrocinio Solana)"
           />
           <StatCard
-            value={formatUsd(cost7d)}
+            value={<AnimatedMoney value={cost7d} />}
             label="Gastos 7d"
             hint="Semana más reciente — tendencia a corto plazo"
           />
           <StatCard
-            value={formatUsd(costLifetime)}
+            value={<AnimatedMoney value={costLifetime} />}
             label="Gastos (histórico)"
             hint={`${formatNumber(opsLifetime)} ops EVM + patrocinio Solana desde el inicio`}
           />
           <StatCard
-            value={formatUsd(margin30d)}
+            value={<AnimatedMoney value={margin30d} />}
             label={`Margen ${COST_DAYS}d`}
             tone={margin30d !== null && margin30d < 0 ? "warning" : "neutral"}
             hint={`Ingresos ${formatUsd(revenue30d)} − gastos ${formatUsd(cost30d)}`}

@@ -45,12 +45,15 @@ export const RefreshButton = ({ onClick, isLoading = false, label = "Actualizar"
  *
  * @param {Object} props
  * @param {string} props.title
+ * @param {React.ReactNode} [props.meta] Muted qualifier next to the title — the date
+ * window a panel is scoped to, typically. Sits on the heading line so it reads as part
+ * of the title rather than as prose the eye skips.
  * @param {React.ReactNode} [props.description]
  * @param {React.ReactNode} [props.action] Rendered top-right, typically a RefreshButton.
  * @param {"neutral" | "warning"} [props.tone] Tints the border when something needs attention.
  * @param {React.ReactNode} [props.children]
  */
-const Panel = ({ title, description, action, tone = "neutral", children }) => (
+const Panel = ({ title, meta, description, action, tone = "neutral", children }) => (
   <section
     className={cn(
       "flex flex-col rounded-xl border-[0.7px] bg-white px-4 py-3.5",
@@ -60,8 +63,13 @@ const Panel = ({ title, description, action, tone = "neutral", children }) => (
     )}
   >
     <div className="flex items-start justify-between gap-4 mb-1">
-      <h3 className="font-inter text-[13px] font-semibold text-[#19363F] tracking-[-0.52px]">
+      <h3 className="flex flex-wrap items-baseline gap-x-2 font-inter text-[13px] font-semibold text-[#19363F] tracking-[-0.52px]">
         {title}
+        {meta && (
+          <span className="font-normal tabular-nums text-[11px] tracking-[-0.44px] text-[rgba(25,54,63,0.4)]">
+            {meta}
+          </span>
+        )}
       </h3>
       {action}
     </div>

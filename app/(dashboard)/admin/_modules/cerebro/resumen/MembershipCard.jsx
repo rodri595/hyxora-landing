@@ -1,17 +1,15 @@
 "use client";
 
 import Spinner from "@/components/Spinner";
-import { cerebroOperationLabels, cerebroPlanLabel } from "@/constants/cerebro";
+import { cerebroOperationLabel, cerebroPlanLabel } from "@/constants/cerebro";
 import { useGetPnlOperations } from "@/hooks/cerebro/useGetPnlOperations";
 import { cn } from "@/utils";
-import { formatNumber, formatUsd } from "@/utils/format";
+import { formatNumber, formatUsd, formatUsdPrecise } from "@/utils/format";
 import { useMemo } from "react";
 
 const money = (value, { signed = false } = {}) => {
   if (typeof value !== "number" || !Number.isFinite(value)) return "—";
-  const size = Math.abs(value);
-  const decimals = size === 0 || size >= 1 ? 2 : size >= 0.01 ? 4 : 6;
-  return `${signed && value > 0 ? "+" : ""}${formatUsd(value, { decimals })}`;
+  return `${signed && value > 0 ? "+" : ""}${formatUsdPrecise(value)}`;
 };
 
 const Figure = ({ label, value, tone }) => (
@@ -134,7 +132,7 @@ const MembershipCard = ({ row, filters }) => {
                   className="border-b-[0.7px] border-[rgba(25,54,63,0.05)] last:border-b-0"
                 >
                   <td className="py-1.5 font-inter text-[11px] tracking-[-0.44px] text-[#19363F]">
-                    {cerebroOperationLabels[op.operation] ?? op.operation}
+                    {cerebroOperationLabel(op.operation ?? op.op)}
                   </td>
                   <td className="py-1.5 text-right font-inter text-[11px] tabular-nums tracking-[-0.44px] text-emerald-700">
                     {money(op.feesUsd)}

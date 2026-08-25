@@ -2,6 +2,7 @@
 
 import { useGetSystemHealth } from "@/hooks/cerebro/useGetSystemHealth";
 import { formatNumber, hoursSince, timeAgo } from "@/utils/format";
+import { AnimatedCount } from "../../shared/AnimatedValue";
 import Panel, { RefreshButton } from "../../shared/Panel";
 import PendingEndpoint from "../../shared/PendingEndpoint";
 import QueryState from "../../shared/QueryState";
@@ -27,12 +28,12 @@ const TvlFreshnessPanel = () => {
       <QueryState isLoading={isLoading} error={error}>
         <div className="flex flex-wrap gap-2.5">
           <StatCard
-            value={formatNumber(withTvl)}
+            value={<AnimatedCount value={withTvl} />}
             label="Usuarios con TVL"
             tone={withTvl > 0 ? "good" : "muted"}
           />
           <StatCard
-            value={formatNumber(withoutTvl)}
+            value={<AnimatedCount value={withoutTvl} />}
             label="Usuarios sin TVL"
             tone={withoutTvl > 0 ? "muted" : "neutral"}
           />
