@@ -1,20 +1,18 @@
 "use client";
 
-import AssetSearchPanel from "./balances/AssetSearchPanel";
 import TopTokensPanel from "./balances/TopTokensPanel";
 import TopVaultsPanel from "./balances/TopVaultsPanel";
 
 /**
- * Cerebro API only (see CLAUDE.md).
+ * Cerebro API, plus one exception.
  *
- * The two tables are one `/holdings` request — react-query dedups them. The search
- * on top is the section that has no endpoint: /holdings is a top-N ranking, and a
- * search that only looks inside it would report "nadie tiene este activo" for
- * anything below the cut.
+ * Both tables are one `/holdings` request — react-query dedups them. Expanding a
+ * token row is the part Cerebro has no endpoint for: `/holdings` is an aggregate
+ * with no way to ask who is behind a number. That list comes from
+ * `/api/monitoring/holdings-index`, which rebuilds the join server-side.
  */
 const BalancesModule = () => (
   <div className="flex flex-col gap-3.5 py-3 pb-8">
-    <AssetSearchPanel />
     <TopTokensPanel />
     <TopVaultsPanel />
   </div>

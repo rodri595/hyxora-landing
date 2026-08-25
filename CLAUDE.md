@@ -36,20 +36,35 @@ service pings, the Solana fee-payer balance, the Zerion treasury scan and live
 `SOLANA_RPC_URL` — all server-only, all gated by `requireAdmin`
 (`utils/server/requireAdmin.js`), which defers to the same Cerebro allowlist.
 
+> `holdings-index` is the one route there that holds no credential. It is a
+> *fan-out*: it replays the caller's own Privy bearer against Cerebro's `/users`
+> and `/users/{privyId}` to rebuild a join Cerebro doesn't expose (see Balances
+> below). It lives server-side because the sweep is one request per user with a
+> balance — ~100 parallel XHRs if a panel did it — and because the result is one
+> cached index rather than a query per lookup. Add a route here for the same two
+> reasons, not just to hide a key.
+
 > **Never import `utils/server/*` from a client component.** It is what stands
 > between a public marketing site and every user's KYC.
 
 ### The rule
 
 > **Everything under `app/(dashboard)/admin/_modules/cerebro/` calls the Cerebro
-> API**, with two deliberate exceptions, each marked by a «Disponible en Cerebro»
-> divider separating the foreign panels above from the Cerebro ones below:
+> API**, with three deliberate exceptions. Planes and Sistema each mark theirs
+> with a «Disponible en Cerebro» divider separating the foreign panels above from
+> the Cerebro ones below; Balances mixes both sources inside one panel instead:
 >
 > - **Planes** — the first four panels are the plan *schema* (pricing, fee
 >   matrix, whitelists). Cerebro serves no schema at all; its `/fees/*` report
 >   revenue *collected*. They read app-api via `appApiClient`.
 > - **Sistema** — the first three panels are live infrastructure checks (pings,
 >   Solana RPC, Zerion). They read `/api/monitoring/*` via `monitoringClient`.
+> - **Balances** — expanding a row of the tokens table lists who holds it, from
+>   `/api/monitoring/holdings-index`. `/holdings` is an aggregate with no way to
+>   ask who is behind a number. The two sources are fetched separately on purpose,
+>   so a failing sweep costs the holder lists and leaves Cerebro's numbers standing.
+>   Note the tokens table is capped at 100 rows by `/holdings`, so an asset below
+>   that cut has no row to expand and no other way to reach its holders.
 >
 > `Costos → GasLimitsPanel` also joins both: live prices from `/api/monitoring`,
 > ceilings from app-api. Two requests on purpose, so one failing source doesn't
@@ -100,6 +115,17 @@ Use `@/components/DataTable` — never hand-roll a table. For tables inside a
 the card and title. Right-align numerics with `meta: { align: "right" }`. Totals
 rows come from each column's `footer` plus `enableFooter`. Every flag defaults to
 the original behaviour, so the older admin tables are unaffected.
+
+`renderSubRow(rowData, row)` turns rows into expandable ones — a chevron column
+appears and the returned node renders full-width underneath. `isRowExpandable`
+narrows which rows get one. Both default off, so no existing table grows a column.
+
+One caveat that bites: **`admin.md` is not always right about response shapes.**
+`/holdings` is documented as `chainId` + `chainName` and actually sends `chain`,
+the Zerion slug, because its source table stores the slug as text while every
+other Cerebro table stores an integer `chain_id`. Resolve chains through
+`cerebroChainLabel()` (`constants/cerebro.js`), which reads either — indexing
+`cerebroChains` by `chainId` alone is what left «Redes» rendering "Chain undefined".
 
 ## Conventions
 

@@ -252,9 +252,14 @@
 /* -------------------------------------------------------------------------- */
 
 /**
+ * Rows come from the positions snapshot, whose chain column is Zerion own text slug
+ * ("base", "solana", "binance-smart-chain") rather than the numeric chainId every
+ * other Cerebro endpoint reports. admin.md documents chainId/chainName here; the API
+ * sends `chain`. Resolve it with `cerebroChainLabel()`, which reads either.
+ *
  * @typedef {Object} Holdings
- * @property {{ symbol: string, name: string, chainId: CerebroChainId, chainName: string, totalUsd: number, holders: number }[]} tokens
- * @property {{ vaultName: string, symbol: string, chainId: CerebroChainId, chainName: string, totalUsd: number, holders: number }[]} vaults
+ * @property {{ symbol: string, name: string, chain: string, totalUsd: number, holders: number }[]} tokens
+ * @property {{ vaultName: string, symbol: string, chain: string, totalUsd: number, holders: number }[]} vaults
  */
 
 /**

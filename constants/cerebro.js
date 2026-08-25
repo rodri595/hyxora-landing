@@ -36,6 +36,51 @@ export const cerebroChains = {
   13381: "HyperEVM",
 };
 
+/**
+ * Chain *slugs* — Zerion own vocabulary, which /holdings reports instead of a
+ * chainId because its source table (daily_positions_by_user) stores the slug as
+ * text. Solana has no numeric id in that map at all, so slugs are the only key
+ * that covers every row there.
+ */
+export const cerebroChainSlugs = {
+  ethereum: "Ethereum",
+  base: "Base",
+  polygon: "Polygon",
+  "binance-smart-chain": "BNB Chain",
+  hyperevm: "HyperEVM",
+  solana: "Solana",
+};
+
+/**
+ * Label for a row that identifies its chain either way round: /holdings sends
+ * `chain: "base"`, every other Cerebro endpoint sends `chainId: 8453`. Reading only
+ * one of the two is what left the «Redes» column showing "Chain undefined".
+ *
+ * Unknown slugs are title-cased rather than dashed — a chain we simply have not
+ * labelled yet reads better spelled out than hidden behind a dash.
+ *
+ * @param {{ chain?: string, chainName?: string, chainId?: number | string }} row
+ * @return {string}
+ */
+export const cerebroChainLabel = (row = {}) => {
+  const { chain, chainName, chainId } = row;
+  if (chainName) return chainName;
+
+  if (typeof chain === "string" && chain.trim() !== "") {
+    const slug = chain.trim().toLowerCase();
+    return (
+      cerebroChainSlugs[slug] ??
+      slug
+        .split("-")
+        .map((word) => word[0].toUpperCase() + word.slice(1))
+        .join(" ")
+    );
+  }
+
+  if (chainId === undefined || chainId === null || chainId === "") return "—";
+  return cerebroChains[chainId] ?? `Chain ${chainId}`;
+};
+
 /** Sort columns accepted by GET /users. */
 export const cerebroUserSorts = ["created", "tvl", "cost", "fees", "net", "plan"];
 

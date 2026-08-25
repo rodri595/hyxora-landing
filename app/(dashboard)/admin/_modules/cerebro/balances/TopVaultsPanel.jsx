@@ -1,7 +1,7 @@
 "use client";
 
 import DataTable from "@/components/DataTable";
-import { cerebroChains } from "@/constants/cerebro";
+import { cerebroChainLabel } from "@/constants/cerebro";
 import { useGetHoldings } from "@/hooks/cerebro/useGetHoldings";
 import { formatNumber, formatUsd } from "@/utils/format";
 import { useMemo } from "react";
@@ -66,7 +66,7 @@ const TopVaultsPanel = () => {
     () =>
       (data?.vaults ?? []).map((row) => ({
         ...row,
-        chainName: row.chainName ?? cerebroChains[row.chainId] ?? `Chain ${row.chainId}`,
+        chainName: cerebroChainLabel(row),
       })),
     [data]
   );

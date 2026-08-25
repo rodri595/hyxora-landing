@@ -7,12 +7,13 @@ import { cn } from "@/utils";
 import {
   flexRender,
   getCoreRowModel,
+  getExpandedRowModel,
   getFilteredRowModel,
   getPaginationRowModel,
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { useMemo, useRef, useState } from "react";
+import { Fragment, useMemo, useRef, useState } from "react";
 import * as XLSX from "xlsx";
 
 // ─── Export helpers ───────────────────────────────────────────────────────────
@@ -120,6 +121,26 @@ const ChevronIcon = () => (
   >
     <path
       d="M4 6l4 4 4-4"
+      stroke="rgba(25,54,63,0.6)"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </svg>
+);
+
+const ExpandIcon = ({ open }) => (
+  <svg
+    width="12"
+    height="12"
+    viewBox="0 0 16 16"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+    aria-hidden="true"
+    className={cn("transition-transform duration-150", open && "rotate-90")}
+  >
+    <path
+      d="M6 4l4 4-4 4"
       stroke="rgba(25,54,63,0.6)"
       strokeWidth="1.5"
       strokeLinecap="round"
@@ -507,6 +528,8 @@ const DataTable = ({
   dense = false,
   initialSorting = [],
   emptyLabel = "Sin resultados",
+  renderSubRow,
+  isRowExpandable,
   maxHeight,
   toolbarExtra,
   enablePagination = false,
@@ -530,6 +553,7 @@ const DataTable = ({
   const [rowSelection, setRowSelection] = useState({});
   const [columnVisibility, setColumnVisibility] = useState({});
   const [internalPagination, setInternalPagination] = useState({ pageIndex: 0, pageSize });
+  const [expanded, setExpanded] = useState({});
 
   const sorting = sortingProp ?? internalSorting;
   const setSorting = onSortingChangeProp ?? setInternalSorting;
@@ -539,9 +563,39 @@ const DataTable = ({
   const setPagination = onPaginationChangeProp ?? setInternalPagination;
 
   const tableColumns = useMemo(() => {
-    if (!enableSelection) return columns;
+    // Expander first, then selection, so the chevron sits at the row edge where
+    // it reads as belonging to the row rather than to the checkbox.
+    const expander = renderSubRow
+      ? [
+          {
+            id: "expander",
+            size: 28,
+            enableHiding: false,
+            enableSorting: false,
+            header: () => null,
+            cell: ({ row }) =>
+              row.getCanExpand() ? (
+                <button
+                  type="button"
+                  aria-expanded={row.getIsExpanded()}
+                  aria-label={row.getIsExpanded() ? "Contraer fila" : "Expandir fila"}
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    row.toggleExpanded();
+                  }}
+                  className="flex items-center justify-center size-5 rounded hover:bg-[rgba(25,54,63,0.06)] transition-colors"
+                >
+                  <ExpandIcon open={row.getIsExpanded()} />
+                </button>
+              ) : null,
+          },
+        ]
+      : [];
+
+    if (!enableSelection) return [...expander, ...columns];
 
     return [
+      ...expander,
       {
         id: "select",
         size: 36,
@@ -564,18 +618,22 @@ const DataTable = ({
       },
       ...columns,
     ];
-  }, [columns, enableSelection]);
+  }, [columns, enableSelection, renderSubRow]);
 
   const table = useReactTable({
     data,
     columns: tableColumns,
-    state: { sorting, globalFilter, rowSelection, columnVisibility, pagination },
+    state: { sorting, globalFilter, rowSelection, columnVisibility, pagination, expanded },
     enableRowSelection: enableSelection,
     onRowSelectionChange: setRowSelection,
     onSortingChange: setSorting,
     onGlobalFilterChange: setGlobalFilter,
     onColumnVisibilityChange: setColumnVisibility,
     onPaginationChange: setPagination,
+    onExpandedChange: setExpanded,
+    // Every row expands unless the caller says otherwise — a token with no holders
+    // in the index is worth opening to say so, rather than being silently inert.
+    getRowCanExpand: renderSubRow ? (row) => isRowExpandable?.(row.original) ?? true : undefined,
     manualPagination,
     manualSorting,
     manualFiltering,
@@ -584,6 +642,7 @@ const DataTable = ({
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
+    getExpandedRowModel: renderSubRow ? getExpandedRowModel() : undefined,
     // Left undefined when off, which is what makes TanStack render every row. In
     // server mode the response *is* the page, so slicing it again would hide rows.
     getPaginationRowModel:
@@ -736,34 +795,48 @@ const DataTable = ({
               </tr>
             ) : (
               table.getRowModel().rows.map((row, i) => (
-                <tr
-                  key={row.id}
-                  onKeyDown={(e) => {
-                    if (e.key === " " || e.key === "Enter") row.getToggleSelectedHandler()(e);
-                  }}
-                  className={cn(
-                    "border-b-[0.7px] border-[rgba(25,54,63,0.05)] transition-colors",
-                    enableSelection && "cursor-pointer",
-                    row.getIsSelected()
-                      ? "bg-[rgba(25,54,63,0.03)]"
-                      : i % 2 === 0
-                        ? "bg-white hover:bg-[rgba(25,54,63,0.02)]"
-                        : "bg-[rgba(25,54,63,0.01)] hover:bg-[rgba(25,54,63,0.02)]"
+                <Fragment key={row.id}>
+                  <tr
+                    onKeyDown={(e) => {
+                      if (e.key === " " || e.key === "Enter") row.getToggleSelectedHandler()(e);
+                    }}
+                    className={cn(
+                      "border-b-[0.7px] border-[rgba(25,54,63,0.05)] transition-colors",
+                      enableSelection && "cursor-pointer",
+                      row.getIsSelected()
+                        ? "bg-[rgba(25,54,63,0.03)]"
+                        : i % 2 === 0
+                          ? "bg-white hover:bg-[rgba(25,54,63,0.02)]"
+                          : "bg-[rgba(25,54,63,0.01)] hover:bg-[rgba(25,54,63,0.02)]"
+                    )}
+                  >
+                    {row.getVisibleCells().map((cell) => (
+                      <td
+                        key={cell.id}
+                        className={cn(
+                          cellPad,
+                          ALIGN_CLASS[cell.column.columnDef.meta?.align ?? "left"],
+                          "font-inter tracking-[-0.48px] text-[#19363F] whitespace-nowrap"
+                        )}
+                      >
+                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                      </td>
+                    ))}
+                  </tr>
+                  {renderSubRow && row.getIsExpanded() && (
+                    <tr className="border-b-[0.7px] border-[rgba(25,54,63,0.05)]">
+                      <td
+                        colSpan={row.getVisibleCells().length}
+                        className={cn(
+                          "bg-[rgba(25,54,63,0.02)]",
+                          dense ? "px-2.5 py-2" : "px-3 py-2.5"
+                        )}
+                      >
+                        {renderSubRow(row.original, row)}
+                      </td>
+                    </tr>
                   )}
-                >
-                  {row.getVisibleCells().map((cell) => (
-                    <td
-                      key={cell.id}
-                      className={cn(
-                        cellPad,
-                        ALIGN_CLASS[cell.column.columnDef.meta?.align ?? "left"],
-                        "font-inter tracking-[-0.48px] text-[#19363F] whitespace-nowrap"
-                      )}
-                    >
-                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                    </td>
-                  ))}
-                </tr>
+                </Fragment>
               ))
             )}
           </tbody>
