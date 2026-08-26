@@ -5,28 +5,11 @@
 export const REVENUE_DAYS = 30;
 
 /**
- * `/fees/diagnostics` caps at 100 rows and has no pagination, so both diagnostics
- * panels ask for the same page and react-query serves them from one request.
+ * `/fees/diagnostics` caps at 100 rows and has no pagination, so `FeeTaggingPanel`
+ * asks for the maximum: if the response is row-level, every row it misses is a
+ * tagging bucket the panel can't show. It says so under the table when it groups.
  */
 export const DIAGNOSTICS_LIMIT = 100;
-
-/**
- * Donut / series colours, in the order categories are drawn. Blue leads because
- * swap dominates every window we've seen.
- */
-export const REVENUE_COLORS = [
-  "#2D68FF",
-  "#F59E0B",
-  "#D946EF",
-  "#10B981",
-  "#8B5CF6",
-  "#0EA5A6",
-  "#F43F5E",
-  "#0F172A",
-  "#64748B",
-  "#EAB308",
-  "#14B8A6",
-];
 
 /** Line/area colour for revenue series. */
 export const REVENUE_LINE = "#10B981";

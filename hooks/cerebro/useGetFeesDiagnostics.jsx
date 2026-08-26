@@ -5,8 +5,11 @@ import { useQuery } from "@tanstack/react-query";
 /** @import { FeeDiagnosticRow } from "./types" */
 
 /**
- * GET /fees/diagnostics — raw fee rows with the tag that classified them, for
+ * GET /fees/diagnostics — fee rows with the tag that classified them, for
  * debugging why a fee landed under a given operation. Not a reporting endpoint.
+ *
+ * Field names don't match admin.md (see `FeeDiagnosticRow`), so the rows are
+ * returned untouched and `ingresos/FeeTaggingPanel` normalises them.
  *
  * @param {Object} [params]
  * @param {number} [params.days] Days to include. API default 30, max 365.

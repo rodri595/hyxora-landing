@@ -189,18 +189,34 @@
  * @property {CerebroChainId} chainId
  * @property {string} tokenSymbol
  * @property {string} tokenAddress
- * @property {CerebroOperation} operation
+ * @property {CerebroOperation} operationType `admin.md` calls this `operation`; the
+ * API answers with the old dashboard query's spelling.
  * @property {number} transfers
+ * @property {number} totalAmount Sum in token units, undocumented but sent.
  * @property {number} totalUsd
  */
 
 /**
+ * One `/fees/treasury/by-chain` row.
+ *
+ * `chainName` is documented but does not arrive — the endpoint is a port of the old
+ * dashboard's `getTreasuryByChain()` and answers with that query's columns, so the
+ * chain has to be resolved from `chainId`. The same reason `userFeesUsd` and
+ * `otherUsd` show up here without appearing in admin.md: the port kept them. They
+ * are marked optional so a panel reading them has to say what it does when they
+ * are missing, rather than treating `totalUsd` as user revenue.
+ *
+ * Solana arrives as chainId `1399811149`, the `treasury_fees` sentinel, not the
+ * `101` that /fees/recent uses.
+ *
  * @typedef {Object} TreasuryByChainRow
  * @property {CerebroChainId} chainId
- * @property {string} chainName
+ * @property {string} [chainName]
  * @property {number} transfers
  * @property {number} tokens
- * @property {number} totalUsd
+ * @property {number} totalUsd Every inflow, user fees and treasury management alike.
+ * @property {number} [userFeesUsd] Inflows from a known user Safe, NFT sales excluded.
+ * @property {number} [otherUsd] The remainder: team funding, internal swaps.
  */
 
 /**
@@ -210,13 +226,24 @@
  */
 
 /**
+ * One `/fees/diagnostics` row. Every field below `source` is optional on purpose:
+ * the endpoint is a port of the old dashboard's `getOpTagDiagnostics()` and the
+ * live response does not match the spellings admin.md documents — `operation` and
+ * `feesUsd` arrive empty, the way `/fees/recent` sends `operationType` and
+ * `amountUsd` for the same treasury rows. `ingresos/FeeTaggingPanel` reads all of
+ * them, and treats a row carrying `transfers` as one the server already grouped.
+ *
  * @typedef {Object} FeeDiagnosticRow
- * @property {CerebroChainId} chainId
- * @property {string} txHash
- * @property {IsoDate} timestamp
- * @property {CerebroOperation} operation
- * @property {string} source
- * @property {number} feesUsd
+ * @property {CerebroChainId} [chainId]
+ * @property {string} [txHash]
+ * @property {IsoDate} [timestamp]
+ * @property {CerebroOperation} [operation]
+ * @property {CerebroOperation} [operationType] Same value, SQL spelling.
+ * @property {string} [source] `hyxora` (backend tag) or `heuristic` (router ladder).
+ * @property {string} [parentMethod] Contract method that originated the transfer.
+ * @property {number} [transfers] Only on a pre-grouped response.
+ * @property {number} [feesUsd]
+ * @property {number} [amountUsd] Same value, SQL spelling.
  */
 
 /* -------------------------------------------------------------------------- */

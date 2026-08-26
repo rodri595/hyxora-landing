@@ -7,7 +7,6 @@ import { formatNumber, formatUsd } from "@/utils/format";
 import { useCallback } from "react";
 import { AnimatedMoney } from "../../shared/AnimatedValue";
 import Panel, { RefreshButton } from "../../shared/Panel";
-import PendingEndpoint from "../../shared/PendingEndpoint";
 import QueryState from "../../shared/QueryState";
 import StatCard from "../../shared/StatCard";
 import { sumDefined } from "../../shared/aggregate";
@@ -91,23 +90,6 @@ const CostsSummaryPanel = () => {
             label={`Margen ${COST_DAYS}d`}
             tone={margin30d !== null && margin30d < 0 ? "warning" : "neutral"}
             hint={`Ingresos ${formatUsd(revenue30d)} − gastos ${formatUsd(cost30d)}`}
-          />
-        </div>
-
-        <div className="mt-2.5">
-          <PendingEndpoint
-            needs={`Dos cosas de la cabecera original. Una, el recuento de ops de ${COST_DAYS} días: /costs/totals trae evm.lifetimeOps pero no evm.last30dOps, así que aquí se suma /costs/by-chain?days=${COST_DAYS}, que solo cubre las cadenas EVM que ese endpoint devuelve. Dos, el botón «Sincronizar» reindexa; Cerebro es de solo lectura, así que el de aquí solo vuelve a pedir los datos.`}
-            fields={["/costs/totals → evm.last30dOps, evm.last7dOps"]}
-            shape={{
-              evm: {
-                lifetimeUsd: 5.97,
-                lifetimeOps: 592,
-                last30dUsd: 0.82,
-                last30dOps: 116,
-                last7dUsd: 0.09,
-                last7dOps: 12,
-              },
-            }}
           />
         </div>
       </QueryState>

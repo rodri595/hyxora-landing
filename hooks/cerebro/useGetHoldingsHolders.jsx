@@ -13,7 +13,7 @@ import { useQuery } from "@tanstack/react-query";
  * — one upstream request per user with a balance. This is that query done in SQL
  * where it belongs, so the sweep is gone.
  *
- * `query` matches on symbol / vault name, not on chain: asking for USDC returns a
+ * `query` matches on symbol / position name, not on chain: asking for USDC returns a
  * holder once, with `chains` listing every network they hold it on and `valueUsd`
  * summed across them.
  *
@@ -21,7 +21,7 @@ import { useQuery } from "@tanstack/react-query";
  * nothing — `query` is required and an empty one is a 400.
  *
  * @param {Object} [params]
- * @param {string} [params.query] Token symbol or vault name. Required by the API.
+ * @param {string} [params.query] Token symbol or position name. Required by the API.
  * @param {number} [params.limit] Max holders. API default 100, max 500.
  * @param {DayString} [params.asOfDate] Snapshot date, "YYYY-MM-DD". Omit for each
  * user's latest, which is what `/holdings` aggregates.

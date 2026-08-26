@@ -1031,12 +1031,21 @@ it is an aggregate with no way to ask who is behind a number.
 }
 ```
 
-Matches on symbol / vault name and **not on chain**, so a holder appears once with
-`valueUsd` summed across every network in `chains`. A row in the Balances tables is
-a (symbol, chain) pair, so the panel narrows by `chains` and marks any holder whose
+Matches on symbol / position *name* and **not on chain**, so a holder appears once
+with `valueUsd` summed across every network in `chains`. A row in Top tokens is a
+(symbol, chain) pair, so the panel narrows by `chains` and marks any holder whose
 figure spans more than one.
 
-**Cache:** 5 minutes · **Used by:** `balances/AssetHolders`, under both tables.
+> **`chains` are slugs, not labels.** The example above shows `["Polygon", "Base"]`;
+> the API sends `["polygon", "base"]` — it is `array_agg(distinct chain)` over the
+> same column `/holdings` reports as `chain`, so the doc is wrong here in exactly
+> the way it is wrong there. Comparing them raw against a row's rendered label
+> matched nothing and left every expanded row empty; `balances/holders.js` resolves
+> both sides through `cerebroChainLabel()`.
+
+**Cache:** 5 minutes · **Used by:** `balances/AssetHolders`, under Top tokens.
+Top vaults does not expand: `vaultName` is Zerion's protocol label, which this
+endpoint searches for in neither symbol nor name.
 
 > This is what retired `/api/monitoring/holdings-index`, a route that rebuilt the
 > same join by fanning out over `/users` and `/users/{privyId}` — one upstream

@@ -9,7 +9,7 @@ import { HOLDERS_LIMIT } from "./constants";
 import { holdersOnChain } from "./holders";
 
 /**
- * The holder list under an expanded row of either Balances table.
+ * The holder list under an expanded row of the Top tokens table.
  *
  * A component and not a helper because the request is per asset and lazy: the hook
  * only fires once this mounts, which is when somebody actually opens the row. That
@@ -21,7 +21,7 @@ import { holdersOnChain } from "./holders";
  * costs this list and leaves the aggregate numbers above it standing.
  *
  * @param {Object} props
- * @param {string} props.query Symbol or vault name, as `/holdings/holders` matches it.
+ * @param {string} props.query Token symbol, as `/holdings/holders` matches it.
  * @param {Object} props.row The table row being expanded, for its chain.
  * @param {string} props.label How to name the asset in the empty state.
  */

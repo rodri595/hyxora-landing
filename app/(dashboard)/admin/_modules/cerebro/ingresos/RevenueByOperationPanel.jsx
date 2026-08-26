@@ -1,16 +1,66 @@
 "use client";
 
-import { cerebroOperationLabels, cerebroOperations } from "@/constants/cerebro";
+import {
+  cerebroOperationColor,
+  cerebroOperationLabel,
+  cerebroOperations,
+} from "@/constants/cerebro";
 import { useGetFeesByOperation } from "@/hooks/cerebro/useGetFeesByOperation";
 import { cn } from "@/utils";
-import { formatNumber, formatUsd, formatUsdPrecise } from "@/utils/format";
+import { formatNumber, formatUsdPrecise } from "@/utils/format";
 import { useMemo } from "react";
 import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from "recharts";
 import { AnimatedMoney } from "../../shared/AnimatedValue";
 import { TooltipSurface, tooltipWrapperStyle, useHeldTooltip } from "../../shared/ChartTooltip";
 import Panel, { RefreshButton } from "../../shared/Panel";
 import QueryState from "../../shared/QueryState";
-import { REVENUE_COLORS, REVENUE_DAYS } from "./constants";
+import { firstNumber } from "../../shared/aggregate";
+import { REVENUE_DAYS } from "./constants";
+
+/**
+ * Legacy buckets folded into the category we display, the same fold the old
+ * dashboard applied in SQL (`OP_TYPE_NORMALIZED`). Rows tagged before the tagger
+ * knew about user safes landed in a generic `transfer`; without the fold the
+ * legend shows two «Transferencia externa» lines that don't add up to the total.
+ */
+const OPERATION_ALIASES = {
+  transfer: "external_transfer",
+};
+
+/**
+ * NFT primary sales are revenue, but not *operational* revenue — the old
+ * dashboard reports them on their own line and keeps them out of this breakdown
+ * so the donut total agrees with the fee series next to it.
+ */
+const EXCLUDED_OPERATIONS = new Set(["nft_sale"]);
+
+/**
+ * Not real fee classes: `unknown` is "the tagger didn't recognise this flow" and
+ * `receive` is "the safe received tokens with no clear counter-flow". Hidden while
+ * they're at zero so the idle rail stays about categories we actually sell.
+ *
+ * Shown the moment either carries a value, deliberately: a `Sin clasificar: $X`
+ * row means the tagger fell behind a new flow type and needs extending.
+ */
+const NOISE_OPERATIONS = new Set(["receive", "unknown"]);
+
+/**
+ * `admin.md` documents these rows as `operation` / `opsCount` / `feesUsd`, and the
+ * API answers with the names the old dashboard's query produced — `op` / `txs` /
+ * `total`, the last as a Postgres `numeric` string. Same class of mismatch as
+ * `/costs/by-operation`; read every spelling rather than trusting the doc.
+ *
+ * @param {Object} row
+ * @return {{ operation: string, opsCount: number, feesUsd: number }}
+ */
+const toRevenueRow = (row) => {
+  const operation = row.operation ?? row.op ?? row.operationType ?? row.operation_type ?? "unknown";
+  return {
+    operation: OPERATION_ALIASES[operation] ?? operation,
+    opsCount: firstNumber(row.opsCount, row.txs, row.ops, row.ops_count) ?? 0,
+    feesUsd: firstNumber(row.feesUsd, row.total, row.totalFeeUsd, row.fees_usd) ?? 0,
+  };
+};
 
 const DonutTooltip = (props) => {
   const { visible, payload } = useHeldTooltip(props.active, props.payload);
@@ -46,7 +96,25 @@ const RevenueByOperationPanel = () => {
   });
 
   const { rows, total } = useMemo(() => {
-    const byOperation = new Map((data ?? []).map((row) => [row.operation, row]));
+    // Fold aliases before grouping, so `transfer` and `external_transfer` land on
+    // one row with their tx counts added rather than overwriting each other.
+    const byOperation = new Map();
+    for (const raw of data ?? []) {
+      const row = toRevenueRow(raw);
+      if (EXCLUDED_OPERATIONS.has(row.operation)) continue;
+
+      const current = byOperation.get(row.operation);
+      byOperation.set(
+        row.operation,
+        current
+          ? {
+              ...current,
+              opsCount: current.opsCount + row.opsCount,
+              feesUsd: current.feesUsd + row.feesUsd,
+            }
+          : row
+      );
+    }
 
     // Operations the API returned but constants/cerebro.js doesn't list yet —
     // a new op type shouldn't silently vanish from the breakdown.
@@ -57,16 +125,17 @@ const RevenueByOperationPanel = () => {
     const merged = [...cerebroOperations, ...extra]
       .map((operation) => ({
         operation,
-        label: cerebroOperationLabels[operation] ?? operation,
+        label: cerebroOperationLabel(operation),
         opsCount: byOperation.get(operation)?.opsCount ?? 0,
         feesUsd: byOperation.get(operation)?.feesUsd ?? 0,
       }))
+      .filter((row) => row.feesUsd > 0 || !NOISE_OPERATIONS.has(row.operation))
       .sort((a, b) => b.feesUsd - a.feesUsd || b.opsCount - a.opsCount);
 
     return {
       rows: merged.map((row, index) => ({
         ...row,
-        color: REVENUE_COLORS[index % REVENUE_COLORS.length],
+        color: cerebroOperationColor(row.operation, index),
       })),
       total: merged.reduce((sum, row) => sum + row.feesUsd, 0),
     };
@@ -147,18 +216,12 @@ const RevenueByOperationPanel = () => {
                     isIdle ? "text-[rgba(25,54,63,0.3)]" : "text-[#19363F]"
                   )}
                 >
-                  {formatUsd(row.feesUsd, { decimals: row.feesUsd > 0 && row.feesUsd < 1 ? 4 : 2 })}
+                  {isIdle ? "$0" : formatUsdPrecise(row.feesUsd)}
                 </span>
               </div>
             );
           })}
         </div>
-
-        <p className="font-inter text-[10px] leading-[1.5] tracking-[-0.4px] text-[rgba(25,54,63,0.4)] mt-2.5">
-          Cerebro agrupa en estas categorías: las compras/ventas de xStock, los deploys y las
-          transferencias internas del dashboard original caen dentro de swap, approve u «otros», así
-          que no aparecen como líneas propias.
-        </p>
       </QueryState>
     </Panel>
   );

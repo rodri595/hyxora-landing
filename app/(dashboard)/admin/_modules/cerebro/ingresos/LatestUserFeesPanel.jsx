@@ -4,11 +4,10 @@ import DataTable from "@/components/DataTable";
 import { cerebroChainLabel, cerebroOperationLabels } from "@/constants/cerebro";
 import { useGetFeesRecent } from "@/hooks/cerebro/useGetFeesRecent";
 import { formatDateTime, formatNumber, formatUsd, shortenHash } from "@/utils/format";
-import { useCallback, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import Panel, { RefreshButton } from "../../shared/Panel";
 import QueryState from "../../shared/QueryState";
 import TxLink from "../../shared/TxLink";
-import WhitelistToggle from "./WhitelistToggle";
 import { FEES_PAGE_SIZE, FEES_PAGE_SIZES } from "./constants";
 
 /**
@@ -110,26 +109,31 @@ const columns = [
  * over the whole ledger and carries both. The tagging panel above still reads
  * diagnostics, which is what it is for.
  *
- * The whitelist toggle is the same one the two revenue breakdowns carry, so the
- * detail can be reconciled against them under the same filter; off by default, like
- * the API.
+ * The whitelist filter is the tab's, so this detail reconciles against the two
+ * revenue breakdowns under whatever they are showing.
+ *
+ * @param {Object} props
+ * @param {boolean} [props.includeNonWhitelisted] Owned by `IngresosModule`.
  */
-const LatestUserFeesPanel = () => {
-  const [includeNonWhitelisted, setIncludeNonWhitelisted] = useState(false);
+const LatestUserFeesPanel = ({ includeNonWhitelisted = false }) => {
   const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: FEES_PAGE_SIZE });
+
+  // Switching the filter changes what row 1 is, so an old page index would land
+  // somewhere arbitrary in the new list. Adjusted during render off a remembered
+  // prop rather than in an effect — React's own recipe for this, and it re-renders
+  // before painting the wrong page. The page *size* is the reader's choice, so it
+  // survives.
+  const [filterAtLastReset, setFilterAtLastReset] = useState(includeNonWhitelisted);
+  if (filterAtLastReset !== includeNonWhitelisted) {
+    setFilterAtLastReset(includeNonWhitelisted);
+    setPagination((prev) => (prev.pageIndex === 0 ? prev : { ...prev, pageIndex: 0 }));
+  }
 
   const { data, error, isLoading, isFetching, refetch } = useGetFeesRecent({
     page: pagination.pageIndex + 1,
     pageSize: pagination.pageSize,
     includeNonWhitelisted: includeNonWhitelisted || undefined,
   });
-
-  // Switching the filter changes what row 1 is, so an old page index would land
-  // somewhere arbitrary in the new list.
-  const handleWhitelistChange = useCallback((next) => {
-    setIncludeNonWhitelisted(next);
-    setPagination((prev) => (prev.pageIndex === 0 ? prev : { ...prev, pageIndex: 0 }));
-  }, []);
 
   const rows = useMemo(() => (data?.rows ?? []).map(toFeeRow), [data]);
   const total = data?.total ?? 0;
@@ -139,12 +143,7 @@ const LatestUserFeesPanel = () => {
       title="Últimas comisiones de usuario"
       meta={total > 0 ? `${formatNumber(total)} en total` : undefined}
       description="Cada cobro individual que ha entrado en el tesoro, del más reciente al más antiguo, con quién lo pagó y en qué token."
-      action={
-        <div className="flex items-center gap-2">
-          <WhitelistToggle value={includeNonWhitelisted} onChange={handleWhitelistChange} />
-          <RefreshButton onClick={() => refetch()} isLoading={isFetching} />
-        </div>
-      }
+      action={<RefreshButton onClick={() => refetch()} isLoading={isFetching} />}
     >
       <QueryState
         isLoading={isLoading}

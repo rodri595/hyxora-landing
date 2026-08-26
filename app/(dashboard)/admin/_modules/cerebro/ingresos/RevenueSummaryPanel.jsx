@@ -94,12 +94,24 @@ const RevenueSummaryPanel = () => {
   const cost30d = sumDefined(costsEvm?.last30dUsd, costsSolana?.last30dUsd);
   const margin30d = revenue30d === null || cost30d === null ? null : revenue30d - cost30d;
 
+  // Solana is reported lifetime, not over the 30-day window, mirroring the panel
+  // this replaced: the fee treasury sees a handful of transfers in total, so a
+  // 30-day slice of it is empty on almost every day and the strip renders "—".
+  const solanaFeesUsd = feesSolana?.lifetimeUsd;
+  const solanaCostUsd = costsSolana?.lifetimeUsd;
+  const solanaFeeCount = feesSolana?.fees;
+  const solanaOps = costsSolana?.lifetimeOps;
+
   // Both halves have to be present: a Solana net of $0 because the cost side is
   // missing looks like break-even, which it isn't.
   const solanaNet =
-    typeof feesSolana?.last30dUsd === "number" && typeof costsSolana?.last30dUsd === "number"
-      ? feesSolana.last30dUsd - costsSolana.last30dUsd
+    typeof solanaFeesUsd === "number" && typeof solanaCostUsd === "number"
+      ? solanaFeesUsd - solanaCostUsd
       : null;
+
+  // Nothing indexed yet is not the same as a break-even treasury — the original
+  // dashboard dropped this card entirely until the first fee or op landed.
+  const hasSolana = (solanaFeeCount ?? 0) > 0 || (solanaOps ?? 0) > 0;
 
   return (
     <Panel
@@ -133,22 +145,28 @@ const RevenueSummaryPanel = () => {
         </div>
 
         <div className="flex flex-col gap-2 mt-2.5">
-          <StreamStrip
-            title="Solana"
-            meta={`${formatNumber(feesSolana?.fees)} comisiones · ${formatNumber(
-              costsSolana?.last30dOps
-            )} ops patrocinadas ${REVENUE_DAYS}d`}
-            hint="El contador de comisiones de Solana no trae ventana en admin.md — se muestra tal cual lo devuelve /fees/totals."
-            items={[
-              { label: "Comisiones", value: formatUsd(feesSolana?.last30dUsd) },
-              { label: "Gastos", value: formatUsd(costsSolana?.last30dUsd), tone: "negative" },
-              {
-                label: "Neto",
-                value: formatUsd(solanaNet),
-                tone: solanaNet !== null && solanaNet < 0 ? "negative" : "positive",
-              },
-            ]}
-          />
+          {hasSolana && (
+            <StreamStrip
+              title="Solana"
+              meta={`${formatNumber(solanaFeeCount)} ${
+                solanaFeeCount === 1 ? "comisión" : "comisiones"
+              } · ${formatNumber(solanaOps)} ops patrocinadas`}
+              hint="Tesoro de comisiones de Solana (entradas de stablecoins y xStocks) menos lo que el fee-payer gastó patrocinando operaciones. Cifras históricas, no de la ventana de arriba: son unas pocas transferencias en total, así que 30 días no dicen nada."
+              items={[
+                { label: "Comisiones", value: formatUsd(solanaFeesUsd, { decimals: 4 }) },
+                {
+                  label: "Gastos",
+                  value: formatUsd(solanaCostUsd, { decimals: 4 }),
+                  tone: "negative",
+                },
+                {
+                  label: "Neto",
+                  value: formatUsd(solanaNet, { decimals: 4 }),
+                  tone: solanaNet !== null && solanaNet < 0 ? "negative" : "positive",
+                },
+              ]}
+            />
+          )}
 
           <StreamStrip
             title="NFT Founder"
@@ -159,16 +177,6 @@ const RevenueSummaryPanel = () => {
             items={[
               { label: `${REVENUE_DAYS}d`, value: formatUsd(nft.data?.recent?.totalUsd) },
               { label: "Histórico", value: formatUsd(nft.data?.allTime?.totalUsd) },
-            ]}
-          />
-        </div>
-
-        <div className="mt-2.5">
-          <PendingEndpoint
-            needs="La cabecera del dashboard original muestra la dirección del tesoro y cuántos tokens/vaults hay en lista blanca, y ofrece un botón de resincronizar. Cerebro es de solo lectura y no expone ninguna de las tres cosas: la lista blanca vive en la API de Hyxora (pestaña Comisiones) y no se cruza aquí a propósito."
-            fields={[
-              "GET /system/treasury → address por cadena",
-              "GET /system/whitelist/count → tokens, vaults",
             ]}
           />
         </div>

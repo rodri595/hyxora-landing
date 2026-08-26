@@ -62,14 +62,23 @@ service pings, the Solana fee-payer balance, the Zerion treasury scan and live
 >   because it queries the RPC on request, the Pimlico half is Cerebro's because
 >   the remaining credit can only come from an unfiltered op ledger.
 >
-> Balances used to be a third exception and no longer is. It expands a row into
-> its holder list via `/holdings/holders`, fetched separately from `/holdings` and
-> lazily — an unopened row costs nothing, and a failing holder query costs that
-> list while leaving the aggregates standing. Two caveats worth keeping in the
-> copy: the tables are capped at 100 rows by `/holdings`, so an asset below the
-> cut has no row to expand; and `/holdings/holders` matches on symbol or vault
-> name and **not on chain**, so a holder's `valueUsd` is their exposure across
-> every network in `chains`, not just the one on the row.
+> Balances used to be a third exception and no longer is. **Its Top tokens rows**
+> expand into a holder list via `/holdings/holders`, fetched separately from
+> `/holdings` and lazily — an unopened row costs nothing, and a failing holder
+> query costs that list while leaving the aggregates standing. Three caveats worth
+> keeping in the copy: the tables are capped at 100 rows by `/holdings`, so an
+> asset below the cut has no row to expand; `/holdings/holders` matches on symbol
+> or position *name* and **not on chain**, so a holder's `valueUsd` is their
+> exposure across every network in `chains`, not just the one on the row; and its
+> `chains` are Zerion **slugs** ("base"), the same column `/holdings` sends as
+> `chain`, whatever `admin.md` shows — compare them through `cerebroChainLabel()`,
+> because matching the raw strings against a row's label is what left every
+> expanded row rendering empty.
+>
+> **Top vaults rows do not expand**, and that is deliberate rather than pending: a
+> vault row's `vaultName` is Zerion's protocol label ("Morpho Blue") whenever it
+> decomposed the position, and `/holdings/holders` searches neither symbol nor name
+> for it. Who is inside a vault needs an endpoint that filters on protocol.
 >
 > `Costos → GasLimitsPanel` still joins both: live prices from `/api/monitoring`,
 > ceilings from app-api. Two requests on purpose, so one failing source doesn't
@@ -137,11 +146,42 @@ other Cerebro table stores an integer `chain_id`. Resolve chains through
 `cerebroChainLabel()` (`constants/cerebro.js`), which reads either — indexing
 `cerebroChains` by `chainId` alone is what left «Redes» rendering "Chain undefined".
 
+`/fees/diagnostics` is the same story on the fee side: documented as `operation` +
+`feesUsd`, it arrives with the SQL spellings its port kept — the ones `/fees/recent`
+publishes for the very same treasury rows (`operationType`, `amountUsd`) — plus a
+`transfers` count when the server grouped for us. Reading only the documented names
+is what left «Diagnóstico de etiquetado» showing a single «—» bucket at $0.
+`ingresos/FeeTaggingPanel` normalises every spelling in `toTagRow()` and groups only
+when the response is row-level.
+
 Its «Chain IDs Reference» is wrong too: it lists HyperEVM as **13381**, and the id
 the indexers actually stamp is **999** (`hyxora-admin-main/src/lib/chains.ts` is the
 registry both they and Cerebro read). Copying the doc's number is what left «Por
 cadena» rendering "Chain 999". Worth reporting upstream — the doc is unedited here
 on purpose, so it still diffs cleanly against the Cerebro team's next version.
+
+Two more things that registry settles, both of which bit «Ingresos por cadena»:
+
+- **Solana arrives under two different ids.** `101` on the row-level feeds
+  (`/costs/recent`, `/fees/recent`), which is the cluster number the app backend
+  stamps; **1399811149** on anything grouping `treasury_fees.chain_id`, which is the
+  `SOLANA_CHAIN_ID` sentinel the old indexer wrote to keep non-EVM rows out of every
+  EVM aggregation. `cerebroChains` maps both.
+- **Ethereum (id 1) is deprecated but still in the data.** The app stopped routing
+  through it; its history stayed in the table, and Cerebro's group-by endpoints do
+  not filter it the way the old dashboard's `EXCLUDED_CHAIN_IDS` did.
+
+So **a per-chain table renders `cerebroActiveChains`, not the response.** Group-by
+endpoints emit no row at all for a chain with no data — which is what dropped Polygon
+off «Ingresos por cadena» while Ethereum's history added a "Chain 1" row to it. Look
+each API row up by id, show `$0` for the quiet chains, and the table matches the old
+dashboard's, which iterates `ALL_CHAINS` for exactly this reason.
+
+That panel also reads `userFeesUsd`, which admin.md does not document at all — the
+port kept the query's `user_fees_usd` (sender is a known user Safe, `nft_sale` rows
+excluded). `totalUsd` next to it also counts team funding and internal swaps, so it
+is not "comisiones de usuario" however tempting the name. The column drops out if the
+field ever stops arriving, rather than showing the total under the wrong header.
 
 ## Conventions
 

@@ -41,12 +41,43 @@ export const cerebroChains = {
   8453: "Base",
   56: "BSC",
   999: "HyperEVM",
-  // Not an EVM chain id — Solana has none. 101 is the cluster number the backend
-  // stamps on Solana rows so they can share a column with the EVM ones, and it
-  // arrives on the /costs/recent and /fees/recent feeds. Those rows also carry
-  // `source: "solana"`, which is the field to trust when the two disagree.
+  // Not an EVM chain id — Solana has none, and it arrives under two different
+  // numbers depending on which table the row came from. 101 is the cluster number
+  // the app backend stamps, on the /costs/recent and /fees/recent feeds; those
+  // rows also carry `source: "solana"`, the field to trust when the two disagree.
+  // 1399811149 is the sentinel the old dashboard's indexer writes into
+  // `treasury_fees.chain_id` (`SOLANA_CHAIN_ID` in its chains.ts) to keep the
+  // non-EVM rows out of every EVM aggregation, so it is what the group-by
+  // endpoints report — /fees/treasury/by-chain among them.
   101: "Solana",
+  1399811149: "Solana",
+  // Deprecated. Hyxora stopped routing through Ethereum, but its historical
+  // treasury rows are still in the table and still come back from the group-by
+  // endpoints, which don't filter them. Labelled so a stray row reads "Ethereum"
+  // rather than "Chain 1"; deliberately absent from `cerebroActiveChains` below,
+  // the way the old dashboard's EXCLUDED_CHAIN_IDS kept that data but never
+  // counted it.
+  1: "Ethereum",
 };
+
+/**
+ * The networks Hyxora runs on, in the order the old dashboard lists them:
+ * `ALL_CHAINS` from `hyxora-admin-main/src/lib/chains.ts`, with Solana appended
+ * the way its «Redes» page does it — non-EVM, so it lives outside that registry.
+ *
+ * Per-chain breakdowns iterate **this** list and look each API row up by id,
+ * instead of rendering whatever rows came back. Cerebro's group-by endpoints only
+ * emit a row for a chain that has data, so reading the response directly is what
+ * dropped Polygon — no treasury inflows yet — off «Ingresos por cadena», while
+ * putting a "Chain 1" row there for Ethereum's history.
+ */
+export const cerebroActiveChains = [
+  { chainId: 8453, name: "Base" },
+  { chainId: 137, name: "Polygon" },
+  { chainId: 56, name: "BSC" },
+  { chainId: 999, name: "HyperEVM" },
+  { chainId: 1399811149, name: "Solana" },
+];
 
 /**
  * Chain *slugs* — Zerion own vocabulary, which /holdings reports instead of a
@@ -166,6 +197,65 @@ export const cerebroOperationLabel = (operation) => {
   const [first, ...rest] = words;
   return [first[0].toUpperCase() + first.slice(1), ...rest].join(" ");
 };
+
+/**
+ * Colour per operation, keyed by the operation itself and **not** by its position
+ * in a sorted list. Two reasons, both learned in the old dashboard:
+ *
+ *   1. the same functionality keeps its colour across panels, so a revenue donut
+ *      and a cost donut can be read side by side; and
+ *   2. a colour is never assigned by rank, so the biggest slice can't land on a
+ *      near-black or grey entry just because the data happened to sort it first.
+ *
+ * Every value is a bright hue for that second reason — no slate, grey or black.
+ */
+export const cerebroOperationColors = {
+  swap: "#3B82F6",
+  bridge: "#06B6D4",
+  deposit: "#10B981",
+  withdraw: "#F59E0B",
+  internal_transfer: "#6366F1",
+  external_transfer: "#8B5CF6",
+  // Legacy bucket, folded into external_transfer for display — same colour so the
+  // fold is invisible if an un-normalised row ever slips through.
+  transfer: "#8B5CF6",
+  onramp: "#14B8A6",
+  offramp: "#EC4899",
+  xstock_buy: "#D946EF",
+  xstock_sell: "#F43F5E",
+  xstock_fees: "#EC4899",
+  xstock_fee: "#EC4899",
+  xstock_sponsorship: "#F472B6",
+  xstocks: "#D946EF",
+  receive: "#0EA5E9",
+  send: "#A855F7",
+  fee: "#84CC16",
+  unknown: "#F97316",
+};
+
+/** Rotation for operations the map doesn't name yet — still bright, never grey. */
+const operationColorFallback = [
+  "#10B981",
+  "#3B82F6",
+  "#F59E0B",
+  "#8B5CF6",
+  "#F43F5E",
+  "#06B6D4",
+  "#6366F1",
+  "#EC4899",
+  "#14B8A6",
+  "#0EA5E9",
+];
+
+/**
+ * @param {string | null | undefined} operation
+ * @param {number} [index] Position in the rendered list, used only to spread the
+ * fallback rotation across several unmapped operations.
+ * @return {string}
+ */
+export const cerebroOperationColor = (operation, index = 0) =>
+  cerebroOperationColors[operation] ??
+  operationColorFallback[index % operationColorFallback.length];
 
 /**
  * Block explorers per chain, for tx links in the fee tables.

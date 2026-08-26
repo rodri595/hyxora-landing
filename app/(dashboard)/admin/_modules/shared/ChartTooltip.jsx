@@ -13,7 +13,13 @@ import { useRef } from "react";
  * Pass it to every `<Tooltip>` that renders a `TooltipSurface`, and nowhere else:
  * on its own it would leave a plain tooltip stuck on screen.
  */
-export const tooltipWrapperStyle = { visibility: "visible", outline: "none" };
+/**
+ * The z-index is what keeps a donut's tooltip on top of its own centre label: the
+ * label is an absolutely-positioned sibling that comes *after* the chart in the
+ * DOM, so at `z-index: auto` it paints over the tooltip that the pointer just
+ * summoned. 30 clears the chart chrome without reaching the sticky header.
+ */
+export const tooltipWrapperStyle = { visibility: "visible", outline: "none", zIndex: 30 };
 
 /**
  * Holds the last payload the chart was active with, so the card still has
