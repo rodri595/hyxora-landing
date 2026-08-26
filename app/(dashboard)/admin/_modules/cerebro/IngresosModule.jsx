@@ -15,8 +15,12 @@ import WhitelistToggle from "./ingresos/WhitelistToggle";
  * team built: totales, serie diaria, desgloses, y al final el diagnóstico y el
  * detalle fila a fila.
  *
- * Everything on this tab is 30 días except «Ingresos por cadena», whose endpoint
- * doesn't accept a window — the panel says so.
+ * Everything on this tab is 30 días except three panels, each of which says so in
+ * its header: «Ingresos por cadena» is all-time because its endpoint takes no
+ * window at all, and «Ingresos por cadena × token» and «Diagnóstico de etiquetado»
+ * both default to a year — the old dashboard ran those two queries lifetime, and
+ * reading them at 30 días dropped every token, and every tagging bucket, whose last
+ * fee was older than the window.
  *
  * `includeNonWhitelisted` lives here rather than in each panel: the old dashboard
  * drove its whole Earnings page from one `?raw=1` link, and three panels filtering

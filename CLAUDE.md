@@ -183,6 +183,28 @@ excluded). `totalUsd` next to it also counts team funding and internal swaps, so
 is not "comisiones de usuario" however tempting the name. The column drops out if the
 field ever stops arriving, rather than showing the total under the wrong header.
 
+**Check the old dashboard's window before porting a panel, not just its columns.**
+`getTreasuryByToken` ran with no `sinceDays` at all — lifetime — so «Ingresos por
+cadena × token» read at the tab's `REVENUE_DAYS` was quietly missing every (cadena,
+token, operación) tuple whose last fee predates 30 days, which is most of Base's and
+BSC's list. Cerebro always applies a window here and caps it at 365, so the panel
+defaults to that and offers the shorter ones. A missing row looks identical to a
+chain with no revenue; only the old table says which it is.
+
+`getOpTagDiagnostics` is the second one — `earnings/page.tsx` calls it as
+`{ limit: 20 }`, and the query only adds its `block_timestamp >=` clause when a
+`sinceDays` is passed. «Diagnóstico de etiquetado» read at `REVENUE_DAYS` was a
+strict subset of the old table: same buckets, smaller counts, and **not one
+`hyxora`-sourced row left**, because those tags come from the backend activity
+cache and none of the rows it tagged land inside the last month. Same fix, same
+365-day ceiling.
+
+That panel's `source` is `case when operation_reason like 'hyxora:%'` in SQL, so it
+is `hyxora` or `heuristic` and never null. Defaulting a row with no `source` to
+`"heuristic"` — which is what the panel used to do — files every backend-tagged
+bucket under the heuristic ladder and hides the split the column exists to show.
+Render "—" and say the field is missing.
+
 ## Conventions
 
 - Formatter is Biome (`npm run lint:fix`). **Scope it to files you changed** —
