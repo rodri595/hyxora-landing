@@ -17,7 +17,9 @@ import { useEditTutorial } from "@/hooks/admin/useEditTutorial";
 import { useGetAllCategories } from "@/hooks/admin/useGetAllCategories";
 import { useGetAllTutorials } from "@/hooks/admin/useGetAllTutorials";
 import { cn } from "@/utils";
-import { formatDate, formatDuration } from "@/utils/video";
+import { formatDateTime } from "@/utils/format";
+import { sortTutorials } from "@/utils/tutorialTitle";
+import { formatDuration } from "@/utils/video";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import { useCallback, useMemo, useRef, useState } from "react";
@@ -31,13 +33,7 @@ const SIDEBAR_WIDTH = 440;
 // ── Action icons ─────────────────────────────────────────────────────────────
 
 const EyeIcon = () => (
-  <svg
-    width="13"
-    height="13"
-    viewBox="0 0 16 16"
-    fill="none"
-    aria-hidden="true"
-  >
+  <svg width="13" height="13" viewBox="0 0 16 16" fill="none" aria-hidden="true">
     <path
       d="M1 8s2.5-4.5 7-4.5S15 8 15 8s-2.5 4.5-7 4.5S1 8 1 8Z"
       stroke="currentColor"
@@ -48,13 +44,7 @@ const EyeIcon = () => (
 );
 
 const PencilIcon = () => (
-  <svg
-    width="12"
-    height="12"
-    viewBox="0 0 16 16"
-    fill="none"
-    aria-hidden="true"
-  >
+  <svg width="12" height="12" viewBox="0 0 16 16" fill="none" aria-hidden="true">
     <path
       d="M11.5 2.5l2 2L6 12l-3 1 1-3 7.5-7.5Z"
       stroke="currentColor"
@@ -65,13 +55,7 @@ const PencilIcon = () => (
 );
 
 const TrashIcon = () => (
-  <svg
-    width="12"
-    height="12"
-    viewBox="0 0 16 16"
-    fill="none"
-    aria-hidden="true"
-  >
+  <svg width="12" height="12" viewBox="0 0 16 16" fill="none" aria-hidden="true">
     <path
       d="M2.5 4h11M6 4V2.5h4V4M4 4l.5 9h7L12 4"
       stroke="currentColor"
@@ -95,7 +79,7 @@ const ActionButton = ({ label, onClick, danger, children }) => (
       "flex size-6 items-center justify-center rounded-md text-[rgba(25,54,63,0.4)] transition-colors",
       danger
         ? "hover:bg-red-50 hover:text-red-600"
-        : "hover:bg-[rgba(25,54,63,0.08)] hover:text-[#19363F]",
+        : "hover:bg-[rgba(25,54,63,0.08)] hover:text-[#19363F]"
     )}
   >
     {children}
@@ -129,9 +113,11 @@ const TutorialsModule = () => {
   // invalidated and refetched; React Query keeps the previous data during the
   // background refetch, so the open sidebar (derived from these lists by id) is
   // never unmounted — it just re-renders with fresh values.
+  // Listed in the manual order the academy renders, so the table matches what
+  // members see; unnumbered tutorials fall to the bottom, oldest first.
   const videos = useMemo(
-    () => (tutorialsData ?? []).map(decorateTutorial),
-    [tutorialsData],
+    () => sortTutorials((tutorialsData ?? []).map(decorateTutorial)),
+    [tutorialsData]
   );
   const categories = useMemo(() => categoriesData ?? [], [categoriesData]);
 
@@ -154,18 +140,17 @@ const TutorialsModule = () => {
 
   const displayedVideo = useMemo(
     () => videos.find((v) => v.id === displayedId) ?? null,
-    [videos, displayedId],
+    [videos, displayedId]
   );
   const displayedCategory = useMemo(
     () => categories.find((c) => c.id === displayedId) ?? null,
-    [categories, displayedId],
+    [categories, displayedId]
   );
 
   // Tutorials assigned to each category (by categoryId).
   const categoryCounts = useMemo(() => {
     const counts = {};
-    for (const v of videos)
-      counts[v.categoryId] = (counts[v.categoryId] ?? 0) + 1;
+    for (const v of videos) counts[v.categoryId] = (counts[v.categoryId] ?? 0) + 1;
     return counts;
   }, [videos]);
 
@@ -203,7 +188,7 @@ const TutorialsModule = () => {
       setIsOpen(false);
       setView(next);
     },
-    [view],
+    [view]
   );
 
   // ── Tutorial CRUD ──
@@ -222,7 +207,7 @@ const TutorialsModule = () => {
         onError: () => toast.error("No se pudo crear el tutorial"),
       });
     },
-    [createTutorial],
+    [createTutorial]
   );
 
   const handleUpdate = useCallback(
@@ -232,10 +217,10 @@ const TutorialsModule = () => {
         {
           onSuccess: () => toast.success("Cambios guardados"),
           onError: () => toast.error("No se pudieron guardar los cambios"),
-        },
+        }
       );
     },
-    [editTutorial],
+    [editTutorial]
   );
 
   const handleDelete = useCallback(
@@ -245,10 +230,10 @@ const TutorialsModule = () => {
         {
           onSuccess: () => toast.success("Tutorial eliminado"),
           onError: () => toast.error("No se pudo eliminar el tutorial"),
-        },
+        }
       );
     },
-    [deleteTutorial],
+    [deleteTutorial]
   );
 
   // ── Category CRUD ──
@@ -259,7 +244,7 @@ const TutorialsModule = () => {
         onError: () => toast.error("No se pudo crear la categoría"),
       });
     },
-    [createCategory],
+    [createCategory]
   );
 
   const handleUpdateCategory = useCallback(
@@ -269,10 +254,10 @@ const TutorialsModule = () => {
         {
           onSuccess: () => toast.success("Cambios guardados"),
           onError: () => toast.error("No se pudieron guardar los cambios"),
-        },
+        }
       );
     },
-    [editCategory],
+    [editCategory]
   );
 
   const handleDeleteCategory = useCallback(
@@ -282,10 +267,10 @@ const TutorialsModule = () => {
         {
           onSuccess: () => toast.success("Categoría eliminada"),
           onError: () => toast.error("No se pudo eliminar la categoría"),
-        },
+        }
       );
     },
-    [deleteCategory],
+    [deleteCategory]
   );
 
   // Desktop (lg+): inline wrapper — GSAP animates its width
@@ -312,7 +297,7 @@ const TutorialsModule = () => {
         });
       }
     },
-    { dependencies: [isOpen] },
+    { dependencies: [isOpen] }
   );
 
   // Mobile/tablet (<lg): overlay slide + backdrop fade
@@ -342,12 +327,39 @@ const TutorialsModule = () => {
         gsap.to(backdrop, { opacity: 0, duration: 0.22, overwrite: true });
       }
     },
-    { dependencies: [isOpen] },
+    { dependencies: [isOpen] }
   );
 
   // ── Tutorial columns ──
   const tutorialColumns = useMemo(
     () => [
+      {
+        id: "order",
+        // `undefined` rather than null so TanStack's sortUndefined applies.
+        accessorFn: (row) => row.order ?? undefined,
+        header: "Orden",
+        size: 64,
+        // Left-aligned like every other column in this table (Duración included) —
+        // right-aligning just this header broke the row's visual rhythm.
+        // Unnumbered rows sort last in either direction — they have no place in
+        // the sequence, so floating them to the top would just be noise.
+        sortUndefined: "last",
+        cell: (info) => {
+          const order = info.getValue();
+          return (
+            <span
+              className={cn(
+                "font-inter text-[11px] tabular-nums tracking-[-0.44px]",
+                order === null || order === undefined
+                  ? "text-[rgba(25,54,63,0.3)]"
+                  : "font-medium text-[#19363F]"
+              )}
+            >
+              {order === null || order === undefined ? "—" : order}
+            </span>
+          );
+        },
+      },
       {
         accessorKey: "title",
         header: "Título",
@@ -393,13 +405,10 @@ const TutorialsModule = () => {
             <span
               className={cn(
                 "inline-flex items-center gap-1 rounded-[5px] border px-1.5 py-0.5 font-inter text-[10px] font-medium tracking-[-0.3px]",
-                v.badge,
+                v.badge
               )}
             >
-              <span
-                className="size-1.5 rounded-full"
-                style={{ background: v.dot }}
-              />
+              <span className="size-1.5 rounded-full" style={{ background: v.dot }} />
               {v.label}
             </span>
           );
@@ -408,20 +417,20 @@ const TutorialsModule = () => {
       {
         accessorKey: "createdAt",
         header: "Subido",
-        size: 100,
+        size: 130,
         cell: (info) => (
-          <span className="font-inter text-[11px] tracking-[-0.44px] text-[rgba(25,54,63,0.55)]">
-            {formatDate(info.getValue())}
+          <span className="font-inter text-[11px] tabular-nums tracking-[-0.44px] text-[rgba(25,54,63,0.55)]">
+            {formatDateTime(info.getValue())}
           </span>
         ),
       },
       {
         accessorKey: "updatedAt",
         header: "Actualizado",
-        size: 100,
+        size: 130,
         cell: (info) => (
-          <span className="font-inter text-[11px] tracking-[-0.44px] text-[rgba(25,54,63,0.55)]">
-            {formatDate(info.getValue())}
+          <span className="font-inter text-[11px] tabular-nums tracking-[-0.44px] text-[rgba(25,54,63,0.55)]">
+            {formatDateTime(info.getValue())}
           </span>
         ),
       },
@@ -432,16 +441,10 @@ const TutorialsModule = () => {
         size: 110,
         cell: ({ row }) => (
           <div className="flex items-center gap-0.5">
-            <ActionButton
-              label="Editar tutorial"
-              onClick={() => openDetail(row.original, "edit")}
-            >
+            <ActionButton label="Editar tutorial" onClick={() => openDetail(row.original, "edit")}>
               <PencilIcon />
             </ActionButton>
-            <ActionButton
-              label="Ver tutorial"
-              onClick={() => openDetail(row.original, "detail")}
-            >
+            <ActionButton label="Ver tutorial" onClick={() => openDetail(row.original, "detail")}>
               <EyeIcon />
             </ActionButton>
             <ActionButton
@@ -455,7 +458,7 @@ const TutorialsModule = () => {
         ),
       },
     ],
-    [openDetail],
+    [openDetail]
   );
 
   // ── Category columns ──
@@ -492,16 +495,10 @@ const TutorialsModule = () => {
         size: 90,
         cell: ({ row }) => (
           <div className="flex items-center gap-0.5">
-            <ActionButton
-              label="Editar categoría"
-              onClick={() => openDetail(row.original, "edit")}
-            >
+            <ActionButton label="Editar categoría" onClick={() => openDetail(row.original, "edit")}>
               <PencilIcon />
             </ActionButton>
-            <ActionButton
-              label="Ver categoría"
-              onClick={() => openDetail(row.original, "detail")}
-            >
+            <ActionButton label="Ver categoría" onClick={() => openDetail(row.original, "detail")}>
               <EyeIcon />
             </ActionButton>
             <ActionButton
@@ -515,7 +512,7 @@ const TutorialsModule = () => {
         ),
       },
     ],
-    [openDetail, categoryCounts],
+    [openDetail, categoryCounts]
   );
 
   // Sidebar content depends on the active view + mode. Shared by desktop & mobile.
@@ -582,23 +579,14 @@ const TutorialsModule = () => {
   if (isError)
     return (
       <div className="flex items-center justify-center w-full h-full p-4">
-        <ErrorComp
-          error
-          message="Error al cargar los tutoriales."
-          className="max-w-sm"
-        />
+        <ErrorComp error message="Error al cargar los tutoriales." className="max-w-sm" />
       </div>
     );
 
   return (
     <div className="flex flex-row flex-1 min-h-0 overflow-hidden h-full">
       <div className="flex flex-col flex-1 w-0 min-h-0 rounded-xl border-[0.7px] border-[rgba(25,54,63,0.08)] shadow-[0px_2px_12px_0px_rgba(25,54,63,0.08)] px-4 py-3 overflow-hidden ">
-        <Tabs
-          tabs={VIEWS}
-          value={view}
-          onChange={switchView}
-          className="mb-3"
-        />
+        <Tabs tabs={VIEWS} value={view} onChange={switchView} className="mb-3" />
         <div className="mb-3 flex shrink-0 items-center justify-end gap-2">
           <button
             type="button"

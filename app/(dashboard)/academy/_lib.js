@@ -1,5 +1,7 @@
 // Small presentation helpers for the tutorials section.
 
+import { parseTutorialTitle } from "@/utils/tutorialTitle";
+
 export const formatDuration = (totalSec = 0) => {
   const s = Math.max(0, Math.floor(totalSec));
   const h = Math.floor(s / 3600);
@@ -43,9 +45,15 @@ export const gradientFromAccent = (accent) => {
 export const decorateAcademyTutorial = (t) => {
   if (!t) return null;
   const accent = t.category?.accent ?? t.accent ?? "#19363F";
+  // The manual order rides inside the stored title as JSON — unpack it here so
+  // everything downstream keeps reading a plain `title` (utils/tutorialTitle.js).
+  const { title, order, meta } = parseTutorialTitle(t.title);
   return {
     ...t,
     slug: t.id,
+    title,
+    order,
+    titleMeta: meta,
     category: t.category?.label ?? t.category ?? "",
     accent,
     gradient: t.gradient ?? gradientFromAccent(accent),

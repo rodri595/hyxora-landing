@@ -5,16 +5,11 @@ import ErrorComp from "@/components/Error";
 import Layout from "@/components/Layout";
 import Spinner from "@/components/Spinner";
 import { useGetPublicTutorials } from "@/hooks/academy/useGetPublicTutorials";
+import { sortTutorials } from "@/utils/tutorialTitle";
 import { useMemo, useState } from "react";
 import VideoCard from "./VideoCard";
 import VideoModal from "./VideoModal";
 import { decoratePublicTutorial } from "./_lib";
-
-// Undated tutorials sink to the bottom instead of leading the oldest-first grid.
-const publishedTime = (video) => {
-  const t = Date.parse(video?.publishedAt ?? video?.createdAt ?? "");
-  return Number.isNaN(t) ? Number.POSITIVE_INFINITY : t;
-};
 
 const TutorialsPage = () => {
   const [active, setActive] = useState(null);
@@ -24,11 +19,12 @@ const TutorialsPage = () => {
   // The endpoint mirrors the authenticated one (`{ tutorials, featured,
   // categories }`); the public grid only needs the flat tutorials list. Stay
   // resilient if the backend returns a bare array instead. The endpoint does
-  // not guarantee an order, so sort oldest first here — the learning center
-  // reads as a course, so the earliest tutorial is where you start.
+  // not guarantee an order, so sort here — the learning center reads as a
+  // course, so it follows the manual order the admin set, and falls back to
+  // oldest-first for videos that don't carry a number yet.
   const videos = useMemo(() => {
     const list = Array.isArray(data) ? data : (data?.tutorials ?? []);
-    return list.map(decoratePublicTutorial).sort((a, b) => publishedTime(a) - publishedTime(b));
+    return sortTutorials(list.map(decoratePublicTutorial));
   }, [data]);
 
   return (

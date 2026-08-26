@@ -1,4 +1,5 @@
 import apiClient from "@/utils/axios";
+import { buildTutorialTitle } from "@/utils/tutorialTitle";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 export const useCreateTutorial = () => {
@@ -6,7 +7,13 @@ export const useCreateTutorial = () => {
   return useMutation({
     mutationFn: async (data) => {
       const response = await apiClient.post("/admin/tutorials", {
-        title: data.title,
+        // `order` has no column of its own — it rides inside the title string.
+        // See utils/tutorialTitle.js.
+        title: buildTutorialTitle({
+          ...(data.titleMeta ?? {}),
+          title: data.title,
+          order: data.order,
+        }),
         description: data.description,
         categoryId: data.categoryId,
         url: data.url,
