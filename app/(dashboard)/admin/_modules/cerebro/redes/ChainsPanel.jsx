@@ -1,131 +1,136 @@
 "use client";
 
 import DataTable from "@/components/DataTable";
-import { cerebroChains } from "@/constants/cerebro";
-import { useGetCostsByChain } from "@/hooks/cerebro/useGetCostsByChain";
-import { useGetHoldings } from "@/hooks/cerebro/useGetHoldings";
-import { useGetSystemHealth } from "@/hooks/cerebro/useGetSystemHealth";
-import { useGetTreasuryByToken } from "@/hooks/cerebro/useGetTreasuryByToken";
+import { cerebroActiveChains } from "@/constants/cerebro";
+import { useGetChainsSummary } from "@/hooks/cerebro/useGetChainsSummary";
 import { cn } from "@/utils";
 import { formatNumber, formatUsd } from "@/utils/format";
-import { useCallback, useMemo } from "react";
+import { useMemo } from "react";
 import Panel, { RefreshButton } from "../../shared/Panel";
 import QueryState from "../../shared/QueryState";
 
+/** `/chains` fixes its own window; the headers say which one. */
 const DAYS = 30;
 
-/** /holdings returns the TOP tokens and vaults, not all of them. 100 is its max. */
-const HOLDINGS_LIMIT = 100;
+/** Solana's registry id — the sentinel `treasury_fees.chain_id` carries for non-EVM rows. */
+const SOLANA_CHAIN_ID = 1399811149;
 
-const sumBy = (rows, key) => rows.reduce((total, row) => total + (row[key] ?? 0), 0);
+const sumBy = (table, key) =>
+  table.getFilteredRowModel().rows.reduce((total, row) => total + (row.original[key] ?? 0), 0);
+
+const numberOrNull = (value) => (Number.isFinite(Number(value)) ? Number(value) : null);
 
 /** Muted zero, so a row with real activity stands out from an idle chain. */
-const Count = ({ value }) => (
-  <span className={cn("tabular-nums", value > 0 ? "text-[#19363F]" : "text-[rgba(25,54,63,0.3)]")}>
-    {formatNumber(value)}
-  </span>
-);
+const Count = ({ value }) => {
+  if (value === null) return <span className="tabular-nums text-[rgba(25,54,63,0.3)]">—</span>;
+
+  return (
+    <span
+      className={cn("tabular-nums", value > 0 ? "text-[#19363F]" : "text-[rgba(25,54,63,0.3)]")}
+    >
+      {formatNumber(value)}
+    </span>
+  );
+};
 
 const Usd = ({ value, decimals = 3 }) => (
   <span className="tabular-nums text-[rgba(25,54,63,0.7)]">{formatUsd(value, { decimals })}</span>
 );
 
+const Cursor = ({ value }) => (
+  <span className="tabular-nums text-[rgba(25,54,63,0.5)]">
+    {value === null ? "—" : formatNumber(value)}
+  </span>
+);
+
+/**
+ * Per-chain TVL, 30-day P&L and both indexer cursors, straight from `GET /chains`.
+ *
+ * This table used to assemble itself from four endpoints — `/costs/by-chain`,
+ * `/fees/treasury/by-token`, `/holdings` and `/system/health` — which cost it both
+ * rows and columns: TVL only ever covered the top 100 holdings rows, and a chain
+ * with no cost, fee or indexer row never got created at all, so Polygon vanished
+ * and Solana — non-EVM, absent from every one of those four — never appeared.
+ * `/chains` is the same table the old dashboard's «Chains» page computes, done
+ * upstream over everything.
+ *
+ * Rows still come from `cerebroActiveChains` rather than from the response, for the
+ * usual reason: a quiet chain must read $0 instead of dropping out, and deprecated
+ * Ethereum must not sneak a row in if the endpoint ever emits one.
+ */
 const ChainsPanel = () => {
-  const costs = useGetCostsByChain({ days: DAYS });
-  const treasury = useGetTreasuryByToken({ days: DAYS });
-  const holdings = useGetHoldings({ limit: HOLDINGS_LIMIT });
-  const health = useGetSystemHealth();
-
-  const queries = [costs, treasury, holdings, health];
-  const isLoading = queries.some((query) => query.isLoading);
-  const isFetching = queries.some((query) => query.isFetching);
-  const error = queries.find((query) => query.error)?.error ?? null;
-
-  const refetchAll = useCallback(() => {
-    costs.refetch();
-    treasury.refetch();
-    holdings.refetch();
-    health.refetch();
-  }, [costs.refetch, treasury.refetch, holdings.refetch, health.refetch]);
+  const { data, error, isLoading, isFetching, refetch } = useGetChainsSummary();
 
   const rows = useMemo(() => {
-    const byChain = new Map();
+    const byChainId = new Map((data?.chains ?? []).map((row) => [Number(row.chainId), row]));
+    const solana = data?.solana ?? null;
 
-    const ensure = (chainId, chainName) => {
-      if (chainId === undefined || chainId === null) return null;
-      const key = String(chainId);
+    return cerebroActiveChains.map(({ chainId, name }) => {
+      // Solana is non-EVM: no EntryPoint, no Safe, no block-cursor indexers, so it
+      // travels in its own block of the response and its cursor cells stay "—"
+      // rather than a misleading 0.
+      if (chainId === SOLANA_CHAIN_ID) {
+        const costUsd = Number(solana?.costs30dUsd ?? 0);
+        const feesUsd = Number(solana?.earnings30dUsd ?? 0);
 
-      if (!byChain.has(key)) {
-        byChain.set(key, {
+        return {
           chainId,
-          chainName: cerebroChains[chainId] ?? `Chain ${chainId}`,
-          tvlUsd: 0,
-          opsCount: 0,
-          costUsd: 0,
-          feeTransfers: 0,
-          feesUsd: 0,
+          chainName: name,
+          nonEvm: true,
+          tvlUsd: Number(solana?.tvlUsd ?? 0),
+          // That block documents neither an op count nor a transfer count. If the
+          // endpoint grows them they render; until then the cells say so instead
+          // of reporting a zero nobody counted.
+          opsCount: numberOrNull(solana?.ops30d),
+          costUsd,
+          feeTransfers: numberOrNull(solana?.feesCount30d),
+          feesUsd,
+          marginUsd: Number(solana?.margin30dUsd ?? feesUsd - costUsd),
           userOpsCursor: null,
           treasuryCursor: null,
-        });
+        };
       }
 
-      const row = byChain.get(key);
-      // The API's own chainName wins over our static map — it knows about chains
-      // that shipped after constants/cerebro.js was written.
-      if (chainName) row.chainName = chainName;
-      return row;
-    };
+      const row = byChainId.get(chainId);
+      const costUsd = Number(row?.cost30dUsd ?? 0);
+      const feesUsd = Number(row?.fees30dUsd ?? 0);
 
-    for (const entry of costs.data ?? []) {
-      const row = ensure(entry.chainId, entry.chainName);
-      if (!row) continue;
-      row.opsCount += entry.opsCount ?? 0;
-      row.costUsd += entry.costUsd ?? 0;
-    }
-
-    // Fees per chain are summed from the by-token rows: /fees/treasury/by-chain
-    // has no `days` filter, so it can't answer a 30-day question.
-    for (const entry of treasury.data ?? []) {
-      const row = ensure(entry.chainId);
-      if (!row) continue;
-      row.feeTransfers += entry.transfers ?? 0;
-      row.feesUsd += entry.totalUsd ?? 0;
-    }
-
-    for (const entry of [...(holdings.data?.tokens ?? []), ...(holdings.data?.vaults ?? [])]) {
-      const row = ensure(entry.chainId, entry.chainName);
-      if (!row) continue;
-      row.tvlUsd += entry.totalUsd ?? 0;
-    }
-
-    for (const indexer of health.data?.system?.indexers ?? []) {
-      const row = ensure(indexer.chainId);
-      if (!row) continue;
-
-      const kind = String(indexer.kind ?? "");
-      const block = indexer.lastBlock ?? 0;
-
-      // Several userops indexers can run per chain (safe / entrypoint /
-      // etherscan) — the furthest one is the one that matters.
-      if (kind.startsWith("userops")) {
-        row.userOpsCursor = Math.max(row.userOpsCursor ?? 0, block);
-      } else if (kind === "treasury") {
-        row.treasuryCursor = Math.max(row.treasuryCursor ?? 0, block);
-      }
-    }
-
-    return [...byChain.values()].map((row) => ({
-      ...row,
-      marginUsd: row.feesUsd - row.costUsd,
-    }));
-  }, [costs.data, treasury.data, holdings.data, health.data]);
+      return {
+        chainId,
+        // The API's own name wins — it knows about chains that shipped after
+        // constants/cerebro.js was written.
+        chainName: row?.name ?? name,
+        nonEvm: false,
+        tvlUsd: Number(row?.tvlUsd ?? 0),
+        opsCount: Number(row?.ops30d ?? 0),
+        costUsd,
+        feeTransfers: Number(row?.feesCount30d ?? 0),
+        feesUsd,
+        marginUsd: Number(row?.margin30dUsd ?? feesUsd - costUsd),
+        userOpsCursor: numberOrNull(row?.useropsLastBlock),
+        treasuryCursor: numberOrNull(row?.treasuryLastBlock),
+      };
+    });
+  }, [data]);
 
   const columns = useMemo(
     () => [
       {
         accessorKey: "chainName",
         header: "Cadena",
-        cell: (info) => <span className="font-medium text-[#19363F]">{info.getValue()}</span>,
+        cell: (info) => (
+          <span className="flex items-center gap-2">
+            <span className="font-medium text-[#19363F]">{info.getValue()}</span>
+            {info.row.original.nonEvm ? (
+              <span
+                className="rounded bg-[rgba(25,54,63,0.06)] px-1.5 py-0.5 text-[10px] font-normal text-[rgba(25,54,63,0.5)]"
+                title="Cadena no EVM: no hay UserOps ERC-4337 ni indexers por bloque, así que las columnas de ops y cursores no aplican."
+              >
+                no EVM
+              </span>
+            ) : null}
+          </span>
+        ),
         footer: () => "Total",
       },
       {
@@ -137,74 +142,35 @@ const ChainsPanel = () => {
             {formatUsd(info.getValue(), { decimals: 0 })}
           </span>
         ),
-        footer: ({ table }) =>
-          formatUsd(
-            sumBy(
-              table.getFilteredRowModel().rows.map((r) => r.original),
-              "tvlUsd"
-            ),
-            {
-              decimals: 0,
-            }
-          ),
+        footer: ({ table }) => formatUsd(sumBy(table, "tvlUsd"), { decimals: 0 }),
       },
       {
         accessorKey: "opsCount",
         header: `Ops ${DAYS}d`,
-        meta: { align: "right" },
+        meta: { align: "right", label: "Ops" },
         cell: (info) => <Count value={info.getValue()} />,
-        footer: ({ table }) =>
-          formatNumber(
-            sumBy(
-              table.getFilteredRowModel().rows.map((r) => r.original),
-              "opsCount"
-            )
-          ),
+        footer: ({ table }) => formatNumber(sumBy(table, "opsCount")),
       },
       {
         accessorKey: "costUsd",
         header: `Gastos ${DAYS}d`,
-        meta: { align: "right" },
+        meta: { align: "right", label: "Gastos" },
         cell: (info) => <Usd value={info.getValue()} />,
-        footer: ({ table }) =>
-          formatUsd(
-            sumBy(
-              table.getFilteredRowModel().rows.map((r) => r.original),
-              "costUsd"
-            ),
-            {
-              decimals: 3,
-            }
-          ),
+        footer: ({ table }) => formatUsd(sumBy(table, "costUsd"), { decimals: 3 }),
       },
       {
         accessorKey: "feeTransfers",
         header: `Txs de comisión ${DAYS}d`,
         meta: { align: "right", label: "Txs de comisión" },
         cell: (info) => <Count value={info.getValue()} />,
-        footer: ({ table }) =>
-          formatNumber(
-            sumBy(
-              table.getFilteredRowModel().rows.map((r) => r.original),
-              "feeTransfers"
-            )
-          ),
+        footer: ({ table }) => formatNumber(sumBy(table, "feeTransfers")),
       },
       {
         accessorKey: "feesUsd",
         header: `Comisiones ${DAYS}d`,
         meta: { align: "right", label: "Comisiones" },
         cell: (info) => <Usd value={info.getValue()} />,
-        footer: ({ table }) =>
-          formatUsd(
-            sumBy(
-              table.getFilteredRowModel().rows.map((r) => r.original),
-              "feesUsd"
-            ),
-            {
-              decimals: 3,
-            }
-          ),
+        footer: ({ table }) => formatUsd(sumBy(table, "feesUsd"), { decimals: 3 }),
       },
       {
         accessorKey: "marginUsd",
@@ -224,10 +190,7 @@ const ChainsPanel = () => {
           );
         },
         footer: ({ table }) => {
-          const total = sumBy(
-            table.getFilteredRowModel().rows.map((r) => r.original),
-            "marginUsd"
-          );
+          const total = sumBy(table, "marginUsd");
           return (
             <span className={total < 0 ? "text-red-600" : "text-emerald-700"}>
               {formatUsd(total, { decimals: 3 })}
@@ -239,21 +202,13 @@ const ChainsPanel = () => {
         accessorKey: "userOpsCursor",
         header: "cursor UserOps",
         meta: { align: "right", label: "cursor UserOps" },
-        cell: (info) => (
-          <span className="tabular-nums text-[rgba(25,54,63,0.5)]">
-            {info.getValue() === null ? "—" : formatNumber(info.getValue())}
-          </span>
-        ),
+        cell: (info) => <Cursor value={info.getValue()} />,
       },
       {
         accessorKey: "treasuryCursor",
         header: "cursor de tesoro",
         meta: { align: "right", label: "cursor de tesoro" },
-        cell: (info) => (
-          <span className="tabular-nums text-[rgba(25,54,63,0.5)]">
-            {info.getValue() === null ? "—" : formatNumber(info.getValue())}
-          </span>
-        ),
+        cell: (info) => <Cursor value={info.getValue()} />,
       },
     ],
     []
@@ -263,7 +218,7 @@ const ChainsPanel = () => {
     <Panel
       title="Cadenas"
       description={`TVL, actividad y P&L de los últimos ${DAYS} días por red, junto al cursor de cada indexer. Un cursor parado explica por qué una cadena aparece con menos ops o comisiones de las que debería.`}
-      action={<RefreshButton onClick={refetchAll} isLoading={isFetching} />}
+      action={<RefreshButton onClick={() => refetch()} isLoading={isFetching} />}
     >
       <QueryState isLoading={isLoading} error={error}>
         <DataTable
@@ -271,7 +226,6 @@ const ChainsPanel = () => {
           columns={columns}
           filename={`cerebro-cadenas-${DAYS}d`}
           searchPlaceholder="Buscar cadena..."
-          initialSorting={[{ id: "tvlUsd", desc: true }]}
           enableSelection={false}
           enableColumnToggle
           enableFooter
@@ -282,12 +236,13 @@ const ChainsPanel = () => {
 
         <div className="flex flex-col gap-1 mt-3">
           <p className="font-inter text-[10px] leading-[1.5] tracking-[-0.4px] text-[rgba(25,54,63,0.4)]">
-            TVL suma los {HOLDINGS_LIMIT} tokens y {HOLDINGS_LIMIT} vaults más grandes de /holdings,
-            así que la cola larga queda fuera y la cifra por cadena se queda algo corta.
+            Las redes salen siempre todas y en el mismo orden, con $0 si no registraron actividad en
+            la ventana. La ventana la fija el endpoint en {DAYS} días. Margen = comisiones − gastos.
           </p>
           <p className="font-inter text-[10px] leading-[1.5] tracking-[-0.4px] text-[rgba(25,54,63,0.4)]">
-            Comisiones y txs se agregan desde /fees/treasury/by-token (source: user-fees), porque el
-            endpoint por cadena no acepta ventana de días. Margen = comisiones − gastos.
+            Comisiones cuenta solo lo que pagó un Safe de usuario, sin las ventas de NFT. Solana no
+            es EVM: tiene TVL, comisiones y coste de fee-payer, pero ni UserOps ni cursores de
+            bloque, y por eso esas celdas van con «—».
           </p>
         </div>
       </QueryState>

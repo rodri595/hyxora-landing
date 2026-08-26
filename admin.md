@@ -1179,11 +1179,14 @@ plus a separate `solana` block.
 
 Window is fixed at 30 days; no parameters.
 
-**Cache:** 5 minutes · **Hook written (`useGetChainsSummary`), panel not switched.**
-`redes/ChainsPanel` currently assembles the same table from four endpoints, which is
-why its TVL column only covers the top 100 `/holdings` rows. Switching it is a
-straight win but replaces a working panel against shapes nobody has seen a real
-response for — do it once someone can diff the two side by side.
+**Cache:** 5 minutes · **Used by:** `redes/ChainsPanel`
+
+That panel used to assemble the same table from `/costs/by-chain`,
+`/fees/treasury/by-token`, `/holdings` and `/system/health`, which cost it rows as
+well as accuracy: TVL only covered the top 100 `/holdings` rows, and a chain with no
+cost, fee or indexer row was never created at all — Polygon dropped out and Solana,
+absent from all four, never appeared. The `solana` block carries no op count and no
+transfer count, so those two cells render "—" rather than a zero nobody counted.
 
 ---
 
