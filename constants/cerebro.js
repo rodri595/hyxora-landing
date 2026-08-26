@@ -287,6 +287,30 @@ export const cerebroTxUrl = (chainId, txHash) => {
 };
 
 /**
+ * Explorer link for a *wallet*, which the tx helper can't serve: Solscan files
+ * accounts under `/account/` while every Etherscan fork uses `/address/`.
+ *
+ * `chainId` is optional because the monitoring routes report treasuries by label
+ * and never by network — a Safe carries the same address on every EVM chain, so
+ * there is no single right answer. Falling back on the address shape sends `0x…`
+ * to Basescan, Base being where the treasury actually collects, and everything
+ * else to Solscan.
+ *
+ * @param {string | null | undefined} address
+ * @param {number | string} [chainId]
+ * @return {string | null} null when we have no explorer for that chain.
+ */
+export const cerebroAddressUrl = (address, chainId) => {
+  if (typeof address !== "string" || address.trim() === "") return null;
+
+  const id = chainId ?? (address.startsWith("0x") ? 8453 : 101);
+  const explorer = cerebroExplorers[id];
+  if (!explorer) return null;
+
+  return `${explorer}/${explorer.includes("solscan") ? "account" : "address"}/${address}`;
+};
+
+/**
  * Plans come back lowercase ("premium"); the admin tables show them capitalised.
  *
  * @param {string | null | undefined} plan

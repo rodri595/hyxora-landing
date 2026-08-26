@@ -3,9 +3,12 @@ import { requireAdmin } from "@/utils/server/requireAdmin";
 /**
  * Service liveness — staging and prod, API and App.
  *
- * Any HTTP response counts as **up**, including 401 and 404: these hosts are
- * auth-gated, so a 401 proves the process is answering. Only a network error or
- * a timeout is down. app-api's root `GET /` is a public healthcheck returning
+ * A 4xx counts as **up**, 401 and 404 included: these hosts are auth-gated, so
+ * being turned away proves the process is answering. A 5xx does not — something
+ * is listening but the service behind it is broken, which is exactly the outage
+ * this endpoint exists to catch. Network errors and timeouts are down too.
+ *
+ * app-api's root `GET /` is a public healthcheck returning
  * `{"message":"Hello World!"}`, so the base URL is already the right target.
  *
  * Fail-soft per target: one dead host returns a `down` row, never a 500 for the
@@ -35,12 +38,13 @@ const ping = async (target) => {
       cache: "no-store",
       redirect: "follow",
     });
+    const isUp = response.status < 500;
     return {
       ...target,
-      status: "up",
+      status: isUp ? "up" : "down",
       httpStatus: response.status,
       latencyMs: Date.now() - startedAt,
-      error: null,
+      error: isUp ? null : `HTTP ${response.status}`,
     };
   } catch (error) {
     return {

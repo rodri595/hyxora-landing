@@ -56,11 +56,14 @@ service pings, the Solana fee-payer balance, the Zerion treasury scan and live
 > - **Planes** — the first four panels are the plan *schema* (pricing, fee
 >   matrix, whitelists). Cerebro serves no schema at all; its `/fees/*` report
 >   revenue *collected*. They read app-api via `appApiClient`.
-> - **Sistema** — the first three panels are live infrastructure checks (pings,
->   Solana RPC, Zerion). They read `/api/monitoring/*` via `monitoringClient`.
->   `SponsorshipPanel` straddles the line on purpose: the Solana half is ours
->   because it queries the RPC on request, the Pimlico half is Cerebro's because
->   the remaining credit can only come from an unfiltered op ledger.
+> - **Sistema** — `sistema/monitoring/MonitoringPanel` is live infrastructure
+>   checks (pings, Solana RPC, Zerion) and reads `/api/monitoring/*` via
+>   `monitoringClient`. Its «Margen de subsidio» block straddles the line on
+>   purpose: the Solana half is ours because it queries the RPC on request, the
+>   Pimlico half is Cerebro's because the remaining credit can only come from an
+>   unfiltered op ledger. Those two cards therefore render their own loading and
+>   error states instead of sharing one `QueryState` — a Cerebro outage must not
+>   blank a live SOL balance, and vice versa.
 >
 > Balances used to be a third exception and no longer is. **Its Top tokens rows**
 > expand into a holder list via `/holdings/holders`, fetched separately from

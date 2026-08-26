@@ -1267,7 +1267,7 @@ it has to be derived from a recorded deposit minus the *unfiltered* op ledger, a
 `balanceUsd` is a deposit on record at `asOf`, not a live balance. If nobody updates
 it after a top-up the runway walks to zero on a healthy account — the panel says so.
 
-**Cache:** 1 minute · **Used by:** `sistema/SponsorshipPanel`
+**Cache:** 1 minute · **Used by:** `sistema/monitoring/MonitoringPanel`
 
 ---
 
