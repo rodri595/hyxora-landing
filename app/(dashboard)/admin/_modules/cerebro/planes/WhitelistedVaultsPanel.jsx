@@ -108,7 +108,6 @@ const WhitelistedVaultsPanel = () => {
           filename="vaults-lista-blanca"
           searchPlaceholder="Buscar por nombre, red, protocolo o dirección..."
           initialSorting={[{ id: "name", desc: false }]}
-          enableSelection={false}
           bare
           dense
         />

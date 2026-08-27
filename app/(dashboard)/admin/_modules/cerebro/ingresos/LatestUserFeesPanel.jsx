@@ -156,7 +156,6 @@ const LatestUserFeesPanel = ({ includeNonWhitelisted = false }) => {
           columns={columns}
           filename="cerebro-comisiones-recientes"
           emptyLabel="No hay comisiones en esta página."
-          enableSelection={false}
           enableSearch={false}
           showRowCount={false}
           enablePagination

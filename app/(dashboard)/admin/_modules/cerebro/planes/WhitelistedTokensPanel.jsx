@@ -97,7 +97,6 @@ const WhitelistedTokensPanel = () => {
           filename="tokens-lista-blanca"
           searchPlaceholder="Buscar por símbolo, nombre, red o dirección..."
           initialSorting={[{ id: "displaySymbol", desc: false }]}
-          enableSelection={false}
           enablePagination={rows.length > 25}
           bare
           dense

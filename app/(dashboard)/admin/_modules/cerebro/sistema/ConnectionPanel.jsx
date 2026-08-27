@@ -145,7 +145,10 @@ const ConnectionPanel = () => {
           <summary className="cursor-pointer font-inter text-[10px] font-medium text-[rgba(25,54,63,0.5)] hover:text-[#19363F] tracking-[-0.4px] transition-colors list-none">
             Ver JSON completo
           </summary>
-          <pre className="mt-2 max-h-[320px] overflow-auto rounded-lg bg-[rgba(25,54,63,0.03)] border-[0.7px] border-[rgba(25,54,63,0.08)] p-2.5 font-mono text-[10px] leading-[1.5] text-[rgba(25,54,63,0.7)]">
+          <pre
+            data-lenis-prevent
+            className="mt-2 max-h-[320px] overflow-auto overscroll-contain rounded-lg bg-[rgba(25,54,63,0.03)] border-[0.7px] border-[rgba(25,54,63,0.08)] p-2.5 font-mono text-[10px] leading-[1.5] text-[rgba(25,54,63,0.7)]"
+          >
             {JSON.stringify(data, null, 2)}
           </pre>
         </details>

@@ -4,6 +4,7 @@ import DataTable from "@/components/DataTable";
 import { useGetTopFeePayers } from "@/hooks/cerebro/useGetTopFeePayers";
 import { formatNumber, formatPercent, formatUsd, shortenHash } from "@/utils/format";
 import { useMemo } from "react";
+import CompositionBar from "../../shared/CompositionBar";
 import Panel, { RefreshButton } from "../../shared/Panel";
 import QueryState from "../../shared/QueryState";
 import { sumColumn } from "../../shared/aggregate";
@@ -119,6 +120,25 @@ const TopFeePayersPanel = () => {
     }));
   }, [data]);
 
+  // The same rows the table shows, labelled the way the «Usuario» column labels
+  // them. This is the panel's actual question drawn instead of computed: three fat
+  // segments and a sliver of «Resto» is a concentration risk you see before you
+  // read a single figure.
+  const composition = useMemo(
+    () =>
+      rows.map((row) => ({
+        label:
+          row.email ||
+          (row.twitterUsername
+            ? row.twitterUsername.startsWith("@")
+              ? row.twitterUsername
+              : `@${row.twitterUsername}`
+            : shortenHash(row.privyId ?? "", { lead: 10, tail: 4 })),
+        value: row.totalUsd,
+      })),
+    [rows]
+  );
+
   // Revenue concentration in one number: how much of this table the top three are.
   const topThreeShare = useMemo(() => {
     const total = rows.reduce((sum, row) => sum + row.totalUsd, 0);
@@ -139,6 +159,16 @@ const TopFeePayersPanel = () => {
         isEmpty={!isLoading && !error && rows.length === 0}
         emptyLabel="Nadie pagó comisiones en la ventana."
       >
+        <div className="mb-3.5">
+          <CompositionBar
+            items={composition}
+            limit={6}
+            formatValue={(value) => formatUsd(value, { decimals: 2 })}
+            ariaLabel="Reparto de las comisiones entre los mayores pagadores"
+            footnote={`Reparto entre estos ${TOP_PAYERS_LIMIT} usuarios, no sobre todos los ingresos — el endpoint solo devuelve la cabeza de la lista.`}
+          />
+        </div>
+
         <DataTable
           data={rows}
           columns={columns}

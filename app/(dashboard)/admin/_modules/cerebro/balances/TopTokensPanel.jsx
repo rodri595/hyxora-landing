@@ -5,6 +5,7 @@ import { cerebroChainLabel } from "@/constants/cerebro";
 import { useGetHoldings } from "@/hooks/cerebro/useGetHoldings";
 import { formatNumber, formatUsd } from "@/utils/format";
 import { useCallback, useMemo } from "react";
+import CompositionBar from "../../shared/CompositionBar";
 import Panel, { RefreshButton } from "../../shared/Panel";
 import QueryState from "../../shared/QueryState";
 import { sumColumn } from "../../shared/aggregate";
@@ -91,6 +92,19 @@ const TopTokensPanel = () => {
     []
   );
 
+  // Rows are per token *and chain*, so USDC on Base and USDC on Arbitrum arrive as
+  // two. The bar folds them back together: the question it answers is «how much of
+  // the book is this asset», and that is one number per symbol regardless of where
+  // it sits. The table below keeps the split.
+  const composition = useMemo(() => {
+    const bySymbol = new Map();
+    for (const row of rows) {
+      const value = Number(row.totalUsd) || 0;
+      bySymbol.set(row.symbol, (bySymbol.get(row.symbol) ?? 0) + value);
+    }
+    return [...bySymbol].map(([label, value]) => ({ label, value }));
+  }, [rows]);
+
   const atCap = rows.length >= HOLDINGS_LIMIT;
 
   return (
@@ -109,13 +123,25 @@ const TopTokensPanel = () => {
         isEmpty={!isLoading && !error && rows.length === 0}
         emptyLabel="No hay posiciones en tokens registradas."
       >
+        <div className="mb-3.5">
+          <CompositionBar
+            items={composition}
+            formatValue={(value) => formatUsd(value, { decimals: 0 })}
+            ariaLabel="Reparto del valor en tokens entre los mayores activos"
+            footnote={
+              atCap
+                ? "Reparto sobre las filas que devolvió /holdings, agrupadas por símbolo. Con el tope alcanzado, «Resto» se queda corto: lo que cayó por debajo del corte no está en ninguna parte de esta barra."
+                : "Reparto del valor total agrupando cada símbolo en todas sus redes."
+            }
+          />
+        </div>
+
         <DataTable
           data={rows}
           columns={columns}
           filename="cerebro-tokens"
           searchPlaceholder="Buscar por símbolo, nombre o red..."
           initialSorting={[{ id: "totalUsd", desc: true }]}
-          enableSelection={false}
           enableFooter
           enablePagination={rows.length > HOLDINGS_PAGE_SIZE}
           pageSize={HOLDINGS_PAGE_SIZE}

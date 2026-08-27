@@ -231,7 +231,6 @@ const ExpensiveOpsPanel = () => {
           filename="cerebro-ops-patrocinadas"
           searchPlaceholder="Buscar por cadena, operación, usuario o hash..."
           initialSorting={[{ id: "costUsd", desc: true }]}
-          enableSelection={false}
           enablePagination
           pageSize={25}
           bare

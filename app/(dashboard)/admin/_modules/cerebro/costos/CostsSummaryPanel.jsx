@@ -6,6 +6,7 @@ import { useGetFeesTotals } from "@/hooks/cerebro/useGetFeesTotals";
 import { formatNumber, formatUsd } from "@/utils/format";
 import { useCallback } from "react";
 import { AnimatedMoney } from "../../shared/AnimatedValue";
+import MeterBar from "../../shared/MeterBar";
 import Panel, { RefreshButton } from "../../shared/Panel";
 import QueryState from "../../shared/QueryState";
 import StatCard from "../../shared/StatCard";
@@ -47,6 +48,14 @@ const CostsSummaryPanel = () => {
 
   const revenue30d = sumDefined(feesEvm?.last30dUsd, feesSolana?.last30dUsd);
   const margin30d = revenue30d === null || cost30d === null ? null : revenue30d - cost30d;
+
+  // The margin tile answers «how much did we keep»; this answers «how close was
+  // that to zero», which is the number that moves first. Above 100% the window ran
+  // at a loss — MeterBar clamps the fill, and the label keeps the real percentage.
+  const burnRate =
+    typeof revenue30d === "number" && typeof cost30d === "number" && revenue30d > 0
+      ? (cost30d / revenue30d) * 100
+      : null;
 
   const opsEvm30d = byChain.data?.length
     ? byChain.data.reduce((total, row) => total + (row.opsCount ?? 0), 0)
@@ -92,6 +101,23 @@ const CostsSummaryPanel = () => {
             hint={`Ingresos ${formatUsd(revenue30d)} − gastos ${formatUsd(cost30d)}`}
           />
         </div>
+
+        {burnRate !== null && (
+          <div className="mt-3.5">
+            <MeterBar
+              label={`Gas sobre ingresos · ${COST_DAYS}d`}
+              value={cost30d}
+              total={revenue30d}
+              tone={burnRate >= 100 ? "warning" : burnRate >= 60 ? "neutral" : "good"}
+              hint={`de ${formatUsd(revenue30d)} cobrados`}
+            />
+            <p className="font-inter text-[10px] leading-[1.5] tracking-[-0.4px] text-[rgba(25,54,63,0.4)] mt-1.5">
+              {burnRate >= 100
+                ? `El gas patrocinado se comió el ${burnRate.toFixed(0)}% de lo cobrado en la ventana: la barra está llena porque el margen es negativo.`
+                : `El gas patrocinado se llevó el ${burnRate.toFixed(0)}% de lo cobrado en la ventana. Los dos importes son de los últimos ${COST_DAYS} días y salen de endpoints distintos (/costs/totals y /fees/totals), así que se comparan por ventana, no operación a operación.`}
+            </p>
+          </div>
+        )}
       </QueryState>
     </Panel>
   );

@@ -12,6 +12,14 @@ import QueryState from "../../shared/QueryState";
 import ScopeTabs from "./ScopeTabs";
 import { USER_PAGE_SIZE, USER_PAGE_SIZES } from "./constants";
 
+/**
+ * Selection is keyed by row id, and the default id is the row's position in the
+ * page. On a server-paginated table that means a tick stays on "the third row"
+ * while the rows underneath it change — page forward and you would be exporting
+ * somebody else. `privyId` is the one field every /users row carries.
+ */
+const getRowId = (row) => row.privyId;
+
 const formatDay = (value) => {
   if (!value) return "—";
   const date = new Date(value);
@@ -205,8 +213,8 @@ const UsersTablePanel = () => {
           filename="cerebro-usuarios"
           searchPlaceholder="Busca por correo o usuario..."
           emptyLabel="Ningún usuario coincide con la búsqueda."
-          enableSelection={false}
           showRowCount={false}
+          getRowId={getRowId}
           enablePagination
           manualPagination
           manualSorting
@@ -228,7 +236,9 @@ const UsersTablePanel = () => {
           La búsqueda de /users mira correo y nombre de usuario; el dashboard original busca además
           por wallet, signer y handle. Correo no ordena porque el endpoint no acepta esa columna, y
           la exportación baja la página que estás viendo, no las {total} filas — sube a 200 por
-          página si necesitas menos tiradas.
+          página si necesitas menos tiradas. Si marcas filas, exporta solo esas, y la selección vive
+          dentro de la página: al cambiar de página el navegador ya no tiene esas filas, así que
+          marca y exporta página a página.
         </p>
       </QueryState>
     </Panel>

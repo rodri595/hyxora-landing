@@ -353,7 +353,6 @@ const RevenueByChainTokenPanel = ({ includeNonWhitelisted = false }) => {
             emptyLabel="Esta cadena no registró entradas en la ventana."
             initialSorting={[{ id: "totalUsd", desc: true }]}
             maxHeight={520}
-            enableSelection={false}
             enableFooter
             bare
             dense

@@ -13,13 +13,14 @@ const money = (value, { signed = false } = {}) => {
 };
 
 const Figure = ({ label, value, tone }) => (
-  <div className="flex flex-col items-center gap-0.5 flex-1">
+  <div className="flex min-w-0 flex-1 flex-col items-center gap-0.5">
     <span className="font-inter text-[9px] font-medium uppercase tracking-[0.5px] text-[rgba(25,54,63,0.4)]">
       {label}
     </span>
     <span
+      title={typeof value === "string" ? value : undefined}
       className={cn(
-        "font-inter text-[14px] font-semibold tabular-nums tracking-[-0.56px]",
+        "max-w-full truncate font-inter text-[14px] font-semibold tabular-nums tracking-[-0.56px]",
         tone === "cost"
           ? "text-red-600"
           : tone === "revenue"
@@ -76,7 +77,7 @@ const MembershipCard = ({ row, filters }) => {
   }, [row.topHoldings]);
 
   return (
-    <section className="flex flex-col rounded-xl border-[0.7px] border-[rgba(25,54,63,0.08)] bg-white px-4 py-3.5 shadow-[0px_2px_12px_0px_rgba(25,54,63,0.06)]">
+    <section className="flex flex-col rounded-xl border-[0.7px] border-[rgba(25,54,63,0.08)] bg-white px-2.5 py-2.5 shadow-[0px_2px_12px_0px_rgba(25,54,63,0.06)] sm:px-4 sm:py-3.5">
       <div className="flex items-baseline justify-between gap-3">
         <h4 className="font-inter text-[13px] font-semibold tracking-[-0.52px] text-[#19363F]">
           {cerebroPlanLabel(row.plan)}
@@ -108,50 +109,54 @@ const MembershipCard = ({ row, filters }) => {
             Sin actividad en la ventana.
           </p>
         ) : (
-          <table className="w-full border-collapse">
-            <thead>
-              <tr className="border-b-[0.7px] border-[rgba(25,54,63,0.08)]">
-                <th className="text-left font-inter text-[10px] font-medium tracking-[-0.4px] text-[rgba(25,54,63,0.45)] pb-1">
-                  Funcionalidad
-                </th>
-                <th className="text-right font-inter text-[10px] font-medium tracking-[-0.4px] text-[rgba(25,54,63,0.45)] pb-1">
-                  Ingresos
-                </th>
-                <th className="text-right font-inter text-[10px] font-medium tracking-[-0.4px] text-[rgba(25,54,63,0.45)] pb-1">
-                  Gastos
-                </th>
-                <th className="text-right font-inter text-[10px] font-medium tracking-[-0.4px] text-[rgba(25,54,63,0.45)] pb-1">
-                  Margen
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {operations.map((op) => (
-                <tr
-                  key={op.operation}
-                  className="border-b-[0.7px] border-[rgba(25,54,63,0.05)] last:border-b-0"
-                >
-                  <td className="py-1.5 font-inter text-[11px] tracking-[-0.44px] text-[#19363F]">
-                    {cerebroOperationLabel(op.operation ?? op.op)}
-                  </td>
-                  <td className="py-1.5 text-right font-inter text-[11px] tabular-nums tracking-[-0.44px] text-emerald-700">
-                    {money(op.feesUsd)}
-                  </td>
-                  <td className="py-1.5 text-right font-inter text-[11px] tabular-nums tracking-[-0.44px] text-red-600">
-                    {money(op.costUsd)}
-                  </td>
-                  <td
-                    className={cn(
-                      "py-1.5 text-right font-inter text-[11px] font-medium tabular-nums tracking-[-0.44px]",
-                      (op.marginUsd ?? 0) < 0 ? "text-red-600" : "text-[#19363F]"
-                    )}
-                  >
-                    {money(op.marginUsd, { signed: true })}
-                  </td>
+          // Four money columns don't fit a phone. Scroll the table rather than the
+          // card, and take the gesture back off Lenis so the scroll actually happens.
+          <div className="-mx-1 overflow-x-auto overscroll-x-contain px-1" data-lenis-prevent>
+            <table className="w-full min-w-[300px] border-collapse">
+              <thead>
+                <tr className="border-b-[0.7px] border-[rgba(25,54,63,0.08)]">
+                  <th className="text-left font-inter text-[10px] font-medium tracking-[-0.4px] text-[rgba(25,54,63,0.45)] pb-1">
+                    Funcionalidad
+                  </th>
+                  <th className="text-right font-inter text-[10px] font-medium tracking-[-0.4px] text-[rgba(25,54,63,0.45)] pb-1">
+                    Ingresos
+                  </th>
+                  <th className="text-right font-inter text-[10px] font-medium tracking-[-0.4px] text-[rgba(25,54,63,0.45)] pb-1">
+                    Gastos
+                  </th>
+                  <th className="text-right font-inter text-[10px] font-medium tracking-[-0.4px] text-[rgba(25,54,63,0.45)] pb-1">
+                    Margen
+                  </th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {operations.map((op) => (
+                  <tr
+                    key={op.operation}
+                    className="border-b-[0.7px] border-[rgba(25,54,63,0.05)] last:border-b-0"
+                  >
+                    <td className="py-1.5 font-inter text-[11px] tracking-[-0.44px] text-[#19363F]">
+                      {cerebroOperationLabel(op.operation ?? op.op)}
+                    </td>
+                    <td className="py-1.5 text-right font-inter text-[11px] tabular-nums tracking-[-0.44px] text-emerald-700">
+                      {money(op.feesUsd)}
+                    </td>
+                    <td className="py-1.5 text-right font-inter text-[11px] tabular-nums tracking-[-0.44px] text-red-600">
+                      {money(op.costUsd)}
+                    </td>
+                    <td
+                      className={cn(
+                        "py-1.5 text-right font-inter text-[11px] font-medium tabular-nums tracking-[-0.44px]",
+                        (op.marginUsd ?? 0) < 0 ? "text-red-600" : "text-[#19363F]"
+                      )}
+                    >
+                      {money(op.marginUsd, { signed: true })}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         )}
       </div>
 

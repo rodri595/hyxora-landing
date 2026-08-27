@@ -17,6 +17,11 @@ import { useMemo } from "react";
  * @param {{ value: number, label: string }[]} props.options
  * @param {string} props.label Accessible name — the control has no visible label.
  * @param {string} [props.className] Width override; defaults to a header-sized box.
+ *   The default is elastic under `sm` on purpose: a fixed 168px `shrink-0` box next
+ *   to «Actualizar» and a title is wider than a phone, and that is exactly what put
+ *   the Costos tab into sideways scrolling. Below `sm` it grows to fill whatever the
+ *   refresh button leaves, so the two share one line instead of the dropdown
+ *   claiming a whole row to itself.
  */
 const FilterSelect = ({ value, onChange, options, label, className }) => {
   const stringOptions = useMemo(
@@ -30,7 +35,7 @@ const FilterSelect = ({ value, onChange, options, label, className }) => {
       onChange={(next) => onChange(Number(next))}
       options={stringOptions}
       ariaLabel={label}
-      className={className ?? "w-42 shrink-0"}
+      className={className ?? "min-w-0 flex-1 basis-40 sm:w-42 sm:flex-none sm:shrink-0"}
     />
   );
 };

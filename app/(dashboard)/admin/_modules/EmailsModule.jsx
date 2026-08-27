@@ -1,13 +1,13 @@
 "use client";
 
-import { useMemo, useState, useCallback, useRef } from "react";
-import gsap from "gsap";
-import { useGSAP } from "@gsap/react";
-import { useGetAllEmails } from "@/hooks/admin/useGetAllEmails";
+import CreateEmailSidebar from "@/components/CreateEmailSidebar";
 import DataTable from "@/components/DataTable";
 import Spinner from "@/components/Spinner";
-import CreateEmailSidebar from "@/components/CreateEmailSidebar";
+import { useGetAllEmails } from "@/hooks/admin/useGetAllEmails";
 import { cn } from "@/utils";
+import { useGSAP } from "@gsap/react";
+import gsap from "gsap";
+import { useCallback, useMemo, useRef, useState } from "react";
 
 gsap.registerPlugin(useGSAP);
 
@@ -58,7 +58,7 @@ const EmailsModule = () => {
         });
       }
     },
-    { dependencies: [isOpen] },
+    { dependencies: [isOpen] }
   );
 
   useGSAP(
@@ -76,7 +76,7 @@ const EmailsModule = () => {
         gsap.to(backdrop, { opacity: 0, duration: 0.22, overwrite: true });
       }
     },
-    { dependencies: [isOpen] },
+    { dependencies: [isOpen] }
   );
 
   const columns = useMemo(
@@ -141,7 +141,7 @@ const EmailsModule = () => {
             <span
               className={cn(
                 "inline-flex items-center px-1.5 py-0.5 rounded-[5px] font-inter text-[10px] font-medium tracking-[-0.3px] border",
-                cls,
+                cls
               )}
             >
               {val}
@@ -150,7 +150,7 @@ const EmailsModule = () => {
         },
       },
     ],
-    [],
+    []
   );
 
   if (isLoading)
@@ -162,7 +162,7 @@ const EmailsModule = () => {
 
   return (
     <div className="flex flex-row flex-1 min-h-0 overflow-hidden h-full">
-      <div className="flex flex-col flex-1 w-0 min-h-0 rounded-xl border-[0.7px] border-[rgba(25,54,63,0.08)] shadow-[0px_2px_12px_0px_rgba(25,54,63,0.08)] px-4 py-3 overflow-hidden">
+      <div className="flex flex-col flex-1 w-0 min-h-0 overflow-hidden py-2.5 sm:rounded-xl sm:border-[0.7px] sm:border-[rgba(25,54,63,0.08)] sm:px-4 sm:py-3 sm:shadow-[0px_2px_12px_0px_rgba(25,54,63,0.08)]">
         {/* Header row */}
         <div className="flex items-center justify-between mb-3 shrink-0">
           <div className="flex items-center gap-2">

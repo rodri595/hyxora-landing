@@ -30,8 +30,11 @@ const AdminContent = () => {
   const Module = moduleMap[activeTab];
 
   return (
+    // p-2 on a phone: this is the outermost gutter, and every module inside adds
+    // its own — the Cerebro shell, then each panel, then the table. Four nested
+    // 16px gutters were eating a fifth of the viewport before a number was drawn.
     <section
-      className="flex-1 flex gap-4 justify-start items-start p-4 h-full min-h-0"
+      className="flex-1 flex gap-4 justify-start items-start p-2 sm:p-4 h-full min-h-0"
       data-lenis-prevent
     >
       {Module ? (

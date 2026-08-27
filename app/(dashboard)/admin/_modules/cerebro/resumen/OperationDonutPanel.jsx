@@ -125,13 +125,19 @@ const OperationDonutPanel = ({ filters, valueKey, title, description, emptyLabel
                 className="size-[7px] shrink-0 rounded-full"
                 style={{ background: row.color }}
               />
-              <span className="font-inter text-[11px] tracking-[-0.44px] text-[#19363F]">
+              {/* min-w-0 + truncate: «external_transfer» is wider than the label
+                  column on a phone, and without a floor to shrink to it pushes the
+                  two numeric columns off the panel instead of ellipsing. */}
+              <span
+                className="min-w-0 truncate font-inter text-[11px] tracking-[-0.44px] text-[#19363F]"
+                title={row.label}
+              >
                 {row.label}
               </span>
-              <span className="font-inter text-[10px] tabular-nums tracking-[-0.4px] text-[rgba(25,54,63,0.45)] ml-auto">
+              <span className="shrink-0 font-inter text-[10px] tabular-nums tracking-[-0.4px] text-[rgba(25,54,63,0.45)] ml-auto">
                 {formatNumber(row.opsCount)} tx
               </span>
-              <span className="font-inter text-[11px] font-semibold tabular-nums tracking-[-0.44px] text-[#19363F] w-[92px] text-right">
+              <span className="shrink-0 font-inter text-[11px] font-semibold tabular-nums tracking-[-0.44px] text-[#19363F] w-[72px] sm:w-[92px] text-right">
                 {formatUsdPrecise(row.value)}
               </span>
             </div>

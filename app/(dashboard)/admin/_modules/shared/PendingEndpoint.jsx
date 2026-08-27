@@ -54,7 +54,10 @@ const PendingEndpoint = ({ needs, fields = [], shape }) => {
             <div className="absolute top-1.5 right-1.5 z-1">
               <CopyButton text={shapeJson} />
             </div>
-            <pre className="max-h-[260px] overflow-auto rounded-lg bg-white border-[0.7px] border-[rgba(25,54,63,0.1)] p-2.5 pr-9 font-mono text-[10px] leading-[1.5] text-[rgba(25,54,63,0.65)]">
+            <pre
+              data-lenis-prevent
+              className="max-h-[260px] overflow-auto overscroll-contain rounded-lg bg-white border-[0.7px] border-[rgba(25,54,63,0.1)] p-2.5 pr-9 font-mono text-[10px] leading-[1.5] text-[rgba(25,54,63,0.65)]"
+            >
               {shapeJson}
             </pre>
           </div>

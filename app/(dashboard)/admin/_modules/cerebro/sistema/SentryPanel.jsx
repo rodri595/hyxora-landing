@@ -219,7 +219,6 @@ const SentryPanel = () => {
                 searchPlaceholder="Buscar por mensaje o culprit..."
                 emptyLabel="Sentry no devolvió ningún issue sin resolver."
                 initialSorting={[{ id: "events24h", desc: true }]}
-                enableSelection={false}
                 enablePagination={issues.length > 25}
                 pageSize={25}
                 bare

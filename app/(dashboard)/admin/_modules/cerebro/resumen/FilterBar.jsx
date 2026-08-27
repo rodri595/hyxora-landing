@@ -137,7 +137,9 @@ const FilterBar = ({ filters, onApply, onExport, canExport = false }) => {
   );
 
   return (
-    <section className="flex flex-col gap-3.5 rounded-xl border-[0.7px] border-[rgba(25,54,63,0.08)] bg-white px-4 py-3.5 shadow-[0px_2px_12px_0px_rgba(25,54,63,0.06)]">
+    // Padding tracks Panel's — this is a card in the same stack and should not be
+    // the one that indents further on a phone.
+    <section className="flex flex-col gap-3.5 rounded-xl border-[0.7px] border-[rgba(25,54,63,0.08)] bg-white px-2.5 py-2.5 shadow-[0px_2px_12px_0px_rgba(25,54,63,0.06)] sm:px-4 sm:py-3.5">
       <div className="flex flex-wrap items-center gap-2">
         <span className="font-inter text-[11px] tracking-[-0.44px] text-[rgba(25,54,63,0.45)] mr-1">
           Rangos rápidos:

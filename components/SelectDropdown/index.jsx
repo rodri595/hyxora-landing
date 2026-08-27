@@ -106,8 +106,11 @@ const SelectDropdown = ({
           />
           {/* Dropdown panel. max-h + scroll because some lists are long — the
               Cerebro user filter renders up to 200 options and would otherwise
-              run off the bottom of the viewport with no way to reach the end. */}
+              run off the bottom of the viewport with no way to reach the end.
+              data-lenis-prevent so that inner scroll actually works: Lenis owns
+              wheel and touch on the document and would otherwise swallow both. */}
           <div
+            data-lenis-prevent
             className={cn(
               "absolute left-0 right-0 z-20 max-h-70 overflow-y-auto overscroll-contain bg-white border-[0.7px] border-[rgba(25,54,63,0.08)] rounded-[10px] shadow-[0px_4px_16px_0px_rgba(25,54,63,0.1)] p-1",
               dropUp ? "bottom-[calc(100%+4px)]" : "top-[calc(100%+4px)]"

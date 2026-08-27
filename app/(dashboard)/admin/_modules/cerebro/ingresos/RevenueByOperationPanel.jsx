@@ -194,17 +194,21 @@ const RevenueByOperationPanel = () => {
                   className="size-[7px] shrink-0 rounded-full"
                   style={{ background: isIdle ? "rgba(25,54,63,0.15)" : row.color }}
                 />
+                {/* min-w-0 + truncate: «external_transfer» is wider than the label
+                    column on a phone, and with no floor to shrink to it shoves the
+                    numeric columns off the panel instead of ellipsing. */}
                 <span
                   className={cn(
-                    "font-inter text-[11px] tracking-[-0.44px]",
+                    "min-w-0 truncate font-inter text-[11px] tracking-[-0.44px]",
                     isIdle ? "text-[rgba(25,54,63,0.35)]" : "text-[#19363F]"
                   )}
+                  title={row.label}
                 >
                   {row.label}
                 </span>
                 <span
                   className={cn(
-                    "font-inter text-[10px] tabular-nums tracking-[-0.4px] ml-auto",
+                    "shrink-0 font-inter text-[10px] tabular-nums tracking-[-0.4px] ml-auto",
                     isIdle ? "text-[rgba(25,54,63,0.25)]" : "text-[rgba(25,54,63,0.45)]"
                   )}
                 >
@@ -212,7 +216,7 @@ const RevenueByOperationPanel = () => {
                 </span>
                 <span
                   className={cn(
-                    "font-inter text-[11px] font-semibold tabular-nums tracking-[-0.44px] w-[92px] text-right",
+                    "shrink-0 font-inter text-[11px] font-semibold tabular-nums tracking-[-0.44px] w-[72px] sm:w-[92px] text-right",
                     isIdle ? "text-[rgba(25,54,63,0.3)]" : "text-[#19363F]"
                   )}
                 >

@@ -50,20 +50,25 @@ export const RefreshButton = ({ onClick, isLoading = false, label = "Actualizar"
  * of the title rather than as prose the eye skips.
  * @param {React.ReactNode} [props.description]
  * @param {React.ReactNode} [props.action] Rendered top-right, typically a RefreshButton.
+ * Below `sm` the header stacks and this row goes full-width, so a filter dropdown
+ * beside the button drops onto its own line instead of forcing the panel wider than
+ * the viewport — which is what made whole tabs scroll sideways on a phone. The
+ * `[&>div]` rules reach into the wrapper each caller passes, because they all pass a
+ * `flex` row and rewriting twenty of them to wrap is the same fix twenty times.
  * @param {"neutral" | "warning"} [props.tone] Tints the border when something needs attention.
  * @param {React.ReactNode} [props.children]
  */
 const Panel = ({ title, meta, description, action, tone = "neutral", children }) => (
   <section
     className={cn(
-      "flex flex-col rounded-xl border-[0.7px] bg-white px-4 py-3.5",
+      "flex min-w-0 flex-col rounded-xl border-[0.7px] bg-white px-2.5 py-2.5 sm:px-4 sm:py-3.5",
       tone === "warning"
         ? "border-red-200 shadow-[0px_2px_12px_0px_rgba(220,38,38,0.06)]"
         : "border-[rgba(25,54,63,0.08)] shadow-[0px_2px_12px_0px_rgba(25,54,63,0.06)]"
     )}
   >
-    <div className="flex items-start justify-between gap-4 mb-1">
-      <h3 className="flex flex-wrap items-baseline gap-x-2 font-inter text-[13px] font-semibold text-[#19363F] tracking-[-0.52px]">
+    <div className="flex flex-col gap-2 mb-1 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
+      <h3 className="flex min-w-0 flex-wrap items-baseline gap-x-2 font-inter text-[13px] font-semibold text-[#19363F] tracking-[-0.52px]">
         {title}
         {meta && (
           <span className="font-normal tabular-nums text-[11px] tracking-[-0.44px] text-[rgba(25,54,63,0.4)]">
@@ -71,7 +76,11 @@ const Panel = ({ title, meta, description, action, tone = "neutral", children })
           </span>
         )}
       </h3>
-      {action}
+      {action && (
+        <div className="flex w-full min-w-0 flex-wrap items-center gap-2 sm:w-auto sm:shrink-0 sm:justify-end [&>div]:max-sm:w-full [&>div]:max-sm:flex-wrap">
+          {action}
+        </div>
+      )}
     </div>
 
     {description && (

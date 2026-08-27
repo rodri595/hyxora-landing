@@ -160,7 +160,9 @@ balances, fees and error counts — a mocked figure is something someone acts on
 
 ```
 _modules/
-  shared/          Panel, StatCard, QueryState, PendingEndpoint, StatusBadge
+  shared/          Panel, StatCard, QueryState, PendingEndpoint, StatusBadge,
+                   MeterBar (one labelled proportion), CompositionBar (how a
+                   total splits across its biggest contributors), ChartTooltip
   cerebro/         Cerebro API only — sistema/ redes/ planes/ …
   comisiones/      Fee schema + whitelists — Hyxora API (deliberately outside cerebro/)
   UsersModule.jsx  …and the other original admin tabs
@@ -172,14 +174,49 @@ Top-level tabs live in `components/AdminTabBar` + the `moduleMap` in
 ## Tables
 
 Use `@/components/DataTable` — never hand-roll a table. For tables inside a
-`Panel`, pass `bare dense enableSelection={false}`; the panel already provides
-the card and title. Right-align numerics with `meta: { align: "right" }`. Totals
-rows come from each column's `footer` plus `enableFooter`. Every flag defaults to
-the original behaviour, so the older admin tables are unaffected.
+`Panel`, pass `bare dense`; the panel already provides the card and title.
+Right-align numerics with `meta: { align: "right" }`. Totals rows come from each
+column's `footer` plus `enableFooter`. Every flag defaults to the original
+behaviour, so the older admin tables are unaffected.
+
+**Selection follows what a row *is*, not how long the table is.** A row-level
+table — one row per user, op, fee, holding, issue, whitelist entry — keeps the
+checkbox column, because picking a handful of records and exporting just those is
+a real thing to want, and export already prefers the selection over the filtered
+rows. A group-by table — one row per chain, plan or operation type, a dozen rows
+under a totals footer — passes `enableSelection={false}`: there is no workflow
+where you export three of eight chains, and the column costs width the numbers
+need. Clicking anywhere on a row toggles it, except on a link, button or input.
+
+When `enableSelection` meets `manualPagination`, pass `getRowId`. Selection is
+keyed by row id and the default id is the row's *index*, so without it a tick
+stays on "the third row" while the rows underneath it change — page forward and
+you export somebody else. `usuarios/UsersTablePanel` keys on `privyId`. Selection
+is still per-page there, because the browser only ever holds one page; the panel
+says so in its footnote rather than exporting a subset in silence.
 
 `renderSubRow(rowData, row)` turns rows into expandable ones — a chevron column
 appears and the returned node renders full-width underneath. `isRowExpandable`
 narrows which rows get one. Both default off, so no existing table grows a column.
+
+## Mobile, and `data-lenis-prevent`
+
+Lenis smooth-scrolls the document from `app/providers.jsx`, and it owns wheel and
+touch everywhere. **Anything that scrolls inside itself needs `data-lenis-prevent`**
+or the gesture is swallowed and the element never moves: DataTable's wrapper, the
+Cerebro tab body, both tab strips, `SelectDropdown`'s menu, the column menu, and
+every `<pre>` with a `max-h`. It is not styling — without it a wide table simply
+cannot be scrolled sideways on a phone. `Tabs` forwards unknown props for exactly
+this reason.
+
+`Panel`'s header stacks below `sm` and its `action` row goes full-width, with
+`[&>div]` rules reaching into the wrapper each caller passes. That is deliberate:
+every panel hands `action` a `flex` row, and a `shrink-0` filter beside
+«Actualizar» beside a title is wider than a phone — one fixed-width dropdown in a
+Costos header is what made whole tabs scroll sideways. So **a control in a panel
+header is elastic, never `shrink-0` at a fixed width** (`costos/FilterSelect` is
+the pattern), and a long label in a legend row gets `min-w-0 truncate` so it
+ellipses instead of shoving the numeric columns off the card.
 
 One caveat that bites: **`admin.md` is not always right about response shapes.**
 `/holdings` is documented as `chainId` + `chainName` and actually sends `chain`,

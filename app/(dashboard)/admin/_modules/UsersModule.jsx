@@ -1,18 +1,18 @@
 "use client";
 
-import { useMemo, useState, useCallback, useRef } from "react";
-import gsap from "gsap";
-import { useGSAP } from "@gsap/react";
-import { useGetAllUsers } from "@/hooks/admin/useGetAllUsers";
-import { useGetAllPayments } from "@/hooks/admin/useGetAllPayments";
-import { useGetAllPolls } from "@/hooks/poll/useGetAllPolls";
-import DataTable from "@/components/DataTable";
-import Spinner from "@/components/Spinner";
-import UserDetailSidebar from "@/components/UserDetailSidebar";
-import InvoiceDetailSidebar from "@/components/InvoiceDetailSidebar";
-import { cn } from "@/utils";
-import Tabs from "@/components/Tabs";
 import CopyButton from "@/components/CopyButton";
+import DataTable from "@/components/DataTable";
+import InvoiceDetailSidebar from "@/components/InvoiceDetailSidebar";
+import Spinner from "@/components/Spinner";
+import Tabs from "@/components/Tabs";
+import UserDetailSidebar from "@/components/UserDetailSidebar";
+import { useGetAllPayments } from "@/hooks/admin/useGetAllPayments";
+import { useGetAllUsers } from "@/hooks/admin/useGetAllUsers";
+import { useGetAllPolls } from "@/hooks/poll/useGetAllPolls";
+import { cn } from "@/utils";
+import { useGSAP } from "@gsap/react";
+import gsap from "gsap";
+import { useCallback, useMemo, useRef, useState } from "react";
 
 gsap.registerPlugin(useGSAP);
 
@@ -25,8 +25,7 @@ const TABS = [
 
 const UsersModule = () => {
   const { data, isLoading, isError } = useGetAllUsers();
-  const { data: allPayments, isLoading: isLoadingPayments } =
-    useGetAllPayments();
+  const { data: allPayments, isLoading: isLoadingPayments } = useGetAllPayments();
   const { data: allPolls } = useGetAllPolls();
   const rows = useMemo(() => data ?? [], [data]);
   const [activeTab, setActiveTab] = useState("all");
@@ -57,7 +56,7 @@ const UsersModule = () => {
         (p) =>
           p?.status === "completed" &&
           (p?.wallet?.toLowerCase() === user?.address?.toLowerCase() ||
-            p?.email?.toLowerCase() === user?.email?.toLowerCase()),
+            p?.email?.toLowerCase() === user?.email?.toLowerCase())
       );
       for (const payment of userPayments) {
         matchedPaymentIds.add(payment._id);
@@ -79,8 +78,7 @@ const UsersModule = () => {
 
     // Orphaned payments (no matching user account)
     for (const payment of allPayments) {
-      if (payment?.status !== "completed" || matchedPaymentIds.has(payment._id))
-        continue;
+      if (payment?.status !== "completed" || matchedPaymentIds.has(payment._id)) continue;
       let parsedData = null;
       try {
         if (payment?.data) parsedData = JSON.parse(payment.data);
@@ -165,7 +163,7 @@ const UsersModule = () => {
       setIsOpen(false);
       setActiveTab(id);
     },
-    [activeTab],
+    [activeTab]
   );
 
   const buyersColumns = useMemo(
@@ -209,8 +207,7 @@ const UsersModule = () => {
         header: "Email",
         cell: (info) => {
           const val = info.getValue();
-          if (!val || val === "N/A")
-            return <span className="text-[rgba(25,54,63,0.3)]">—</span>;
+          if (!val || val === "N/A") return <span className="text-[rgba(25,54,63,0.3)]">—</span>;
           return (
             <div className="flex items-center gap-1.5">
               <span className="font-inter text-[11px] tracking-[-0.44px] text-[rgba(25,54,63,0.7)]">
@@ -245,8 +242,7 @@ const UsersModule = () => {
         header: "Factura",
         cell: (info) => {
           const val = info.getValue();
-          if (!val || val === "N/A")
-            return <span className="text-[rgba(25,54,63,0.3)]">—</span>;
+          if (!val || val === "N/A") return <span className="text-[rgba(25,54,63,0.3)]">—</span>;
           return (
             <div className="flex items-center gap-1.5">
               <span className="font-mono text-[10px] tracking-tight text-[rgba(25,54,63,0.65)]">
@@ -262,8 +258,7 @@ const UsersModule = () => {
         header: "Método",
         cell: (info) => {
           const val = info.getValue();
-          if (!val || val === "N/A")
-            return <span className="text-[rgba(25,54,63,0.3)]">—</span>;
+          if (!val || val === "N/A") return <span className="text-[rgba(25,54,63,0.3)]">—</span>;
           const label = val.toLowerCase();
           const isStripe = label.includes("stripe");
           const isMoonpay = label.includes("moonpay");
@@ -275,7 +270,7 @@ const UsersModule = () => {
                   ? "bg-violet-50 text-violet-700 border border-violet-200"
                   : isMoonpay
                     ? "bg-blue-50 text-blue-700 border border-blue-200"
-                    : "bg-[rgba(25,54,63,0.06)] text-[#19363F]",
+                    : "bg-[rgba(25,54,63,0.06)] text-[#19363F]"
               )}
             >
               {val}
@@ -306,7 +301,7 @@ const UsersModule = () => {
             <span
               className={cn(
                 "font-inter text-[11px] font-semibold tabular-nums",
-                count > 0 ? "text-[#19363F]" : "text-[rgba(25,54,63,0.25)]",
+                count > 0 ? "text-[#19363F]" : "text-[rgba(25,54,63,0.25)]"
               )}
             >
               {count}
@@ -375,7 +370,7 @@ const UsersModule = () => {
         },
       },
     ],
-    [onSelectInvoice],
+    [onSelectInvoice]
   );
 
   // ── Desktop animation (lg+): slide wrapper width ──────────────────────────
@@ -402,7 +397,7 @@ const UsersModule = () => {
         });
       }
     },
-    { dependencies: [isOpen] },
+    { dependencies: [isOpen] }
   );
 
   // ── Mobile/tablet animation (<lg): overlay slide + backdrop fade ──────────
@@ -432,7 +427,7 @@ const UsersModule = () => {
         gsap.to(backdrop, { opacity: 0, duration: 0.22, overwrite: true });
       }
     },
-    { dependencies: [isOpen] },
+    { dependencies: [isOpen] }
   );
 
   const columns = useMemo(
@@ -490,15 +485,14 @@ const UsersModule = () => {
         header: "Rol",
         cell: (info) => {
           const role = info.getValue();
-          if (!role)
-            return <span className="text-[rgba(25,54,63,0.3)]">—</span>;
+          if (!role) return <span className="text-[rgba(25,54,63,0.3)]">—</span>;
           return (
             <span
               className={cn(
                 "inline-flex items-center px-1.5 py-0.5 rounded-[5px] font-inter text-[10px] font-medium tracking-[-0.4px]",
                 role === "Admin"
                   ? "bg-[#19363F] text-white"
-                  : "bg-[rgba(25,54,63,0.06)] text-[#19363F]",
+                  : "bg-[rgba(25,54,63,0.06)] text-[#19363F]"
               )}
             >
               {role}
@@ -516,7 +510,7 @@ const UsersModule = () => {
             <span
               className={cn(
                 "font-inter text-[11px] font-semibold tracking-[-0.44px] tabular-nums",
-                count > 0 ? "text-[#19363F]" : "text-[rgba(25,54,63,0.25)]",
+                count > 0 ? "text-[#19363F]" : "text-[rgba(25,54,63,0.25)]"
               )}
             >
               {count}
@@ -587,13 +581,7 @@ const UsersModule = () => {
                   xmlns="http://www.w3.org/2000/svg"
                   aria-hidden="true"
                 >
-                  <circle
-                    cx="8"
-                    cy="8"
-                    r="6.5"
-                    stroke="currentColor"
-                    strokeWidth="1.3"
-                  />
+                  <circle cx="8" cy="8" r="6.5" stroke="currentColor" strokeWidth="1.3" />
                   <path
                     d="M8 5v3.5l2 2"
                     stroke="currentColor"
@@ -608,7 +596,7 @@ const UsersModule = () => {
         },
       },
     ],
-    [onSelectUser],
+    [onSelectUser]
   );
 
   if (isLoading)
@@ -629,13 +617,8 @@ const UsersModule = () => {
 
   return (
     <div className="flex flex-row flex-1 min-h-0 overflow-hidden h-full">
-      <div className="flex flex-col flex-1 w-0 min-h-0 rounded-xl border-[0.7px] border-[rgba(25,54,63,0.08)] shadow-[0px_2px_12px_0px_rgba(25,54,63,0.08)] px-4 py-3 overflow-hidden ">
-        <Tabs
-          tabs={TABS}
-          value={activeTab}
-          onChange={handleTabChange}
-          className="mb-3"
-        />
+      <div className="flex flex-col flex-1 w-0 min-h-0 overflow-hidden py-2.5 sm:rounded-xl sm:border-[0.7px] sm:border-[rgba(25,54,63,0.08)] sm:px-4 sm:py-3 sm:shadow-[0px_2px_12px_0px_rgba(25,54,63,0.08)] ">
+        <Tabs tabs={TABS} value={activeTab} onChange={handleTabChange} className="mb-3" />
 
         {activeTab === "all" && (
           <DataTable

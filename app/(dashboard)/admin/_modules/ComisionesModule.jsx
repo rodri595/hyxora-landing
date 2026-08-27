@@ -14,7 +14,10 @@ import WhitelistedVaultsPanel from "./comisiones/WhitelistedVaultsPanel";
  * Plans and the matrix share one /admin/fees query via react-query's cache.
  */
 const ComisionesModule = () => (
-  <div className="flex flex-col gap-3.5 py-3 pb-8 w-full overflow-y-auto">
+  <div
+    className="flex flex-col gap-3.5 py-3 pb-8 w-full min-w-0 overflow-y-auto overflow-x-hidden"
+    data-lenis-prevent
+  >
     <PlansPanel />
     <FeeMatrixPanel />
     <WhitelistedTokensPanel />

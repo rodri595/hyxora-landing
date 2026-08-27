@@ -224,7 +224,7 @@ const QuizModule = () => {
 
   return (
     <div className="flex flex-row flex-1 min-h-0 overflow-hidden h-full">
-      <div className="flex flex-col flex-1 w-0 min-h-0 rounded-xl border-[0.7px] border-[rgba(25,54,63,0.08)] shadow-[0px_2px_12px_0px_rgba(25,54,63,0.08)] px-4 py-3 overflow-hidden">
+      <div className="flex flex-col flex-1 w-0 min-h-0 overflow-hidden py-2.5 sm:rounded-xl sm:border-[0.7px] sm:border-[rgba(25,54,63,0.08)] sm:px-4 sm:py-3 sm:shadow-[0px_2px_12px_0px_rgba(25,54,63,0.08)]">
         <div className="flex items-center justify-between mb-1 shrink-0">
           <h2 className="font-inter font-semibold text-[14px] tracking-[-0.56px] text-[#19363F]">
             Quiz
@@ -249,7 +249,10 @@ const QuizModule = () => {
             searchPlaceholder="Buscar por email..."
           />
         ) : (
-          <div className="flex flex-col gap-2 flex-1 min-h-0 overflow-y-auto scrollbar-thin scrollbar-thumb-[rgba(25,54,63,0.15)] scrollbar-thumb-rounded-lg">
+          <div
+            className="flex flex-col gap-2 flex-1 min-h-0 overflow-y-auto overscroll-contain"
+            data-lenis-prevent
+          >
             {questions.map((q, qi) => (
               <div
                 key={q.questionNumber}

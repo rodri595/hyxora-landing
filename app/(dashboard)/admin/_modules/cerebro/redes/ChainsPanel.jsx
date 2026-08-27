@@ -4,10 +4,23 @@ import DataTable from "@/components/DataTable";
 import { cerebroActiveChains } from "@/constants/cerebro";
 import { useGetChainsSummary } from "@/hooks/cerebro/useGetChainsSummary";
 import { cn } from "@/utils";
-import { formatNumber, formatUsd } from "@/utils/format";
+import { formatNumber, formatUsd, formatUsdAxis, formatUsdPrecise } from "@/utils/format";
 import { useMemo } from "react";
+import {
+  Bar,
+  BarChart,
+  CartesianGrid,
+  Legend,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
+import { TooltipSurface, tooltipWrapperStyle, useHeldTooltip } from "../../shared/ChartTooltip";
+import CompositionBar from "../../shared/CompositionBar";
 import Panel, { RefreshButton } from "../../shared/Panel";
 import QueryState from "../../shared/QueryState";
+import { COST_COLOR, REVENUE_COLOR } from "../resumen/constants";
 
 /** `/chains` fixes its own window; the headers say which one. */
 const DAYS = 30;
@@ -42,6 +55,50 @@ const Cursor = ({ value }) => (
     {value === null ? "—" : formatNumber(value)}
   </span>
 );
+
+const AXIS = "rgba(25,54,63,0.4)";
+const GRID = "rgba(25,54,63,0.08)";
+
+const PnlTooltip = (props) => {
+  const { visible, payload, label } = useHeldTooltip(props.active, props.payload, props.label);
+  if (!payload) return null;
+  const point = payload[0]?.payload;
+
+  return (
+    <TooltipSurface visible={visible}>
+      <p className="font-inter text-[10px] font-medium tracking-[-0.4px] text-[rgba(25,54,63,0.45)] mb-1">
+        {label}
+      </p>
+      {[
+        { key: "feesUsd", name: "Comisiones", color: REVENUE_COLOR },
+        { key: "costUsd", name: "Gastos", color: COST_COLOR },
+      ].map((row) => (
+        <div key={row.key} className="flex items-center gap-2">
+          <span className="size-[7px] shrink-0 rounded-full" style={{ background: row.color }} />
+          <span className="font-inter text-[11px] tracking-[-0.44px] text-[rgba(25,54,63,0.6)]">
+            {row.name}
+          </span>
+          <span className="font-inter text-[11px] font-semibold tabular-nums tracking-[-0.44px] text-[#19363F] ml-auto pl-3">
+            {formatUsdPrecise(point?.[row.key])}
+          </span>
+        </div>
+      ))}
+      <div className="mt-1 flex items-center gap-2 border-t-[0.7px] border-[rgba(25,54,63,0.08)] pt-1">
+        <span className="font-inter text-[11px] tracking-[-0.44px] text-[rgba(25,54,63,0.6)]">
+          Margen
+        </span>
+        <span
+          className={cn(
+            "font-inter text-[11px] font-semibold tabular-nums tracking-[-0.44px] ml-auto pl-3",
+            (point?.marginUsd ?? 0) < 0 ? "text-red-600" : "text-emerald-700"
+          )}
+        >
+          {formatUsdPrecise(point?.marginUsd)}
+        </span>
+      </div>
+    </TooltipSurface>
+  );
+};
 
 /**
  * Per-chain TVL, 30-day P&L and both indexer cursors, straight from `GET /chains`.
@@ -214,6 +271,18 @@ const ChainsPanel = () => {
     []
   );
 
+  const tvlComposition = useMemo(
+    () => rows.map((row) => ({ label: row.chainName, value: row.tvlUsd })),
+    [rows]
+  );
+
+  // Only the chains with something to draw. A row of paired zero-length bars adds a
+  // label and no information, and with every chain listed the chart is mostly that.
+  const pnlRows = useMemo(
+    () => rows.filter((row) => (row.feesUsd ?? 0) > 0 || (row.costUsd ?? 0) > 0),
+    [rows]
+  );
+
   return (
     <Panel
       title="Cadenas"
@@ -221,6 +290,88 @@ const ChainsPanel = () => {
       action={<RefreshButton onClick={() => refetch()} isLoading={isFetching} />}
     >
       <QueryState isLoading={isLoading} error={error}>
+        <div className="flex flex-col gap-4 mb-4">
+          <div>
+            <h4 className="font-inter text-[10px] font-medium uppercase tracking-[0.6px] text-[rgba(25,54,63,0.4)] mb-2">
+              Reparto del TVL por red
+            </h4>
+            <CompositionBar
+              items={tvlComposition}
+              limit={cerebroActiveChains.length}
+              formatValue={(value) => formatUsd(value, { decimals: 0 })}
+              ariaLabel="Reparto del TVL entre las redes"
+              emptyLabel="Ninguna red reporta TVL."
+            />
+          </div>
+
+          <div>
+            <h4 className="font-inter text-[10px] font-medium uppercase tracking-[0.6px] text-[rgba(25,54,63,0.4)] mb-2">
+              Comisiones contra gastos · {DAYS}d
+            </h4>
+            {/* layout="vertical": chain names read left-to-right at any width, where
+                an X-axis category would collide or rotate on a phone. Height grows
+                with the row count so the bars keep a constant thickness. */}
+            {pnlRows.length === 0 ? (
+              <p className="font-inter text-[11px] tracking-[-0.44px] text-[rgba(25,54,63,0.4)] py-2">
+                Ninguna red registró comisiones ni gastos en la ventana.
+              </p>
+            ) : (
+              <ResponsiveContainer width="100%" height={Math.max(160, pnlRows.length * 34 + 40)}>
+                <BarChart
+                  data={pnlRows}
+                  layout="vertical"
+                  margin={{ top: 4, right: 12, bottom: 0, left: 4 }}
+                  barGap={2}
+                >
+                  <CartesianGrid horizontal={false} stroke={GRID} />
+                  <XAxis
+                    type="number"
+                    tickFormatter={formatUsdAxis}
+                    tick={{ fontSize: 10, fill: AXIS }}
+                    tickLine={false}
+                    axisLine={{ stroke: GRID }}
+                  />
+                  <YAxis
+                    type="category"
+                    dataKey="chainName"
+                    tick={{ fontSize: 10, fill: AXIS }}
+                    tickLine={false}
+                    axisLine={false}
+                    width={78}
+                  />
+                  <Tooltip
+                    content={<PnlTooltip />}
+                    cursor={{ fill: "rgba(25,54,63,0.04)" }}
+                    wrapperStyle={tooltipWrapperStyle}
+                  />
+                  <Legend
+                    align="right"
+                    verticalAlign="top"
+                    iconType="circle"
+                    iconSize={7}
+                    formatter={(value) => (
+                      <span className="font-inter text-[10px] tracking-[-0.4px] text-[rgba(25,54,63,0.6)]">
+                        {value}
+                      </span>
+                    )}
+                  />
+                  <Bar
+                    dataKey="feesUsd"
+                    name="Comisiones"
+                    fill={REVENUE_COLOR}
+                    radius={[0, 3, 3, 0]}
+                  />
+                  <Bar dataKey="costUsd" name="Gastos" fill={COST_COLOR} radius={[0, 3, 3, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            )}
+            <p className="font-inter text-[10px] leading-[1.5] tracking-[-0.4px] text-[rgba(25,54,63,0.4)] mt-1">
+              Las dos barras son cifras absolutas, no una resta: una red gana dinero cuando la verde
+              pasa a la roja. El margen exacto está en el tooltip y en la tabla.
+            </p>
+          </div>
+        </div>
+
         <DataTable
           data={rows}
           columns={columns}

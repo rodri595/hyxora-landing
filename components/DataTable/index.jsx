@@ -287,7 +287,10 @@ const ColumnToggle = ({ table }) => {
               if (e.key === "Escape") setOpen(false);
             }}
           />
-          <div className="absolute right-0 top-[calc(100%+4px)] z-20 max-h-72 overflow-y-auto bg-white border-[0.7px] border-[rgba(25,54,63,0.08)] rounded-[10px] shadow-[0px_4px_16px_0px_rgba(25,54,63,0.1)] p-1 min-w-44">
+          <div
+            data-lenis-prevent
+            className="absolute right-0 top-[calc(100%+4px)] z-20 max-h-72 overflow-y-auto overscroll-contain bg-white border-[0.7px] border-[rgba(25,54,63,0.08)] rounded-[10px] shadow-[0px_4px_16px_0px_rgba(25,54,63,0.1)] p-1 min-w-44"
+          >
             {columns.map((column) => (
               <button
                 key={column.id}
@@ -405,7 +408,7 @@ const PaginationBar = ({ table, pageSizeOptions }) => {
         )}
       </div>
 
-      <div className="flex items-center gap-1.5">
+      <div className="flex flex-wrap items-center gap-1.5">
         <PageButton
           onClick={() => table.setPageIndex(0)}
           disabled={!table.getCanPreviousPage()}
@@ -419,7 +422,7 @@ const PaginationBar = ({ table, pageSizeOptions }) => {
           label="Página anterior"
         >
           <PageArrow direction="left" />
-          Anterior
+          <span className="hidden sm:inline">Anterior</span>
         </PageButton>
 
         <span className="font-inter text-[11px] tabular-nums tracking-[-0.44px] text-[rgba(25,54,63,0.5)] px-1 whitespace-nowrap">
@@ -431,7 +434,7 @@ const PaginationBar = ({ table, pageSizeOptions }) => {
           disabled={!table.getCanNextPage()}
           label="Página siguiente"
         >
-          Siguiente
+          <span className="hidden sm:inline">Siguiente</span>
           <PageArrow />
         </PageButton>
         <PageButton
@@ -494,6 +497,11 @@ const ALIGN_CLASS = {
  *   hides the selector.
  * @param {boolean} [isFetching]            - Dims the rows while a server round-trip
  *   is in flight, so a stale page reads as stale.
+ * @param {(row: object) => string} [getRowId] - Stable identity for a row. Selection
+ *   state is keyed by row id, and the default id is the row's *index*, so on a
+ *   server-paginated table "row 3 is selected" survives a page change and lands on
+ *   whatever record is third on the next page. Pass this whenever `enableSelection`
+ *   and `manualPagination` are both on.
  *
  * Server-driven mode — for an endpoint that paginates, sorts and searches itself.
  * Turn on the `manual*` flag for each concern the server owns and pass the matching
@@ -536,6 +544,7 @@ const DataTable = ({
   pageSize = 25,
   pageSizeOptions = [10, 25, 50, 100],
   isFetching = false,
+  getRowId,
   manualPagination = false,
   manualSorting = false,
   manualFiltering = false,
@@ -625,6 +634,7 @@ const DataTable = ({
     columns: tableColumns,
     state: { sorting, globalFilter, rowSelection, columnVisibility, pagination, expanded },
     enableRowSelection: enableSelection,
+    getRowId,
     onRowSelectionChange: setRowSelection,
     onSortingChange: setSorting,
     onGlobalFilterChange: setGlobalFilter,
@@ -685,7 +695,7 @@ const DataTable = ({
       )}
     >
       {showToolbar && (
-        <div className="flex items-center justify-between gap-3 mb-3 flex-wrap">
+        <div className="flex items-center justify-between gap-2 mb-3 flex-wrap">
           {title && (
             <h2 className="font-inter font-semibold text-[14px] tracking-[-0.56px] text-[#19363F] mr-auto">
               {title}
@@ -694,7 +704,10 @@ const DataTable = ({
 
           {enableSearch && (
             <Field
-              className={cn("flex-1 min-w-40 max-w-70", !title && "mr-auto")}
+              className={cn(
+                "min-w-0 flex-1 basis-full sm:basis-40 sm:max-w-70",
+                !title && "sm:mr-auto"
+              )}
               classInput="h-[30px] pl-9 text-[11px] tracking-[-0.44px]"
               value={globalFilter}
               onChange={(e) => setGlobalFilter(e.target.value)}
@@ -711,7 +724,7 @@ const DataTable = ({
             </Field>
           )}
 
-          <div className="flex items-center gap-2">
+          <div className="flex min-w-0 flex-wrap items-center gap-2">
             {showRowCount && (
               <span className="font-inter text-[11px] tracking-[-0.44px] text-[rgba(25,54,63,0.45)] whitespace-nowrap">
                 {selectedCount > 0 ? `${selectedCount} seleccionados` : `${totalRows} filas`}
@@ -724,11 +737,15 @@ const DataTable = ({
         </div>
       )}
 
-      {/* Table wrapper */}
+      {/* Table wrapper.
+          data-lenis-prevent: Lenis hijacks wheel and touch on the whole document, so
+          without it a horizontal drag on a wide table scrolls the page instead of the
+          table, and a table with maxHeight can't be scrolled at all. */}
       <div
+        data-lenis-prevent
         style={maxHeight ? { maxHeight } : undefined}
         className={cn(
-          "overflow-auto",
+          "overflow-auto overscroll-x-contain",
           isFetching && "opacity-55 transition-opacity",
           bare
             ? "rounded-lg border-[0.7px] border-[rgba(25,54,63,0.06)]"
@@ -797,6 +814,17 @@ const DataTable = ({
               table.getRowModel().rows.map((row, i) => (
                 <Fragment key={row.id}>
                   <tr
+                    // The row carries cursor-pointer when selection is on, so it has to
+                    // actually select — before this it only responded to a key press it
+                    // could never receive, and the checkbox was the sole way in.
+                    // Clicks that started on something interactive are left alone: the
+                    // address and tx cells are links, the chevron is a button, and the
+                    // checkbox stops propagation on its own.
+                    onClick={(e) => {
+                      if (!enableSelection || !row.getCanSelect()) return;
+                      if (e.target.closest("a,button,input,select,textarea,label")) return;
+                      row.toggleSelected();
+                    }}
                     onKeyDown={(e) => {
                       if (e.key === " " || e.key === "Enter") row.getToggleSelectedHandler()(e);
                     }}

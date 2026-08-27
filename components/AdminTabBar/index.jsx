@@ -23,7 +23,8 @@ const AdminTabBarInner = () => {
       tabs={ADMIN_TABS}
       value={activeTab}
       onChange={(id) => router.push(`/admin?tab=${id}`)}
-      className="w-full overflow-x-auto"
+      className="w-full overflow-x-auto overscroll-x-contain"
+      data-lenis-prevent
     />
   );
 };

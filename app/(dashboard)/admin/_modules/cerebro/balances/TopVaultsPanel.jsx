@@ -5,6 +5,7 @@ import { cerebroChainLabel } from "@/constants/cerebro";
 import { useGetHoldings } from "@/hooks/cerebro/useGetHoldings";
 import { formatNumber, formatUsd } from "@/utils/format";
 import { useMemo } from "react";
+import CompositionBar from "../../shared/CompositionBar";
 import Panel, { RefreshButton } from "../../shared/Panel";
 import QueryState from "../../shared/QueryState";
 import { sumColumn } from "../../shared/aggregate";
@@ -80,6 +81,17 @@ const TopVaultsPanel = () => {
     [data]
   );
 
+  // Grouped by vault name, not by row: the same vault on two chains is one place
+  // the money is, and «cuánto pesa Morpho Blue» is the question the bar answers.
+  const composition = useMemo(() => {
+    const byVault = new Map();
+    for (const row of rows) {
+      const label = row.vaultName || row.symbol || "—";
+      byVault.set(label, (byVault.get(label) ?? 0) + (Number(row.totalUsd) || 0));
+    }
+    return [...byVault].map(([label, value]) => ({ label, value }));
+  }, [rows]);
+
   return (
     <Panel
       title="Principales vaults entre todos los usuarios"
@@ -92,13 +104,21 @@ const TopVaultsPanel = () => {
         isEmpty={!isLoading && !error && rows.length === 0}
         emptyLabel="No hay depósitos en vaults registrados."
       >
+        <div className="mb-3.5">
+          <CompositionBar
+            items={composition}
+            formatValue={(value) => formatUsd(value, { decimals: 0 })}
+            ariaLabel="Reparto de los depósitos en vaults"
+            footnote="Reparto de los depósitos agrupando cada vault en todas sus redes."
+          />
+        </div>
+
         <DataTable
           data={rows}
           columns={columns}
           filename="cerebro-vaults"
           searchPlaceholder="Buscar por vault, símbolo o red..."
           initialSorting={[{ id: "totalUsd", desc: true }]}
-          enableSelection={false}
           enableFooter
           bare
           dense
