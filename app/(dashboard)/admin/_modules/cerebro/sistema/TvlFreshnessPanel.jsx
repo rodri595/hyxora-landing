@@ -1,123 +1,106 @@
 "use client";
 
-import { useGetSystemHealth } from "@/hooks/cerebro/useGetSystemHealth";
-import { cn } from "@/utils";
-import { formatDateTime, formatNumber, hoursSince, timeAgo } from "@/utils/format";
-import MeterBar from "../../shared/MeterBar";
+import { useGetTvlFreshness } from "@/hooks/cerebro/useGetTvlFreshness";
+import { formatDateTime, formatNumber, timeAgo } from "@/utils/format";
+import { AnimatedCount } from "../../shared/AnimatedValue";
 import Panel, { RefreshButton } from "../../shared/Panel";
-import PendingEndpoint from "../../shared/PendingEndpoint";
 import QueryState from "../../shared/QueryState";
+import StatCard from "../../shared/StatCard";
 
-/** Past this, the ported dashboard calls a user's portfolio stale. */
-const STALE_HOURS = 24;
+const isCount = (value) => typeof value === "number" && Number.isFinite(value);
 
+/** One labelled figure on the footer line. */
+const Fact = ({ label, value, title }) => (
+  <div className="flex items-center gap-1.5">
+    <span className="font-inter text-[10px] tracking-[-0.4px] text-[rgba(25,54,63,0.45)]">
+      {label}
+    </span>
+    <span
+      className="font-inter text-[10px] tabular-nums tracking-[-0.4px] text-[rgba(25,54,63,0.65)]"
+      title={title}
+    >
+      {value}
+    </span>
+  </div>
+);
+
+/**
+ * How stale the TVL behind Saldos and Usuarios is, user by user.
+ *
+ * Read `/system/tvl-freshness` and not `/system/health`: the latter reports one
+ * global timestamp, the max of the same column, so a single user refreshing moves
+ * it while everyone else stays a day behind. The histogram is the only thing that
+ * says how much of the TVL on the other tabs is current.
+ */
 const TvlFreshnessPanel = () => {
-  const { data, error, isLoading, isFetching, refetch } = useGetSystemHealth();
+  const { data, error, isLoading, isFetching, refetch } = useGetTvlFreshness();
 
-  const withTvl = data?.tvl?.usersWithTvl;
-  const withoutTvl = data?.tvl?.usersWithoutTvl;
-  const freshness = data?.tvl?.freshness;
+  const { fresh1h, within1d, over1d, never, total, newest, oldest } = data ?? {};
 
-  const hours = hoursSince(freshness);
-  const isStale = hours !== null && hours > STALE_HOURS;
-  const isUnknown = hours === null;
-
-  // `/system/health` reports the two counts but not their sum, so the population
-  // is only known when both arrived — otherwise the bars have no denominator.
-  const covered =
-    typeof withTvl === "number" && typeof withoutTvl === "number" ? withTvl + withoutTvl : null;
-
-  const tvlErrorCount = Array.isArray(data?.system?.tvlErrors) ? data.system.tvlErrors.length : 0;
+  // The two ways of being out of date, added because the headline treats them the
+  // same: `over1d` is a portfolio that has drifted, `never` one that was never
+  // fetched at all. Null rather than 0 when either field is missing — "nobody is
+  // lagging" is a claim, and a field that did not arrive is no evidence for it.
+  const lagging = isCount(over1d) && isCount(never) ? over1d + never : null;
 
   return (
     <Panel
       title="Actualidad de cartera (TVL)"
-      description="Cuándo se refrescaron por última vez las posiciones de Zerion. Alimenta las pestañas de Saldos y Usuarios: si el snapshot va viejo, la TVL que ves allí va por detrás de la real."
-      tone={isStale ? "warning" : "neutral"}
+      description="Cuándo se refrescaron por última vez las posiciones de Zerion, usuario a usuario. Alimenta las pestañas de Saldos y Usuarios: la parte rezagada de este histograma es exactamente la parte de la TVL que allí va por detrás de la real."
+      tone={lagging > 0 ? "warning" : "neutral"}
       action={<RefreshButton onClick={() => refetch()} isLoading={isFetching} />}
     >
       <QueryState isLoading={isLoading} error={error}>
-        <div className="flex flex-col gap-3.5 sm:flex-row sm:items-stretch">
-          {/* The one figure that decides whether anything else on Saldos can be
-              trusted, so it gets the size and the colour rather than a tile in a row. */}
-          <div
-            className={cn(
-              "flex flex-col justify-center gap-0.5 rounded-lg border-[0.7px] px-3.5 py-3 sm:min-w-49",
-              isUnknown
-                ? "border-[rgba(25,54,63,0.06)] bg-[rgba(25,54,63,0.02)]"
-                : isStale
-                  ? "border-amber-200 bg-amber-50/60"
-                  : "border-emerald-200 bg-emerald-50/60"
-            )}
-          >
-            <span className="font-inter text-[10px] font-medium uppercase tracking-[0.6px] text-[rgba(25,54,63,0.4)]">
-              Último refresco
-            </span>
-            <span
-              className={cn(
-                "font-inter text-[22px] font-semibold leading-tight tracking-[-0.88px]",
-                isUnknown
-                  ? "text-[rgba(25,54,63,0.35)]"
-                  : isStale
-                    ? "text-amber-700"
-                    : "text-emerald-700"
-              )}
-            >
-              {timeAgo(freshness)}
-            </span>
-            <span className="font-inter text-[10px] tabular-nums tracking-[-0.4px] text-[rgba(25,54,63,0.45)]">
-              {isUnknown
-                ? "el endpoint no devolvió timestamp"
-                : isStale
-                  ? `${formatDateTime(freshness)} · por encima de ${STALE_HOURS}h`
-                  : formatDateTime(freshness)}
-            </span>
-          </div>
-
-          <div className="flex flex-1 flex-col justify-center gap-2.5 rounded-lg border-[0.7px] border-[rgba(25,54,63,0.08)] px-3.5 py-3">
-            <MeterBar
-              label="Usuarios con TVL valorada"
-              value={withTvl}
-              total={covered}
-              tone="good"
-            />
-            <MeterBar
-              label="Usuarios sin TVL"
-              value={withoutTvl}
-              total={covered}
-              tone="muted"
-              hint="cartera vacía o nunca refrescada"
-            />
-            <p className="font-inter text-[10px] tracking-[-0.4px] text-[rgba(25,54,63,0.35)]">
-              {covered === null
-                ? "Población desconocida — falta uno de los dos contadores."
-                : `${formatNumber(covered)} usuarios en total según /system/health.`}
+        {lagging !== null &&
+          (lagging > 0 ? (
+            <p className="mb-2.5 font-inter text-[11px] font-medium leading-[1.5] tracking-[-0.44px] text-amber-700">
+              {formatNumber(lagging)}{" "}
+              {lagging === 1 ? "usuario sin refrescar" : "usuarios sin refrescar"} en el último día
+              — su saldo en Saldos y Usuarios se queda corto hasta el próximo barrido.
             </p>
-          </div>
-        </div>
+          ) : (
+            <p className="mb-2.5 font-inter text-[11px] font-medium tracking-[-0.44px] text-emerald-700">
+              Todos los usuarios con Safe se refrescaron en el último día.
+            </p>
+          ))}
 
-        {tvlErrorCount > 0 && (
-          <p className="mt-2.5 font-inter text-[11px] font-medium tracking-[-0.44px] text-red-600">
-            {tvlErrorCount} error(es) de TVL en el último refresco — ver «Posiciones sin precio»
-            justo debajo.
-          </p>
-        )}
-
-        <div className="mt-3">
-          <PendingEndpoint
-            needs="Falta el histograma por antigüedad («< 1h», «último día», «> 1 día», «nunca») y el usuario más desactualizado: /system/health solo da un timestamp global, que se mueve en cuanto un solo usuario se refresca y por tanto no dice cuántos van rezagados. La consulta ya existe tal cual en el dashboard antiguo (getTvlFreshness) — el spec está en docs/cerebro-sistema-endpoints.md. Los botones «Actualizar activos» / «Actualizar todos» no se piden: son escrituras y Cerebro es de solo lectura."
-            fields={["GET /system/tvl-freshness"]}
-            shape={{
-              fresh1h: 28,
-              within1d: 392,
-              over1d: 0,
-              never: 0,
-              total: 420,
-              newest: "2026-08-26T09:58:00.000Z",
-              oldest: "2026-08-25T12:04:00.000Z",
-            }}
+        <div className="flex flex-wrap gap-2.5">
+          <StatCard value={<AnimatedCount value={fresh1h} />} label="Menos de 1h" tone="good" />
+          <StatCard
+            value={<AnimatedCount value={within1d} />}
+            label="En el último día"
+            tone="neutral"
+          />
+          <StatCard
+            value={<AnimatedCount value={over1d} />}
+            label="Más de 1 día"
+            tone={over1d > 0 ? "warning" : "muted"}
+            hint="desactualizados"
+          />
+          <StatCard
+            value={<AnimatedCount value={never} />}
+            label="Nunca refrescados"
+            tone={never > 0 ? "warning" : "muted"}
+            hint="Safe sin snapshot"
           />
         </div>
+
+        <div className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-1.5 border-t-[0.7px] border-[rgba(25,54,63,0.06)] pt-3">
+          <Fact label="Usuarios con Safe" value={formatNumber(total)} />
+          <Fact
+            label="Refresco más reciente"
+            value={timeAgo(newest)}
+            title={formatDateTime(newest)}
+          />
+          <Fact label="Más antiguo" value={timeAgo(oldest)} title={formatDateTime(oldest)} />
+        </div>
+
+        <p className="mt-2 font-inter text-[10px] leading-[1.5] tracking-[-0.4px] text-[rgba(25,54,63,0.4)]">
+          Los cuatro tramos son excluyentes y suman el total, que solo cuenta usuarios con Safe: una
+          cuenta de Privy sin wallet no tiene nada que refrescar. Cerebro es de solo lectura, así
+          que «Actualizar» aquí vuelve a leer el histograma — disparar el refresco de Zerion sigue
+          siendo cosa del cron y de los botones del dashboard antiguo.
+        </p>
       </QueryState>
     </Panel>
   );

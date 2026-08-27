@@ -90,12 +90,51 @@ service pings, the Solana fee-payer balance, the Zerion treasury scan and live
 Anywhere else in `cerebro/`, if the section needs data `admin.md` doesn't
 document, **check app-api's spec before reaching for `apiClient`.** If neither
 serves it, render the `PendingEndpoint` component naming the endpoint we'd need,
-the way `TvlFreshnessPanel` and `UserActivationPanel` do.
+the way `resumen/MembershipPanel` and `costos/CostsByPlanPanel` do.
 
 Those asks do get answered: on 2026-08-25 six of them shipped as endpoints and
 the panels were rewired (`/costs/recent`, `/fees/recent`, `/holdings/holders`,
-`/users/trends`, `/system/sentry`, `/system/monitoring.pimlicoRunway`). Write the
-`needs` copy as a request a person will read, not as a tombstone.
+`/users/trends`, `/system/sentry`, `/system/monitoring.pimlicoRunway`), and on
+2026-08-27 the three «Sistema» asks did too (`/system/tvl-freshness`,
+`/system/unpriced-positions`, `/users/activation`). Write the `needs` copy as a
+request a person will read, not as a tombstone — `docs/cerebro-sistema-endpoints.md`
+is what those three were asked with, and it now records what came back.
+
+Two names to watch on that newest batch. `/users/activation` calls the parked-funds
+stage **`balanceNeverUsed`**, not the `fundedNeverUsed` the spec asked for, and that
+name carries both the bucket count and the enumerated list. And `/system/health`'s
+`tvl.freshness` is still a **max** — one user refreshing moves it — so the per-user
+histogram and `oldest` exist only on `/system/tvl-freshness`. Read that one whenever
+the question is how much of the TVL on Saldos and Usuarios is current.
+
+**`/users/activation` is deployed but answers 500** — `a.createdAt.toISOString is
+not a function`, its port having dropped the `createdAt: new Date(row.created_at)`
+mapping `getUsersOverview` ends with. So `useGetUserActivation` assembles that
+funnel here instead, classifying every row of a full `/users` sweep, and returns the
+shape the endpoint documents so switching back is a one-hook change. It is a
+workaround with an expiry date, not the pattern: **a fan-out is still the thing to
+avoid**, and the only reason this one is in the tree is that the panel is otherwise
+a 500 for as long as the fix takes.
+
+Three traps it was written around, each worth knowing before touching anything that
+counts users:
+
+- **`?scope=active|inactive` is not the activity split a funnel wants.** It behaves
+  like `last_active_at`, which every indexer hook stamps — the deployment op
+  included — so `scope=inactive` drops people who have never touched the product.
+  Reading the funnel off it showed 5 users with parked funds where there are 16.
+- **Coerce every figure Cerebro sends.** `/users/stats`'s `activation` block arrives
+  with quoted numerics, so a `typeof value === "number"` check nulls the lot: that is
+  what left every bar on that panel at "—" while the row-level counts underneath
+  rendered fine. Same lesson as `firstNumber()` in `_modules/shared/aggregate.js`.
+- **Page until a page comes back empty, not until one comes back short.** The API is
+  free to cap `pageSize` below what you asked for, and treating a 50-row answer to a
+  200-row request as the end of the list reads a fifth of the table in silence.
+
+What it does say out loud: `warnings` for a sweep that stopped short or a population
+that disagrees with `/users/stats`, and `notes` for the activity proxy — `/users`
+carries no activities and no ramp orders, so «usada» is a treasury fee or more than
+one sponsored op, and someone whose only use was free and fee-less reads a stage low.
 
 Never invent placeholder numbers for a missing endpoint. These panels show
 balances, fees and error counts — a mocked figure is something someone acts on.

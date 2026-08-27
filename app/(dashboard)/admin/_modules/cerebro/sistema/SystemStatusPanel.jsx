@@ -1,7 +1,7 @@
 "use client";
 
 import DataTable from "@/components/DataTable";
-import { cerebroChains } from "@/constants/cerebro";
+import { cerebroChainLabel, cerebroColdCursorChainIds } from "@/constants/cerebro";
 import { useGetSystemHealth } from "@/hooks/cerebro/useGetSystemHealth";
 import { cn } from "@/utils";
 import { formatNumber, hoursSince, timeAgo } from "@/utils/format";
@@ -10,11 +10,82 @@ import Panel, { RefreshButton } from "../../shared/Panel";
 import QueryState from "../../shared/QueryState";
 
 /**
- * An indexer that hasn't moved in this long is treated as stuck. The ported
- * dashboard greys out chains it knows are inactive; the v1 API doesn't expose
- * that flag, so every cursor is held to the same threshold here.
+ * Hours a cursor may sit still before it counts as stuck, per indexer kind —
+ * ported from `staleThresholdMin()` in `hyxora-admin-main/src/components/
+ * SystemHealthCard.tsx`.
+ *
+ * The three financial indexers run every 15min–4h but are only flagged after a
+ * full day, matching the product rule «stale = older than 24h»; a few hours of lag
+ * is «al día», not stale. Everything else is a daily cron and gets 48h so one
+ * missed day doesn't raise an alarm. A single flat threshold is what the panel had
+ * before, and it both cried wolf at the daily syncs and stayed quiet about a
+ * treasury cursor that had been stuck since the morning.
  */
-const STALE_HOURS = 24;
+const STALE_HOURS_BY_KIND = {
+  treasury: 24,
+  "userops-etherscan": 24,
+  "userops-safe": 24,
+};
+const DEFAULT_STALE_HOURS = 48;
+
+const staleThresholdHours = (kind) => STALE_HOURS_BY_KIND[kind] ?? DEFAULT_STALE_HOURS;
+
+/**
+ * The cursor list, wherever `/system/health` puts it.
+ *
+ * `admin.md` documents `{ system: { indexers: [...] } }`, and reading only that is
+ * what left this table at «0 filas» against the live API. Same disagreement the doc
+ * already has on `/holdings` (documented `chainId`, sends `chain`) and on
+ * `/fees/diagnostics`, so this reads every plausible spelling rather than trusting
+ * one — see `ingresos/FeeTaggingPanel`'s `toTagRow()`.
+ */
+const readCursorList = (data) => {
+  const candidates = [
+    data?.system?.indexers,
+    data?.system?.cursors,
+    data?.system?.indexerState,
+    data?.indexers,
+    data?.cursors,
+    data?.indexerState,
+    data?.indexer_state,
+  ];
+  return candidates.find(Array.isArray) ?? [];
+};
+
+/**
+ * One indexer cursor, normalised. The row-level feeds Cerebro passes straight
+ * through from the indexer tables are snake_cased (`/costs/recent` says so out
+ * loud), so accept both casings of every field.
+ *
+ * `chainId` is `0` on the cross-chain indexers — fx-rates, hyxora-activity,
+ * hyxora-ramp, sync-users, snapshot — which belong to no single network. The old
+ * dashboard labels those «Cross-chain»; here they read «Multicadena». Solana's
+ * legs arrive under the `SOLANA_CHAIN_ID` sentinel and resolve through
+ * `cerebroChainLabel()` like any other id.
+ */
+const toCursorRow = (row = {}) => {
+  const rawChainId = row.chainId ?? row.chain_id ?? row.chain ?? null;
+  const kind = row.kind ?? row.type ?? row.indexer ?? "—";
+  const updatedAt = row.updatedAt ?? row.updated_at ?? row.lastUpdated ?? row.last_updated ?? null;
+  const lastBlock = row.lastBlock ?? row.last_block ?? null;
+
+  const isCrossChain =
+    rawChainId === null ||
+    rawChainId === undefined ||
+    rawChainId === "" ||
+    Number(rawChainId) === 0;
+
+  return {
+    kind,
+    updatedAt,
+    lastBlock,
+    chainName: isCrossChain ? "Multicadena" : cerebroChainLabel({ chainId: rawChainId }),
+    // Frozen by design — Hyxora stopped routing through these, so the cursor is
+    // correct at "never advancing again" and must not paint the panel red.
+    isCold: !isCrossChain && cerebroColdCursorChainIds.has(Number(rawChainId)),
+    hoursStale: hoursSince(updatedAt) ?? 0,
+  };
+};
 
 const WarningIcon = () => (
   <svg
@@ -39,25 +110,27 @@ const WarningIcon = () => (
 const SystemStatusPanel = () => {
   const { data, error, isLoading, isFetching, refetch } = useGetSystemHealth();
 
-  const rows = useMemo(
-    () =>
-      (data?.system?.indexers ?? []).map((row) => ({
-        ...row,
-        chainName:
-          cerebroChains[row.chainId] ?? (row.chainId ? `Chain ${row.chainId}` : "Multicadena"),
-        hoursStale: hoursSince(row.updatedAt) ?? 0,
-      })),
-    [data]
-  );
+  const rows = useMemo(() => readCursorList(data).map(toCursorRow), [data]);
 
-  const staleCount = rows.filter((row) => row.hoursStale > STALE_HOURS).length;
+  const staleCount = rows.filter(
+    (row) => !row.isCold && row.hoursStale > staleThresholdHours(row.kind)
+  ).length;
 
   const columns = useMemo(
     () => [
       {
         accessorKey: "chainName",
         header: "Cadena",
-        cell: (info) => <span className="text-[#19363F]">{info.getValue()}</span>,
+        cell: ({ row }) => (
+          <span
+            className={cn(row.original.isCold ? "text-[rgba(25,54,63,0.4)]" : "text-[#19363F]")}
+          >
+            {row.original.chainName}
+            {row.original.isCold && (
+              <span className="ml-1.5 text-[10px] text-[rgba(25,54,63,0.35)]">(inactiva)</span>
+            )}
+          </span>
+        ),
       },
       {
         accessorKey: "kind",
@@ -74,7 +147,7 @@ const SystemStatusPanel = () => {
         meta: { align: "right" },
         cell: (info) => (
           <span className="tabular-nums text-[rgba(25,54,63,0.6)]">
-            {formatNumber(info.getValue())}
+            {info.getValue() === null ? "—" : formatNumber(info.getValue())}
           </span>
         ),
       },
@@ -84,7 +157,9 @@ const SystemStatusPanel = () => {
         header: "Actualizado",
         meta: { align: "right", label: "Actualizado" },
         cell: ({ row }) => {
-          const isStale = row.original.hoursStale > STALE_HOURS;
+          const isStale =
+            !row.original.isCold &&
+            row.original.hoursStale > staleThresholdHours(row.original.kind);
           return (
             <span
               className={cn(
@@ -102,18 +177,47 @@ const SystemStatusPanel = () => {
     []
   );
 
+  // The backend cache arrives either as the documented boolean or as the object the
+  // old dashboard renders (`{ ok, totalKeys, ... }`). Prefer the key count when it
+  // is there — "0 claves" is a far more useful answer than "OK".
+  const backendCache = data?.system?.backendCache ?? data?.backendCache ?? null;
+  const backendCacheOk =
+    backendCache && typeof backendCache === "object"
+      ? backendCache.ok !== false
+      : (data?.system?.backendCacheOk ?? data?.backendCacheOk ?? null);
+  const backendCacheKeys =
+    backendCache && typeof backendCache === "object" ? backendCache.totalKeys : undefined;
+
+  const backendCacheLabel = (() => {
+    if (backendCacheOk === null || backendCacheOk === undefined) return "—";
+    if (!backendCacheOk) return "Con errores";
+    if (typeof backendCacheKeys === "number") return `${formatNumber(backendCacheKeys)} claves`;
+    return "OK";
+  })();
+
+  const latest = data?.data ?? data?.latest ?? {};
+
+  // A 200 with no cursor list is indistinguishable from "no indexers configured"
+  // unless the panel says what it did get, and this is the tab where that belongs.
+  const responseKeys =
+    data && typeof data === "object" && !Array.isArray(data) ? Object.keys(data) : [];
+  const emptyLabel =
+    responseKeys.length > 0
+      ? `El endpoint respondió sin cursores de indexador. Claves recibidas: ${responseKeys.join(", ")}.`
+      : "El endpoint no devolvió cursores de indexador.";
+
   return (
     <Panel
       title="Estado del sistema"
-      description="Cursores de los indexers y estado de la caché del backend. Un cursor parado significa que las cifras de las demás pestañas se quedan cortas hasta que se recupere."
+      description="Cursores de los indexers y estado de la caché del backend. Un cursor parado significa que las cifras de las demás pestañas se quedan cortas hasta que se recupere. Las cadenas inactivas se muestran en gris: sus cursores están congelados a propósito."
       tone={staleCount > 0 ? "warning" : "neutral"}
       action={<RefreshButton onClick={() => refetch()} isLoading={isFetching} />}
     >
       <QueryState isLoading={isLoading} error={error}>
         {staleCount > 0 && (
           <p className="font-inter text-[11px] font-medium tracking-[-0.44px] text-red-600 mb-2.5">
-            {staleCount} {staleCount === 1 ? "cursor parado" : "cursores parados"} (&gt;{" "}
-            {STALE_HOURS}h) — las cifras de otras pestañas pueden contar de menos mientras persista.
+            {staleCount} {staleCount === 1 ? "cursor parado" : "cursores parados"} — las cifras de
+            otras pestañas pueden contar de menos mientras persista.
           </p>
         )}
 
@@ -127,7 +231,7 @@ const SystemStatusPanel = () => {
           bare
           dense
           maxHeight={340}
-          emptyLabel="El endpoint no devolvió cursores de indexador."
+          emptyLabel={emptyLabel}
         />
 
         <div className="flex flex-wrap items-center gap-x-5 gap-y-1.5 mt-3 pt-3 border-t-[0.7px] border-[rgba(25,54,63,0.06)]">
@@ -137,11 +241,15 @@ const SystemStatusPanel = () => {
             </span>
             <span
               className={cn(
-                "font-inter text-[10px] font-medium tracking-[-0.4px]",
-                data?.system?.backendCacheOk ? "text-emerald-700" : "text-red-600"
+                "font-inter text-[10px] font-medium tabular-nums tracking-[-0.4px]",
+                backendCacheOk === null || backendCacheOk === undefined
+                  ? "text-[rgba(25,54,63,0.35)]"
+                  : backendCacheOk
+                    ? "text-emerald-700"
+                    : "text-red-600"
               )}
             >
-              {data?.system?.backendCacheOk ? "OK" : "Con errores"}
+              {backendCacheLabel}
             </span>
           </div>
 
@@ -150,7 +258,7 @@ const SystemStatusPanel = () => {
               Última fee de tesorería
             </span>
             <span className="font-inter text-[10px] tabular-nums text-[rgba(25,54,63,0.65)]">
-              {timeAgo(data?.data?.latestTreasuryFee)}
+              {timeAgo(latest.latestTreasuryFee ?? latest.latest_treasury_fee)}
             </span>
           </div>
 
@@ -159,7 +267,7 @@ const SystemStatusPanel = () => {
               Última operación de usuario
             </span>
             <span className="font-inter text-[10px] tabular-nums text-[rgba(25,54,63,0.65)]">
-              {timeAgo(data?.data?.latestUserOp)}
+              {timeAgo(latest.latestUserOp ?? latest.latest_user_op)}
             </span>
           </div>
         </div>

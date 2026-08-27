@@ -25,6 +25,91 @@ page load for data one `GROUP BY` answers. That is the same reasoning that retir
 
 ---
 
+## Estado: los tres shipearon — 2026-08-27
+
+El equipo de Cerebro los publicó los tres (`CEREBRO_ENDPOINTS.md`, Telegram,
+2026-08-27) y ya no queda ningún «Pendiente de endpoint» en la pestaña. Dos se leen
+tal cual; **`/users/activation` responde 500** y su panel se calcula en el propio
+front mientras tanto — el bug está descrito justo debajo de esta sección.
+
+Lo que llegó distinto de lo que se pide más abajo — el resto coincide:
+
+| Se pidió | Se publicó |
+|---|---|
+| `/system/tvl-freshness` | idéntico a la respuesta de abajo, caché 1 minuto |
+| `/system/unpriced-positions` | la forma **partida**: `{ symbol, chain, users }`, con `chain` como slug de Zerion o `null`. La variante `"SYMBOL@chain"` no se usó |
+| `/users/activation` | mismo embudo, pero el tramo de fondos aparcados **y su lista se llaman `balanceNeverUsed`**, no `fundedNeverUsed` |
+
+Dos reglas de `/users/activation` cambiaron respecto a lo que se pedía, y las dos
+hacen falta para leer el embudo:
+
+- **El umbral de saldo es $0.50, no $0.** `walletNotDeployed` y `deployedNeverUsed`
+  exigen TVL ≤ $0.50; `balanceNeverUsed` es > $0.50. El polvo que deja un depósito
+  fallido ya no asciende a nadie al tramo con fondos.
+- **«Desplegada» es una UserOp patrocinada**, que es justo lo que este documento
+  proponía y dejaba a confirmar. Queda confirmado: la primera op patrocinada *es* el
+  despliegue. La señal de actividad sigue siendo `hyxora_activities` +
+  `hyxora_ramp_orders`, nunca `last_active_at`.
+
+Ninguna de las dos alternativas que se ofrecen abajo se tomó: `system.tvlErrors`
+sigue sin documentar — se lee `/system/unpriced-positions` en su lugar — y
+`/users/stats` conserva intactos sus cuatro contadores solapados, así que nada de lo
+que los leía se rompió.
+
+Una cosa que comprobar antes de darlo por bueno en producción: `CEREBRO_ENDPOINTS.md`
+da como base `https://admin.wafflemakr.xyz/api/v1`, y `NEXT_PUBLIC_CEREBRO_API`
+apunta a `https://admin.hyxora.com/api/v1`. Es la misma app en otro despliegue: si
+las tres rutas dan 404 ahí, es que todavía no se han promocionado.
+
+Las dos correcciones del final del documento quedaron reconocidas: HyperEVM es 999 y
+`/holdings` manda el slug de Zerion.
+
+---
+
+## Open bug — `GET /users/activation` returns 500
+
+Live on `admin.hyxora.com` since 2026-08-27, failing on every call:
+
+```
+500  a.createdAt.toISOString is not a function
+```
+
+It is the endpoint, not auth: `/users/stats` answers fine on the same host with the
+same token, and the three new routes all return `401 unauthorized` unauthenticated
+the way every other v1 route does.
+
+The `a` says comparator — something sorts or serialises the `balanceNeverUsed` list
+and calls `.toISOString()` on a `createdAt` that is still the raw Postgres string.
+`getUsersOverview` in `hyxora-admin-main/src/lib/queries.ts` is the one place that
+gets this right: its mapper ends `createdAt: new Date(row.created_at)`. The port
+looks to have kept the consumer and dropped that mapper. Either wrap the value
+before sorting, or emit the string as-is — the response documents `createdAt` as ISO
+8601, which a Postgres `timestamptz` already serialises to.
+
+Until it is fixed the landing admin sweeps `/users` in full and classifies each row
+itself (`hooks/cerebro/useGetUserActivation.jsx`). Three findings from doing that,
+all of them things `admin.md` could say and currently does not:
+
+1. **`?scope=active|inactive` is not the funnel's activity split.** Filtering the
+   sweep through `scope=inactive` returned 5 of the 16 users who have funds parked in
+   a Safe they never used — it drops people whose wallet was merely deployed. It
+   behaves like `last_active_at`, the column this spec's bucket rules single out as
+   the wrong signal for exactly that reason. Whatever it is, please document the
+   predicate; if there is also a flag for real product use (`hyxora_activities` /
+   `hyxora_ramp_orders`), that is the one this panel wants, ideally as a field on the
+   `/users` row.
+2. **`/users/stats` sends `activation` as quoted numerics.** `{"total":"448"}`
+   rather than `448`, which any strict numeric check reads as absent. Worth either
+   casting server-side or documenting.
+3. **`/users` rows carry `safeAddress`**, which the documented response does not
+   mention — it comes straight from `getUsersOverview`, and the «sin wallet» bucket
+   and the Safe column both read it, so please keep it. Same question for that
+   mapper's `costOps` and `feeTxs`: if the port kept them we would rather count
+   sponsored ops than infer a deployment from `costUsd > 0`. Tell us which of the
+   three actually ship and we will document them on our side.
+
+---
+
 ## 1. GET /system/tvl-freshness
 
 How long ago each user's Zerion portfolio was last refreshed, bucketed. Answers
@@ -238,8 +323,9 @@ calls it. Keep the four legacy counters alongside so nothing that reads them bre
 | `/system/unpriced-positions` | `cerebro/sistema/UnpricedPositionsPanel` |
 | `/users/activation` | `cerebro/sistema/UserActivationPanel` |
 
-All three render a «Pendiente de endpoint» block today naming exactly these paths.
-Ship any one of them and only that panel changes — they do not depend on each other.
+Los tres renderizaban un bloque «Pendiente de endpoint» con exactamente estas rutas;
+desde el 2026-08-27 leen el endpoint real y cada panel cayó por su cuenta, sin
+depender de los otros dos.
 
 ## Two corrections to `admin.md` while you are in there
 

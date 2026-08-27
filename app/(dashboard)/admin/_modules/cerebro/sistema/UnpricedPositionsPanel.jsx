@@ -1,11 +1,10 @@
 "use client";
 
 import { cerebroChainLabel } from "@/constants/cerebro";
-import { useGetSystemHealth } from "@/hooks/cerebro/useGetSystemHealth";
+import { useGetUnpricedPositions } from "@/hooks/cerebro/useGetUnpricedPositions";
 import { formatNumber } from "@/utils/format";
 import { useMemo } from "react";
 import Panel, { RefreshButton } from "../../shared/Panel";
-import PendingEndpoint from "../../shared/PendingEndpoint";
 import QueryState from "../../shared/QueryState";
 
 const CheckIcon = () => (
@@ -28,105 +27,94 @@ const CheckIcon = () => (
 );
 
 /**
- * `system.tvlErrors` is documented in admin.md only as an empty array, so its row
- * shape is unknown and this has to read defensively.
+ * One row of `symbols`.
  *
- * The one shape we can predict is the underlying column: `users.tvl_unpriced_held`
- * is a jsonb array of `"SYMBOL@chain"` strings, so a plain string entry is parsed
- * on the `@` and the chain half resolved through `cerebroChainLabel` — the same
- * Zerion slugs `/holdings` sends. Object entries are probed for the obvious keys.
- * Anything else is dumped raw rather than rendered as blank cells: a non-empty
- * response has to be visible immediately, even if we can't name its fields yet.
+ * The API splits the stored `"SYMBOL@chain"` string for us and sends `chain` as a
+ * Zerion slug, the same spelling `/holdings` uses — so it resolves through
+ * `cerebroChainLabel`, never by matching the raw text. `chain` is documented as
+ * nullable, and a symbol that still carries an "@" is the case where the split had
+ * nothing to split on upstream: parse it here rather than show "wstETH@base" as if
+ * that were the token.
  *
- * @param {unknown} entry
- * @return {{ symbol: string | null, chainLabel: string | null, users: number | null, raw: unknown }}
+ * @param {{ symbol?: string, chain?: string | null, users?: number }} entry
+ * @param {number} index
  */
-const toChip = (entry) => {
-  if (typeof entry === "string") {
-    const [symbol, chain] = entry.split("@");
-    return {
-      symbol: symbol || null,
-      chainLabel: chain ? cerebroChainLabel({ chain }) : null,
-      users: null,
-      raw: entry,
-    };
-  }
+const toRow = (entry, index) => {
+  const raw = typeof entry?.symbol === "string" ? entry.symbol.trim() : "";
+  const [symbol, embedded] = raw.split("@");
+  const chain = entry?.chain ?? embedded ?? null;
 
-  if (entry && typeof entry === "object") {
-    const symbol = entry.symbol ?? entry.tokenSymbol ?? entry.vaultName ?? null;
-    const hasChain = entry.chain != null || entry.chainId != null || entry.chainName != null;
-    const users = typeof entry.users === "number" ? entry.users : null;
-
-    if (symbol) {
-      return {
-        symbol,
-        chainLabel: hasChain ? cerebroChainLabel(entry) : null,
-        users,
-        raw: entry,
-      };
-    }
-  }
-
-  return { symbol: null, chainLabel: null, users: null, raw: entry };
+  return {
+    key: `${raw || "sin-simbolo"}-${index}`,
+    symbol: symbol || raw || "—",
+    chainLabel: chain ? cerebroChainLabel({ chain }) : null,
+    users: typeof entry?.users === "number" ? entry.users : null,
+  };
 };
 
+/**
+ * Assets Zerion returns but cannot price.
+ *
+ * Nothing else in the dashboard surfaces these: the position is dropped from the
+ * TVL sum without a trace, so an affected user's balance is simply too low and
+ * looks perfectly ordinary. Almost always a vault or token price feed that went
+ * away, which means the fix is upstream and the chip disappears on its own once
+ * the feed returns.
+ */
 const UnpricedPositionsPanel = () => {
-  const { data, error, isLoading, isFetching, refetch } = useGetSystemHealth();
+  const { data, error, isLoading, isFetching, refetch } = useGetUnpricedPositions();
 
-  const chips = useMemo(
-    () => (Array.isArray(data?.system?.tvlErrors) ? data.system.tvlErrors.map(toChip) : []),
-    [data]
-  );
-  const hasErrors = chips.length > 0;
+  const rows = useMemo(() => (Array.isArray(data?.symbols) ? data.symbols.map(toRow) : []), [data]);
+
+  const totalUsers = typeof data?.totalUsers === "number" ? data.totalUsers : null;
+  const hasIssue = rows.length > 0 || (totalUsers ?? 0) > 0;
 
   return (
     <Panel
       title="Posiciones sin precio"
       description="Posiciones que Zerion muestra pero no pudo valorar en el último refresco. Aportan $0 al TVL, así que el saldo de cualquier usuario afectado queda subestimado — normalmente por una fuente de precios de vault o token caída."
-      tone={hasErrors ? "warning" : "neutral"}
+      tone={hasIssue ? "warning" : "neutral"}
       action={<RefreshButton onClick={() => refetch()} isLoading={isFetching} />}
     >
       <QueryState isLoading={isLoading} error={error}>
-        {hasErrors ? (
+        {hasIssue ? (
           <>
             <p className="font-inter text-[11px] font-medium tracking-[-0.44px] text-red-600">
-              {formatNumber(chips.length)}{" "}
-              {chips.length === 1 ? "posición sin valorar" : "posiciones sin valorar"}.
+              {totalUsers === null
+                ? `${formatNumber(rows.length)} ${rows.length === 1 ? "activo" : "activos"} sin valorar`
+                : `${formatNumber(totalUsers)} ${totalUsers === 1 ? "usuario afectado" : "usuarios afectados"} · ${formatNumber(rows.length)} ${rows.length === 1 ? "activo" : "activos"} sin valorar`}
+              .
             </p>
 
             <div className="mt-2 flex flex-wrap gap-1.5">
-              {chips.map((chip, index) =>
-                chip.symbol ? (
-                  <span
-                    // biome-ignore lint/suspicious/noArrayIndexKey: entries carry no documented id
-                    key={index}
-                    className="inline-flex items-baseline gap-1.5 rounded-md border-[0.7px] border-red-200 bg-red-50/70 px-2 py-1"
-                  >
-                    <span className="font-inter text-[11px] font-medium tracking-[-0.44px] text-red-800">
-                      {chip.symbol}
-                    </span>
-                    {chip.chainLabel && (
-                      <span className="font-inter text-[10px] tracking-[-0.4px] text-red-500">
-                        {chip.chainLabel}
-                      </span>
-                    )}
-                    {chip.users !== null && (
-                      <span className="font-inter text-[10px] tabular-nums tracking-[-0.4px] text-red-500">
-                        · {formatNumber(chip.users)} {chip.users === 1 ? "usuario" : "usuarios"}
-                      </span>
-                    )}
+              {rows.map((row) => (
+                <span
+                  key={row.key}
+                  className="inline-flex items-baseline gap-1.5 rounded-md border-[0.7px] border-red-200 bg-red-50/70 px-2 py-1"
+                >
+                  <span className="font-inter text-[11px] font-medium tracking-[-0.44px] text-red-800">
+                    {row.symbol}
                   </span>
-                ) : (
-                  <pre
-                    // biome-ignore lint/suspicious/noArrayIndexKey: entries carry no documented id
-                    key={index}
-                    className="w-full whitespace-pre-wrap break-all rounded-md border-[0.7px] border-[rgba(25,54,63,0.1)] bg-[rgba(25,54,63,0.02)] px-2 py-1.5 font-mono text-[10px] leading-[1.5] text-[rgba(25,54,63,0.6)]"
-                  >
-                    {JSON.stringify(chip.raw)}
-                  </pre>
-                )
-              )}
+                  {row.chainLabel && (
+                    <span className="font-inter text-[10px] tracking-[-0.4px] text-red-500">
+                      {row.chainLabel}
+                    </span>
+                  )}
+                  {row.users !== null && (
+                    <span className="font-inter text-[10px] tabular-nums tracking-[-0.4px] text-red-500">
+                      · {formatNumber(row.users)} {row.users === 1 ? "usuario" : "usuarios"}
+                    </span>
+                  )}
+                </span>
+              ))}
             </div>
+
+            <p className="mt-2.5 font-inter text-[10px] leading-[1.5] tracking-[-0.4px] text-[rgba(25,54,63,0.4)]">
+              Las fichas van ordenadas por usuarios afectados. Un mismo usuario puede tener varias
+              posiciones sin precio, así que sumarlas da más que los usuarios afectados. Se
+              recalcula en cada refresco de Zerion: si la fuente de precios vuelve, la ficha
+              desaparece sola.
+            </p>
           </>
         ) : (
           <div className="flex items-center gap-2 rounded-lg border-[0.7px] border-emerald-200 bg-emerald-50/60 px-3 py-2.5 text-emerald-700">
@@ -136,20 +124,6 @@ const UnpricedPositionsPanel = () => {
             </span>
           </div>
         )}
-
-        <div className="mt-3">
-          <PendingEndpoint
-            needs="Esto se apoya en `system.tvlErrors` de /system/health, que admin.md documenta solo como array vacío — no sabemos qué campos trae cada entrada, así que un fallo real podría llegar y renderizarse como JSON crudo. El dashboard antiguo agrupa la columna users.tvl_unpriced_held por símbolo y cuenta usuarios afectados (getUnpricedHoldings); basta con eso, o con documentar la forma de tvlErrors[]. Spec en docs/cerebro-sistema-endpoints.md."
-            fields={["GET /system/unpriced-positions", "o docs: forma de system.tvlErrors[]"]}
-            shape={{
-              totalUsers: 3,
-              symbols: [
-                { symbol: "wstETH", chain: "base", users: 2 },
-                { symbol: "sDAI", chain: "polygon", users: 1 },
-              ],
-            }}
-          />
-        </div>
       </QueryState>
     </Panel>
   );

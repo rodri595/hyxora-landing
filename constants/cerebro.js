@@ -80,6 +80,20 @@ export const cerebroActiveChains = [
 ];
 
 /**
+ * Chains whose indexer cursors are **expected** to sit frozen: `active: false` in
+ * the old dashboard's registry (`hyxora-admin-main/src/lib/chains.ts`).
+ *
+ * Not the same thing as being absent from `cerebroActiveChains`. Polygon is still a
+ * network the dashboard lists — it keeps its row in every per-chain table and its
+ * history in the data — but nothing routes through it any more, so its cursors never
+ * advance again and painting them red is crying wolf at a state nobody can fix.
+ * Ethereum is deprecated outright and belongs here for the same reason. «Estado del
+ * sistema» greys both out and leaves them out of its stalled count, exactly as
+ * `SystemHealthCard.tsx` does with `chainById(id)?.active !== false`.
+ */
+export const cerebroColdCursorChainIds = new Set([137, 1]);
+
+/**
  * Chain *slugs* — Zerion own vocabulary, which /holdings reports instead of a
  * chainId because its source table (daily_positions_by_user) stores the slug as
  * text. Solana has no numeric id in that map at all, so slugs are the only key

@@ -260,6 +260,54 @@
  */
 
 /**
+ * The onboarding funnel: the same shape `/users/activation` documents, currently
+ * assembled client-side by `useGetUserActivation`, which classifies every row of a
+ * full `/users` sweep because that endpoint answers 500. Keeping the shape identical
+ * is what makes switching back a one-hook change.
+ *
+ * Buckets are mutually exclusive and sum to the sweep, evaluated in funnel order.
+ * «Desplegada» is a Safe we have paid gas for; «usada» is a treasury fee or more
+ * sponsored ops than the one that deployed the wallet. Server-side those are a
+ * sponsored UserOp and a `hyxora_activities` / `hyxora_ramp_orders` row — never
+ * `last_active_at`, which the deployment op also stamps, and never `scope`, which
+ * appears to be built on it.
+ *
+ * @typedef {Object} UserActivation
+ * @property {number | null} total
+ * @property {ActivationBuckets} buckets
+ * @property {ParkedUser[]} balanceNeverUsed The bucket of the same name listed out,
+ * `tvlUsd` descending. A support list, not a statistic.
+ * @property {string[]} [warnings] Structural failures — a sweep that stopped short,
+ * a population that disagrees with `/users/stats`. Rendered above the funnel.
+ * @property {string[]} [notes] Known approximations, chiefly the activity proxy.
+ * Rendered muted under the funnel: an explained gap is not an alarm.
+ * @property {number} [sweptUsers] How many `/users` rows were classified.
+ * @property {number} [fundedThresholdUsd] Balance over which a user counts as funded.
+ */
+
+/**
+ * The five stages, in funnel order. Spec'd as `fundedNeverUsed`; shipped as
+ * `balanceNeverUsed`. Null where a counter could not be worked out.
+ *
+ * @typedef {Object} ActivationBuckets
+ * @property {number | null} noWallet Signed up with Privy, never created a Safe.
+ * @property {number | null} walletNotDeployed Safe address, no sponsored gas, under $0.50.
+ * @property {number | null} deployedNeverUsed Gas paid for, no product use, under $0.50.
+ * @property {number | null} balanceNeverUsed Over $0.50 parked, never used the app.
+ * @property {number | null} active Everyone else.
+ */
+
+/**
+ * @typedef {Object} ParkedUser
+ * @property {string | null} privyId
+ * @property {string | null} email
+ * @property {number} tvlUsd
+ * @property {string | null} safe Primary Safe, full address — the UI truncates it,
+ * and drops the column when `/users` omits the field.
+ * @property {IsoDate | null} createdAt
+ */
+
+/**
  * @typedef {Object} CerebroUser
  * @property {string} privyId
  * @property {string} email
@@ -335,6 +383,46 @@
  * @property {boolean} system.backendCacheOk
  * @property {{ freshness: IsoDate, usersWithTvl: number, usersWithoutTvl: number }} tvl
  * @property {{ latestTreasuryFee: IsoDate, latestUserOp: IsoDate }} data
+ */
+
+/**
+ * GET /system/tvl-freshness. Four mutually exclusive buckets that sum to `total`,
+ * which counts users with at least one Safe — an account that never created a
+ * wallet has nothing to refresh and would sit in `never` for good.
+ *
+ * @typedef {Object} TvlFreshness
+ * @property {number} fresh1h Refreshed within the last hour.
+ * @property {number} within1d Between one hour and one day ago.
+ * @property {number} over1d Stale; the panel warns on this.
+ * @property {number} never `tvl_refreshed_at is null`.
+ * @property {number} total
+ * @property {IsoDate | null} newest Same instant as `SystemHealth.tvl.freshness`.
+ * @property {IsoDate | null} oldest Ignores the never-refreshed.
+ */
+
+/**
+ * GET /system/unpriced-positions — positions Zerion returned but could not price on
+ * the last refresh. They contribute $0 to TVL, so every affected user's balance is
+ * understated.
+ *
+ * The source column stores `"SYMBOL@chain"` strings and the API splits them, so
+ * `chain` is a Zerion slug ("base") like `/holdings` sends — resolve it through
+ * `cerebroChainLabel()`, never by matching the raw string. It is null when the
+ * stored string carried no chain half.
+ *
+ * `totalUsers` counts distinct users, so it is not the sum of `symbols[].users`:
+ * one user holding two unpriced assets appears in two rows.
+ *
+ * @typedef {Object} UnpricedPositions
+ * @property {number} totalUsers
+ * @property {UnpricedSymbol[]} symbols Ordered `users` desc, then symbol asc.
+ */
+
+/**
+ * @typedef {Object} UnpricedSymbol
+ * @property {string} symbol
+ * @property {string | null} chain Zerion slug.
+ * @property {number} users
  */
 
 /**

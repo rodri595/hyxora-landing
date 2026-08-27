@@ -27,6 +27,7 @@ export { useGetUsers } from "./useGetUsers";
 export { useGetUserDetail } from "./useGetUserDetail";
 export { useGetUserTransactions } from "./useGetUserTransactions";
 export { useGetUserTrends } from "./useGetUserTrends";
+export { useGetUserActivation } from "./useGetUserActivation";
 export { useGetTopFeePayers } from "./useGetTopFeePayers";
 export { useGetRenewals } from "./useGetRenewals";
 
@@ -37,5 +38,7 @@ export { useGetChainsSummary } from "./useGetChainsSummary";
 export { useGetFounderEconomics } from "./useGetFounderEconomics";
 
 export { useGetSystemHealth } from "./useGetSystemHealth";
+export { useGetTvlFreshness } from "./useGetTvlFreshness";
+export { useGetUnpricedPositions } from "./useGetUnpricedPositions";
 export { useGetSystemMonitoring } from "./useGetSystemMonitoring";
 export { useGetSentryReport } from "./useGetSentryReport";
