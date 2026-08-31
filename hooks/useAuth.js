@@ -1,9 +1,9 @@
-import apiClient from "@/utils/axios";
+import { authClient } from "@/utils/axios";
 
 export function useAuth() {
     const authenticate = async (jwt) => {
-        const response = await apiClient.post(
-            "/authenticate",
+        const response = await authClient.post(
+            "/login",
             {},
             { headers: { Authorization: jwt } }
         );
@@ -14,7 +14,7 @@ export function useAuth() {
     };
 
     const invalidateSession = async () => {
-        const response = await apiClient.post("/logout", {});
+        const response = await authClient.post("/logout", {});
         sessionStorage.removeItem("jwt");
         return response.data;
     };

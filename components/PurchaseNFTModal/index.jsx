@@ -3,7 +3,7 @@ import { useState } from "react";
 import Link from "next/link";
 import toast from "react-hot-toast";
 import Modal from "@/components/Modal";
-import Error from "@/components/Error";
+import ErrorComp from "@/components/Error";
 import Image from "@/components/Image";
 import { useWeb3 } from "@/context/Web3Provider";
 import { useCreatePaymentLink } from "@/hooks/useCreatePaymentLink";
@@ -32,11 +32,7 @@ const DEFAULT_CONCEPT = "Compra NFT Founder_";
 /* ─── Main component ─── */
 const PurchaseNFTModal = () => {
   const { isModalPurchaseNFTOpen, setIsModalPurchaseNFTOpen } = useWeb3();
-  const {
-    mutateAsync,
-    isPending,
-    error: paymentLinkError,
-  } = useCreatePaymentLink();
+  const { mutateAsync, isPending, error: paymentLinkError } = useCreatePaymentLink();
   const {
     data: nftsRemaining,
     isLoading: isNftsRemainingLoading,
@@ -152,9 +148,7 @@ const PurchaseNFTModal = () => {
               >
                 {FEATURES.map((f) => (
                   <div key={f} className="flex items-center gap-2">
-                    <span className="text-[#f5a623] text-[13px] leading-none">
-                      –
-                    </span>
+                    <span className="text-[#f5a623] text-[13px] leading-none">–</span>
                     <span className="text-[rgba(255,255,255,0.80)] text-[12px] font-medium tracking-[-0.24px] leading-none">
                       {f}
                     </span>
@@ -232,8 +226,8 @@ const PurchaseNFTModal = () => {
                   {PRICE}
                 </span>
                 <span className="text-[9px] text-[rgba(255,255,255,0.30)] leading-tight tracking-[-0.18px]">
-                  *Precio final con IVA (3.630€). La devolución del IVA
-                  dependerá de tu situación fiscal.
+                  *Precio final con IVA (3.630€). La devolución del IVA dependerá de tu situación
+                  fiscal.
                 </span>
               </div>
             </div>
@@ -271,8 +265,7 @@ const PurchaseNFTModal = () => {
                       e.target.style.background = "rgba(255,255,255,0.09)";
                     }}
                     onBlur={(e) => {
-                      e.target.style.border =
-                        "1px solid rgba(255,255,255,0.10)";
+                      e.target.style.border = "1px solid rgba(255,255,255,0.10)";
                       e.target.style.background = "rgba(255,255,255,0.06)";
                     }}
                   />
@@ -420,23 +413,16 @@ const PurchaseNFTModal = () => {
                 className="flex items-center gap-3 w-full p-3.5 rounded-xl border text-left transition-all"
                 style={{
                   background:
-                    paymentMethod === "stripe"
-                      ? "rgba(27,95,253,0.12)"
-                      : "rgba(255,255,255,0.03)",
+                    paymentMethod === "stripe" ? "rgba(27,95,253,0.12)" : "rgba(255,255,255,0.03)",
                   borderColor:
-                    paymentMethod === "stripe"
-                      ? "rgba(27,95,253,0.55)"
-                      : "rgba(255,255,255,0.08)",
+                    paymentMethod === "stripe" ? "rgba(27,95,253,0.55)" : "rgba(255,255,255,0.08)",
                 }}
               >
                 {/* Radio dot */}
                 <div
                   className="shrink-0 size-4 rounded-full border-2 flex items-center justify-center transition-all"
                   style={{
-                    borderColor:
-                      paymentMethod === "stripe"
-                        ? "#1b5ffd"
-                        : "rgba(255,255,255,0.25)",
+                    borderColor: paymentMethod === "stripe" ? "#1b5ffd" : "rgba(255,255,255,0.25)",
                   }}
                 >
                   {paymentMethod === "stripe" && (
@@ -459,11 +445,7 @@ const PurchaseNFTModal = () => {
                       stroke="rgba(255,255,255,0.60)"
                       strokeWidth="1.5"
                     />
-                    <path
-                      d="M2 10h20"
-                      stroke="rgba(255,255,255,0.60)"
-                      strokeWidth="1.5"
-                    />
+                    <path d="M2 10h20" stroke="rgba(255,255,255,0.60)" strokeWidth="1.5" />
                     <rect
                       x="5"
                       y="14"
@@ -492,22 +474,15 @@ const PurchaseNFTModal = () => {
                 className="flex items-center gap-3 w-full p-3.5 rounded-xl border text-left transition-all"
                 style={{
                   background:
-                    paymentMethod === "crypto"
-                      ? "rgba(27,95,253,0.12)"
-                      : "rgba(255,255,255,0.03)",
+                    paymentMethod === "crypto" ? "rgba(27,95,253,0.12)" : "rgba(255,255,255,0.03)",
                   borderColor:
-                    paymentMethod === "crypto"
-                      ? "rgba(27,95,253,0.55)"
-                      : "rgba(255,255,255,0.08)",
+                    paymentMethod === "crypto" ? "rgba(27,95,253,0.55)" : "rgba(255,255,255,0.08)",
                 }}
               >
                 <div
                   className="shrink-0 size-4 rounded-full border-2 flex items-center justify-center transition-all"
                   style={{
-                    borderColor:
-                      paymentMethod === "crypto"
-                        ? "#1b5ffd"
-                        : "rgba(255,255,255,0.25)",
+                    borderColor: paymentMethod === "crypto" ? "#1b5ffd" : "rgba(255,255,255,0.25)",
                   }}
                 >
                   {paymentMethod === "crypto" && (
@@ -552,27 +527,18 @@ const PurchaseNFTModal = () => {
                 className="flex items-center gap-3 w-full p-3.5 rounded-xl border text-left transition-all"
                 style={{
                   background:
-                    paymentMethod === "bank"
-                      ? "rgba(27,95,253,0.12)"
-                      : "rgba(255,255,255,0.03)",
+                    paymentMethod === "bank" ? "rgba(27,95,253,0.12)" : "rgba(255,255,255,0.03)",
                   borderColor:
-                    paymentMethod === "bank"
-                      ? "rgba(27,95,253,0.55)"
-                      : "rgba(255,255,255,0.08)",
+                    paymentMethod === "bank" ? "rgba(27,95,253,0.55)" : "rgba(255,255,255,0.08)",
                 }}
               >
                 <div
                   className="shrink-0 size-4 rounded-full border-2 flex items-center justify-center transition-all"
                   style={{
-                    borderColor:
-                      paymentMethod === "bank"
-                        ? "#1b5ffd"
-                        : "rgba(255,255,255,0.25)",
+                    borderColor: paymentMethod === "bank" ? "#1b5ffd" : "rgba(255,255,255,0.25)",
                   }}
                 >
-                  {paymentMethod === "bank" && (
-                    <div className="size-2 rounded-full bg-[#1b5ffd]" />
-                  )}
+                  {paymentMethod === "bank" && <div className="size-2 rounded-full bg-[#1b5ffd]" />}
                 </div>
                 <div
                   className="shrink-0 size-8 rounded-lg flex items-center justify-center"
@@ -587,14 +553,7 @@ const PurchaseNFTModal = () => {
                       strokeLinecap="round"
                       strokeLinejoin="round"
                     />
-                    <rect
-                      x="2"
-                      y="19"
-                      width="20"
-                      height="2"
-                      rx="1"
-                      fill="rgba(255,255,255,0.60)"
-                    />
+                    <rect x="2" y="19" width="20" height="2" rx="1" fill="rgba(255,255,255,0.60)" />
                     <rect
                       x="5"
                       y="11"
@@ -640,8 +599,7 @@ const PurchaseNFTModal = () => {
                 onClick={() => handlePaymentContinue()}
                 className="w-full h-11 relative rounded-[100px] cursor-pointer overflow-hidden disabled:opacity-40 disabled:cursor-not-allowed transition-opacity"
                 style={{
-                  background:
-                    "linear-gradient(135deg, #1b5ffd 0%, #0d40c8 100%)",
+                  background: "linear-gradient(135deg, #1b5ffd 0%, #0d40c8 100%)",
                   border: "1px solid rgba(255,255,255,0.18)",
                 }}
               >
@@ -681,7 +639,7 @@ const PurchaseNFTModal = () => {
                 Pago seguro y cifrado
               </span>
             </div>
-            <Error
+            <ErrorComp
               error={paymentLinkError}
               className="bg-transparent"
               message={
@@ -690,7 +648,7 @@ const PurchaseNFTModal = () => {
                 "Ha ocurrido un error al generar el enlace de pago. Por favor, inténtalo de nuevo."
               }
             />
-            <Error
+            <ErrorComp
               error={nftsRemainingError}
               className="bg-transparent"
               message={
@@ -718,8 +676,7 @@ const PurchaseNFTModal = () => {
               }}
             >
               <p className="text-[11px] text-[rgba(255,255,255,0.50)] tracking-[-0.22px] leading-relaxed text-center">
-                Para adquirir tu NFT, realiza una transferencia bancaria con los
-                siguientes datos:
+                Para adquirir tu NFT, realiza una transferencia bancaria con los siguientes datos:
               </p>
             </div>
 
@@ -749,10 +706,7 @@ const PurchaseNFTModal = () => {
                     <span className="text-[11px] font-semibold text-white tracking-[-0.22px] break-all">
                       ES64 0182 0187 2902 0163 5449
                     </span>
-                    <CopyButton
-                      text="ES64 0182 0187 2902 0163 5449"
-                      variant="dark"
-                    />
+                    <CopyButton text="ES64 0182 0187 2902 0163 5449" variant="dark" />
                   </div>
                 </div>
                 <div className="flex flex-col gap-0.5">
@@ -788,8 +742,8 @@ const PurchaseNFTModal = () => {
                 }}
               >
                 <p className="text-[12px] font-semibold text-white tracking-[-0.24px] leading-relaxed">
-                  No te preocupes, te mandaremos un mail con estos datos de la
-                  transferencia para que los tengas a mano.
+                  No te preocupes, te mandaremos un mail con estos datos de la transferencia para
+                  que los tengas a mano.
                 </p>
               </div>
             </div>
@@ -821,10 +775,9 @@ const PurchaseNFTModal = () => {
             </div>
 
             <p className="text-[9px] text-[rgba(255,255,255,0.30)] tracking-[-0.18px] leading-relaxed -mt-1">
-              *Precio final con IVA. La aplicación o devolución del IVA
-              dependerá de tu país y situación fiscal. Más adelante podrás
-              rellenar un formulario para solicitar no pagarlo o recuperarlo, si
-              corresponde.
+              *Precio final con IVA. La aplicación o devolución del IVA dependerá de tu país y
+              situación fiscal. Más adelante podrás rellenar un formulario para solicitar no pagarlo
+              o recuperarlo, si corresponde.
             </p>
 
             {/* Actions */}
@@ -851,15 +804,12 @@ const PurchaseNFTModal = () => {
                     });
                     setStep(4);
                   } catch {
-                    toast.error(
-                      "Error al procesar la transferencia. Inténtalo de nuevo.",
-                    );
+                    toast.error("Error al procesar la transferencia. Inténtalo de nuevo.");
                   }
                 }}
                 className="flex-2 h-11 relative rounded-[100px] cursor-pointer overflow-hidden disabled:opacity-40 disabled:cursor-not-allowed transition-opacity"
                 style={{
-                  background:
-                    "linear-gradient(135deg, #1b5ffd 0%, #0d40c8 100%)",
+                  background: "linear-gradient(135deg, #1b5ffd 0%, #0d40c8 100%)",
                   border: "1px solid rgba(255,255,255,0.18)",
                 }}
               >
@@ -947,10 +897,7 @@ const PurchaseNFTModal = () => {
                   <span className="text-[13px] font-semibold text-white tracking-[-0.26px]">
                     ES64 0182 0187 2902 0163 5449
                   </span>
-                  <CopyButton
-                    text="ES64 0182 0187 2902 0163 5449"
-                    variant="dark"
-                  />
+                  <CopyButton text="ES64 0182 0187 2902 0163 5449" variant="dark" />
                 </div>
               </div>
               <div className="flex flex-col gap-0.5">
@@ -986,17 +933,14 @@ const PurchaseNFTModal = () => {
               }}
             >
               <p className="text-[12px] text-[#60a5fa] tracking-[-0.24px] leading-relaxed">
-                No te olvides de poner el concepto en la transferencia para que
-                sea más fácil tu identificación
+                No te olvides de poner el concepto en la transferencia para que sea más fácil tu
+                identificación
               </p>
               <div className="flex items-center justify-center gap-2 mt-1.5">
                 <p className="text-[13px] font-semibold text-white tracking-[-0.26px]">
                   Compra NFT Founder_{username}
                 </p>
-                <CopyButton
-                  text={`Compra NFT Founder_${username}`}
-                  variant="dark"
-                />
+                <CopyButton text={`Compra NFT Founder_${username}`} variant="dark" />
               </div>
             </div>
 
