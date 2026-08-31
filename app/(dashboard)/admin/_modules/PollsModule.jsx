@@ -1,14 +1,14 @@
 "use client";
 
-import { useMemo, useState, useCallback, useRef, useEffect } from "react";
-import gsap from "gsap";
-import { useGSAP } from "@gsap/react";
-import { useGetAllPolls } from "@/hooks/poll/useGetAllPolls";
-import DataTable from "@/components/DataTable";
-import Spinner from "@/components/Spinner";
-import PollDetailSidebar from "@/components/PollDetailSidebar";
 import CreatePollSidebar from "@/components/CreatePollSidebar";
+import DataTable from "@/components/DataTable";
+import PollDetailSidebar from "@/components/PollDetailSidebar";
+import Spinner from "@/components/Spinner";
+import { useGetAllPolls } from "@/hooks/poll/useGetAllPolls";
 import { cn } from "@/utils";
+import { useGSAP } from "@gsap/react";
+import gsap from "gsap";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 gsap.registerPlugin(useGSAP);
 
@@ -16,8 +16,7 @@ const SIDEBAR_WIDTH = 420;
 
 const STATUS_STYLES = {
   ACTIVE: "bg-emerald-50 text-emerald-700 border-emerald-200",
-  CLOSED:
-    "bg-[rgba(25,54,63,0.06)] text-[rgba(25,54,63,0.55)] border-[rgba(25,54,63,0.1)]",
+  CLOSED: "bg-[rgba(25,54,63,0.06)] text-[rgba(25,54,63,0.55)] border-[rgba(25,54,63,0.1)]",
 };
 
 const PollsModule = () => {
@@ -82,7 +81,7 @@ const PollsModule = () => {
         });
       }
     },
-    { dependencies: [isOpen] },
+    { dependencies: [isOpen] }
   );
 
   // Mobile/tablet (<lg): overlay slide + backdrop fade
@@ -112,7 +111,7 @@ const PollsModule = () => {
         gsap.to(backdrop, { opacity: 0, duration: 0.22, overwrite: true });
       }
     },
-    { dependencies: [isOpen] },
+    { dependencies: [isOpen] }
   );
 
   const columns = useMemo(
@@ -147,7 +146,7 @@ const PollsModule = () => {
             <span
               className={cn(
                 "inline-flex items-center px-1.5 py-0.5 rounded-[5px] font-inter text-[10px] font-medium tracking-[-0.3px] border",
-                cls,
+                cls
               )}
             >
               {val}
@@ -200,7 +199,7 @@ const PollsModule = () => {
             <span
               className={cn(
                 "font-inter text-[11px] font-semibold tabular-nums",
-                count > 0 ? "text-[#19363F]" : "text-[rgba(25,54,63,0.25)]",
+                count > 0 ? "text-[#19363F]" : "text-[rgba(25,54,63,0.25)]"
               )}
             >
               {count}
@@ -220,27 +219,15 @@ const PollsModule = () => {
             onClick={() => onSelectPoll(row.original)}
             className="size-6 flex items-center justify-center rounded-md text-[rgba(25,54,63,0.4)] hover:bg-[rgba(25,54,63,0.08)] hover:text-[#19363F] transition-colors"
           >
-            <svg
-              width="12"
-              height="12"
-              viewBox="0 0 16 16"
-              fill="none"
-              aria-hidden="true"
-            >
-              <circle
-                cx="8"
-                cy="8"
-                r="6.5"
-                stroke="currentColor"
-                strokeWidth="1.3"
-              />
+            <svg width="12" height="12" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+              <circle cx="8" cy="8" r="6.5" stroke="currentColor" strokeWidth="1.3" />
               <circle cx="8" cy="8" r="2" fill="currentColor" />
             </svg>
           </button>
         ),
       },
     ],
-    [onSelectPoll],
+    [onSelectPoll]
   );
 
   if (pollsData_isLoading)
@@ -261,7 +248,7 @@ const PollsModule = () => {
 
   return (
     <div className="flex flex-row flex-1 min-h-0 overflow-hidden h-full">
-      <div className="flex flex-col flex-1 w-0 min-h-0 rounded-xl border-[0.7px] border-[rgba(25,54,63,0.08)] shadow-[0px_2px_12px_0px_rgba(25,54,63,0.08)] px-4 py-3 overflow-hidden">
+      <div className="flex flex-col flex-1 w-0 min-h-0 overflow-hidden py-2.5 sm:rounded-xl sm:border-[0.7px] sm:border-[rgba(25,54,63,0.08)] sm:px-4 sm:py-3 sm:shadow-[0px_2px_12px_0px_rgba(25,54,63,0.08)]">
         <div className="flex items-center justify-between mb-3 shrink-0">
           <h2 className="font-inter font-semibold text-[14px] tracking-[-0.56px] text-[#19363F]">
             Encuestas
@@ -271,19 +258,8 @@ const PollsModule = () => {
             onClick={onOpenCreate}
             className="flex items-center gap-1.5 h-7.5 px-2.5 rounded-lg bg-[#19363F] text-white font-inter font-medium text-[11px] tracking-[-0.44px] hover:bg-[#0f2228] transition-colors"
           >
-            <svg
-              width="10"
-              height="10"
-              viewBox="0 0 10 10"
-              fill="none"
-              aria-hidden="true"
-            >
-              <path
-                d="M5 1v8M1 5h8"
-                stroke="white"
-                strokeWidth="1.4"
-                strokeLinecap="round"
-              />
+            <svg width="10" height="10" viewBox="0 0 10 10" fill="none" aria-hidden="true">
+              <path d="M5 1v8M1 5h8" stroke="white" strokeWidth="1.4" strokeLinecap="round" />
             </svg>
             Nueva encuesta
           </button>
@@ -303,17 +279,10 @@ const PollsModule = () => {
         className="hidden lg:block shrink-0 overflow-hidden"
       >
         {sidebarMode === "create" ? (
-          <CreatePollSidebar
-            nextNumber={rows.length + 1}
-            onClose={handleClose}
-          />
+          <CreatePollSidebar nextNumber={rows.length + 1} onClose={handleClose} />
         ) : (
           displayedPoll && (
-            <PollDetailSidebar
-              key={displayedPoll._id}
-              poll={displayedPoll}
-              onClose={handleClose}
-            />
+            <PollDetailSidebar key={displayedPoll._id} poll={displayedPoll} onClose={handleClose} />
           )
         )}
       </div>
@@ -339,17 +308,10 @@ const PollsModule = () => {
         style={{ transform: "translateX(100%)" }}
       >
         {sidebarMode === "create" ? (
-          <CreatePollSidebar
-            nextNumber={rows.length + 1}
-            onClose={handleClose}
-          />
+          <CreatePollSidebar nextNumber={rows.length + 1} onClose={handleClose} />
         ) : (
           displayedPoll && (
-            <PollDetailSidebar
-              key={displayedPoll._id}
-              poll={displayedPoll}
-              onClose={handleClose}
-            />
+            <PollDetailSidebar key={displayedPoll._id} poll={displayedPoll} onClose={handleClose} />
           )
         )}
       </div>

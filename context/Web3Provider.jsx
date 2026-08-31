@@ -17,6 +17,7 @@ const Web3Context = createContext({
   setCurrentChain: () => {},
   isModalPurchaseNFTOpen: false,
   setIsModalPurchaseNFTOpen: () => {},
+  isSessionReady: false,
 });
 
 export const Web3Provider = ({ children }) => {
@@ -81,8 +82,8 @@ export const Web3Provider = ({ children }) => {
 
     deploy();
   }, [user, smartWalletClient, manualSmartWalletClient]);
-  // Sync backend session when Privy is authenticated but session cookie is absent
-  useSessionSync();
+  // Exchange the Privy token for a backend session before any gated query runs
+  const { isSessionReady } = useSessionSync();
 
   const logout = async () => {
     try {
@@ -106,6 +107,7 @@ export const Web3Provider = ({ children }) => {
         setCurrentChain,
         isModalPurchaseNFTOpen,
         setIsModalPurchaseNFTOpen,
+        isSessionReady,
       }}
     >
       {children}

@@ -5,6 +5,7 @@ import Spinner from "@/components/Spinner";
 import { useGetTutorial } from "@/hooks/academy/useGetTutorial";
 import { useGetTutorials } from "@/hooks/academy/useGetTutorials";
 import { useUpdateWatchProgress } from "@/hooks/academy/useUpdateWatchProgress";
+import { sortTutorials } from "@/utils/tutorialTitle";
 import Link from "next/link";
 import { use, useCallback, useMemo } from "react";
 import Poster from "../_components/Poster";
@@ -42,10 +43,11 @@ const TutorialDetailPage = ({ params }) => {
   const video = decorateAcademyTutorial(data?.tutorial);
 
   // Pull the (already-cached) tutorials list for the "Más tutoriales" rail —
-  // same category first, then the rest, excluding the one being watched.
+  // same category first, then the rest, excluding the one being watched. Both
+  // groups follow the manual order, so the rail reads as "what comes next".
   const { data: listData } = useGetTutorials();
   const related = useMemo(() => {
-    const all = (listData?.tutorials ?? []).map(decorateAcademyTutorial);
+    const all = sortTutorials((listData?.tutorials ?? []).map(decorateAcademyTutorial));
     const others = all.filter((t) => t.slug !== slug);
     const sameCat = others.filter((t) => t.categoryId === video?.categoryId);
     const rest = others.filter((t) => t.categoryId !== video?.categoryId);
@@ -61,7 +63,7 @@ const TutorialDetailPage = ({ params }) => {
     ({ positionSec, completed }) => {
       updateProgress({ id: slug, positionSec, completed });
     },
-    [updateProgress, slug],
+    [updateProgress, slug]
   );
 
   if (isLoading) {
@@ -75,32 +77,19 @@ const TutorialDetailPage = ({ params }) => {
   if (isError || !video) {
     return (
       <section className="flex h-full min-h-0 flex-1 items-center justify-center p-4">
-        <ErrorComp
-          error
-          message="No se pudo cargar este tutorial."
-          className="max-w-sm"
-        />
+        <ErrorComp error message="No se pudo cargar este tutorial." className="max-w-sm" />
       </section>
     );
   }
 
   return (
-    <section
-      className="flex h-full min-h-0 flex-1 flex-col p-4"
-      data-lenis-prevent
-    >
+    <section className="flex h-full min-h-0 flex-1 flex-col p-4" data-lenis-prevent>
       <div className="flex min-h-0 flex-1 flex-col overflow-y-auto rounded-xl border-[0.7px] border-[rgba(25,54,63,0.08)] bg-white px-4 py-3 shadow-[0px_2px_12px_0px_rgba(25,54,63,0.08)]">
         <Link
           href="/academy"
           className="mb-3 inline-flex w-fit items-center gap-1.5 font-inter text-[11.5px] font-medium tracking-[-0.4px] text-[rgba(25,54,63,0.55)] transition-colors hover:text-[#19363F]"
         >
-          <svg
-            width="14"
-            height="14"
-            viewBox="0 0 16 16"
-            fill="none"
-            aria-hidden="true"
-          >
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
             <path
               d="M10 4L6 8l4 4"
               stroke="currentColor"
@@ -121,7 +110,10 @@ const TutorialDetailPage = ({ params }) => {
               <div className="mt-4 flex flex-col gap-2">
                 <span
                   className="inline-flex w-fit items-center rounded-[5px] px-1.5 py-0.5 font-inter text-[10px] font-medium tracking-[-0.3px]"
-                  style={{ background: `${video.accent}14`, color: video.accent }}
+                  style={{
+                    background: `${video.accent}14`,
+                    color: video.accent,
+                  }}
                 >
                   {video.category}
                   {video.level ? ` · ${video.level}` : ""}
@@ -130,9 +122,7 @@ const TutorialDetailPage = ({ params }) => {
                   {video.title}
                 </h1>
                 <div className="flex flex-wrap items-center gap-1.5 font-inter text-[11.5px] tracking-[-0.3px] text-[rgba(25,54,63,0.5)]">
-                  <span className="tabular-nums">
-                    {formatDuration(video.durationSec)}
-                  </span>
+                  <span className="tabular-nums">{formatDuration(video.durationSec)}</span>
                   <span className="text-[rgba(25,54,63,0.25)]">·</span>
                   <span>{formatDate(video.publishedAt)}</span>
                 </div>

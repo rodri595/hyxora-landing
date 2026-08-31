@@ -1,15 +1,12 @@
 "use client";
 
-import {
-  VISIBILITY,
-  VISIBILITY_OPTIONS,
-} from "@/app/(dashboard)/admin/_data/tutorials";
+import { VISIBILITY, VISIBILITY_OPTIONS } from "@/app/(dashboard)/admin/_data/tutorials";
 import Checkbox from "@/components/Checkbox";
 import CoverImageUpload from "@/components/CoverImageUpload";
 import Field from "@/components/Field";
+import Image from "@/components/Image";
 import SelectDropdown from "@/components/SelectDropdown";
 import Tabs from "@/components/Tabs";
-import Image from "@/components/Image";
 import VideoPreview from "@/components/VideoPreview";
 import { useGetAllCategories } from "@/hooks/admin/useGetAllCategories";
 import { cn } from "@/utils";
@@ -56,7 +53,7 @@ const VisibilityBadge = ({ visibility }) => {
     <span
       className={cn(
         "inline-flex items-center gap-1 rounded-[5px] border px-1.5 py-0.5 font-inter text-[10px] font-medium tracking-[-0.3px]",
-        v.badge,
+        v.badge
       )}
     >
       <span className="size-1.5 rounded-full" style={{ background: v.dot }} />
@@ -107,6 +104,11 @@ const DetailPanel = ({ video }) => {
         <span className="font-inter text-[10px] tracking-[-0.4px] tabular-nums text-[rgba(25,54,63,0.4)]">
           {formatDuration(video.durationSec)}
         </span>
+        {video.order !== null && video.order !== undefined && (
+          <span className="inline-flex items-center rounded-[5px] bg-[rgba(25,54,63,0.06)] px-1.5 py-0.5 font-inter text-[10px] font-medium tabular-nums tracking-[-0.3px] text-[rgba(25,54,63,0.6)]">
+            Orden {video.order}
+          </span>
+        )}
       </div>
 
       <div className="flex flex-col gap-1">
@@ -144,9 +146,7 @@ const DetailPanel = ({ video }) => {
       </div>
 
       <div className="flex flex-col gap-1">
-        <span className={labelCls}>
-          Enlace{source.provider ? ` · ${source.provider}` : ""}
-        </span>
+        <span className={labelCls}>Enlace{source.provider ? ` · ${source.provider}` : ""}</span>
         <a
           href={video.url}
           target="_blank"
@@ -211,18 +211,8 @@ const ConfirmBlock = ({ message, confirmLabel, onCancel, onConfirm }) => (
         className="mt-px shrink-0"
         aria-hidden="true"
       >
-        <path
-          d="M8 2L14.5 13H1.5L8 2Z"
-          stroke="#dc2626"
-          strokeWidth="1.3"
-          strokeLinejoin="round"
-        />
-        <path
-          d="M8 6.5V9.5M8 11v.5"
-          stroke="#dc2626"
-          strokeWidth="1.3"
-          strokeLinecap="round"
-        />
+        <path d="M8 2L14.5 13H1.5L8 2Z" stroke="#dc2626" strokeWidth="1.3" strokeLinejoin="round" />
+        <path d="M8 6.5V9.5M8 11v.5" stroke="#dc2626" strokeWidth="1.3" strokeLinecap="round" />
       </svg>
       <p className="font-inter text-[11px] leading-relaxed tracking-[-0.44px] text-red-700">
         {message}
@@ -252,12 +242,14 @@ const ConfirmBlock = ({ message, confirmLabel, onCancel, onConfirm }) => (
 const EditPanel = ({ video, categoryOptions, onUpdate, onDelete, onClose }) => {
   const [title, setTitle] = useState(video.title ?? "");
   const [description, setDescription] = useState(video.description ?? "");
-  const [categoryId, setCategoryId] = useState(
-    video.categoryId ?? categoryOptions[0]?.value ?? "",
-  );
+  const [categoryId, setCategoryId] = useState(video.categoryId ?? categoryOptions[0]?.value ?? "");
   const [url, setUrl] = useState(video.url ?? "");
   const [coverId, setCoverId] = useState(video.coverId ?? "");
   const [duration, setDuration] = useState(formatDuration(video.durationSec));
+  // `order` arrives already unpacked from the title by decorateTutorial.
+  const [order, setOrder] = useState(
+    video.order === null || video.order === undefined ? "" : String(video.order)
+  );
   const [visibility, setVisibility] = useState(video.visibility ?? "visible");
   const [isPublic, setIsPublic] = useState(video.isPublic ?? false);
   const [confirmDelete, setConfirmDelete] = useState(false);
@@ -278,14 +270,11 @@ const EditPanel = ({ video, categoryOptions, onUpdate, onDelete, onClose }) => {
   const source = useMemo(() => detectVideoSource(url), [url]);
   // The selected category's accent drives the fallback gradient preview.
   const accent = useMemo(
-    () =>
-      categoryOptions.find((c) => c.value === categoryId)?.accent ??
-      video.accent,
-    [categoryOptions, categoryId, video.accent],
+    () => categoryOptions.find((c) => c.value === categoryId)?.accent ?? video.accent,
+    [categoryOptions, categoryId, video.accent]
   );
 
-  const coverChanged =
-    coverId !== (video.coverId ?? "") || (coverRemoved && hasExistingCover);
+  const coverChanged = coverId !== (video.coverId ?? "") || (coverRemoved && hasExistingCover);
 
   const hasChanges =
     title !== (video.title ?? "") ||
@@ -294,12 +283,18 @@ const EditPanel = ({ video, categoryOptions, onUpdate, onDelete, onClose }) => {
     url !== (video.url ?? "") ||
     coverChanged ||
     parseDuration(duration) !== video.durationSec ||
+    order.trim() !==
+      (video.order === null || video.order === undefined ? "" : String(video.order)) ||
     visibility !== video.visibility ||
     isPublic !== (video.isPublic ?? false);
 
   const handleSave = () => {
     onUpdate?.(video.id, {
       title: title.trim(),
+      // Repacked into the title by useEditTutorial; `titleMeta` carries any
+      // other keys the payload already held so an edit doesn't drop them.
+      order: order.trim(),
+      titleMeta: video.titleMeta,
       description: description.trim(),
       categoryId,
       url: url.trim(),
@@ -315,11 +310,7 @@ const EditPanel = ({ video, categoryOptions, onUpdate, onDelete, onClose }) => {
 
   return (
     <div className="flex flex-col gap-4 p-4">
-      <Field
-        label="Título"
-        value={title}
-        onChange={(e) => setTitle(e.target.value)}
-      />
+      <Field label="Título" value={title} onChange={(e) => setTitle(e.target.value)} />
 
       <Field
         label="Descripción"
@@ -332,19 +323,11 @@ const EditPanel = ({ video, categoryOptions, onUpdate, onDelete, onClose }) => {
       <div className="grid grid-cols-2 gap-3">
         <div className="flex flex-col gap-1">
           <span className={labelCls}>Categoría</span>
-          <SelectDropdown
-            value={categoryId}
-            onChange={setCategoryId}
-            options={categoryOptions}
-          />
+          <SelectDropdown value={categoryId} onChange={setCategoryId} options={categoryOptions} />
         </div>
         <div className="flex flex-col gap-1">
           <span className={labelCls}>Visibilidad</span>
-          <SelectDropdown
-            value={visibility}
-            onChange={setVisibility}
-            options={visibilityOptions}
-          />
+          <SelectDropdown value={visibility} onChange={setVisibility} options={visibilityOptions} />
         </div>
       </div>
 
@@ -375,13 +358,26 @@ const EditPanel = ({ video, categoryOptions, onUpdate, onDelete, onClose }) => {
         )}
       </div>
 
-      <Field
-        label="Duración (m:ss)"
-        classInput="w-28"
-        value={duration}
-        onChange={(e) => setDuration(e.target.value)}
-        inputMode="numeric"
-      />
+      <div className="grid grid-cols-2 gap-3">
+        <Field
+          label="Duración (m:ss)"
+          value={duration}
+          onChange={(e) => setDuration(e.target.value)}
+          inputMode="numeric"
+        />
+        <div className="flex flex-col gap-1">
+          <Field
+            label="Orden"
+            value={order}
+            onChange={(e) => setOrder(e.target.value)}
+            placeholder="1"
+            inputMode="numeric"
+          />
+          <span className="font-inter text-[10px] tracking-[-0.4px] text-[rgba(25,54,63,0.4)]">
+            Posición en el curso. Sin número, va al final por fecha.
+          </span>
+        </div>
+      </div>
       <CoverThumb coverImgUrl={video.coverImgUrl} accent={video.accent} />
 
       <CoverImageUpload
@@ -459,7 +455,7 @@ const TutorialDetailSidebar = ({
         label: c.label,
         accent: c.accent,
       })),
-    [categories],
+    [categories]
   );
 
   // Re-apply the requested tab on every action click (openSignal bumps each time),
@@ -475,10 +471,10 @@ const TutorialDetailSidebar = ({
       gsap.fromTo(
         panelRef.current,
         { opacity: 0 },
-        { opacity: 1, duration: 0.28, delay: 0.14, ease: "power2.out" },
+        { opacity: 1, duration: 0.28, delay: 0.14, ease: "power2.out" }
       );
     },
-    { scope: panelRef },
+    { scope: panelRef }
   );
 
   return (
@@ -502,13 +498,7 @@ const TutorialDetailSidebar = ({
           aria-label="Cerrar panel"
           className="mt-0.5 flex size-6 shrink-0 items-center justify-center rounded-md text-[rgba(25,54,63,0.4)] transition-colors hover:bg-[rgba(25,54,63,0.06)] hover:text-[#19363F]"
         >
-          <svg
-            width="10"
-            height="10"
-            viewBox="0 0 10 10"
-            fill="none"
-            aria-hidden="true"
-          >
+          <svg width="10" height="10" viewBox="0 0 10 10" fill="none" aria-hidden="true">
             <path
               d="M8.5 1.5l-7 7M1.5 1.5l7 7"
               stroke="currentColor"
@@ -520,12 +510,7 @@ const TutorialDetailSidebar = ({
       </div>
 
       {/* Tabs */}
-      <Tabs
-        tabs={SIDEBAR_TABS}
-        value={tab}
-        onChange={setTab}
-        className="px-4"
-      />
+      <Tabs tabs={SIDEBAR_TABS} value={tab} onChange={setTab} className="px-4" />
 
       {/* Content */}
       <div className="scrollbar-thin scrollbar-thumb-[rgba(25,54,63,0.1)] scrollbar-thumb-rounded scrollbar-track-transparent flex-1 overflow-y-auto">

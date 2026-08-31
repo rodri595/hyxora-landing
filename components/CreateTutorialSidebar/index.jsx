@@ -7,11 +7,7 @@ import Field from "@/components/Field";
 import SelectDropdown from "@/components/SelectDropdown";
 import VideoPreview from "@/components/VideoPreview";
 import { useGetAllCategories } from "@/hooks/admin/useGetAllCategories";
-import {
-  detectVideoSource,
-  formatDuration,
-  parseDuration,
-} from "@/utils/video";
+import { detectVideoSource, formatDuration, parseDuration } from "@/utils/video";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -37,7 +33,7 @@ const CreateTutorialSidebar = ({ onClose, onCreate, onCreateCategory }) => {
   const { data: categories } = useGetAllCategories();
   const categoryOptions = useMemo(
     () => (categories ?? []).map((c) => ({ value: c.id, label: c.label })),
-    [categories],
+    [categories]
   );
   const hasCategories = categoryOptions.length > 0;
 
@@ -47,6 +43,7 @@ const CreateTutorialSidebar = ({ onClose, onCreate, onCreateCategory }) => {
   const [url, setUrl] = useState("");
   const [coverId, setCoverId] = useState("");
   const [duration, setDuration] = useState("");
+  const [order, setOrder] = useState("");
   const [visibility, setVisibility] = useState("visible");
   const [isPublic, setIsPublic] = useState(false);
   const [coverUploading, setCoverUploading] = useState(false);
@@ -54,7 +51,7 @@ const CreateTutorialSidebar = ({ onClose, onCreate, onCreateCategory }) => {
   const source = useMemo(() => detectVideoSource(url), [url]);
   const accent = useMemo(
     () => (categories ?? []).find((c) => c.id === categoryId)?.accent,
-    [categories, categoryId],
+    [categories, categoryId]
   );
 
   // Default to the first category once the list has loaded.
@@ -69,10 +66,10 @@ const CreateTutorialSidebar = ({ onClose, onCreate, onCreateCategory }) => {
       gsap.fromTo(
         panelRef.current,
         { opacity: 0 },
-        { opacity: 1, duration: 0.28, delay: 0.14, ease: "power2.out" },
+        { opacity: 1, duration: 0.28, delay: 0.14, ease: "power2.out" }
       );
     },
-    { scope: panelRef },
+    { scope: panelRef }
   );
 
   // Auto-fill the duration from Vimeo metadata if the admin hasn't typed one.
@@ -89,13 +86,15 @@ const CreateTutorialSidebar = ({ onClose, onCreate, onCreateCategory }) => {
       url: url.trim(),
       coverId: coverId || null,
       durationSec: parseDuration(duration),
+      // Packed into the title by useCreateTutorial — the backend has no column
+      // for it (utils/tutorialTitle.js).
+      order: order.trim(),
       visibility,
       isPublic,
     });
   };
 
-  const canSubmit =
-    title.trim() && url.trim() && categoryId && source.provider && coverId;
+  const canSubmit = title.trim() && url.trim() && categoryId && source.provider && coverId;
 
   return (
     <div
@@ -113,13 +112,7 @@ const CreateTutorialSidebar = ({ onClose, onCreate, onCreateCategory }) => {
           aria-label="Cerrar panel"
           className="flex size-6 shrink-0 items-center justify-center rounded-md text-[rgba(25,54,63,0.4)] transition-colors hover:bg-[rgba(25,54,63,0.06)] hover:text-[#19363F]"
         >
-          <svg
-            width="10"
-            height="10"
-            viewBox="0 0 10 10"
-            fill="none"
-            aria-hidden="true"
-          >
+          <svg width="10" height="10" viewBox="0 0 10 10" fill="none" aria-hidden="true">
             <path
               d="M8.5 1.5l-7 7M1.5 1.5l7 7"
               stroke="currentColor"
@@ -217,14 +210,27 @@ const CreateTutorialSidebar = ({ onClose, onCreate, onCreateCategory }) => {
             )}
           </div>
 
-          <Field
-            label="Duración (m:ss)"
-            classInput="w-28"
-            value={duration}
-            onChange={(e) => setDuration(e.target.value)}
-            placeholder="6:52"
-            inputMode="numeric"
-          />
+          <div className="grid grid-cols-2 gap-3">
+            <Field
+              label="Duración (m:ss)"
+              value={duration}
+              onChange={(e) => setDuration(e.target.value)}
+              placeholder="6:52"
+              inputMode="numeric"
+            />
+            <div className="flex flex-col gap-1">
+              <Field
+                label="Orden"
+                value={order}
+                onChange={(e) => setOrder(e.target.value)}
+                placeholder="1"
+                inputMode="numeric"
+              />
+              <span className="font-inter text-[10px] tracking-[-0.4px] text-[rgba(25,54,63,0.4)]">
+                Posición en el curso. Sin número, va al final por fecha.
+              </span>
+            </div>
+          </div>
 
           <CoverImageUpload
             value={coverId}

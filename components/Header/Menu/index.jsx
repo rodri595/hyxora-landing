@@ -9,7 +9,9 @@ import podcastIMG from "@/assets/imgs/podcast//Logo fondo cuadrodo E Negro.png";
 import Button from "@/components/Button";
 import Icon from "@/components/Icon";
 import Image from "@/components/Image";
+import { HYXORA_APP_URL } from "@/constants/links";
 import { roleNames } from "@/constants/roles";
+import { useAppLaunch } from "@/context/AppLaunchProvider";
 import { useWeb3 } from "@/context/Web3Provider";
 import { GetMyPayments } from "@/hooks/nfts/GetMyPayments";
 import { useSectionScroll } from "@/hooks/useSectionScroll";
@@ -127,6 +129,7 @@ const MenuComponent = () => {
     );
   }, [userInformation]);
   const { logout, smartWalletAddress } = useWeb3();
+  const { hintOpen, dismissHint } = useAppLaunch();
   const [isActive, setIsActive] = useState(false);
   const [welcomeOpen, setWelcomeOpen] = useState(false);
   const { login } = useLogin();
@@ -145,6 +148,7 @@ const MenuComponent = () => {
 
   const toggleMenu = () => {
     haptic(isActive ? "soft" : "light");
+    dismissHint();
     setIsActive((prev) => !prev);
   };
 
@@ -233,11 +237,19 @@ const MenuComponent = () => {
   return (
     <>
       <div className="relative ">
+        {/* Post-login halo on the only entry point mobile has to the menu. */}
+        {hintOpen && !isActive && (
+          <span
+            aria-hidden
+            className="pointer-events-none absolute inset-0 hidden max-md:block rounded-[8px] bg-[#1b5ffd] opacity-30 animate-ping"
+          />
+        )}
         <button
           onClick={toggleMenu}
           type="button"
           className={cn(
-            "group hidden max-md:flex rounded-[8px] border-[0.7px] border-[rgba(25,54,63,0.02)] bg-[rgba(25,54,63,0.04)] shadow-[0px_0px_4px_0px_inset_rgba(25,54,63,0.04)] justify-center items-center shrink-0 !h-[32px] !w-[32px] focus:outline-none",
+            "group hidden max-md:flex rounded-[8px] border-[0.7px] border-[rgba(25,54,63,0.02)] bg-[rgba(25,54,63,0.04)] shadow-[0px_0px_4px_0px_inset_rgba(25,54,63,0.04)] justify-center items-center shrink-0 !h-[32px] !w-[32px] focus:outline-none relative",
+            hintOpen && "ring-2 ring-[#1b5ffd] ring-offset-2 ring-offset-white",
           )}
         >
           {isActive ? (
@@ -308,7 +320,7 @@ const MenuComponent = () => {
                 type="button"
                 onClick={handleApuntate}
               >
-                Apúntate
+                Regístrate
               </Button>
             ) : (
               <Button
@@ -333,6 +345,17 @@ const MenuComponent = () => {
                   </p>
                 </div>
                 <div className="flex flex-col space-y-2 mb-6">
+                  <MenuItem
+                    icon={
+                      <Icon name="external-link" className="w-[16px] h-[16px]" />
+                    }
+                    title="Ir a la App"
+                    description="Abre tu dashboard"
+                    className="w-full max-w-none"
+                    href={HYXORA_APP_URL}
+                    target="_blank"
+                    external
+                  />
                   {isAdmin && (
                     <MenuItem
                       icon={

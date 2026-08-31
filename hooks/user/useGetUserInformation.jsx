@@ -8,7 +8,7 @@ import { usePrivy } from "@privy-io/react-auth";
  * @return {Object}
  */
 export const useGetUserInformation = () => {
-  const { smartWalletAddress } = useWeb3();
+  const { smartWalletAddress, isSessionReady } = useWeb3();
   const { authenticated, ready } = usePrivy();
 
   return useQuery({
@@ -23,6 +23,7 @@ export const useGetUserInformation = () => {
     refetchOnMount: false,
     retry: false,
 
-    enabled: Boolean(smartWalletAddress) && authenticated && ready,
+    enabled:
+      Boolean(smartWalletAddress) && authenticated && ready && isSessionReady,
   });
 };

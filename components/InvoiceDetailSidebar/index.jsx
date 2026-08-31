@@ -33,15 +33,12 @@ const formatDate = (value) =>
 
 // Compact uppercase label, matching the admin sidebar's dense layout. Passed to
 // the shared <Field> via `classLabel` so we reuse one field component app-wide.
-const LABEL_CLS =
-  "text-[10px] tracking-[-0.4px] text-[rgba(25,54,63,0.4)] uppercase";
+const LABEL_CLS = "text-[10px] tracking-[-0.4px] text-[rgba(25,54,63,0.4)] uppercase";
 
 // ── EditPanel ──────────────────────────────────────────────────────────────────
 
 const EditPanel = ({ payment }) => {
-  const [invoiceNumber, setInvoiceNumber] = useState(
-    payment?.invoiceNumber ?? "",
-  );
+  const [invoiceNumber, setInvoiceNumber] = useState(payment?.invoiceNumber ?? "");
   const [saved, setSaved] = useState(false);
   const savedTimeout = useRef(null);
 
@@ -66,7 +63,7 @@ const EditPanel = ({ payment }) => {
           setSaved(true);
           savedTimeout.current = setTimeout(() => setSaved(false), 3000);
         },
-      },
+      }
     );
   };
 
@@ -146,12 +143,7 @@ const EditPanel = ({ payment }) => {
 // ── DetailPanel ──────────────────────────────────────────────────────────────────
 
 const DetailPanel = ({ payment }) => {
-  {
-    console.log(payment);
-  }
-  const statusCls =
-    STATUS_CLASSES[payment?.status] ??
-    "bg-[rgba(25,54,63,0.06)] text-[#19363F]";
+  const statusCls = STATUS_CLASSES[payment?.status] ?? "bg-[rgba(25,54,63,0.06)] text-[#19363F]";
 
   return (
     <div className="flex flex-col gap-4 p-4">
@@ -178,12 +170,7 @@ const DetailPanel = ({ payment }) => {
         readOnly
         mono
       />
-      <Field
-        label="Cliente"
-        classLabel={LABEL_CLS}
-        value={payment?.name || "—"}
-        readOnly
-      />
+      <Field label="Cliente" classLabel={LABEL_CLS} value={payment?.name || "—"} readOnly />
 
       <Field
         label="Email"
@@ -209,7 +196,7 @@ const DetailPanel = ({ payment }) => {
             <span
               className={cn(
                 "inline-flex items-center px-1.5 py-0.5 rounded-sm font-inter text-[10px] font-medium tracking-[-0.4px] capitalize",
-                statusCls,
+                statusCls
               )}
             >
               {payment?.status || "—"}
@@ -268,11 +255,7 @@ const DetailPanel = ({ payment }) => {
 
 // ── InvoiceDetailSidebar ──────────────────────────────────────────────────────────
 
-const InvoiceDetailSidebar = ({
-  payment,
-  mode: initialMode = "edit",
-  onClose,
-}) => {
+const InvoiceDetailSidebar = ({ payment, mode: initialMode = "edit", onClose }) => {
   const panelRef = useRef(null);
   const [mode, setMode] = useState(initialMode);
 
@@ -287,10 +270,10 @@ const InvoiceDetailSidebar = ({
       gsap.fromTo(
         panelRef.current,
         { opacity: 0 },
-        { opacity: 1, duration: 0.28, delay: 0.14, ease: "power2.out" },
+        { opacity: 1, duration: 0.28, delay: 0.14, ease: "power2.out" }
       );
     },
-    { scope: panelRef },
+    { scope: panelRef }
   );
 
   return (
@@ -314,13 +297,7 @@ const InvoiceDetailSidebar = ({
           aria-label="Cerrar panel"
           className="size-6 shrink-0 flex items-center justify-center rounded-md text-[rgba(25,54,63,0.4)] hover:bg-[rgba(25,54,63,0.06)] hover:text-[#19363F] transition-colors mt-0.5"
         >
-          <svg
-            width="10"
-            height="10"
-            viewBox="0 0 10 10"
-            fill="none"
-            aria-hidden="true"
-          >
+          <svg width="10" height="10" viewBox="0 0 10 10" fill="none" aria-hidden="true">
             <path
               d="M8.5 1.5l-7 7M1.5 1.5l7 7"
               stroke="currentColor"
@@ -344,11 +321,7 @@ const InvoiceDetailSidebar = ({
 
       {/* Scrollable content */}
       <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-[rgba(25,54,63,0.1)] scrollbar-thumb-rounded scrollbar-track-transparent">
-        {mode === "edit" ? (
-          <EditPanel payment={payment} />
-        ) : (
-          <DetailPanel payment={payment} />
-        )}
+        {mode === "edit" ? <EditPanel payment={payment} /> : <DetailPanel payment={payment} />}
       </div>
     </div>
   );

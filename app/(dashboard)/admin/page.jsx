@@ -9,6 +9,9 @@ const UsersModule = lazy(() => import("./_modules/UsersModule"));
 const EmailsModule = lazy(() => import("./_modules/EmailsModule"));
 const PollsModule = lazy(() => import("./_modules/PollsModule"));
 const TutorialsModule = lazy(() => import("./_modules/TutorialsModule"));
+const QuizModule = lazy(() => import("./_modules/QuizModule"));
+const ComisionesModule = lazy(() => import("./_modules/ComisionesModule"));
+const CerebroModule = lazy(() => import("./_modules/CerebroModule"));
 const SimulatorModule = lazy(() => import("./_modules/SimulatorModule"));
 
 const moduleMap = {
@@ -16,6 +19,9 @@ const moduleMap = {
   emails: EmailsModule,
   polls: PollsModule,
   tutorials: TutorialsModule,
+  quiz: QuizModule,
+  comisiones: ComisionesModule,
+  cerebro: CerebroModule,
   simulator: SimulatorModule,
 };
 
@@ -43,8 +49,11 @@ const AdminContent = () => {
   }
 
   return (
+    // p-2 on a phone: this is the outermost gutter, and every module inside adds
+    // its own — the Cerebro shell, then each panel, then the table. Four nested
+    // 16px gutters were eating a fifth of the viewport before a number was drawn.
     <section
-      className="flex-1 flex gap-4 justify-start items-start p-4 h-full min-h-0"
+      className="flex-1 flex gap-4 justify-start items-start p-2 sm:p-4 h-full min-h-0"
       data-lenis-prevent
     >
       {Module ? (

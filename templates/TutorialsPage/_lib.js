@@ -2,6 +2,8 @@
 // marketing /tutorials page stays self-contained and independent from the
 // dashboard academy code.
 
+import { parseTutorialTitle } from "@/utils/tutorialTitle";
+
 // Darken a hex color by a 0–1 amount (for deriving poster gradients).
 const darken = (hex, amount = 0.35) => {
   const h = (hex ?? "").replace("#", "");
@@ -26,8 +28,14 @@ export const gradientFromAccent = (accent) => {
 export const decoratePublicTutorial = (t) => {
   if (!t) return null;
   const accent = t.category?.accent ?? t.accent ?? "#19363F";
+  // The manual order rides inside the stored title as JSON — unpack it here so
+  // the cards and modal keep reading a plain `title` (utils/tutorialTitle.js).
+  const { title, order, meta } = parseTutorialTitle(t.title);
   return {
     ...t,
+    title,
+    order,
+    titleMeta: meta,
     category: t.category?.label ?? t.category ?? "",
     gradient: t.gradient ?? gradientFromAccent(accent),
   };

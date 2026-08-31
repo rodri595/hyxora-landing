@@ -735,7 +735,7 @@ const UsersModule = () => {
 
   return (
     <div className="flex flex-row flex-1 min-h-0 overflow-hidden h-full">
-      <div className="flex flex-col flex-1 w-0 min-h-0 rounded-xl border-[0.7px] border-[rgba(25,54,63,0.08)] shadow-[0px_2px_12px_0px_rgba(25,54,63,0.08)] px-4 py-3 overflow-hidden ">
+      <div className="flex flex-col flex-1 w-0 min-h-0 overflow-hidden py-2.5 sm:rounded-xl sm:border-[0.7px] sm:border-[rgba(25,54,63,0.08)] sm:px-4 sm:py-3 sm:shadow-[0px_2px_12px_0px_rgba(25,54,63,0.08)] ">
         <Tabs tabs={TABS} value={activeTab} onChange={handleTabChange} className="mb-3" />
 
         {activeTab === "all" && (

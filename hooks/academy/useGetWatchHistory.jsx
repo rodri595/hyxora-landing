@@ -9,7 +9,7 @@ import { usePrivy } from "@privy-io/react-auth";
  * @return {Object}
  */
 export const useGetWatchHistory = () => {
-  const { smartWalletAddress } = useWeb3();
+  const { smartWalletAddress, isSessionReady } = useWeb3();
   const { authenticated, ready } = usePrivy();
 
   return useQuery({
@@ -23,6 +23,7 @@ export const useGetWatchHistory = () => {
     refetchOnWindowFocus: false,
     refetchOnMount: true,
     retry: 1,
-    enabled: Boolean(smartWalletAddress) && authenticated && ready,
+    enabled:
+      Boolean(smartWalletAddress) && authenticated && ready && isSessionReady,
   });
 };

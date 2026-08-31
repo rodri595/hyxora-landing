@@ -27,11 +27,7 @@ const MapSection = () => {
               {/* Hot Button */}
               <div className="bg-[#1b5ffd] border border-[rgba(255,255,255,0.2)] border-solid h-[30px] relative rounded-[100px]">
                 <div className="flex gap-[3px] h-[30px] items-center justify-center overflow-hidden p-[8px] relative rounded-[inherit]">
-                  <Image
-                    src={fireSVG}
-                    alt="Fire Icon"
-                    className="relative w-[10px] h-[10px]"
-                  />
+                  <Image src={fireSVG} alt="Fire Icon" className="relative w-[10px] h-[10px]" />
                   <p className="font-medium text-[12px] text-[#f7f8f8] tracking-[-0.48px] whitespace-nowrap">
                     Acceso a la Plataforma
                   </p>
@@ -46,11 +42,7 @@ const MapSection = () => {
               <p className="font-normal text-[12px] text-[rgba(25,54,63,0.7)] tracking-[-0.48px] whitespace-nowrap max-md:tracking-[-0.24px] max-md:leading-[20px]">
                 Hyxora
               </p>
-              <Image
-                src={chevronSVG}
-                alt="Chevron Icon"
-                className="relative w-[12px] h-[12px]"
-              />
+              <Image src={chevronSVG} alt="Chevron Icon" className="relative w-[12px] h-[12px]" />
             </Link>
 
             {/* Title */}
@@ -60,18 +52,15 @@ const MapSection = () => {
             </p>
             {/* Description */}
             <p className="font-normal text-[16px] max-md:text-[14px] max-sm:text-[13px] leading-6 max-sm:leading-5 text-[rgba(25,54,63,0.7)] tracking-[-0.32px] max-sm:tracking-[-0.26px] w-full">
-              Estamos abriendo colaboraciones por todo el planeta. ¿Quieres
-              formar parte de la expansión de Hyxora?{" "}
-              <a
-                href="mailto:future@hyxora.com"
-                className="text-[#19363f] underline"
-              >
+              Estamos abriendo colaboraciones por todo el planeta. ¿Quieres formar parte de la
+              expansión de Hyxora?{" "}
+              <a href="mailto:future@hyxora.com" className="text-[#19363f] underline">
                 Contáctanos
               </a>
             </p>
           </div>
           {/* Stats */}
-          <div className="grid grid-cols-3 gap-7.5 items-start debug  max-xl:grid-cols-1 w-full">
+          <div className="grid grid-cols-3 gap-7.5 items-start  max-xl:grid-cols-1 w-full">
             <div className="flex flex-col gap-[16px] items-start max-sm:w-full">
               <p className="font-medium text-[28px] max-lg:text-[24px] max-md:text-[22px] max-sm:text-[20px] leading-[normal] text-[#19363f] tracking-[-1.36px] max-sm:tracking-[-1px]">
                 100% Autocustodia
@@ -85,7 +74,7 @@ const MapSection = () => {
                 39 Países
               </p>
               <p className="font-normal text-[16px] max-md:text-[14px] max-sm:text-[13px] leading-6 max-sm:leading-5 text-[rgba(25,54,63,0.7)] tracking-[-0.32px] max-sm:tracking-[-0.26px]">
-                Retiradas en moneda local{" "}
+                Retiros en moneda local{" "}
               </p>
             </div>
             <div className="flex flex-col gap-[16px] items-start max-sm:w-full">

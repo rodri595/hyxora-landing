@@ -27,7 +27,7 @@ const Finance = () => {
       id: 1,
       title: "Intercambios de activos",
       description:
-        "Realiza cambios entre Fiat y Criptp en un solo click. Maximiza la rentabilidad de tu dinero",
+        "Realiza cambios entre Fiat y Cripto en un solo clic. Maximiza la rentabilidad de tu dinero",
       iconSrc: circleIMG,
       imageSrc: swapIMG,
     },
@@ -35,7 +35,7 @@ const Finance = () => {
       id: 2,
       title: "Remesas internacionales",
       description:
-        "Envía dinero a otros usuarios en cualquier parte del mundo en segundos y sin coste",
+        "Envía dinero a otros usuarios en cualquier parte del mundo en segundos y sin costo",
       iconSrc: circleIMG,
       imageSrc: sendIMG,
     },
@@ -49,7 +49,7 @@ const Finance = () => {
     },
     {
       id: 4,
-      title: "Retiradas en moneda local",
+      title: "Retiros en moneda local",
       description: "Retira tus fondos en tu moneda local (Consultar países disponibles)",
       iconSrc: triangleIMG,
       imageSrc: soonIMG,

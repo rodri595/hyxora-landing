@@ -5,6 +5,7 @@ import ErrorComp from "@/components/Error";
 import Layout from "@/components/Layout";
 import Spinner from "@/components/Spinner";
 import { useGetPublicTutorials } from "@/hooks/academy/useGetPublicTutorials";
+import { sortTutorials } from "@/utils/tutorialTitle";
 import { useMemo, useState } from "react";
 import VideoCard from "./VideoCard";
 import VideoModal from "./VideoModal";
@@ -13,15 +14,17 @@ import { decoratePublicTutorial } from "./_lib";
 const TutorialsPage = () => {
   const [active, setActive] = useState(null);
 
-  const { data, isLoading, isError, isFetching, refetch } =
-    useGetPublicTutorials();
+  const { data, isLoading, isError, isFetching, refetch } = useGetPublicTutorials();
 
   // The endpoint mirrors the authenticated one (`{ tutorials, featured,
   // categories }`); the public grid only needs the flat tutorials list. Stay
-  // resilient if the backend returns a bare array instead.
+  // resilient if the backend returns a bare array instead. The endpoint does
+  // not guarantee an order, so sort here — the learning center reads as a
+  // course, so it follows the manual order the admin set, and falls back to
+  // oldest-first for videos that don't carry a number yet.
   const videos = useMemo(() => {
     const list = Array.isArray(data) ? data : (data?.tutorials ?? []);
-    return list.map(decoratePublicTutorial);
+    return sortTutorials(list.map(decoratePublicTutorial));
   }, [data]);
 
   return (
@@ -39,8 +42,8 @@ const TutorialsPage = () => {
             Aprende el mundo cripto, de cero a experto.
           </h1>
           <p className="max-w-[475px] text-center font-inter text-[16px] font-normal leading-6 tracking-[-0.32px] text-[rgba(25,54,63,0.7)] max-md:text-[14px]">
-            Aquí entenderás el mundo de las criptomonedas y la blockchain de
-            forma fácil, interactiva y confiable.
+            Aquí entenderás el mundo de las criptomonedas y la blockchain de forma fácil,
+            interactiva y confiable.
           </p>
         </div>
 
@@ -56,11 +59,7 @@ const TutorialsPage = () => {
               message="No se pudieron cargar los tutoriales. Inténtalo de nuevo."
               className="max-w-sm"
             />
-            <Button
-              isSecondary
-              onClick={() => refetch()}
-              disabled={isFetching}
-            >
+            <Button isSecondary onClick={() => refetch()} disabled={isFetching}>
               {isFetching ? "Cargando…" : "Reintentar"}
             </Button>
           </div>
@@ -76,21 +75,13 @@ const TutorialsPage = () => {
         ) : (
           <div className="grid w-full grid-cols-4 gap-x-4 gap-y-[60px] max-lg:grid-cols-2 max-md:gap-y-10 max-sm:grid-cols-1">
             {videos.map((video) => (
-              <VideoCard
-                key={video.id}
-                video={video}
-                onPlay={() => setActive(video)}
-              />
+              <VideoCard key={video.id} video={video} onPlay={() => setActive(video)} />
             ))}
           </div>
         )}
       </section>
 
-      <VideoModal
-        open={!!active}
-        video={active}
-        onClose={() => setActive(null)}
-      />
+      <VideoModal open={!!active} video={active} onClose={() => setActive(null)} />
     </Layout>
   );
 };
