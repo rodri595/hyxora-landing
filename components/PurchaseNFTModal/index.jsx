@@ -33,11 +33,14 @@ const DEFAULT_CONCEPT = "Compra NFT Founder_";
 const PurchaseNFTModal = () => {
   const { isModalPurchaseNFTOpen, setIsModalPurchaseNFTOpen } = useWeb3();
   const { mutateAsync, isPending, error: paymentLinkError } = useCreatePaymentLink();
+  // DashboardLayout mounts this modal on every page, so an ungated query here is
+  // a request on every dashboard load for a modal nobody opened. The count is
+  // only ever read inside the open modal.
   const {
     data: nftsRemaining,
     isLoading: isNftsRemainingLoading,
     error: nftsRemainingError,
-  } = GetNftsRemaining();
+  } = GetNftsRemaining({ enabled: isModalPurchaseNFTOpen });
   const [step, setStep] = useState(1);
   const [username, setUsername] = useState("");
   const [refBy, setRefBy] = useState("");

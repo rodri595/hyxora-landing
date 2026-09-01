@@ -2,6 +2,7 @@
 import { ADMIN_TABS } from "@/components/AdminTabBar";
 import Spinner from "@/components/Spinner";
 import { useGetSimAccount } from "@/hooks/simulator/useGetSimAccount";
+import { useIsAdmin } from "@/hooks/user/useIsAdmin";
 import { useSearchParams } from "next/navigation";
 import { Suspense, lazy } from "react";
 
@@ -77,9 +78,46 @@ const AdminContent = () => {
   );
 };
 
+/**
+ * Nothing under /admin mounts until the role is known.
+ *
+ * Every admin hook gates itself, but a gate per hook still means the whole tab
+ * renders for a non-admin and fires its requests — which is exactly what a
+ * signed-in visitor opening `?tab=cerebro` used to do: ~40 calls, every one
+ * answered 401. The cheap fix is not reaching the module at all.
+ *
+ * `isResolving` is why this is not a plain `if (!isAdmin)`: the role arrives a
+ * moment after Privy does, and a real admin must not see "sin permiso" flash in
+ * between. No redirect — DashboardLayout already sends anyone unauthenticated
+ * home, and this only separates admin from signed-in, so it says so.
+ */
+const AdminGate = () => {
+  const { isAdmin, isResolving } = useIsAdmin();
+
+  if (isResolving) {
+    return (
+      <section className="flex-1 flex justify-center items-center p-4 h-full min-h-0">
+        <Spinner />
+      </section>
+    );
+  }
+
+  if (!isAdmin) {
+    return (
+      <section className="flex-1 flex justify-center items-center p-4 h-full min-h-0">
+        <p className="font-inter text-[12px] text-[rgba(25,54,63,0.4)] tracking-[-0.48px]">
+          Esta sección es solo para administradores.
+        </p>
+      </section>
+    );
+  }
+
+  return <AdminContent />;
+};
+
 const AdminPage = () => (
   <Suspense>
-    <AdminContent />
+    <AdminGate />
   </Suspense>
 );
 
