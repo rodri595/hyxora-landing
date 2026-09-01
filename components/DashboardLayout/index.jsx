@@ -1,25 +1,25 @@
 "use client";
-import { useEffect, useMemo } from "react";
-import { useRouter, usePathname } from "next/navigation";
-import { usePrivy } from "@privy-io/react-auth";
+import { useWeb3 } from "@/context/Web3Provider";
 import { cn } from "@/utils";
+import { usePrivy } from "@privy-io/react-auth";
+import { usePathname, useRouter } from "next/navigation";
+import { useEffect, useMemo } from "react";
 import { useState } from "react";
 
 const SPECIAL_URLS = ["/nfts"];
+import PurchaseNFTModal from "@/components/PurchaseNFTModal";
+import SessionGate from "@/components/SessionGate";
 import Header from "./Header";
 import Sidebar from "./Sidebar";
-import PurchaseNFTModal from "@/components/PurchaseNFTModal";
 
 const DashboardLayout = ({ children, headerExtra }) => {
   const router = useRouter();
   const pathname = usePathname();
   const { authenticated, ready } = usePrivy();
+  const { sessionStatus, sessionError, retrySession, isRetryingSession, logout } = useWeb3();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
-  const isSpecialPage = useMemo(
-    () => SPECIAL_URLS.some((url) => pathname === url),
-    [pathname],
-  );
+  const isSpecialPage = useMemo(() => SPECIAL_URLS.some((url) => pathname === url), [pathname]);
 
   useEffect(() => {
     if (ready && !authenticated) {
@@ -27,13 +27,19 @@ const DashboardLayout = ({ children, headerExtra }) => {
     }
   }, [ready, authenticated, router]);
 
-  if (!ready || !authenticated) {
+  // Nothing under the dashboard renders without a Hyxora session. Every gated
+  // query is `enabled: isSessionReady`, so mounting without one gives a screen
+  // of spinners that never resolve and no error anywhere — SessionGate names the
+  // failure instead, and is also the spinner while Privy and the session boot.
+  if (!ready || !authenticated || sessionStatus !== "ready") {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[#f7f8f8] px-6">
-        <p className="font-inter text-[14px] font-medium tracking-[-0.56px] text-[rgba(25,54,63,0.7)]">
-          Loading dashboard...
-        </p>
-      </div>
+      <SessionGate
+        status={ready && authenticated ? sessionStatus : "pending"}
+        error={sessionError}
+        onRetry={retrySession}
+        isRetrying={isRetryingSession}
+        onLogout={logout}
+      />
     );
   }
 
@@ -42,7 +48,7 @@ const DashboardLayout = ({ children, headerExtra }) => {
       className={cn(
         "flex flex-col justify-start items-start h-[100dvh] overflow-hidden",
         "bg-[#FFF]",
-        isSpecialPage && "bg-[#0D0D0D]",
+        isSpecialPage && "bg-[#0D0D0D]"
       )}
     >
       <Header

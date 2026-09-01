@@ -1,11 +1,11 @@
-import { createContext, useContext, useEffect, useMemo, useState } from "react";
-import { usePrivy, useWallets, useLogout } from "@privy-io/react-auth";
-import { useSmartWallets } from "@privy-io/react-auth/smart-wallets";
-import { useQuery } from "@tanstack/react-query";
-import { createPublicClient, http } from "viem";
-import { base } from "viem/chains";
 import { useAuth } from "@/hooks/useAuth";
 import { useSessionSync } from "@/hooks/useSessionSync";
+import { useLogout, usePrivy, useWallets } from "@privy-io/react-auth";
+import { useSmartWallets } from "@privy-io/react-auth/smart-wallets";
+import { useQuery } from "@tanstack/react-query";
+import { createContext, useContext, useEffect, useMemo, useState } from "react";
+import { http, createPublicClient } from "viem";
+import { base } from "viem/chains";
 
 const Web3Context = createContext({
   logout: async () => {},
@@ -19,6 +19,10 @@ const Web3Context = createContext({
   setIsModalPurchaseNFTOpen: () => {},
   isSessionReady: false,
   isSessionSettled: false,
+  sessionStatus: "anonymous",
+  sessionError: null,
+  retrySession: () => {},
+  isRetryingSession: false,
 });
 
 export const Web3Provider = ({ children }) => {
@@ -42,7 +46,7 @@ export const Web3Provider = ({ children }) => {
 
   const publicClient = useMemo(
     () => createPublicClient({ chain: currentChain, transport: http() }),
-    [currentChain],
+    [currentChain]
   );
 
   const walletAddress = useMemo(() => {
@@ -69,11 +73,10 @@ export const Web3Provider = ({ children }) => {
           {
             uiOptions: {
               title: "Activate Your Smart Wallet",
-              description:
-                "Deploy your smart wallet to access your tokens on-chain",
+              description: "Deploy your smart wallet to access your tokens on-chain",
               buttonText: "Activate Wallet",
             },
-          },
+          }
         );
         console.log("Smart wallet deployed:", txHash);
       } catch (error) {
@@ -84,7 +87,14 @@ export const Web3Provider = ({ children }) => {
     deploy();
   }, [user, smartWalletClient, manualSmartWalletClient]);
   // Exchange the Privy token for a backend session before any gated query runs
-  const { isSessionReady, isSessionSettled } = useSessionSync();
+  const {
+    isSessionReady,
+    isSessionSettled,
+    sessionStatus,
+    sessionError,
+    retrySession,
+    isRetryingSession,
+  } = useSessionSync();
 
   const logout = async () => {
     try {
@@ -110,6 +120,10 @@ export const Web3Provider = ({ children }) => {
         setIsModalPurchaseNFTOpen,
         isSessionReady,
         isSessionSettled,
+        sessionStatus,
+        sessionError,
+        retrySession,
+        isRetryingSession,
       }}
     >
       {children}
