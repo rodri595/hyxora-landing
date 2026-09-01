@@ -7,7 +7,6 @@ export function useAuth() {
       {},
       { headers: { Authorization: `Bearer ${jwt}` } }
     );
-    console.log("authenticate response", response.data);
     if (response.data?.token) {
       sessionStorage.setItem("jwt", response.data.token);
     }
