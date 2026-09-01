@@ -411,3 +411,15 @@ html[data-theme="dark"] .dropdown-arrow-up:before {
 .mask-right {
   mask-image: linear-gradient(to right, black 90%, transparent 100%);
 }
+
+/* Apple-style superellipse corners. `corner-shape` is a progressive
+   enhancement: where it is unsupported the element keeps its `border-radius`
+   and simply renders as an ordinary rounded rectangle. Used by the internal
+   tools panel (components/DevToolButton). */
+/* biome-ignore lint/correctness/noUnknownProperty: real CSS, Chrome 139+ */
+@supports (corner-shape: squircle) {
+  .squircle {
+    /* biome-ignore lint/correctness/noUnknownProperty: real CSS, Chrome 139+ */
+    corner-shape: squircle;
+  }
+}
