@@ -243,9 +243,9 @@ const User = () => {
               modal={false}
             >
               <div className="flex p-[0_20px] justify-center items-center gap-[10px]">
-                <label className="text-[#19363F] leading-[normal] text-edge-[cap] font-inter text-[16px] font-medium tracking-[-0.64px]">
+                <div className="text-[#19363F] leading-[normal] text-edge-[cap] font-inter text-[16px] font-medium tracking-[-0.64px]">
                   Menu
-                </label>
+                </div>
               </div>
               <div className="flex p-[6px_14px] justify-center items-start gap-[0px] w-full flex-col">
                 {isLoadingUserInformation ? (
