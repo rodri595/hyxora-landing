@@ -1,11 +1,11 @@
+import { gatewayRoot } from "@/utils/gateway";
 import axios from "axios";
 
 const isDev = process.env.NODE_ENV === "development";
 
-// Gateway root (no trailing slash), e.g. https://gateway-dev.hyxora.com
-// The per-app prefix (/app, /founders, /admin) is appended here, not stored
-// in the env, so the two clients below can never drift apart.
-const gateway = (process.env.NEXT_PUBLIC_HYXORA_API || "").replace(/\/+$/, "");
+// Re-exported so every client built here imports the root from the same module
+// as the factory. `@/utils/gateway` is where it is actually defined.
+export { gatewayRoot };
 
 // Endpoints that mint/clear the session themselves. They carry their own
 // Authorization (a Privy access token) and must never be given the session JWT:
@@ -30,60 +30,32 @@ export const readSessionJwt = (data) =>
   data?.data?.jwt ?? data?.token ?? data?.jwt ?? data?.data?.token ?? null;
 
 /**
- * Replays the session JWT as `Authorization: Bearer` whenever we hold one and
- * the caller left the header empty.
+ * Lifts the backend's own words onto `error.message`, so a panel renders the
+ * reason instead of "Request failed with status code 400".
  *
- * The cookie is the real credential, but it is only first-party while the app
- * and the gateway share a registrable domain. They don't always: a Netlify
- * deploy (`hyxora-landing-dev.netlify.app` against `gateway-dev.hyxora.com`)
- * makes it a third-party cookie the browser is free to drop, and in dev
- * `withCredentials` is off so it never rides along at all. In both cases the
- * header is the only credential left — and sending it beside a cookie that did
- * survive costs nothing, which is what `gatewayAdminClient` already relies on.
+ * Three shapes, most specific first. A validation failure answers
+ * `{ error: "Validation failed", details: [{ message }] }` and only the detail
+ * says *what* was wrong; some 404s answer with a `message`; everything else
+ * (the gateway, our own route handlers) answers `{ error }`.
  *
- * Only ever fills a header the caller left empty: `/login` sends a Privy token
- * here, and clobbering it with a Hyxora session JWT is what the backend rejects
- * with 400.
+ * @param {unknown} error Axios error, returned unchanged for rejection chaining.
  */
-const withSessionHeader = (client) => {
-  client.interceptors.request.use((config) => {
-    if (config.headers.Authorization || isAuthEndpoint(config.url)) return config;
-    const jwt = typeof window === "undefined" ? null : sessionStorage.getItem("jwt");
-    if (jwt) {
-      config.headers.Authorization = `Bearer ${jwt}`;
-    }
-    return config;
-  });
-  return client;
+export const withMessage = (error) => {
+  const data = error?.response?.data;
+  const message = data?.details?.[0]?.message ?? data?.message ?? data?.error;
+  if (message) error.message = message;
+  return error;
 };
 
-// Login/logout live at the gateway root, outside /founders.
-export const authClient = withSessionHeader(
-  axios.create({
-    baseURL: `${gateway}/auth`,
-    withCredentials: !isDev,
-  })
-);
-
-// This app only talks to the founders service, so every hook path
-// ("/poll/all", "/admin/tutorials", ...) resolves under /founders unchanged.
-const apiClient = withSessionHeader(
-  axios.create({
-    baseURL: `${gateway}/founders`,
-    withCredentials: !isDev,
-  })
-);
-
 // One shared re-auth in flight, so a burst of parallel 401s triggers a single
-// /auth/login instead of one per request
+// /auth/login instead of one per request — across *every* client below.
 let sessionRefresh = null;
 
 /**
  * Re-mints the Hyxora session from the current Privy token, at most once at a
- * time. Exported because `gatewayAdminClient` needs the same recovery on 401 and
- * must share this single-flight guard: two clients each running their own
- * refresh on a burst of 401s is two `/auth/login` calls, and failed logins are
- * exactly what the gateway's ban counter counts.
+ * time. Every session client shares this single-flight guard: several clients
+ * each running their own refresh on a burst of 401s is several `/auth/login`
+ * calls, and failed logins are exactly what the gateway's ban counter counts.
  */
 export const refreshSession = () => {
   if (!sessionRefresh) {
@@ -97,9 +69,9 @@ export const refreshSession = () => {
       // "Missing access token" }` — which, arriving from the *recovery* path,
       // reads like a rejected login rather than a malformed header.
       //
-      // Bare axios: apiClient's response interceptor would recurse on this call
+      // Bare axios: a session client's response interceptor would recurse here.
       const { data } = await axios.post(
-        `${gateway}/auth/login`,
+        `${gatewayRoot}/auth/login`,
         {},
         {
           headers: { Authorization: `Bearer ${accessToken}` },
@@ -118,28 +90,95 @@ export const refreshSession = () => {
   return sessionRefresh;
 };
 
-// Recover from a request that raced ahead of the session cookie (or outlived
-// it): re-authenticate once, then replay the original request
-apiClient.interceptors.response.use(
-  (response) => response,
-  async (error) => {
-    const config = error?.config;
-    const isRetryable =
-      error?.response?.status === 401 &&
-      config &&
-      !config._sessionRetry &&
-      !isAuthEndpoint(config.url);
+/**
+ * An axios instance that authenticates with the Hyxora session — the one
+ * credential every backend in this app now takes.
+ *
+ * Two behaviours, and both are the reason this is a factory rather than five
+ * hand-rolled instances:
+ *
+ * **The JWT rides as `Authorization: Bearer` as well as a cookie.** The cookie
+ * is the real credential, but it is only first-party while the app and the
+ * gateway share a registrable domain. They don't always: a Netlify deploy
+ * (`hyxora-landing-dev.netlify.app` against `gateway-dev.hyxora.com`) makes it a
+ * third-party cookie the browser drops before it is ever stored, and in dev
+ * `withCredentials` is off so it never rides along at all. In both cases the
+ * header is the only credential left. It only ever fills a header the caller
+ * left empty: `/login` sends a Privy token, and clobbering it with a session
+ * JWT is what the backend rejects with 400.
+ *
+ * **A 401 buys exactly one retry.** A request that raced ahead of the session
+ * (or outlived it) re-authenticates once and replays. A 403 is never retried —
+ * that one means "not on the allowlist", and asking twice changes nothing.
+ *
+ * @param {Object} options
+ * @param {string} options.baseURL Absolute (a gateway service) or local (one of
+ * our own route handlers, which replay the same credential server-side).
+ * @param {boolean} [options.withCredentials] Defaults to on outside dev.
+ * @param {boolean} [options.retryUnauthorized] Defaults to on; off for `/auth`,
+ * which *is* the recovery.
+ * @param {boolean} [options.normalizeErrors] Lift the body's message onto
+ * `error.message`. Defaults to on; off for `/founders`, whose callers already
+ * read the raw axios error.
+ * @return {import("axios").AxiosInstance}
+ */
+export const createSessionClient = ({
+  baseURL,
+  withCredentials = !isDev,
+  retryUnauthorized = true,
+  normalizeErrors = true,
+}) => {
+  const client = axios.create({ baseURL, withCredentials });
 
-    if (!isRetryable) return Promise.reject(error);
-
-    config._sessionRetry = true;
-    try {
-      await refreshSession();
-    } catch {
-      return Promise.reject(error);
+  client.interceptors.request.use((config) => {
+    if (config.headers.Authorization || isAuthEndpoint(config.url)) return config;
+    const jwt = typeof window === "undefined" ? null : sessionStorage.getItem("jwt");
+    if (jwt) {
+      config.headers.Authorization = `Bearer ${jwt}`;
     }
-    return apiClient(config);
-  }
-);
+    return config;
+  });
+
+  const reject = (error) => Promise.reject(normalizeErrors ? withMessage(error) : error);
+
+  client.interceptors.response.use(
+    (response) => response,
+    async (error) => {
+      const config = error?.config;
+      const isRetryable =
+        retryUnauthorized &&
+        error?.response?.status === 401 &&
+        config &&
+        !config._sessionRetry &&
+        !isAuthEndpoint(config.url);
+
+      if (!isRetryable) return reject(error);
+
+      config._sessionRetry = true;
+      try {
+        await refreshSession();
+      } catch {
+        return reject(error);
+      }
+      return client(config);
+    }
+  );
+
+  return client;
+};
+
+// Login/logout live at the gateway root, outside /founders.
+export const authClient = createSessionClient({
+  baseURL: `${gatewayRoot}/auth`,
+  retryUnauthorized: false,
+  normalizeErrors: false,
+});
+
+// The founders service — every hook path ("/poll/all", "/admin/tutorials", ...)
+// resolves under /founders unchanged.
+const apiClient = createSessionClient({
+  baseURL: `${gatewayRoot}/founders`,
+  normalizeErrors: false,
+});
 
 export default apiClient;

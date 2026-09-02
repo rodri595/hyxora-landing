@@ -4,10 +4,9 @@ import CopyButton from "@/components/CopyButton";
 import { useCerebroAccess } from "@/hooks/cerebro/useCerebroAccess";
 import { useGetSystemHealth } from "@/hooks/cerebro/useGetSystemHealth";
 import { cn } from "@/utils";
+import { cerebroBaseUrl } from "@/utils/cerebroAxios";
 import { useCallback, useState } from "react";
 import Panel, { RefreshButton } from "../../shared/Panel";
-
-const CEREBRO_BASE_URL = process.env.NEXT_PUBLIC_CEREBRO_API || "https://admin.hyxora.com/api/v1";
 
 const Row = ({ label, children }) => (
   <div className="flex items-start gap-3 py-1.5 border-b-[0.7px] border-[rgba(25,54,63,0.05)] last:border-b-0">
@@ -60,7 +59,7 @@ const ConnectionPanel = () => {
   return (
     <Panel
       title="Diagnóstico de conexión"
-      description="Comprueba que la API de Cerebro responde y que tu Privy ID está en el allowlist del backend."
+      description="Comprueba que el servicio /admin del gateway responde y que tu Privy ID está en el allowlist del backend."
       action={<RefreshButton onClick={runTest} isLoading={isFetching} label="Probar conexión" />}
     >
       <div className="flex items-center gap-2 mb-2.5">
@@ -82,18 +81,18 @@ const ConnectionPanel = () => {
       <div className="flex flex-col">
         <Row label="Endpoint">
           <span className="font-mono text-[10px] tracking-tight text-[rgba(25,54,63,0.65)] break-all">
-            GET {CEREBRO_BASE_URL}/system/health
+            GET {cerebroBaseUrl}/system/health
           </span>
         </Row>
 
-        <Row label="Sesión Privy">
+        <Row label="Sesión Hyxora">
           <span
             className={cn(
               "font-inter text-[10px] tracking-[-0.4px]",
               enabled ? "text-emerald-700" : "text-red-700"
             )}
           >
-            {enabled ? "Autenticado" : "No autenticado — inicia sesión primero"}
+            {enabled ? "Sesión activa" : "Sin sesión — inicia sesión primero"}
           </span>
         </Row>
 
@@ -124,10 +123,11 @@ const ConnectionPanel = () => {
           <span className="font-inter text-[10px] font-medium text-red-700 tracking-[-0.4px]">
             {error.message}
           </span>
-          {httpStatus === 401 && (
+          {(httpStatus === 401 || httpStatus === 403) && (
             <span className="font-inter text-[10px] leading-[1.5] text-red-600/80 tracking-[-0.4px]">
-              El token de Privy llegó pero tu ID no está en ADMIN_ALLOWLIST_PRIVY_IDS. Copia el
-              Privy ID de arriba y pásaselo al equipo de backend.
+              La sesión llegó al gateway pero no autoriza este servicio: o el JWT ya no vale (vuelve
+              a iniciar sesión) o tu ID no está en ADMIN_ALLOWLIST_PRIVY_IDS. Copia el Privy ID de
+              arriba y pásaselo al equipo de backend.
             </span>
           )}
           {!httpStatus && (

@@ -1,5 +1,5 @@
 /**
- * Vocabulary of the Hyxora app backend (app-api.hyxora.com).
+ * Vocabulary of the Hyxora app backend (the gateway's `/app` service).
  *
  * Kept apart from `constants/cerebro.js`: Cerebro's operation keys are its own
  * eleven lowercase categories, while these are the eleven `action` values the

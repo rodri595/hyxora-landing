@@ -2,10 +2,10 @@ import cerebroClient from "@/utils/cerebroAxios";
 import { useMutation } from "@tanstack/react-query";
 
 /**
- * GET /system/health — Cerebro's indexer cursors, TVL freshness and cache state.
+ * GET /admin/system/health — Cerebro's indexer cursors, TVL freshness and cache state.
  *
  * The same call `requireAdmin` uses as its authorisation probe, run directly.
- * A 200 proves this Privy ID is on `ADMIN_ALLOWLIST_PRIVY_IDS`; a 401 proves it
+ * A 200 proves this session is on `ADMIN_ALLOWLIST_PRIVY_IDS`; a 401 proves it
  * is not, which is worth knowing before blaming any other endpoint.
  *
  * `tvl.freshness` here is a **max** — one user refreshing moves it. The per-user

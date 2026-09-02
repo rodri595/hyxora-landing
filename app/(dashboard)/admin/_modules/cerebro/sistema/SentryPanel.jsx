@@ -147,7 +147,7 @@ const SentryUnavailable = ({ data }) => (
     </span>
     <span className="font-inter text-[10px] leading-[1.6] tracking-[-0.4px] text-amber-700/80">
       {data?.configured === false
-        ? "Falta el token de Sentry en admin.hyxora.com, así que no hay informe que pedir. Esto no es «no hay errores»: es que no se ha mirado."
+        ? "Falta el token de Sentry en el backend de Cerebro, así que no hay informe que pedir. Esto no es «no hay errores»: es que no se ha mirado."
         : (data?.error ?? "La API de Sentry devolvió un error. No hay informe que mostrar.")}
     </span>
   </div>

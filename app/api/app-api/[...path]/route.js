@@ -1,17 +1,24 @@
+import { gatewayRoot } from "@/utils/gateway";
 import { requireAdmin } from "@/utils/server/requireAdmin";
 
 /**
- * Server-side proxy for the Hyxora **app** backend (app-api.hyxora.com).
+ * Server-side proxy for the Hyxora **app** backend, now reached through the
+ * gateway's `/app` service rather than `app-api.hyxora.com` directly.
  *
- * Third API in this codebase — see CLAUDE.md. It exists as a route handler and
- * not as a browser-side axios instance for one reason: app-api authenticates
- * with a shared *bot token* that unlocks `/admin/users`, every user's portfolio
- * and transactions, and `/bank/{wallet}/kyc`. Shipping that token in a
- * `NEXT_PUBLIC_` var would put it in the JS bundle of a public marketing site.
- * It lives in `HYXORA_BOT_TOKEN` and only this file ever reads it.
+ * The gateway move did **not** dissolve this route, and that is the thing to
+ * understand before touching it. `/app` is the only service here that does not
+ * take the session JWT: it authenticates with a shared *bot token* that unlocks
+ * `/admin/users`, every user's portfolio and transactions, and
+ * `/bank/{wallet}/kyc`. Shipping that token in a `NEXT_PUBLIC_` var would put it
+ * in the JS bundle of a public marketing site, so it stays in `HYXORA_BOT_TOKEN`
+ * and only this file ever reads it.
+ *
+ * So the request is authorised twice, on two different credentials: the caller
+ * proves they are an allowlisted admin with their own session (`requireAdmin`),
+ * and only then does this file spend the bot token on their behalf.
  */
 
-const APP_API = process.env.HYXORA_APP_API_URL || "https://app-api.hyxora.com";
+const APP_API = `${gatewayRoot}/app`;
 
 /**
  * Exact paths this proxy will forward. The bot token is far more powerful than

@@ -40,7 +40,6 @@ export const useEnvironmentReport = () => {
         durationMs: Math.round(performance.now() - startedAt),
         body: {
           gateway: origin(process.env.NEXT_PUBLIC_HYXORA_API),
-          cerebro: origin(process.env.NEXT_PUBLIC_CEREBRO_API),
           build: process.env.NODE_ENV,
           host: window.location.host,
           privyListo: ready,

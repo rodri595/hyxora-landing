@@ -7,7 +7,7 @@ import { Suspense, lazy, useCallback, useEffect, useRef } from "react";
 
 /**
  * Cerebro shell — the read-only analytics side of the admin, backed by the
- * cross-project API at admin.hyxora.com (see `hooks/cerebro/`).
+ * cross-project API served by the gateway at /admin (see `hooks/cerebro/`).
  *
  * Tab layout mirrors the dashboard the backend team already built, so the two
  * stay comparable while we port it over.
