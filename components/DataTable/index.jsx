@@ -64,7 +64,10 @@ const exportToExcel = (rows, filename) => {
 // ─── Icons ────────────────────────────────────────────────────────────────────
 
 const SortIcon = ({ direction }) => (
-  <span className="inline-flex flex-col gap-0.5 ml-1 opacity-50">
+  // Spacing comes from the header row's `gap`, not a margin here: under
+  // `flex-row-reverse` an `ml-1` lands on the far side of the arrows and opens a
+  // gap where the text isn't.
+  <span className="inline-flex flex-col gap-0.5 opacity-50">
     <svg
       width="6"
       height="4"
@@ -783,10 +786,23 @@ const DataTable = ({
                         if (e.key === "Enter") header.column.getToggleSortingHandler()?.(e);
                       }}
                     >
-                      <span
+                      {/* A block flex row, not an inline-flex span. An
+                          inline-level box sits on the cell's text baseline, and
+                          an inline-flex box takes its baseline from its *first*
+                          flex item — so `flex-row-reverse` moved the baseline
+                          onto the sort arrows, and every right-aligned header
+                          rode a couple of pixels higher than the rest of the
+                          row. Laying the content out in a block removes the
+                          baseline from the question entirely, and justify does
+                          the aligning the parent's `text-align` used to. */}
+                      <div
                         className={cn(
-                          "inline-flex items-center",
-                          align === "right" && "flex-row-reverse"
+                          "flex h-full items-center gap-1",
+                          align === "right"
+                            ? "flex-row-reverse"
+                            : align === "center"
+                              ? "justify-center"
+                              : "justify-start"
                         )}
                       >
                         {header.isPlaceholder
@@ -795,7 +811,7 @@ const DataTable = ({
                         {header.column.getCanSort() && (
                           <SortIcon direction={header.column.getIsSorted() || null} />
                         )}
-                      </span>
+                      </div>
                     </th>
                   );
                 })}

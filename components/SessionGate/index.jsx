@@ -1,6 +1,7 @@
 "use client";
 
 import Button from "@/components/Button";
+import CopyButton from "@/components/CopyButton";
 import Icon from "@/components/Icon";
 import Spinner from "@/components/Spinner";
 import { usePrivy } from "@privy-io/react-auth";
@@ -129,6 +130,7 @@ const SessionGate = ({ status, error, onRetry, isRetrying, onLogout }) => {
   const isWaiting = waitSeconds > 0;
   const isLongWait = waitSeconds >= LONG_WAIT_SECONDS;
   const isRejected = status === "rejected";
+  const reference = error?.rateLimitId ?? null;
 
   // Everything support needs to find the session without a round of questions.
   const supportHref = `mailto:${SUPPORT_EMAIL}?subject=${encodeURIComponent(
@@ -140,6 +142,9 @@ const SessionGate = ({ status, error, onRetry, isRetrying, onLogout }) => {
       `Error: ${failure.title}`,
       `Código: ${error?.status ?? "sin respuesta del servidor"}`,
       error?.message ? `Detalle: ${error.message}` : null,
+      // First in the block that matters: it is the one line an admin can act on
+      // without asking anything else, and it identifies nobody.
+      reference ? `Referencia: ${reference}` : null,
       `Cuenta: ${user?.id ?? "desconocida"}`,
       `Fecha: ${new Date().toISOString()}`,
     ]
@@ -174,6 +179,25 @@ const SessionGate = ({ status, error, onRetry, isRetrying, onLogout }) => {
           </p>
         )}
       </div>
+
+      {/* The reference the gateway handed this client, when it sent one.
+          Deliberately the most legible thing on the screen after the headline —
+          it is the whole recovery path: an admin pastes it into
+          /admin?tab=rate-limits and the wait is over. It reveals nothing about
+          the account, so it is safe to show and safe to forward. */}
+      {reference && (
+        <div className="flex w-full flex-col items-center gap-1.5 rounded-xl border-[0.7px] border-[rgba(25,54,63,0.1)] bg-white px-4 py-3">
+          <span className="font-inter text-[11px] tracking-[-0.44px] text-[rgba(25,54,63,0.45)]">
+            Referencia para soporte
+          </span>
+          <div className="flex max-w-full items-center gap-1.5">
+            <span className="break-all font-mono text-[13px] tracking-tight text-[#19363f]">
+              {reference}
+            </span>
+            <CopyButton text={reference} />
+          </div>
+        </div>
+      )}
 
       {/* The server's own words, when it sent any. Small and muted: it is for
           whoever reads it out to support, not the headline. */}

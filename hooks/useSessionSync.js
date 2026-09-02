@@ -48,6 +48,23 @@ const toWaitSeconds = (raw, perSecond = 1) => {
   return Number.isNaN(at) ? null : Math.max(0, Math.ceil((at - Date.now()) / 1000));
 };
 
+/**
+ * The opaque reference the gateway hands a throttled client — `rl_4fb98800…`.
+ *
+ * The only thing about a rate limit a user can usefully report. It is not
+ * derived from their email or IP, so it says nothing about who they are, and an
+ * admin can look it up in `/admin?tab=rate-limits` and clear the counter.
+ *
+ * Deliberately not persisted with any hope of longevity: the id lives in the
+ * gateway's memory, is stable only within the current window, and is gone on a
+ * restart. It is stored alongside the ban so a reload still shows it, and the
+ * gate says out loud that the email is the fallback when it has gone stale.
+ */
+const readRateLimitId = (data) => {
+  const id = data?.rateLimitId ?? data?.rate_limit_id ?? null;
+  return typeof id === "string" && id ? id : null;
+};
+
 /** The wait a *body* names, which is also the tell that a 4xx is a ban. */
 const readBodyWait = (data) => {
   for (const key of ["retryAfter", "retry_after", "retryAfterSeconds"]) {
@@ -111,6 +128,8 @@ const isRateLimit = (error) => {
  *   how long, defaulting to a minute when the response did not. Checked *before*
  *   `rejected` and by body rather than status, because the gateway bans with a
  *   403 that is otherwise identical to a refusal — see `isRateLimit`.
+ *   `sessionError.rateLimitId` is the opaque reference the user quotes to
+ *   support, which an admin clears from `/admin?tab=rate-limits`.
  * - `rejected` (4xx) — the backend refuses this user. Retrying can still help,
  *   because `getAccessToken()` renews an expired Privy token first, but it is
  *   not automatic and logging out is the realistic way through.
@@ -131,7 +150,7 @@ const isRateLimit = (error) => {
  *   isSessionReady: boolean,
  *   isSessionSettled: boolean,
  *   sessionStatus: "anonymous" | "pending" | "ready" | "rejected" | "rate-limited" | "unavailable",
- *   sessionError: { status: number | null, message: string | null, retryAfterSeconds: number | null } | null,
+ *   sessionError: { status: number | null, message: string | null, retryAfterSeconds: number | null, rateLimitId: string | null } | null,
  *   retrySession: () => void,
  *   isRetryingSession: boolean,
  * }}
@@ -189,6 +208,7 @@ export function useSessionSync() {
   // routes answer `{ message }`. A network failure has no response at all, and
   // axios' own "Network Error" is not worth showing anyone.
   const responseMessage = error?.response?.data?.message ?? error?.response?.data?.error ?? null;
+  const responseRateLimitId = readRateLimitId(error?.response?.data);
 
   // Persist a fresh ban so the next page load waits it out instead of spending
   // another failed request on it.
@@ -199,10 +219,11 @@ export function useSessionSync() {
       until: Date.now() + seconds * 1000,
       status: status ?? null,
       message: responseMessage,
+      rateLimitId: responseRateLimitId,
     };
     writeToLocalStorageWithExpiracy(BAN_STORAGE_KEY, next, seconds * 1000);
     setBan(next);
-  }, [rateLimited, error, status, responseMessage]);
+  }, [rateLimited, error, status, responseMessage, responseRateLimitId]);
 
   // Derived from `isSuccess`/`isError` alone, never from `isFetching`: a manual
   // retry must leave the error screen up with a busy button rather than flashing
@@ -225,10 +246,16 @@ export function useSessionSync() {
         retryAfterSeconds: rateLimited
           ? (readRetryAfter(error) ?? DEFAULT_RATE_LIMIT_WAIT_SECONDS)
           : null,
+        rateLimitId: rateLimited ? responseRateLimitId : null,
       };
     }
     if (isBanned) {
-      return { status: ban.status, message: ban.message, retryAfterSeconds: banSecondsLeft };
+      return {
+        status: ban.status,
+        message: ban.message,
+        retryAfterSeconds: banSecondsLeft,
+        rateLimitId: ban.rateLimitId ?? null,
+      };
     }
     return null;
   })();

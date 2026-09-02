@@ -11,6 +11,7 @@ easiest mistake to make here, so the rule is mechanical:
 | `@/utils/cerebroAxios` (`cerebroClient`) | `NEXT_PUBLIC_CEREBRO_API` | Raw Privy bearer token per request | raw JSON, no envelope |
 | `@/utils/appApiAxios` (`appApiClient`) | `/api/app-api` (local proxy) | Privy bearer → proxy swaps in the bot token | `data.data` |
 | `@/utils/monitoringAxios` (`monitoringClient`) | `/api/monitoring` (our own routes) | Privy bearer → `requireAdmin` | plain JSON, per route |
+| `@/utils/gatewayAdminAxios` (`gatewayAdminClient`) | `NEXT_PUBLIC_HYXORA_API` + `/gateway/admin` | Session JWT as `Bearer`, one-shot re-auth on 401, **plus** the gateway's live Privy allowlist | plain JSON, `{ success, … }` |
 
 **Cerebro** (`admin.hyxora.com/api/v1`) is a cross-project analytics API built by
 another team. It is read-only — every endpoint in `admin.md` is a GET — and it
@@ -42,6 +43,28 @@ service pings, the Solana fee-payer balance, the Zerion treasury scan and live
 > join Cerebro didn't expose. `/holdings/holders` (2026-08-25) does that join in
 > SQL upstream, so the route is gone. Take the lesson with it: a fan-out here is a
 > workaround for a missing endpoint, and it is worth asking for the endpoint first.
+
+**`/gateway/admin/*`** is the gateway's own admin surface — rate-limit counters
+and IP bans — and is the one place `NEXT_PUBLIC_HYXORA_API` is used *outside*
+`/founders`. It is served by the gateway itself and never proxied, so it sits
+beside `/auth`. `docs/RATE_LIMITING.md` is the backend's own guide to it, kept
+here unedited so it diffs cleanly against their next version.
+
+> It wants **both** credentials: a valid gateway JWT *and* the caller's Privy ID
+> in `ADMIN_ALLOWLIST_PRIVY_IDS`, checked live rather than read off the token —
+> the same list Cerebro reads. So `useIsAdmin()` only decides who bothers to ask;
+> a 401 (bad/absent JWT) or 403 (not allowlisted) is still the real answer and
+> must be surfaced. The surface is exempt from rate limiting on purpose, which is
+> the point: a throttled admin can still reach the endpoint that unthrottles.
+>
+> Two things about the counters shape every panel that reads them. They live in
+> the gateway's **memory** and roll over each window, so the list is a live poll
+> and never a cache. And `limit`/`windowMs` come back on every response because
+> they are config-controlled — **read them, never hardcode 100/60s.**
+>
+> `hooks/admin/useResetIpBans` predates this client and still calls
+> `/gateway/admin/ip-bans/reset` through `apiClient` with an absolute URL, from
+> the DEV panel. If it grows a second caller, move it here.
 
 > **Never import `utils/server/*` from a client component.** It is what stands
 > between a public marketing site and every user's KYC.
@@ -147,10 +170,17 @@ balances, fees and error counts — a mocked figure is something someone acts on
   `hooks/appApi/types.js`. **Money is in minor units and fees in basis points**:
   `price: 1900` is €19.00, `feeBps: 20` is 0.20%.
 - `hooks/admin/` → Hyxora backend admin endpoints, gated by the `roleNames.admin`
-  check against `useGetUserInformation()` plus `isSessionReady`. Note
-  `useGetFeeSchema`/`useGetWhitelist` here overlap with `hooks/appApi/` — they ask
-  `api.hyxora.com` for same-named paths with guessed field names, and feed the
-  separate `comisiones/` tab. Reconcile before adding a third copy.
+  check against `useGetUserInformation()` plus `isSessionReady`. It used to hold a
+  `useGetFeeSchema`/`useGetWhitelist` pair asking `api.hyxora.com` for the same
+  schema `hooks/appApi/` serves, on guessed paths (`/admin/tokens`, `/admin/vaults`)
+  with guessed field names. They fed a separate «Comisiones» tab and were deleted
+  along with it — **app-api is the one source for the fee schema and the whitelists**,
+  read through `cerebro/planes/`. Don't add a second copy back.
+- `hooks/gateway/` → the gateway's own `/gateway/admin/*` surface via
+  `gatewayAdminClient`, gated by `useIsAdmin()`. Types in `hooks/gateway/types.js`.
+  The reads poll (`refetchInterval`) instead of caching, because the counters are
+  in-memory and expire with the window; the writes are `retry: false`, because a
+  silent second attempt is not what a reset button should do.
 - One hook per file, named `useGetX.jsx` / `useX.jsx`, JS not TS.
 - Cerebro hooks carry JSDoc `@param`/`@return` with `@import` types from
   `hooks/cerebro/types.js`. Keep that up when adding endpoints.
@@ -164,12 +194,32 @@ _modules/
                    MeterBar (one labelled proportion), CompositionBar (how a
                    total splits across its biggest contributors), ChartTooltip
   cerebro/         Cerebro API only — sistema/ redes/ planes/ …
-  comisiones/      Fee schema + whitelists — Hyxora API (deliberately outside cerebro/)
   UsersModule.jsx  …and the other original admin tabs
 ```
 
 Top-level tabs live in `components/AdminTabBar` + the `moduleMap` in
 `admin/page.jsx`. Cerebro nests a second tab bar on `?tab=cerebro&sub=<id>`.
+
+**«Rate limits»** (`?tab=rate-limits`) is the support desk for a throttled user:
+`/rate-limits` listed in a DataTable, a drawer per row, and a confirmation before
+anything is cleared. Two details there are the feature rather than decoration.
+The manual «resetear por referencia o email» box sits **outside** the query's
+loading/error branch, because a reference that no longer resolves is exactly when
+the list is least useful and the reset most needed — a failing `/rate-limits`
+must not take the reset form down with it. And a row is reset by its **`target`**,
+never by its `id`: the API takes exactly one selector and 400s on two, the target
+*is* the counter's key, and the id can expire between the poll and the click.
+`SessionGate` is the other half — it shows the `rateLimitId` from a 429 so the
+user has something to quote that identifies nobody.
+
+To produce a 429 on purpose, the DEV panel's «Probar rate limit» fires N requests
+at a chosen endpoint (`hooks/devtools/useRateLimitProbe.jsx`). Its target list is
+closed for a reason: **every path must be one that actually exists**, because the
+gateway fail-bans an IP that probes *unknown* paths with a 403 only an admin can
+clear, and **nothing may touch `/auth/login`**, whose failures feed the separate
+twenty-hour login ban. It uses bare `axios`, never `apiClient` — that instance
+re-authenticates on 401, so a run against a 401 endpoint would become a run
+against `/auth/login`.
 
 ## Tables
 

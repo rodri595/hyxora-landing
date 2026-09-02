@@ -52,7 +52,14 @@ const apiClient = withDevAuthHeader(
 // /auth/login instead of one per request
 let sessionRefresh = null;
 
-const refreshSession = () => {
+/**
+ * Re-mints the Hyxora session from the current Privy token, at most once at a
+ * time. Exported because `gatewayAdminClient` needs the same recovery on 401 and
+ * must share this single-flight guard: two clients each running their own
+ * refresh on a burst of 401s is two `/auth/login` calls, and failed logins are
+ * exactly what the gateway's ban counter counts.
+ */
+export const refreshSession = () => {
   if (!sessionRefresh) {
     sessionRefresh = (async () => {
       const { getAccessToken } = await import("@privy-io/react-auth");
