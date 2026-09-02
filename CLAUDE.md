@@ -23,11 +23,21 @@ different times and picking one silently leaves storage empty.
 
 **The session JWT is mirrored into `sessionStorage` in every environment, and
 replayed as a header.** The cookie is the real credential but is only
-first-party while the app and the gateway share a registrable domain — the
-Netlify deploys (`*.netlify.app` against `gateway-dev.hyxora.com`) do not, so
-there the browser is free to drop it and the header is all that is left. Login
-working on `hyxora.com` and 401-looping on Netlify is that difference, not a
-broken token.
+first-party while the app and the gateway share a registrable domain.
+`founder.hyxora.com` → `gateway.hyxora.com` is same-site and fine; the Netlify
+deploys (`*.netlify.app` against `gateway-dev.hyxora.com`) are not, and there
+the gateway's `hyxora_session` cookie — sent `HttpOnly; SameSite=Lax` with no
+`Secure`, confirmed 2026-09-02 — is **blocked by the browser before it is ever
+stored**. `Lax` covers same-site requests and top-level navigations; an XHR
+across sites is neither. So the request that follows carries no `Cookie` at all,
+401s, and the header is the only credential left. Login working on `hyxora.com`
+and 401-looping on Netlify is that difference, not a broken token.
+
+> The gateway-side fix is `SameSite=None; Secure` (the `Secure` is mandatory —
+> `None` without it is rejected too), ideally only for cross-origin frontends so
+> first-party deploys keep `Lax`. **Keep the header fallback regardless**: even
+> a correctly-attributed `SameSite=None` cookie is still third-party, and
+> Chrome's third-party cookie controls and Safari's ITP can drop it anyway.
 
 **Cerebro** (`admin.hyxora.com/api/v1`) is a cross-project analytics API built by
 another team. It is read-only — every endpoint in `admin.md` is a GET — and it

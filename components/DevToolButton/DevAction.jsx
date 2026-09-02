@@ -1,5 +1,6 @@
 "use client";
 
+import CopyButton from "@/components/CopyButton";
 import { cn } from "@/utils";
 import { useGSAP } from "@gsap/react";
 import axios from "axios";
@@ -53,14 +54,33 @@ const Row = ({ label, value, tone }) => (
   </div>
 );
 
-const ResponseBody = ({ body }) => (
-  <pre
-    data-lenis-prevent
-    className="max-h-[132px] overflow-auto whitespace-pre-wrap break-all rounded-[8px] border border-[#24292D] bg-black/40 p-2 font-mono text-[9px] text-[#B6BFC7] leading-[1.55]"
-  >
-    {typeof body === "string" ? body : JSON.stringify(body, null, 2)}
-  </pre>
-);
+/**
+ * The readout, plus the two things you actually do with it: select part of it,
+ * or take all of it.
+ *
+ * `select-text` is not decoration. The floating wrapper is `select-none` so
+ * dragging the button never paints a selection across the page, and that
+ * inherits down to here — without re-enabling it the response is a picture of
+ * JSON: you can read an id in an error but you cannot lift it out.
+ */
+const ResponseBody = ({ body }) => {
+  const text = typeof body === "string" ? body : JSON.stringify(body, null, 2);
+
+  return (
+    <div className="space-y-1">
+      <div className="flex items-center justify-between gap-2">
+        <FieldLabel>Respuesta</FieldLabel>
+        <CopyButton text={text} variant="dark" title="Copiar respuesta" className="-mt-1 size-4" />
+      </div>
+      <pre
+        data-lenis-prevent
+        className="max-h-[132px] cursor-text select-text overflow-auto whitespace-pre-wrap break-all rounded-[8px] border border-[#24292D] bg-black/40 p-2 font-mono text-[9px] text-[#B6BFC7] leading-[1.55]"
+      >
+        {text}
+      </pre>
+    </div>
+  );
+};
 
 /**
  * The hairline that travels while an action is running.
@@ -357,7 +377,7 @@ const DevAction = ({ action, active, onToneChange }) => {
       {failure && (
         <div className="space-y-1.5">
           <Row label="HTTP" value={failure.status ?? "sin respuesta"} tone="error" />
-          <p className="text-[10px] text-[#F31260] leading-[1.5]">{failure.message}</p>
+          <p className="select-text text-[10px] text-[#F31260] leading-[1.5]">{failure.message}</p>
           {failure.body != null && <ResponseBody body={failure.body} />}
         </div>
       )}
