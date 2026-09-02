@@ -32,8 +32,10 @@ const FINGERPRINT_KEY = "hyxora:privy-env";
 // against the old environment is not one the new one should be serving.
 const BAN_STORAGE_KEY = "hyxora:login-ban";
 
-// The backend session minted from the old Privy identity (dev only — in prod it
-// is an HttpOnly cookie the gateway owns).
+// The backend session minted from the old Privy identity. Mirrored into
+// sessionStorage in every environment, because the gateway's cookie is only
+// first-party while the app and the gateway share a domain — see
+// `withSessionHeader` in `utils/axios.js`.
 const SESSION_JWT_KEY = "jwt";
 
 /**

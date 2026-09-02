@@ -7,11 +7,27 @@ easiest mistake to make here, so the rule is mechanical:
 
 | Client | Base URL | Auth | Response shape |
 |---|---|---|---|
-| `@/utils/axios` (`apiClient`) | `NEXT_PUBLIC_HYXORA_API` | Session JWT cookie, auto re-auth on 401 | `data.data.<key>` |
+| `@/utils/axios` (`apiClient`) | `NEXT_PUBLIC_HYXORA_API` | Session JWT — cookie *and* `Bearer` header, auto re-auth on 401 | `data.data.<key>` |
 | `@/utils/cerebroAxios` (`cerebroClient`) | `NEXT_PUBLIC_CEREBRO_API` | Raw Privy bearer token per request | raw JSON, no envelope |
 | `@/utils/appApiAxios` (`appApiClient`) | `/api/app-api` (local proxy) | Privy bearer → proxy swaps in the bot token | `data.data` |
 | `@/utils/monitoringAxios` (`monitoringClient`) | `/api/monitoring` (our own routes) | Privy bearer → `requireAdmin` | plain JSON, per route |
 | `@/utils/gatewayAdminAxios` (`gatewayAdminClient`) | `NEXT_PUBLIC_HYXORA_API` + `/gateway/admin` | Session JWT as `Bearer`, one-shot re-auth on 401, **plus** the gateway's live Privy allowlist | plain JSON, `{ success, … }` |
+
+**`/auth/login` wants `Authorization: Bearer <privy token>`** — the scheme, not a
+bare token. A bare one comes back `{ success: false, error: "Missing access
+token" }`, which from the 401-recovery path reads like a rejected login rather
+than a malformed header. Both minting paths (`useAuth.authenticate` and
+`refreshSession`) send it, and both read the answer through `readSessionJwt()`,
+because the gateway has answered `{ data: { jwt } }` and `{ token }` at
+different times and picking one silently leaves storage empty.
+
+**The session JWT is mirrored into `sessionStorage` in every environment, and
+replayed as a header.** The cookie is the real credential but is only
+first-party while the app and the gateway share a registrable domain — the
+Netlify deploys (`*.netlify.app` against `gateway-dev.hyxora.com`) do not, so
+there the browser is free to drop it and the header is all that is left. Login
+working on `hyxora.com` and 401-looping on Netlify is that difference, not a
+broken token.
 
 **Cerebro** (`admin.hyxora.com/api/v1`) is a cross-project analytics API built by
 another team. It is read-only — every endpoint in `admin.md` is a GET — and it

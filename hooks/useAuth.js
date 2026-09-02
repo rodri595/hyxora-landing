@@ -1,4 +1,4 @@
-import { authClient } from "@/utils/axios";
+import { authClient, readSessionJwt } from "@/utils/axios";
 
 export function useAuth() {
   const authenticate = async (jwt) => {
@@ -7,8 +7,12 @@ export function useAuth() {
       {},
       { headers: { Authorization: `Bearer ${jwt}` } }
     );
-    if (response.data?.token) {
-      sessionStorage.setItem("jwt", response.data.token);
+    // Mirrored in every environment, not just dev: the cookie the gateway sets
+    // is third-party on a Netlify origin and may never be stored, and this is
+    // the credential `apiClient` and `gatewayAdminClient` fall back to.
+    const session = readSessionJwt(response.data);
+    if (session) {
+      sessionStorage.setItem("jwt", session);
     }
     return response.data;
   };

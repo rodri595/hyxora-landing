@@ -14,17 +14,43 @@ const AUTH_ENDPOINTS = ["/login", "/logout"];
 
 const isAuthEndpoint = (url) => AUTH_ENDPOINTS.some((path) => url?.startsWith(path));
 
-// In dev `withCredentials` is off, so the session cookie never rides along —
-// replay it from sessionStorage instead. Only ever fills a header the caller
-// left empty: `/login` sends a Privy token here, and clobbering it with
-// a Hyxora session JWT is what the backend rejects with 400.
-const withDevAuthHeader = (client) => {
+/**
+ * The Hyxora session JWT out of a `/auth/login` body, whichever shape it came
+ * back in — `{ data: { jwt } }` or `{ token }`.
+ *
+ * One reader instead of three, because the three call sites that mint a session
+ * each picked a different one and only one can be right at a time. The failure
+ * is silent and total: the login succeeds, nothing is written to storage, and
+ * every request after it goes out with no credential at all.
+ *
+ * @param {unknown} data Parsed `/auth/login` response body.
+ * @return {string | null}
+ */
+export const readSessionJwt = (data) =>
+  data?.data?.jwt ?? data?.token ?? data?.jwt ?? data?.data?.token ?? null;
+
+/**
+ * Replays the session JWT as `Authorization: Bearer` whenever we hold one and
+ * the caller left the header empty.
+ *
+ * The cookie is the real credential, but it is only first-party while the app
+ * and the gateway share a registrable domain. They don't always: a Netlify
+ * deploy (`hyxora-landing-dev.netlify.app` against `gateway-dev.hyxora.com`)
+ * makes it a third-party cookie the browser is free to drop, and in dev
+ * `withCredentials` is off so it never rides along at all. In both cases the
+ * header is the only credential left — and sending it beside a cookie that did
+ * survive costs nothing, which is what `gatewayAdminClient` already relies on.
+ *
+ * Only ever fills a header the caller left empty: `/login` sends a Privy token
+ * here, and clobbering it with a Hyxora session JWT is what the backend rejects
+ * with 400.
+ */
+const withSessionHeader = (client) => {
   client.interceptors.request.use((config) => {
-    if (isDev && !config.headers.Authorization && !isAuthEndpoint(config.url)) {
-      const jwt = sessionStorage.getItem("jwt");
-      if (jwt) {
-        config.headers.Authorization = `Bearer ${jwt}`;
-      }
+    if (config.headers.Authorization || isAuthEndpoint(config.url)) return config;
+    const jwt = typeof window === "undefined" ? null : sessionStorage.getItem("jwt");
+    if (jwt) {
+      config.headers.Authorization = `Bearer ${jwt}`;
     }
     return config;
   });
@@ -32,7 +58,7 @@ const withDevAuthHeader = (client) => {
 };
 
 // Login/logout live at the gateway root, outside /founders.
-export const authClient = withDevAuthHeader(
+export const authClient = withSessionHeader(
   axios.create({
     baseURL: `${gateway}/auth`,
     withCredentials: !isDev,
@@ -41,7 +67,7 @@ export const authClient = withDevAuthHeader(
 
 // This app only talks to the founders service, so every hook path
 // ("/poll/all", "/admin/tutorials", ...) resolves under /founders unchanged.
-const apiClient = withDevAuthHeader(
+const apiClient = withSessionHeader(
   axios.create({
     baseURL: `${gateway}/founders`,
     withCredentials: !isDev,
@@ -66,17 +92,23 @@ export const refreshSession = () => {
       const accessToken = await getAccessToken();
       if (!accessToken) throw new Error("Privy access token unavailable");
 
+      // The `Bearer` scheme is not optional. The gateway parses it off the
+      // header and answers a bare token with `{ success: false, error:
+      // "Missing access token" }` — which, arriving from the *recovery* path,
+      // reads like a rejected login rather than a malformed header.
+      //
       // Bare axios: apiClient's response interceptor would recurse on this call
       const { data } = await axios.post(
         `${gateway}/auth/login`,
         {},
         {
-          headers: { Authorization: accessToken },
+          headers: { Authorization: `Bearer ${accessToken}` },
           withCredentials: !isDev,
         }
       );
-      if (data?.data?.jwt) {
-        sessionStorage.setItem("jwt", data.data.jwt);
+      const jwt = readSessionJwt(data);
+      if (jwt) {
+        sessionStorage.setItem("jwt", jwt);
       }
       return data;
     })().finally(() => {

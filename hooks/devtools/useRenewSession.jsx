@@ -1,4 +1,4 @@
-import { authClient } from "@/utils/axios";
+import { authClient, readSessionJwt } from "@/utils/axios";
 import { useMutation } from "@tanstack/react-query";
 
 /**
@@ -8,9 +8,9 @@ import { useMutation } from "@tanstack/react-query";
  * failure is visible instead of swallowed. When a call 401s, this says whether
  * the session is the broken part or the route simply wants another credential.
  *
- * Mirrors `refreshSession` in `utils/axios.js`, including the bare
- * `Authorization: <token>` with no `Bearer` prefix — that is what the endpoint
- * expects, and adding the scheme 400s.
+ * Mirrors `refreshSession` in `utils/axios.js`, down to the `Bearer` prefix.
+ * The scheme is not optional: the gateway parses it off the header and answers
+ * a bare token with `{ success: false, error: "Missing access token" }`.
  */
 export const useRenewSession = () => {
   return useMutation({
@@ -25,16 +25,18 @@ export const useRenewSession = () => {
       const response = await authClient.post(
         "/login",
         {},
-        { headers: { Authorization: accessToken } }
+        { headers: { Authorization: `Bearer ${accessToken}` } }
       );
 
-      const jwt = response?.data?.data?.jwt;
+      const jwt = readSessionJwt(response?.data);
       if (jwt) {
         try {
-          // Dev has withCredentials off, so the session only survives here.
+          // Stored in every environment: in dev `withCredentials` is off, and on
+          // a Netlify origin the gateway's cookie is third-party and may never
+          // be stored either. The header is what carries the session in both.
           sessionStorage.setItem("jwt", jwt);
         } catch {
-          // Storage blocked; the cookie path still works in production.
+          // Storage blocked; the cookie path still works on a first-party origin.
         }
       }
 
