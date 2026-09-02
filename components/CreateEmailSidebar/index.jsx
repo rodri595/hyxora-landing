@@ -1,30 +1,22 @@
 "use client";
 
-import { useState, useMemo, useRef, useCallback } from "react";
-import { useGSAP } from "@gsap/react";
-import gsap from "gsap";
+import ErrorComp from "@/components/Error";
+import Field from "@/components/Field";
+import Spinner from "@/components/Spinner";
 import { useGetAllUsers } from "@/hooks/admin/useGetAllUsers";
 import { useSendTextEmails } from "@/hooks/admin/useSendTextEmails";
-import Field from "@/components/Field";
-import ErrorComp from "@/components/Error";
-import Spinner from "@/components/Spinner";
 import { cn } from "@/utils";
+import { isValidEmail } from "@/utils/email";
+import { useGSAP } from "@gsap/react";
+import gsap from "gsap";
+import { useCallback, useMemo, useRef, useState } from "react";
 
 gsap.registerPlugin(useGSAP);
 
 const CreateEmailSidebar = ({ onClose }) => {
   const panelRef = useRef(null);
-  const {
-    data: allUsers = [],
-    error: usersError,
-    isLoading: usersLoading,
-  } = useGetAllUsers();
-  const {
-    mutate: sendEmails,
-    isPending,
-    isSuccess,
-    error: sendError,
-  } = useSendTextEmails();
+  const { data: allUsers = [], error: usersError, isLoading: usersLoading } = useGetAllUsers();
+  const { mutate: sendEmails, isPending, isSuccess, error: sendError } = useSendTextEmails();
 
   const [search, setSearch] = useState("");
   const [selectedEmails, setSelectedEmails] = useState([]);
@@ -36,16 +28,13 @@ const CreateEmailSidebar = ({ onClose }) => {
       gsap.fromTo(
         panelRef.current,
         { opacity: 0 },
-        { opacity: 1, duration: 0.28, delay: 0.14, ease: "power2.out" },
+        { opacity: 1, duration: 0.28, delay: 0.14, ease: "power2.out" }
       );
     },
-    { scope: panelRef },
+    { scope: panelRef }
   );
 
-  const usersWithEmail = useMemo(
-    () => allUsers.filter((u) => u?.email),
-    [allUsers],
-  );
+  const usersWithEmail = useMemo(() => allUsers.filter((u) => u?.email), [allUsers]);
 
   const filtered = useMemo(() => {
     if (!search.trim()) return usersWithEmail;
@@ -54,18 +43,27 @@ const CreateEmailSidebar = ({ onClose }) => {
   }, [usersWithEmail, search]);
 
   const addUser = useCallback((email) => {
-    setSelectedEmails((prev) =>
-      prev.includes(email) ? prev : [...prev, email],
-    );
+    setSelectedEmails((prev) => (prev.includes(email) ? prev : [...prev, email]));
   }, []);
 
   const removeEmail = useCallback((email) => {
     setSelectedEmails((prev) => prev.filter((e) => e !== email));
   }, []);
 
+  // A recipient doesn't have to be a registered user: whatever is typed can be
+  // added straight from the search box, with Enter or the button below it.
+  const typed = search.trim().toLowerCase();
+  const typedIsEmail = isValidEmail(typed);
+  const typedAlreadyAdded = selectedEmails.includes(typed);
+
+  const addTyped = useCallback(() => {
+    if (!typedIsEmail || typedAlreadyAdded) return;
+    addUser(typed);
+    setSearch("");
+  }, [addUser, typed, typedIsEmail, typedAlreadyAdded]);
+
   const allSelected =
-    usersWithEmail.length > 0 &&
-    usersWithEmail.every((u) => selectedEmails.includes(u.email));
+    usersWithEmail.length > 0 && usersWithEmail.every((u) => selectedEmails.includes(u.email));
 
   const addAll = useCallback(() => {
     setSelectedEmails((prev) => {
@@ -133,7 +131,8 @@ const CreateEmailSidebar = ({ onClose }) => {
               Emails enviados correctamente
             </p>
             <p className="font-inter text-[11px] tracking-[-0.44px] text-[rgba(25,54,63,0.5)]">
-              Se enviaron {selectedEmails.length} email{selectedEmails.length !== 1 ? "s" : ""} con el asunto «{subject}»
+              Se enviaron {selectedEmails.length} email{selectedEmails.length !== 1 ? "s" : ""} con
+              el asunto «{subject}»
             </p>
           </div>
           <button
@@ -165,11 +164,55 @@ const CreateEmailSidebar = ({ onClose }) => {
                 </div>
 
                 <Field
-                  placeholder="Buscar usuario..."
+                  type="email"
+                  placeholder="Buscar usuario o escribir email..."
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key !== "Enter") return;
+                    e.preventDefault();
+                    addTyped();
+                  }}
                   classInput="placeholder:text-[rgba(25,54,63,0.3)]"
                 />
+
+                {typed && (typedIsEmail || filtered.length === 0) && (
+                  <button
+                    type="button"
+                    onClick={addTyped}
+                    disabled={!typedIsEmail || typedAlreadyAdded}
+                    className={cn(
+                      "flex items-center gap-1.5 h-7 px-2.5 rounded-lg border-[0.7px] font-inter text-[11px] tracking-[-0.44px] transition-colors",
+                      typedIsEmail && !typedAlreadyAdded
+                        ? "border-[rgba(25,54,63,0.12)] text-[#19363F] hover:bg-[rgba(25,54,63,0.04)]"
+                        : "border-[rgba(25,54,63,0.08)] text-[rgba(25,54,63,0.35)] cursor-not-allowed"
+                    )}
+                  >
+                    {typedAlreadyAdded ? (
+                      `«${typed}» ya está añadido`
+                    ) : typedIsEmail ? (
+                      <>
+                        <svg
+                          width="10"
+                          height="10"
+                          viewBox="0 0 10 10"
+                          fill="none"
+                          aria-hidden="true"
+                        >
+                          <path
+                            d="M5 1v8M1 5h8"
+                            stroke="currentColor"
+                            strokeWidth="1.4"
+                            strokeLinecap="round"
+                          />
+                        </svg>
+                        <span className="truncate">Añadir «{typed}»</span>
+                      </>
+                    ) : (
+                      "Escribe un email válido para añadirlo"
+                    )}
+                  </button>
+                )}
 
                 <div className="flex flex-col rounded-lg border-[0.7px] border-[rgba(25,54,63,0.08)] overflow-hidden max-h-44 overflow-y-auto scrollbar-thin scrollbar-thumb-[rgba(25,54,63,0.1)] scrollbar-thumb-rounded">
                   {usersLoading ? (
@@ -187,14 +230,10 @@ const CreateEmailSidebar = ({ onClose }) => {
                         <button
                           key={u._id ?? u.email}
                           type="button"
-                          onClick={() =>
-                            selected ? removeEmail(u.email) : addUser(u.email)
-                          }
+                          onClick={() => (selected ? removeEmail(u.email) : addUser(u.email))}
                           className={cn(
                             "flex items-center justify-between gap-2 px-3 py-2 text-left border-b-[0.7px] border-[rgba(25,54,63,0.05)] last:border-0 transition-colors",
-                            selected
-                              ? "bg-[rgba(25,54,63,0.04)]"
-                              : "hover:bg-[rgba(25,54,63,0.02)]",
+                            selected ? "bg-[rgba(25,54,63,0.04)]" : "hover:bg-[rgba(25,54,63,0.02)]"
                           )}
                         >
                           <span className="font-inter text-[11px] tracking-[-0.44px] text-[#19363F] truncate">
@@ -205,11 +244,17 @@ const CreateEmailSidebar = ({ onClose }) => {
                               "size-3.5 shrink-0 rounded-[3px] border flex items-center justify-center transition-all",
                               selected
                                 ? "bg-[#19363F] border-[#19363F]"
-                                : "bg-white border-[rgba(25,54,63,0.2)]",
+                                : "bg-white border-[rgba(25,54,63,0.2)]"
                             )}
                           >
                             {selected && (
-                              <svg width="8" height="6" viewBox="0 0 8 6" fill="none" aria-hidden="true">
+                              <svg
+                                width="8"
+                                height="6"
+                                viewBox="0 0 8 6"
+                                fill="none"
+                                aria-hidden="true"
+                              >
                                 <path
                                   d="M1 3l2 2 4-4"
                                   stroke="white"
@@ -242,7 +287,13 @@ const CreateEmailSidebar = ({ onClose }) => {
                           aria-label={`Quitar ${email}`}
                           className="size-3.5 flex items-center justify-center rounded-full hover:bg-[rgba(25,54,63,0.1)] transition-colors"
                         >
-                          <svg width="6" height="6" viewBox="0 0 8 8" fill="none" aria-hidden="true">
+                          <svg
+                            width="6"
+                            height="6"
+                            viewBox="0 0 8 8"
+                            fill="none"
+                            aria-hidden="true"
+                          >
                             <path
                               d="M6.5 1.5l-5 5M1.5 1.5l5 5"
                               stroke="rgba(25,54,63,0.5)"

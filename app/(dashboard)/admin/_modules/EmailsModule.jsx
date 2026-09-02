@@ -2,9 +2,11 @@
 
 import CreateEmailSidebar from "@/components/CreateEmailSidebar";
 import DataTable from "@/components/DataTable";
+import EmailDetailSidebar from "@/components/EmailDetailSidebar";
 import Spinner from "@/components/Spinner";
 import { useGetAllEmails } from "@/hooks/admin/useGetAllEmails";
 import { cn } from "@/utils";
+import { emailRecipients } from "@/utils/email";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import { useCallback, useMemo, useRef, useState } from "react";
@@ -27,14 +29,17 @@ const EmailsModule = () => {
   const { data: emailsData, isLoading, isFetching } = useGetAllEmails();
   const rows = useMemo(() => emailsData?.emails?.data ?? [], [emailsData]);
 
-  const [isOpen, setIsOpen] = useState(false);
+  // One right-hand panel, two contents: the compose form, or the detail of a row.
+  const [panel, setPanel] = useState(null);
+  const isOpen = panel !== null;
 
   const desktopWrapRef = useRef(null);
   const mobileWrapRef = useRef(null);
   const backdropRef = useRef(null);
 
-  const handleOpen = useCallback(() => setIsOpen(true), []);
-  const handleClose = useCallback(() => setIsOpen(false), []);
+  const handleOpen = useCallback(() => setPanel({ mode: "create" }), []);
+  const handleClose = useCallback(() => setPanel(null), []);
+  const handleRowClick = useCallback((email) => setPanel({ mode: "detail", email }), []);
 
   useGSAP(
     () => {
@@ -82,15 +87,24 @@ const EmailsModule = () => {
   const columns = useMemo(
     () => [
       {
-        accessorKey: "to",
+        // The real recipients live in `bcc`; `to` is only the noreply mailbox.
+        // The accessor returns the joined list so search still matches every one.
+        id: "recipients",
+        accessorFn: (row) => emailRecipients(row).join(", "),
         header: "Para",
         cell: (info) => {
-          const val = info.getValue();
-          const display = Array.isArray(val) ? val.join(", ") : val;
-          if (!display) return <span className="text-[rgba(25,54,63,0.3)]">—</span>;
+          const list = emailRecipients(info.row.original);
+          if (list.length === 0) return <span className="text-[rgba(25,54,63,0.3)]">—</span>;
           return (
-            <span className="font-inter text-[11px] tracking-[-0.44px] text-[#19363F]">
-              {display}
+            <span className="inline-flex items-center gap-1.5 max-w-55">
+              <span className="font-inter text-[11px] tracking-[-0.44px] text-[#19363F] truncate">
+                {list[0]}
+              </span>
+              {list.length > 1 && (
+                <span className="shrink-0 inline-flex items-center px-1.5 py-0.5 rounded-[5px] bg-[rgba(25,54,63,0.06)] border-[0.7px] border-[rgba(25,54,63,0.1)] font-inter text-[10px] font-medium tracking-[-0.3px] text-[rgba(25,54,63,0.7)]">
+                  +{list.length - 1}
+                </span>
+              )}
             </span>
           );
         },
@@ -153,6 +167,14 @@ const EmailsModule = () => {
     []
   );
 
+  const panelContent =
+    panel?.mode === "detail" ? (
+      // Keyed by row so the "ver todos" toggle resets when another email opens.
+      <EmailDetailSidebar key={panel.email?.id} email={panel.email} onClose={handleClose} />
+    ) : panel?.mode === "create" ? (
+      <CreateEmailSidebar onClose={handleClose} />
+    ) : null;
+
   if (isLoading)
     return (
       <div className="flex items-center justify-center w-full h-full">
@@ -188,6 +210,7 @@ const EmailsModule = () => {
           columns={columns}
           filename="emails"
           searchPlaceholder="Buscar por destinatario, asunto..."
+          onRowClick={handleRowClick}
         />
       </div>
 
@@ -197,7 +220,7 @@ const EmailsModule = () => {
         style={{ width: 0, marginLeft: 0 }}
         className="hidden lg:block shrink-0 overflow-hidden"
       >
-        {isOpen && <CreateEmailSidebar onClose={handleClose} />}
+        {panelContent}
       </div>
 
       {/* Mobile/tablet (<lg): backdrop */}
@@ -220,7 +243,7 @@ const EmailsModule = () => {
         className="lg:hidden fixed inset-y-0 right-0 z-50 w-[min(380px,100vw)] p-2"
         style={{ transform: "translateX(100%)" }}
       >
-        {isOpen && <CreateEmailSidebar onClose={handleClose} />}
+        {panelContent}
       </div>
     </div>
   );
