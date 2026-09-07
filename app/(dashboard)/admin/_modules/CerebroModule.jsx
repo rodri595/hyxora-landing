@@ -79,14 +79,14 @@ const CerebroModule = () => {
     // own borders, so the grouping still reads.
     <div className="flex flex-col flex-1 w-0 min-h-0 h-full overflow-hidden py-2.5 sm:rounded-xl sm:border-[0.7px] sm:border-[rgba(25,54,63,0.08)] sm:px-4 sm:py-3 sm:shadow-[0px_2px_12px_0px_rgba(25,54,63,0.08)]">
       {/* overflow-x-auto: Tabs is a plain flex row with no wrap, and 8 labels
-          clip on narrow viewports. data-lenis-prevent so a sideways swipe on the
-          strip moves the strip instead of being eaten by Lenis. */}
+          clip on narrow viewports. Lenis' allowNestedScroll gives the strip its
+          sideways swipe without data-lenis-prevent, which would also have eaten the
+          vertical gestures the strip has no use for. */}
       <Tabs
         tabs={CEREBRO_TABS}
         value={activeTab}
         onChange={handleTabChange}
         className="mb-3 shrink-0 overflow-x-auto overscroll-x-contain"
-        data-lenis-prevent
       />
 
       {/* The tab body is this page's real scroller. Lenis smooth-scrolls the

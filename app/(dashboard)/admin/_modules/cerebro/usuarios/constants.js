@@ -17,3 +17,23 @@ export const TVL_LINE = "#10B981";
  * concentration read wants the head of the list, not all of it.
  */
 export const TOP_PAYERS_LIMIT = 20;
+
+/**
+ * Transactions per page inside the user drawer.
+ *
+ * 15 matches what `/users/{privyId}` embeds as its first page in the old
+ * dashboard's `TX_PAGE_SIZE`, so page 1 renders from the detail response with no
+ * second request — see `TransaccionesTab`. Raising the default here would make that
+ * first page a spinner for no gain in a panel this tall.
+ */
+export const TX_PAGE_SIZE = 15;
+export const TX_PAGE_SIZES = [15, 25, 50, 100];
+
+/**
+ * Width of the detail drawer on desktop.
+ *
+ * Wider than the 320px `UsersModule` uses for its edit panel, because this one holds
+ * an eight-column transactions table rather than four form fields — at 320 every
+ * table inside it would be a sideways scroll.
+ */
+export const DETAIL_DRAWER_WIDTH = 560;

@@ -177,9 +177,11 @@ const FeesTable = () => {
           </p>
         </div>
 
-        {/* Table wrapper */}
+        {/* Table wrapper. No data-lenis-prevent: it only scrolls sideways, and the
+            attribute would swallow vertical wheel and touch too, freezing the page
+            for as long as the pointer sits over the table. Lenis' allowNestedScroll
+            takes the sideways gesture on its own. */}
         <div
-          data-lenis-prevent
           className="overflow-x-auto rounded-xl border-[0.7px] border-[rgba(25,54,63,0.08)] bg-white shadow-[0px_1px_4px_0px_rgba(25,54,63,0.04)] scrollbar-thin scrollbar-thumb-[rgba(25,54,63,0.2)] scrollbar-thumb-rounded-lg"
         >
           <table className="w-full border-separate border-spacing-0">

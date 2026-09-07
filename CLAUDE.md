@@ -171,6 +171,43 @@ _modules/
 Top-level tabs live in `components/AdminTabBar` + the `moduleMap` in
 `admin/page.jsx`. Cerebro nests a second tab bar on `?tab=cerebro&sub=<id>`.
 
+### The user drawer
+
+`cerebro/usuarios/detail/` is the per-user view the old dashboard served at
+`/users/{privyId}`. It opens from the eye button on a `UsersTablePanel` row and is
+a **drawer, not a route**: that table is server-paginated, searched and sorted, and
+getting back to the right page of the right query after a navigation was the worst
+part of using the old page.
+
+> **`admin.md` still calls `/users/{privyId}/vaults · /pnl · /relay` "Not wired…
+> `/users` opens no drawer".** That is now stale for two of the three — the doc is
+> left unedited on purpose so it diffs cleanly against the Cerebro team's next
+> version. `useGetUserVaults` and `useGetUserPnl` wire the first two;
+> **`/relay` is still unwired**, and deliberately: it keys Relay bridge destinations
+> by origin tx hash, so it belongs in the transactions table and only earns its
+> request once somebody needs to trace a bridge that didn't land.
+
+Both are documented **by name only** — no shape at all — and proxy an app backend
+that serialises every USD field as a **decimal string**. Together with the usual
+documented-vs-query field-name split, that is why nothing in the drawer reads a
+response field directly: everything goes through `detail/normalize.js`, every figure
+through `firstNumber`, and a field that arrives under no known spelling reads back
+`null`. Two consequences worth keeping:
+
+- **`/pnl` renders nothing rather than a zero.** On a performance figure `$0.00`
+  means "broke exactly even" and is indistinguishable from "we couldn't read it".
+  The panel names the endpoint and says the shape is undocumented instead.
+- **`margin.netUsd` and the PnL are unrelated numbers** that both render as signed
+  USD. Margin is Hyxora's on the user (their fees − our sponsored gas); PnL is what
+  the *user* made. They live in different tabs and each labels its source for that
+  reason.
+
+`/users` itself sends far more than admin.md's example lists — both handles, both
+addresses, `nftTokenIds`, `costOps` / `feeTxs`, `membershipRenewDate` — because it
+is a port of `getUsersOverview` and returns every column that mapper produced. The
+table and the drawer header are built on those; `CerebroUser` in
+`hooks/cerebro/types.js` marks which are undocumented.
+
 ## Tables
 
 Use `@/components/DataTable` — never hand-roll a table. For tables inside a
@@ -195,19 +232,41 @@ you export somebody else. `usuarios/UsersTablePanel` keys on `privyId`. Selectio
 is still per-page there, because the browser only ever holds one page; the panel
 says so in its footnote rather than exporting a subset in silence.
 
+`enableColumnToggle` is on for `usuarios/UsersTablePanel` and nowhere else so far.
+It earns it because that one table answers four unrelated questions — identity,
+membership, KYC, and our economics on the user — and each is somebody's first
+column, so it is wide by design rather than by accident. Give a header-less column
+a `meta.label` (the menu falls back to the raw column id otherwise) and
+`enableHiding: false` to anything that must not be hidden — the actions column is
+the only way into the drawer.
+
 `renderSubRow(rowData, row)` turns rows into expandable ones — a chevron column
 appears and the returned node renders full-width underneath. `isRowExpandable`
 narrows which rows get one. Both default off, so no existing table grows a column.
 
 ## Mobile, and `data-lenis-prevent`
 
-Lenis smooth-scrolls the document from `app/providers.jsx`, and it owns wheel and
-touch everywhere. **Anything that scrolls inside itself needs `data-lenis-prevent`**
-or the gesture is swallowed and the element never moves: DataTable's wrapper, the
-Cerebro tab body, both tab strips, `SelectDropdown`'s menu, the column menu, and
-every `<pre>` with a `max-h`. It is not styling — without it a wide table simply
-cannot be scrolled sideways on a phone. `Tabs` forwards unknown props for exactly
-this reason.
+Lenis smooth-scrolls the document from `app/providers.jsx` and owns wheel and touch
+everywhere, so anything that scrolls inside itself has to be handled. It already is:
+those options set **`allowNestedScroll: true`**, and Lenis then resolves each gesture
+per axis — it yields a sideways drag to a wide table and keeps a vertical one for the
+page, handing the page back the moment the nested element runs out of room. **A plain
+nested scroller therefore needs no attribute at all.**
+
+`data-lenis-prevent` is the opposite of a safe default. It is checked *before*
+`allowNestedScroll`, and it is unconditional: every axis, every gesture type, whether
+or not the element can actually scroll that way. Lenis' own stylesheet then adds
+`overscroll-behavior: contain` to it, so the browser won't chain the scroll either.
+On a table that only overflows sideways — the Comisiones table on the landing page,
+either tab strip, the academy carousel — that combination **froze the whole page for
+as long as the pointer sat over the element**, and on a phone a vertical swipe that
+began on a table went nowhere. Those sites are fixed by *removing* the attribute.
+
+Reach for it only where swallowing the gesture entirely is the point, and the page
+behind must not move: modals and their bodies, `SelectDropdown`'s menu, DataTable's
+column menu, the sidebar and header menus, and the dashboard shells whose document
+does not scroll. Everywhere else, let `allowNestedScroll` do it. `Tabs` still forwards
+unknown props, but no longer for this.
 
 `Panel`'s header stacks below `sm` and its `action` row goes full-width, with
 `[&>div]` rules reaching into the wrapper each caller passes. That is deliberate:

@@ -47,6 +47,7 @@ const plans = [
       "Academia 2.0",
       "IA Personalizada",
       "Imagen diferenciada Premium",
+      "Sistema de referidos un nivel",
     ],
   },
   {
@@ -86,8 +87,7 @@ const plans = [
     features: [
       "Plan Premium gratuito de por vida",
       <Fragment key={0}>
-        Equity Hyxora{" "}
-        <span className="text-[12px] font-light">(hasta un 10%)</span>
+        Equity Hyxora <span className="text-[12px] font-light">(hasta un 10%)</span>
       </Fragment>,
       "Accesos prioritarios",
       "Comité Consultivo Founder",
@@ -97,6 +97,7 @@ const plans = [
       </Fragment>,
       "Imagen diferenciada Founder",
       "Descuentos especiales y rendimientos máximos",
+      "Sistema de referidos 2 niveles",
     ],
   },
 ];
@@ -173,11 +174,7 @@ const Plans = () => {
                   {plan.name === "FOUNDER" && (
                     <div className="bg-[#1b5ffd] h-[18px] border relative flex items-center border-[rgba(255,255,255,0.2)] border-solid rounded-[100px] px-2 ml-auto ">
                       <div className="flex gap-[3px] items-center  justify-center overflow-hidden  rounded-[inherit] w-full">
-                        <Image
-                          src={fireSVG}
-                          alt="Fire Icon"
-                          className=" size-[9px] "
-                        />
+                        <Image src={fireSVG} alt="Fire Icon" className=" size-[9px] " />
                         <p className="font-medium text-[9px]  text-[#f7f8f8] tracking-tight ">
                           NFT
                         </p>
@@ -185,8 +182,7 @@ const Plans = () => {
                       <div
                         className="absolute inset-0 pointer-events-none"
                         style={{
-                          boxShadow:
-                            "0px 0px 10px 0px inset rgba(255,255,255,0.4)",
+                          boxShadow: "0px 0px 10px 0px inset rgba(255,255,255,0.4)",
                         }}
                       />
                     </div>
@@ -198,9 +194,7 @@ const Plans = () => {
               <div className="bg-b-surface1 border border-stroke2 rounded-[20px] flex flex-col gap-3 p-3 flex-1">
                 {/* Description */}
                 <div className="px-3 py-3 h-[60px] flex items-start ">
-                  <p className="text-xs  tracking-[-0.015em] leading-[1.5]">
-                    {plan.description}
-                  </p>
+                  <p className="text-xs  tracking-[-0.015em] leading-[1.5]">{plan.description}</p>
                 </div>
 
                 {/* Price Container */}
@@ -219,11 +213,7 @@ const Plans = () => {
                         </div>
                         <div className="flex flex-col text-xs font-medium text-t-secondary tracking-[-0.01em] leading-4">
                           <span>EUR /</span>
-                          <span
-                            className={
-                              isYearly ? " uppercase font-semibold" : ""
-                            }
-                          >
+                          <span className={isYearly ? " uppercase font-semibold" : ""}>
                             {isYearly ? "año" : "mes"}
                           </span>
                         </div>
@@ -289,9 +279,7 @@ const Plans = () => {
                       <div className="shrink-0 w-4 h-4 flex items-center justify-center">
                         <Icon name="check" className="w-4 h-4 fill-primary2" />
                       </div>
-                      <p className="text-[13px]  tracking-[-0.01em] leading-[1.5]">
-                        {feature}
-                      </p>
+                      <p className="text-[13px]  tracking-[-0.01em] leading-[1.5]">{feature}</p>
                     </div>
                   ))}
                 </div>

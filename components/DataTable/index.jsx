@@ -737,12 +737,13 @@ const DataTable = ({
         </div>
       )}
 
-      {/* Table wrapper.
-          data-lenis-prevent: Lenis hijacks wheel and touch on the whole document, so
-          without it a horizontal drag on a wide table scrolls the page instead of the
-          table, and a table with maxHeight can't be scrolled at all. */}
+      {/* Table wrapper. Deliberately no data-lenis-prevent: that attribute is
+          unconditional, so on a table with no maxHeight — which has nothing to scroll
+          vertically — it ate the page's own scroll for as long as the pointer sat over
+          the table. Lenis runs with allowNestedScroll, which resolves this per axis:
+          it yields a sideways drag to the table and hands a vertical one back to the
+          page once the table has no more room. */}
       <div
-        data-lenis-prevent
         style={maxHeight ? { maxHeight } : undefined}
         className={cn(
           "overflow-auto overscroll-x-contain",
