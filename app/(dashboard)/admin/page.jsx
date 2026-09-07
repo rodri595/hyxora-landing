@@ -9,7 +9,6 @@ const EmailsModule = lazy(() => import("./_modules/EmailsModule"));
 const PollsModule = lazy(() => import("./_modules/PollsModule"));
 const TutorialsModule = lazy(() => import("./_modules/TutorialsModule"));
 const QuizModule = lazy(() => import("./_modules/QuizModule"));
-const ComisionesModule = lazy(() => import("./_modules/ComisionesModule"));
 const CerebroModule = lazy(() => import("./_modules/CerebroModule"));
 
 const moduleMap = {
@@ -18,7 +17,6 @@ const moduleMap = {
   polls: PollsModule,
   tutorials: TutorialsModule,
   quiz: QuizModule,
-  comisiones: ComisionesModule,
   cerebro: CerebroModule,
 };
 
