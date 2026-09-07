@@ -185,7 +185,7 @@ const EditPanel = ({ user }) => {
       editUserInfo({ userId: user._id, phoneNumber: phone });
     }
     if (roleValue !== (user.role ?? "") && user.email) {
-      changeRole({ email: user.email, role: roleValue });
+      changeRole({ userId: user._id, role: roleValue });
     }
   };
 

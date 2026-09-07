@@ -6,7 +6,7 @@ export const useSetRole = () => {
   return useMutation({
     mutationFn: async (data) => {
       const response = await apiClient.post("/admin/setUserRole", {
-        email: data.email,
+        userId: data.userId,
         role: data.role,
       });
       return response?.data?.data;
