@@ -1,5 +1,6 @@
 "use client";
 
+import CopyButton from "@/components/CopyButton";
 import { cerebroPlanLabel } from "@/constants/cerebro";
 import { formatNumber, formatUsd, formatUsdPrecise, timeAgo, toDayString } from "@/utils/format";
 import AddressLink from "../../../shared/AddressLink";
@@ -21,61 +22,85 @@ const formatDay = (value) => {
   return Number.isNaN(date.getTime()) ? null : toDayString(date);
 };
 
+const Dash = () => <span className="font-inter text-[11px] text-[rgba(25,54,63,0.3)]">—</span>;
+
 /**
  * Every address the account owns, in one block.
  *
  * The three are not interchangeable and the labels have to say which is which: the
- * **signer** is the EOA that authorises, the **Safe** is what actually holds the
- * EVM balance and is the address every cost and fee row joins on, and the **Solana
- * wallet** is a separate keypair holding the xStocks. Looking up the wrong one is
- * the easiest mistake to make on this screen, so each carries an explorer link and
- * a copy button rather than being a string to squint at.
+ * **signer** is the EOA that authorises, the **Safes** are what actually hold the
+ * EVM balance and are the addresses every cost and fee row joins on, and the
+ * **Solana wallet** is a separate keypair holding the xStocks. Looking up the wrong
+ * one is the easiest mistake to make on this screen, so each carries an explorer
+ * link and a copy button rather than being a string to squint at.
  *
- * `/users` sends only the first Safe — the same CREATE2 address across every EVM
- * chain, so one is normally the whole story, but the drawer says "primer Safe"
- * rather than "Safe" because a user with more would not see them here.
+ * Safes are a **list**, as on the old page: `/users` sends only the first, but
+ * `safe_addresses` on the detail record is a per-chain map and a user who moved
+ * between Safes on one chain has more than one. `readUserRecord` flattens it.
+ *
+ * The Solana wallet has no source but that same detail record — `getUsersOverview`,
+ * which `/users` ports, never selected the column — so when the record is absent
+ * the field says that instead of leaving a dash to be read as "no wallet".
  */
-const AddressBlock = ({ user }) => (
-  <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-    <DetailField label="Privy ID" value={user.privyId} copy={user.privyId} mono />
+const AddressBlock = ({ user, detailLoaded }) => {
+  const safes = Array.isArray(user.safeAddresses) ? user.safeAddresses : [];
+  const solanaUnavailable = !user.solanaAddress && detailLoaded && !user.hasRecord;
 
-    <DetailField
-      label="Firmante (EOA)"
-      copy={user.signerAddress ?? undefined}
-      hint="La cuenta que firma. No guarda saldo."
-    >
-      {user.signerAddress ? (
-        <AddressLink address={user.signerAddress} chainId={8453} lead={10} tail={8} />
-      ) : (
-        <span className="font-inter text-[11px] text-[rgba(25,54,63,0.3)]">—</span>
-      )}
-    </DetailField>
+  return (
+    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+      <DetailField label="Privy ID" value={user.privyId} copy={user.privyId} mono />
 
-    <DetailField
-      label="Safe (primero)"
-      copy={user.safeAddress ?? undefined}
-      hint="Donde vive el saldo EVM. Es la dirección con la que se cruzan costes y comisiones."
-    >
-      {user.safeAddress ? (
-        <AddressLink address={user.safeAddress} chainId={8453} lead={10} tail={8} />
-      ) : (
-        <span className="font-inter text-[11px] text-[rgba(25,54,63,0.3)]">—</span>
-      )}
-    </DetailField>
+      <DetailField
+        label="Firmante (EOA)"
+        copy={user.signerAddress ?? undefined}
+        hint="La cuenta que firma. No guarda saldo."
+      >
+        {user.signerAddress ? (
+          <AddressLink address={user.signerAddress} chainId={8453} lead={10} tail={8} />
+        ) : (
+          <Dash />
+        )}
+      </DetailField>
 
-    <DetailField
-      label="Cartera Solana"
-      copy={user.solanaAddress ?? undefined}
-      hint="Clave aparte. Aquí están los xStocks."
-    >
-      {user.solanaAddress ? (
-        <AddressLink address={user.solanaAddress} lead={10} tail={8} />
-      ) : (
-        <span className="font-inter text-[11px] text-[rgba(25,54,63,0.3)]">—</span>
-      )}
-    </DetailField>
-  </div>
-);
+      <DetailField
+        label={safes.length > 1 ? `Safes (${safes.length})` : "Safe"}
+        copy={safes.length === 1 ? safes[0] : undefined}
+        hint="Donde vive el saldo EVM. Es la dirección con la que se cruzan costes y comisiones."
+      >
+        {safes.length === 0 ? (
+          <Dash />
+        ) : (
+          <div className="flex min-w-0 flex-col gap-1">
+            {safes.map((safe) => (
+              <div key={safe} className="flex min-w-0 items-center gap-1.5">
+                <AddressLink address={safe} chainId={8453} lead={10} tail={8} />
+                {safes.length > 1 && <CopyButton text={safe} />}
+              </div>
+            ))}
+          </div>
+        )}
+      </DetailField>
+
+      <DetailField
+        label="Cartera Solana"
+        copy={user.solanaAddress ?? undefined}
+        hint={
+          solanaUnavailable
+            ? "/users/{privyId} no trajo el registro del usuario, que es lo único que la lleva."
+            : "Clave aparte. Aquí están los xStocks."
+        }
+      >
+        {user.solanaAddress ? (
+          <AddressLink address={user.solanaAddress} lead={10} tail={8} />
+        ) : solanaUnavailable ? (
+          <span className="font-inter text-[11px] tracking-[-0.44px] text-amber-700">sin dato</span>
+        ) : (
+          <Dash />
+        )}
+      </DetailField>
+    </div>
+  );
+};
 
 /**
  * Who the account is: the two handles, the plan, the membership and the KYC.
@@ -296,8 +321,10 @@ const FreeVsPaidBlock = ({ freeVsPaid }) => {
  * @param {ReturnType<import("./normalize").readFreeVsPaid>} props.freeVsPaid
  * @param {number} props.positionCount
  * @param {number | null} props.pnlUsd Headline only; the breakdown is in «Cartera».
+ * @param {boolean} [props.detailLoaded] The `/users/{privyId}` response arrived. Separates "no
+ * Solana wallet" from "the response carried no user record to read one from".
  */
-const ResumenTab = ({ user, tvl, margin, freeVsPaid, positionCount, pnlUsd }) => (
+const ResumenTab = ({ user, tvl, margin, freeVsPaid, positionCount, pnlUsd, detailLoaded }) => (
   <div className="flex flex-col gap-6 p-4">
     <section className="flex flex-col gap-3">
       <SectionHeader
@@ -315,7 +342,7 @@ const ResumenTab = ({ user, tvl, margin, freeVsPaid, positionCount, pnlUsd }) =>
       />
       <IdentityBlock user={user} />
       <div className="h-px bg-[rgba(25,54,63,0.06)]" />
-      <AddressBlock user={user} />
+      <AddressBlock user={user} detailLoaded={detailLoaded} />
     </section>
 
     <section className="flex flex-col gap-3">

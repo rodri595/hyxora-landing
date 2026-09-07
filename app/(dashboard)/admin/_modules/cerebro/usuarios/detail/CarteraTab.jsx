@@ -245,7 +245,7 @@ const PnlCard = ({ label, block, note }) => {
  * percentage is computed against value − ganancia, so it reads as a return on what
  * was actually put in.
  */
-const PnlBlock = ({ pnl, vaultPositions, isLoading }) => {
+const PnlBlock = ({ pnl, vaultPositions, isLoading, error, shape }) => {
   if (isLoading) {
     return (
       <section className="flex flex-col gap-2.5">
@@ -258,6 +258,12 @@ const PnlBlock = ({ pnl, vaultPositions, isLoading }) => {
   }
 
   if (!pnl) {
+    const endpoint = (
+      <code className="rounded bg-[rgba(25,54,63,0.05)] px-1 py-0.5 font-mono text-[10px]">
+        /users/&#123;privyId&#125;/pnl
+      </code>
+    );
+
     return (
       <section className="flex flex-col gap-2.5">
         <SectionHeader
@@ -268,19 +274,37 @@ const PnlBlock = ({ pnl, vaultPositions, isLoading }) => {
             </span>
           }
         />
-        <EmptyBlock>
-          <span className="block">
-            <code className="rounded bg-[rgba(25,54,63,0.05)] px-1 py-0.5 font-mono text-[10px]">
-              /users/&#123;privyId&#125;/pnl
-            </code>{" "}
-            no devolvió ninguna cifra legible.
-          </span>
-          <span className="mt-1 block">
-            Es el único endpoint que sabe cuánto ha ganado el usuario, y su forma no está
-            documentada en admin.md. No inventamos un 0 aquí: sería indistinguible de alguien que ha
-            quedado exactamente en tablas.
-          </span>
-        </EmptyBlock>
+        {/* A failed request and an unreadable answer are different problems with
+            different owners — one is for the Cerebro team, the other is a spelling
+            to add to `readPnl` — and «no devolvió ninguna cifra legible» over a 404
+            sends you to the wrong one. So the status is shown when there is one. */}
+        {error ? (
+          <div className="flex flex-col gap-1 rounded-lg border border-red-200 bg-red-50 px-2.5 py-2">
+            <span className="font-inter text-[10px] font-medium tracking-[-0.4px] text-red-700">
+              {error?.response?.status ? `${error.response.status} — ` : ""}
+              {error.message}
+            </span>
+            <span className="font-inter text-[10px] leading-[1.5] tracking-[-0.4px] text-red-600/80">
+              {endpoint} falló. Es el único endpoint que sabe cuánto ha ganado el usuario; el resto
+              del cajón no depende de él.
+            </span>
+          </div>
+        ) : (
+          <EmptyBlock>
+            <span className="block">{endpoint} no devolvió ninguna cifra legible.</span>
+            <span className="mt-1 block">
+              Es el único endpoint que sabe cuánto ha ganado el usuario, y su forma no está
+              documentada en admin.md. No inventamos un 0 aquí: sería indistinguible de alguien que
+              ha quedado exactamente en tablas.
+            </span>
+            {shape?.length > 0 && (
+              <span className="mt-1 block">
+                Respondió con: <span className="font-mono">{shape.join(", ")}</span>. Añade esas
+                grafías a <span className="font-mono">readPnl()</span> y el panel se pinta.
+              </span>
+            )}
+          </EmptyBlock>
+        )}
       </section>
     );
   }
@@ -364,11 +388,28 @@ const PnlBlock = ({ pnl, vaultPositions, isLoading }) => {
  * @param {ReturnType<import("./normalize").readPnl>} props.pnl
  * @param {ReturnType<import("./normalize").readVaultPositions>} props.vaultPositions
  * @param {boolean} props.isPnlLoading
+ * @param {Error | null} [props.pnlError] Surfaced rather than folded into the empty
+ * state: a 404 on `/pnl` and a shape `readPnl` couldn't parse need different fixes.
+ * @param {string[]} [props.pnlKeys] Top-level keys of an answer nothing was read from.
  * @param {string | null} props.snapshotDate Day the Zerion snapshot is from.
  */
-const CarteraTab = ({ positions, pnl, vaultPositions, isPnlLoading, snapshotDate }) => (
+const CarteraTab = ({
+  positions,
+  pnl,
+  vaultPositions,
+  isPnlLoading,
+  pnlError,
+  pnlKeys,
+  snapshotDate,
+}) => (
   <div className="flex flex-col gap-6 p-4">
-    <PnlBlock pnl={pnl} vaultPositions={vaultPositions} isLoading={isPnlLoading} />
+    <PnlBlock
+      pnl={pnl}
+      vaultPositions={vaultPositions}
+      isLoading={isPnlLoading}
+      error={pnlError}
+      shape={pnlKeys}
+    />
 
     {positions.count === 0 ? (
       <EmptyBlock>
