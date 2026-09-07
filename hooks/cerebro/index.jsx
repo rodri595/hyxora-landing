@@ -26,6 +26,8 @@ export { useGetUserStats } from "./useGetUserStats";
 export { useGetUsers } from "./useGetUsers";
 export { useGetUserDetail } from "./useGetUserDetail";
 export { useGetUserTransactions } from "./useGetUserTransactions";
+export { useGetUserVaults } from "./useGetUserVaults";
+export { useGetUserPnl } from "./useGetUserPnl";
 export { useGetUserTrends } from "./useGetUserTrends";
 export { useGetUserActivation } from "./useGetUserActivation";
 export { useGetTopFeePayers } from "./useGetTopFeePayers";

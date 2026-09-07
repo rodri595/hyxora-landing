@@ -308,19 +308,38 @@
  */
 
 /**
+ * A row of GET /users.
+ *
+ * admin.md's example lists nine of these fields. The endpoint is a port of
+ * `getUsersOverview` and sends every column that query's mapper produced, so the
+ * rest — the handles, both addresses, the op/tx counters, the NFT token ids and
+ * the renewal date — arrive too and are what the table and its drawer are built
+ * on. Undocumented is not the same as absent; each one below has been seen on the
+ * wire. Still treat any of them as optional: a null `email` (Twitter-only login),
+ * a null `safeAddress` (account that never created a wallet) and an empty
+ * `nftTokenIds` are all normal.
+ *
  * @typedef {Object} CerebroUser
  * @property {string} privyId
- * @property {string} email
- * @property {string} username
+ * @property {string | null} email Null when the account logged in through Twitter.
+ * @property {string | null} username Privy handle, distinct from `twitterUsername`.
+ * @property {string | null} twitterUsername Undocumented.
+ * @property {string | null} signerAddress The EOA behind the Safe. Undocumented.
  * @property {CerebroPlan} plan
- * @property {string} membershipStatus
- * @property {string} kycStatus
+ * @property {string | null} membershipStatus
+ * @property {IsoDate | null} membershipRenewDate Undocumented.
+ * @property {string | null} kycStatus "NOT_AVAILABLE" for anyone who never started it.
  * @property {IsoDate} createdAt
+ * @property {string | null} safeAddress First Safe only — the same CREATE2 address
+ * on every EVM chain. Undocumented.
+ * @property {number} nftBalance
+ * @property {string[]} nftTokenIds Founder NFT ids, sorted numerically. Undocumented.
  * @property {number} tvlUsd
  * @property {number} costUsd
+ * @property {number} costOps Sponsored ops behind `costUsd`. Undocumented.
  * @property {number} feesUsd
- * @property {number} netUsd
- * @property {number} nftBalance
+ * @property {number} feeTxs Fee transfers behind `feesUsd`. Undocumented.
+ * @property {number} netUsd `feesUsd - costUsd`, our margin on them — not their return.
  */
 
 /**
@@ -332,13 +351,35 @@
  */
 
 /**
+ * One sponsored UserOp, with the fee the user paid us on it when there was one.
+ *
+ * admin.md documents `timestamp` / `costUsd` / `feesUsd` / `operation`; the source
+ * query (`getUserTransactions`) emits `blockTimestamp` / `totalCostUsd` / `feeUsd` /
+ * `operationType` plus the bundler-vs-paymaster split and the token pair behind the
+ * op. Both spellings are read at the edge — `toTxRow()` in
+ * `usuarios/detail/normalize.js` — the same way `ingresos/FeeTaggingPanel` reads
+ * `/fees/diagnostics`.
+ *
  * @typedef {Object} UserTransaction
  * @property {CerebroChainId} chainId
  * @property {string} txHash
- * @property {IsoDate} timestamp
- * @property {number} costUsd
- * @property {number} feesUsd
- * @property {CerebroOperation} operation
+ * @property {IsoDate} [timestamp] Documented spelling.
+ * @property {IsoDate} [blockTimestamp] Query spelling.
+ * @property {number} [costUsd] Documented spelling of the total Pimlico bill.
+ * @property {number} [totalCostUsd] Query spelling.
+ * @property {number} [bundlerCostUsd] Query only. The bundler half of the total.
+ * @property {number} [paymasterCostUsd] Query only. The 10% paymaster surcharge.
+ * @property {number} [feesUsd] Documented spelling.
+ * @property {number} [feeUsd] Query spelling.
+ * @property {string | null} [feeTokens] Comma-joined symbols the fee was taken in.
+ * @property {CerebroOperation} [operation] Documented spelling.
+ * @property {string | null} [operationType] Query spelling. Backend `SWAP_QUOTE`-style
+ * labels and the tagger's lowercase ones both land here.
+ * @property {string | null} [fromChain] Zerion slug; populated only for backend-tagged rows.
+ * @property {string | null} [toChain]
+ * @property {string | null} [fromToken] Contract address, not a symbol.
+ * @property {string | null} [toToken]
+ * @property {boolean} [success]
  */
 
 /**
@@ -350,14 +391,110 @@
  */
 
 /**
+ * One fiat ramp order, from the app backend's `/bank/{wallet}/orders`.
+ *
+ * The deposit and withdraw legs are broken out on purpose: "the user says they sent
+ * money and nothing arrived" is `expectedAmount > 0` with `depositAmount` at 0 and
+ * the order still pending, which is invisible if you only read `status`.
+ *
+ * @typedef {Object} UserRampOrder
+ * @property {string} orderId Also the bank reference code the user quotes.
+ * @property {"onramp" | "offramp" | string} [direction] Query spelling.
+ * @property {"onramp" | "offramp" | string} [type] Documented spelling.
+ * @property {string} status
+ * @property {string | null} [depositStatus]
+ * @property {number | null} [depositAmount] What the bank actually credited.
+ * @property {string | null} [depositCurrency]
+ * @property {string | null} [withdrawStatus]
+ * @property {number | null} [withdrawAmount]
+ * @property {string | null} [withdrawCurrency]
+ * @property {number | null} [expectedAmount] What the user said they would send.
+ * @property {number | null} [fee]
+ * @property {string | null} [txHash]
+ * @property {CerebroChainId | null} [chainId]
+ * @property {IsoDate | null} createdAt
+ * @property {IsoDate | null} [updatedAt]
+ */
+
+/**
+ * GET /users/{privyId} — everything about one user in a single response.
+ *
+ * Documented shapes and query shapes disagree across most of this object, so every
+ * field below lists both and `usuarios/detail/normalize.js` reads whichever turns
+ * up. Two that matter especially:
+ *
+ * - **`positions[].chain` is a Zerion slug**, not a `chainId`. Same story as
+ *   `/holdings` (see `Holdings` below) — the source table stores the slug as text.
+ *   Resolve it with `cerebroChainLabel()`, which reads either.
+ * - **`margin.netUsd` / `marginUsd`** is Hyxora's margin on the user: fees they
+ *   paid us minus gas we sponsored. It is not their investment return; that is
+ *   `UserPnl`, and the two are unrelated numbers that both render as signed USD.
+ *
  * @typedef {Object} UserDetail
  * @property {Object} portfolio
- * @property {{ chainId: CerebroChainId, symbol: string, balance: number, usdValue: number }[]} portfolio.positions
- * @property {{ totalUsd: number, vaultUsd: number, refreshedAt: IsoDate }} portfolio.tvl
- * @property {{ costUsd: number, feesUsd: number, marginUsd: number }} portfolio.margin
- * @property {{ rows: UserTransaction[], page: number, pageSize: number, total: number }} transactions
- * @property {{ orderId: string, type: "onramp" | "offramp", status: string, amountUsd: number, createdAt: IsoDate }[]} rampOrders
- * @property {{ freeOps: number, paidOps: number }} freeVsPaid
+ * @property {UserPosition[]} portfolio.positions Ordered by value, descending.
+ * @property {{ totalUsd: number, vaultUsd: number, refreshedAt: IsoDate, date: DayString } | null}
+ * portfolio.tvl Null for a user whose portfolio has never been snapshotted.
+ * @property {{ costUsd: number, costOps?: number, feesUsd: number, feeTxs?: number,
+ * marginUsd?: number, netUsd?: number }} portfolio.margin Lifetime, NFT sales excluded.
+ * @property {Object} [user] The user row itself, when the endpoint embeds it.
+ * @property {number} [nftBalance]
+ * @property {string[]} [nftTokenIds]
+ * @property {{ rows?: UserTransaction[], transactions?: UserTransaction[], page: number,
+ * pageSize: number, total: number }} transactions First page only; page it with
+ * `useGetUserTransactions` so paging doesn't refetch the portfolio.
+ * @property {UserRampOrder[]} rampOrders
+ * @property {{ freeOps: number, paidOps: number, totalOps?: number, freeRatio?: number,
+ * paidCostUsd?: number, freeCostUsd?: number }} freeVsPaid A free op is a sponsored
+ * op with no treasury fee behind it — the subsidy, at user granularity.
+ */
+
+/**
+ * One Zerion position in a user's portfolio snapshot.
+ *
+ * `positionType` and `protocol` are what separate a vault deposit from a raw token
+ * balance; `name` is what identifies an xStock ("SP500 xStock"), since those are
+ * plain SPL tokens on the Solana wallet and nothing else marks them.
+ *
+ * @typedef {Object} UserPosition
+ * @property {string} [chain] Zerion slug — "base", "solana", "binance-smart-chain".
+ * @property {CerebroChainId} [chainId] If the port converted it after all.
+ * @property {string | null} protocol
+ * @property {string} symbol
+ * @property {string} name
+ * @property {number} balance
+ * @property {number} [priceUsd]
+ * @property {number} [valueUsd] Query spelling.
+ * @property {number} [usdValue] Documented spelling.
+ * @property {string} [positionType] "deposit" for vaults, "wallet" for held tokens,
+ * "reward" for gauge dust.
+ * @property {string | null} [iconUrl]
+ */
+
+/**
+ * GET /users/{privyId}/vaults — undocumented shape, proxied from the app backend's
+ * `/vault/positions/{wallet}`.
+ *
+ * **Every USD field arrives as a decimal string** there ("21.823166113498612"), so
+ * nothing here may be read without coercion.
+ *
+ * @typedef {Object} UserVaults
+ * @property {number | string} [totalPnlUsd]
+ * @property {number | string} [totalAssetsUsd]
+ * @property {{ vaultAddress: string, vaultName: string, chain?: string, chainId?: CerebroChainId,
+ * assetsUsd?: number | string, pnlUsd?: number | string, roe?: number | string, apy?: number,
+ * symbol?: string, iconUrl?: string }[]} [positions]
+ */
+
+/**
+ * GET /users/{privyId}/pnl — undocumented shape. The EVM and Solana halves of what
+ * the user has made, which no other endpoint carries.
+ *
+ * @typedef {Object} UserPnl
+ * @property {number | string} [totalPnlUsd]
+ * @property {Object} [evm] Tokens and vaults on the Safes.
+ * @property {Object} [solana] The xStocks wallet.
+ * @property {Object} [vaults] The vault subset of `evm` — contained in it, not added to it.
  */
 
 /* -------------------------------------------------------------------------- */

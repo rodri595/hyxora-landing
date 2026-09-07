@@ -1,3 +1,5 @@
+import { shortenHash } from "@/utils/format";
+
 /** Membership plans accepted by the `plan` filter. */
 export const cerebroPlans = ["basic", "premium", "business", "founder"];
 
@@ -168,6 +170,76 @@ export const cerebroOperationLabels = {
   send: "Envío",
   fee: "Comisión",
   unknown: "Sin clasificar",
+
+  // ── The app backend's own vocabulary ────────────────────────────────────────
+  // `/users/{privyId}/transactions` labels each op from three sources, best first:
+  // `hyxora_activities.action_type` (these), the tagger's heuristic, then the
+  // treasury row's `operation_type` (the lowercase keys above). So one table mixes
+  // both spellings, and folding them here keeps «Swap» a single legend entry
+  // instead of «Swap» and «Swap quote» sitting next to each other.
+  SWAP_QUOTE: "Swap",
+  SWAP: "Swap",
+  BRIDGE: "Bridge",
+  VAULT_DEPOSIT: "Depósito en vault",
+  ORDER_VAULT_DEPOSIT: "Depósito en vault",
+  DEPOSIT: "Depósito en vault",
+  VAULT_WITHDRAW: "Retiro de vault",
+  WITHDRAW: "Retiro de vault",
+  ONRAMP: "On-ramp",
+  OFFRAMP: "Off-ramp",
+  BUY_ETF: "Compra xStock",
+  XSTOCK_BUY: "Compra xStock",
+  SELL_ETF: "Venta xStock",
+  XSTOCK_SELL: "Venta xStock",
+  INTERNAL_TRANSFER: "Transferencia interna",
+  EXTERNAL_TRANSFER: "Transferencia externa",
+  SEND: "Envío",
+  RECEIVE: "Recepción",
+};
+
+/**
+ * The tagger key an operation belongs to, whichever vocabulary it arrived in.
+ *
+ * `cerebroOperationColor` is keyed on the lowercase tagger words, so a row labelled
+ * `SWAP_QUOTE` would otherwise fall to the unmapped rotation and land a different
+ * colour from the `swap` row beside it — in the same table, for the same thing.
+ *
+ * @param {string | null | undefined} operation
+ * @return {string} A key of `cerebroOperationColors`, or the lowercased input when
+ * it maps to nothing — the colour helper's fallback rotation handles it from there.
+ */
+export const cerebroOperationKey = (operation) => {
+  if (typeof operation !== "string" || operation.trim() === "") return "unknown";
+
+  const key = operation.trim();
+  if (cerebroOperationColors[key]) return key;
+
+  const lower = key.toLowerCase();
+  if (cerebroOperationColors[lower]) return lower;
+
+  return backendOperationKeys[key.toUpperCase()] ?? lower;
+};
+
+/** Backend `action_type` → the tagger key that carries its colour. */
+const backendOperationKeys = {
+  SWAP_QUOTE: "swap",
+  SWAP: "swap",
+  BRIDGE: "bridge",
+  VAULT_DEPOSIT: "deposit",
+  ORDER_VAULT_DEPOSIT: "deposit",
+  DEPOSIT: "deposit",
+  VAULT_WITHDRAW: "withdraw",
+  WITHDRAW: "withdraw",
+  ONRAMP: "onramp",
+  OFFRAMP: "offramp",
+  BUY_ETF: "xstock_buy",
+  XSTOCK_BUY: "xstock_buy",
+  SELL_ETF: "xstock_sell",
+  XSTOCK_SELL: "xstock_sell",
+  INTERNAL_TRANSFER: "internal_transfer",
+  EXTERNAL_TRANSFER: "external_transfer",
+  SEND: "send",
+  RECEIVE: "receive",
 };
 
 /** Casings the humaniser must not lowercase away. */
@@ -332,3 +404,106 @@ export const cerebroAddressUrl = (address, chainId) => {
  */
 export const cerebroPlanLabel = (plan) =>
   typeof plan === "string" && plan.length > 0 ? plan[0].toUpperCase() + plan.slice(1) : "—";
+
+/**
+ * Zerion's protocol names, mapped to the labels the product uses.
+ *
+ * A port of `VAULT_PROTOCOL_DISPLAY` in `hyxora-admin-main/src/lib/vaults.ts`. It
+ * normalises, it does not whitelist: a protocol with no entry renders under
+ * Zerion's own name rather than being hidden.
+ */
+const cerebroVaultProtocols = {
+  fluid: "Fluid",
+  "morpho blue": "Morpho",
+  morpho: "Morpho",
+  "summer.fi": "SummerFi",
+  summerfi: "SummerFi",
+  summer: "SummerFi",
+  "lazy-summer": "SummerFi",
+  "40 acres": "40 Acres",
+  "40acres": "40 Acres",
+  "forty-acres": "40 Acres",
+  "forty acres": "40 Acres",
+};
+
+/**
+ * @param {string | null | undefined} protocol
+ * @return {string}
+ */
+export const cerebroVaultProtocolLabel = (protocol) => {
+  if (typeof protocol !== "string" || protocol.trim() === "") return "—";
+  return cerebroVaultProtocols[protocol.trim().toLowerCase()] ?? protocol;
+};
+
+/**
+ * Contract address → ticker, keyed `${chainId}:${lowercased address}`.
+ *
+ * Vendored from `hyxora-admin-main/src/lib/tokens.ts`, and a **display fallback in
+ * exactly the way that file says it is** — the authoritative list of every token
+ * Hyxora supports is the backend's `/token/list`, which this app already reads
+ * through `hooks/appApi/useGetWhitelistedTokens`. It is not read here on purpose:
+ * the only caller is the «Detalle» column of one user's transaction table, where
+ * `/users/{privyId}/transactions` reports the token pair as raw addresses, and
+ * fetching a whitelist to letter one column would make `usuarios/` the third
+ * exception to the Cerebro-only rule in CLAUDE.md for a cosmetic gain.
+ *
+ * An address with no entry falls back to its own truncation, which is what the old
+ * dashboard renders too — the column never goes blank on an unknown token.
+ */
+const cerebroTokenSymbols = {
+  // Base
+  "8453:0x833589fcd6edb6e08f4c7c32d4f71b54bda02913": "USDC",
+  "8453:0x60a3e35cc302bfa44cb288bc5a4f316fdb1adb42": "EURC",
+  "8453:0xcbb7c0000ab88b473b1f5afd9ef808440eed33bf": "cbBTC",
+  "8453:0x2ae3f1ec7f1f5012cfeab0185bfc7aa3cf0dec22": "cbETH",
+  "8453:0x311935cd80b76769bf2ecc9d8ab7635b2139cf82": "SOL",
+  "8453:0x4200000000000000000000000000000000000006": "WETH",
+  // Base vaults
+  "8453:0xef417a2512c5a41f69ae4e021648b69a7cde5d03": "ygOG",
+  "8453:0xf24608e0ccb972b0b0f4a6446a0bbf58c701a026": "mwEURC",
+  "8453:0xee8f4ec5672f09119b96ab6fb59c27e1b7e44b61": "gtUSDCp",
+  "8453:0xf42f5795d9ac7e9d757db633d693cd548cfd9169": "fUSDC",
+  "8453:0x1943fa26360f038230442525cf1b9125b5dcb401": "fEURC",
+  "8453:0x98c49e13bf99d7cad8069faa2a370933ec9ecf17": "LVUSDC",
+  "8453:0x64db8f51f1bf7064bb5a361a7265f602d348e0f0": "LVEURC",
+  "8453:0x2bb9ad69feba5547b7cd57aafe8457d40bf834af": "LVWETH",
+  "8453:0xb99b6df96d4d5448cc0a5b3e0ef7896df9507cf5": "VAULT",
+  // HyperEVM. WHYPE is the canonical cross-chain swap destination there and is
+  // absent from the backend whitelist, so without this row the column renders
+  // `0x5555…5555`.
+  "999:0xf4d9235269a96aadafc9adae454a0618ebe37949": "XAUt0",
+  "999:0x5555555555555555555555555555555555555555": "WHYPE",
+};
+
+/**
+ * Chain **slugs** as the app backend's activity cache spells them, mapped to the
+ * numeric ids `cerebroTokenSymbols` is keyed by. `hyxora_activities` stores
+ * `from_chain` / `to_chain` as these slugs, so a token lookup has to go through
+ * here first.
+ */
+const cerebroActivityChainIds = {
+  base: 8453,
+  polygon: 137,
+  bsc: 56,
+  hyperevm: 999,
+};
+
+/**
+ * Ticker for a token on a chain, given the vocabulary
+ * `/users/{privyId}/transactions` uses: a slug for the chain and a contract
+ * address for the token.
+ *
+ * @param {string | null | undefined} chainSlug "base", "hyperevm", …
+ * @param {string | null | undefined} address Contract address.
+ * @return {string | null} null when either half is missing — the caller renders
+ * nothing rather than a dash for a leg that doesn't exist.
+ */
+export const cerebroTokenSymbol = (chainSlug, address) => {
+  if (typeof address !== "string" || address.trim() === "") return null;
+  if (typeof chainSlug !== "string" || chainSlug.trim() === "") return null;
+
+  const chainId = cerebroActivityChainIds[chainSlug.trim().toLowerCase()];
+  const known = chainId ? cerebroTokenSymbols[`${chainId}:${address.trim().toLowerCase()}`] : null;
+
+  return known ?? shortenHash(address, { lead: 6, tail: 4 });
+};

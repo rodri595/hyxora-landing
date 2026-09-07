@@ -110,8 +110,9 @@ const MembershipCard = ({ row, filters }) => {
           </p>
         ) : (
           // Four money columns don't fit a phone. Scroll the table rather than the
-          // card, and take the gesture back off Lenis so the scroll actually happens.
-          <div className="-mx-1 overflow-x-auto overscroll-x-contain px-1" data-lenis-prevent>
+          // card; allowNestedScroll routes the sideways drag here and leaves a
+          // vertical one to the page.
+          <div className="-mx-1 overflow-x-auto overscroll-x-contain px-1">
             <table className="w-full min-w-[300px] border-collapse">
               <thead>
                 <tr className="border-b-[0.7px] border-[rgba(25,54,63,0.08)]">

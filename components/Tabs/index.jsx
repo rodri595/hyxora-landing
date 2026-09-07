@@ -10,9 +10,11 @@ import { haptic } from "@/utils/haptics";
  * @param {string} value  – active tab id
  * @param {(id: string) => void} onChange
  * @param {string} [className] – extra classes for the container
- * @param {object} [rest] – forwarded to the container, so a caller that makes the
- *   strip scroll horizontally can also mark it `data-lenis-prevent`. Without the
- *   spread the attribute is dropped on the floor and Lenis eats the swipe.
+ * @param {object} [rest] – forwarded to the container. A caller that makes the strip
+ *   scroll horizontally needs nothing extra: Lenis runs with `allowNestedScroll`, so
+ *   it hands a sideways swipe to the strip and keeps vertical ones for the page.
+ *   Do not reach for `data-lenis-prevent` here — it is unconditional, and on a strip
+ *   that only overflows sideways it kills the page's vertical scroll under the cursor.
  */
 const Tabs = ({ tabs, value, onChange, className, ...rest }) => (
   <div

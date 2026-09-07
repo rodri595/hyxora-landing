@@ -107,7 +107,6 @@ const CategoryCarousel = ({ category, videos }) => {
 
         <div
           ref={scrollerRef}
-          data-lenis-prevent
           className="flex snap-x snap-mandatory gap-4 overflow-x-auto scroll-smooth pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
         >
           {videos.map((v) => (

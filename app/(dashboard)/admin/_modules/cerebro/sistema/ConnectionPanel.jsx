@@ -146,7 +146,6 @@ const ConnectionPanel = () => {
             Ver JSON completo
           </summary>
           <pre
-            data-lenis-prevent
             className="mt-2 max-h-[320px] overflow-auto overscroll-contain rounded-lg bg-[rgba(25,54,63,0.03)] border-[0.7px] border-[rgba(25,54,63,0.08)] p-2.5 font-mono text-[10px] leading-[1.5] text-[rgba(25,54,63,0.7)]"
           >
             {JSON.stringify(data, null, 2)}
