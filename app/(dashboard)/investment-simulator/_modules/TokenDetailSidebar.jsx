@@ -8,15 +8,17 @@ import { useGSAP } from "@gsap/react";
 import NumberFlow from "@number-flow/react";
 import gsap from "gsap";
 import { useRef, useState } from "react";
+import TokenChart from "./assets/TokenChart";
 import {
   ChangeChip,
   TokenBadge,
   UNITS_FORMAT,
   USD_FORMAT,
   formatUSD,
+  formatUSDCompact,
   parseTokenDescription,
   truncateAddress,
-} from "./AssetsModule";
+} from "./assets/shared";
 
 gsap.registerPlugin(useGSAP);
 
@@ -31,14 +33,6 @@ const SELL_PRESETS = [
 // Pausa artificial para que la operación no se sienta instantánea.
 const PROCESSING_DELAY_MS = 2000;
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
-
-const formatUSDCompact = (value) =>
-  new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
-    notation: "compact",
-    maximumFractionDigits: 1,
-  }).format(value);
 
 const translateError = (error) => {
   const serverError = error?.response?.data?.error;
@@ -263,6 +257,8 @@ const TokenDetailSidebar = ({ token, holding, cashBalanceCents, onClose }) => {
                 {token.displaySymbol}
               </span>
             </div>
+
+            <TokenChart token={token} />
 
             {description && (
               <p className="font-inter text-[11px] leading-relaxed tracking-[-0.44px] text-[rgba(25,54,63,0.6)]">

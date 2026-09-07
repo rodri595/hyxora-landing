@@ -1,58 +1,42 @@
 "use client";
-import DataTable from "@/components/DataTable";
-import Spinner from "@/components/Spinner";
 import { useGetSimAccount } from "@/hooks/simulator/useGetSimAccount";
 import { useGetTokens } from "@/hooks/token/useGetTokens";
 import { cn } from "@/utils";
+import { timeAgo } from "@/utils/format";
 import { useGSAP } from "@gsap/react";
 import NumberFlow from "@number-flow/react";
+import { useQueryClient } from "@tanstack/react-query";
 import gsap from "gsap";
 import { useCallback, useMemo, useRef, useState } from "react";
 import TokenDetailSidebar from "./TokenDetailSidebar";
+import AssetCard from "./assets/AssetCard";
+import PortfolioDonut from "./assets/PortfolioDonut";
+import SegmentedControl from "./assets/SegmentedControl";
+import { CATEGORY_LABELS, USD_FORMAT, tokenCategory } from "./assets/shared";
 
 gsap.registerPlugin(useGSAP);
 
 const SIDEBAR_WIDTH = 320;
 
-export const USD_FORMAT = { style: "currency", currency: "USD" };
-export const UNITS_FORMAT = { maximumFractionDigits: 6 };
-const PCT_FORMAT = { minimumFractionDigits: 1, maximumFractionDigits: 1 };
+// El orden en que se ofrecen los filtros de categoría; solo se pintan los que
+// tienen tokens, así que el catálogo decide cuáles aparecen.
+const CATEGORY_ORDER = ["crypto", "gold", "stock", "stable"];
 
-// Colores de la referencia (tienen prioridad sobre los neutros del proyecto).
-const SEG_STYLE = {
-  invertido: { backgroundColor: "#7DD3FC" },
-  disponible: {
-    backgroundColor: "#7C5CFC",
-    backgroundImage: "linear-gradient(180deg, rgba(255,255,255,0.22), rgba(255,255,255,0))",
-  },
-};
+const RANGES = [
+  { id: "DAY", label: "24H" },
+  { id: "WEEK", label: "7D" },
+  { id: "MONTH", label: "30D" },
+];
 
-export const formatUSD = (value) =>
-  new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
-  }).format(value);
-
-export const truncateAddress = (address) => {
-  if (!address) return "";
-  return `${address.slice(0, 10)}...${address.slice(-10)}`;
-};
-
-// token.data es un JSON string con { description: { en, es } }.
-export const parseTokenDescription = (raw) => {
-  if (!raw) return "";
-  try {
-    const description = JSON.parse(raw)?.description;
-    return description?.es || description?.en || "";
-  } catch {
-    return "";
-  }
-};
+const SCOPES = [
+  { id: "all", label: "Todos" },
+  { id: "mine", label: "Mi balance" },
+];
 
 const Card = ({ className, children, ...props }) => (
   <div
     className={cn(
-      "rounded-[16px] border-[0.7px] border-[rgba(25,54,63,0.08)] bg-white p-5 shadow-[0px_1px_6px_0px_rgba(25,54,63,0.05)]",
+      "squircle rounded-[20px] border-[0.7px] border-[rgba(25,54,63,0.08)] bg-white p-5 shadow-[0px_1px_6px_0px_rgba(25,54,63,0.05)]",
       className
     )}
     {...props}
@@ -61,120 +45,40 @@ const Card = ({ className, children, ...props }) => (
   </div>
 );
 
-export const TokenBadge = ({ token, size = 34 }) =>
-  token?.imageUrl ? (
-    <img
-      src={token.imageUrl}
-      alt={token.displaySymbol}
-      className="rounded-full shrink-0 object-cover bg-[rgba(25,54,63,0.06)]"
-      style={{ width: size, height: size }}
-    />
-  ) : (
-    <div
-      className="flex items-center justify-center rounded-full shrink-0 font-inter font-bold text-white bg-[#19363F]"
-      style={{ width: size, height: size, fontSize: size * 0.32 }}
-    >
-      {token?.displaySymbol?.slice(0, 1)}
-    </div>
-  );
+// Ids fijos: la parrilla de carga no reordena, pero el índice como key es
+// exactamente lo que el linter no deja pasar y no cuesta nada evitar.
+const SKELETONS = ["s1", "s2", "s3", "s4", "s5", "s6"];
 
-export const ChangeChip = ({ change }) => {
-  const value = Number(change) || 0;
-  return (
-    <span
-      className={cn(
-        "rounded-[100px] px-2 py-0.5 font-inter text-[10px] font-medium tracking-[-0.4px]",
-        value >= 0 ? "bg-[#DCFCE7] text-[#15803D]" : "bg-[#FEE2E2] text-[#DC2626]"
-      )}
-    >
-      {value >= 0 ? "+" : ""}
-      {value.toFixed(2)}%
-    </span>
-  );
-};
+const SkeletonCard = () => (
+  <div className="squircle h-[196px] animate-pulse rounded-[20px] border-[0.7px] border-[rgba(25,54,63,0.08)] bg-[rgba(25,54,63,0.03)]" />
+);
 
-// Columnas TanStack para el DataTable de activos. Los estilos base de celda
-// (font, tamaño, color) los pone DataTable; aquí solo overrides.
-const ASSET_COLUMNS = [
-  {
-    accessorKey: "name",
-    header: "Activo",
-    cell: ({ row }) => (
-      <div className="flex items-center gap-3">
-        <TokenBadge token={row.original} size={30} />
-        <div className="flex flex-col">
-          <p className="font-inter text-[13px] font-semibold tracking-[-0.52px] text-[#19363F]">
-            {row.original.name}
-          </p>
-          <p className="font-inter text-[10px] tracking-[-0.4px] text-[rgba(25,54,63,0.4)]">
-            {row.original.displaySymbol}
-          </p>
-        </div>
-      </div>
-    ),
-  },
-  {
-    id: "price",
-    accessorFn: (row) => Number(row.priceData?.price) || 0,
-    header: "Precio",
-    cell: ({ getValue }) => formatUSD(getValue()),
-  },
-  {
-    id: "change24h",
-    accessorFn: (row) => Number(row.priceData?.priceChange24h) || 0,
-    header: "24h",
-    cell: ({ getValue }) => <ChangeChip change={getValue()} />,
-  },
-  {
-    accessorKey: "units",
-    header: "Unidades",
-    cell: ({ row }) =>
-      row.original.units > 0 ? (
-        <>
-          <NumberFlow value={row.original.units} format={UNITS_FORMAT} />{" "}
-          <span className="text-[10px] text-[rgba(25,54,63,0.4)]">
-            {row.original.displaySymbol}
-          </span>
-        </>
-      ) : (
-        <span className="text-[rgba(25,54,63,0.25)]">—</span>
-      ),
-  },
-  {
-    accessorKey: "usd",
-    header: "Valor",
-    cell: ({ row }) =>
-      row.original.units > 0 ? (
-        <span className="font-semibold">
-          <NumberFlow value={row.original.usd} format={USD_FORMAT} />
-        </span>
-      ) : (
-        <span className="text-[rgba(25,54,63,0.25)]">—</span>
-      ),
-  },
-  {
-    accessorKey: "pnl",
-    header: "Rendimiento",
-    cell: ({ row }) =>
-      row.original.units > 0 ? (
-        <span
-          className={cn(
-            "font-semibold",
-            row.original.pnl >= 0 ? "text-[#15803D]" : "text-[#DC2626]"
-          )}
-        >
-          {row.original.pnl >= 0 ? "+" : "-"}
-          {formatUSD(Math.abs(row.original.pnl))}
-        </span>
-      ) : (
-        <span className="text-[rgba(25,54,63,0.25)]">—</span>
-      ),
-  },
-];
+const RefreshIcon = ({ className, ref }) => (
+  <svg
+    ref={ref}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    aria-hidden="true"
+    className={className}
+  >
+    <path d="M21 12a9 9 0 1 1-2.64-6.36" />
+    <path d="M21 3v6h-6" />
+  </svg>
+);
 
 const AssetsModule = () => {
-  const { data: tokens, isLoading, isError } = useGetTokens();
+  const { data: tokens, isLoading, isError, dataUpdatedAt, isFetching } = useGetTokens();
   const { data: account } = useGetSimAccount();
+  const queryClient = useQueryClient();
+
+  const [scope, setScope] = useState("all");
+  const [category, setCategory] = useState("all");
+  const [range, setRange] = useState("WEEK");
+  const [search, setSearch] = useState("");
 
   // `isOpen` maneja las animaciones. `displayedToken` persiste durante la
   // animación de cierre para que el contenido no desaparezca a mitad de camino.
@@ -182,8 +86,7 @@ const AssetsModule = () => {
   const [displayedToken, setDisplayedToken] = useState(null);
 
   const rootRef = useRef(null);
-  const lastGrow = useRef({ invertido: 0, disponible: 0 });
-  const mmBarRef = useRef(null);
+  const refreshRef = useRef(null);
   const mmGridRef = useRef(null);
 
   // Desktop (lg+): wrapper inline cuyo ancho anima GSAP.
@@ -224,6 +127,7 @@ const AssetsModule = () => {
           invested,
           pnl: usd - invested,
           units,
+          category: tokenCategory(token),
         };
       }),
     [tokens, holdingFor]
@@ -232,17 +136,58 @@ const AssetsModule = () => {
   const cash = (account?.cashBalanceCents ?? 0) / 100;
   const totalInvested = enriched.reduce((acc, a) => acc + a.usd, 0);
   const totalPortfolio = cash + totalInvested;
-  const pctOfPortfolio = totalPortfolio > 0 ? (totalInvested / totalPortfolio) * 100 : 0;
+  const heldCount = enriched.filter((a) => a.units > 0).length;
 
-  const barSegments = [
-    { key: "invertido", value: totalInvested },
-    { key: "disponible", value: cash },
-  ].filter((s) => s.value > 0);
+  const positions = useMemo(
+    () =>
+      enriched
+        .filter((token) => token.usd > 0)
+        // Misma clave que la parrilla: el catálogo repite símbolos entre cadenas
+        // y una posición se identifica por el par, no por la dirección sola.
+        .map((token) => ({
+          key: `${token.address}-${token.chainId}`,
+          name: token.name,
+          value: token.usd,
+        })),
+    [enriched]
+  );
 
-  const legend = [
-    { key: "invertido", label: "Invertido", value: totalInvested },
-    { key: "disponible", label: "Disponible", value: cash },
-  ];
+  // Solo se ofrecen las categorías que el catálogo trae — hoy las stablecoins
+  // están ocultas en useGetTokens, así que su filtro no llega a pintarse.
+  const categories = useMemo(() => {
+    const present = new Set(enriched.map((token) => token.category));
+    return [
+      { id: "all", label: "Todos" },
+      ...CATEGORY_ORDER.filter((id) => present.has(id)).map((id) => ({
+        id,
+        label: CATEGORY_LABELS[id],
+      })),
+    ];
+  }, [enriched]);
+
+  const visible = useMemo(() => {
+    const term = search.trim().toLowerCase();
+    return (
+      enriched
+        .filter((token) => {
+          if (scope === "mine" && token.units <= 0) return false;
+          if (category !== "all" && token.category !== category) return false;
+          if (!term) return true;
+          return (
+            token.name?.toLowerCase().includes(term) ||
+            token.displaySymbol?.toLowerCase().includes(term) ||
+            token.symbol?.toLowerCase().includes(term)
+          );
+        })
+        // Lo que tienes primero y por valor; el resto por capitalización, que es
+        // el orden en que se lee un catálogo cuando aún no has comprado nada.
+        .sort((a, b) => {
+          if (a.units > 0 !== b.units > 0) return a.units > 0 ? -1 : 1;
+          if (a.units > 0 && b.units > 0) return b.usd - a.usd;
+          return (b.priceData?.marketCap ?? 0) - (a.priceData?.marketCap ?? 0);
+        })
+    );
+  }, [enriched, scope, category, search]);
 
   const openToken = useCallback((token) => {
     setDisplayedToken(token);
@@ -250,75 +195,65 @@ const AssetsModule = () => {
   }, []);
 
   const handleClose = useCallback(() => setIsOpen(false), []);
-
   const clearDisplayed = useCallback(() => setDisplayedToken(null), []);
 
-  // Barra de distribución: reacciona a los datos reales.
-  // (Los contadores numéricos los anima NumberFlow.)
+  const refresh = useCallback(() => {
+    queryClient.invalidateQueries({ queryKey: ["tokens"] });
+    queryClient.invalidateQueries({ queryKey: ["simAccount"] });
+    queryClient.invalidateQueries({ queryKey: ["simTokenHistory"] });
+    gsap.fromTo(
+      refreshRef.current,
+      { rotate: 0 },
+      { rotate: 360, duration: 0.7, ease: "power2.inOut" }
+    );
+  }, [queryClient]);
+
+  // Entrada de la cabecera al montar.
   useGSAP(
     () => {
-      const scope = rootRef.current;
-      if (!scope) return;
-      mmBarRef.current?.revert();
       const mm = gsap.matchMedia();
-      mmBarRef.current = mm;
-      const targets = {
-        invertido: totalInvested,
-        disponible: cash,
-      };
-
       mm.add("(prefers-reduced-motion: no-preference)", () => {
-        for (const [key, val] of Object.entries(targets)) {
-          const el = scope.querySelector(`[data-seg="${key}"]`);
-          if (!el) continue;
-          // GSAP es la única fuente de verdad de flexGrow (no se fija en JSX).
-          gsap.fromTo(
-            el,
-            { flexGrow: lastGrow.current[key] ?? 0 },
-            { flexGrow: val, duration: 0.5, ease: "power3.out", overwrite: true }
-          );
-        }
+        gsap.from("[data-head]", {
+          y: 12,
+          opacity: 0,
+          duration: 0.5,
+          ease: "power3.out",
+          stagger: 0.07,
+          clearProps: "opacity,transform",
+        });
       });
-
-      mm.add("(prefers-reduced-motion: reduce)", () => {
-        for (const [key, val] of Object.entries(targets)) {
-          const el = scope.querySelector(`[data-seg="${key}"]`);
-          if (el) gsap.set(el, { flexGrow: val });
-        }
-      });
-
-      Object.assign(lastGrow.current, targets);
     },
-    { scope: rootRef, dependencies: [totalInvested, cash] }
+    { scope: rootRef }
   );
 
-  // Stagger de las filas de la tabla — al llegar datos.
+  // Stagger de la parrilla: al llegar datos y al cambiar de filtro, no en cada
+  // tecla del buscador — reanimar la parrilla mientras se escribe marea.
   useGSAP(
     () => {
-      const scope = rootRef.current;
-      if (!scope) return;
+      const scopeEl = rootRef.current;
+      if (!scopeEl) return;
       mmGridRef.current?.revert();
       const mm = gsap.matchMedia();
       mmGridRef.current = mm;
-      const rows = scope.querySelectorAll("[data-row]");
-      if (!rows.length) return;
+      const cards = scopeEl.querySelectorAll("[data-card]");
+      if (!cards.length) return;
 
       mm.add("(prefers-reduced-motion: no-preference)", () => {
-        gsap.from(rows, {
-          y: 14,
+        gsap.from(cards, {
+          y: 16,
           opacity: 0,
-          duration: 0.4,
-          ease: "power2.out",
-          stagger: 0.045,
+          duration: 0.45,
+          ease: "power3.out",
+          stagger: { each: 0.035, from: "start" },
           overwrite: true,
           clearProps: "opacity,transform",
         });
       });
       mm.add("(prefers-reduced-motion: reduce)", () => {
-        gsap.from(rows, { opacity: 0, duration: 0.2, overwrite: true });
+        gsap.from(cards, { opacity: 0, duration: 0.2, overwrite: true });
       });
     },
-    { scope: rootRef, dependencies: [enriched.length] }
+    { scope: rootRef, dependencies: [enriched.length, scope, category] }
   );
 
   // ── Desktop animation (lg+): ancho del wrapper ────────────────────────────
@@ -356,12 +291,7 @@ const AssetsModule = () => {
       if (!panel || !backdrop) return;
       if (isOpen) {
         gsap.set(backdrop, { pointerEvents: "auto" });
-        gsap.to(panel, {
-          x: "0%",
-          duration: 0.35,
-          ease: "power3.out",
-          overwrite: true,
-        });
+        gsap.to(panel, { x: "0%", duration: 0.35, ease: "power3.out", overwrite: true });
         gsap.to(backdrop, { opacity: 1, duration: 0.25, overwrite: true });
       } else {
         gsap.set(backdrop, { pointerEvents: "none" });
@@ -381,113 +311,148 @@ const AssetsModule = () => {
   return (
     <div className="flex flex-row w-full items-stretch">
       <div ref={rootRef} className="flex flex-col gap-4 flex-1 w-0 min-w-0">
-        {/* ── Fila superior: balance + distribución ─────────────────── */}
-        <div className="grid grid-cols-[1fr_2fr] gap-4 w-full max-lg:grid-cols-1">
-          {/* Balance total invertido */}
-          <Card className="flex flex-col justify-between gap-6">
-            <div className="flex flex-col gap-1">
-              <h2 className="font-inter text-[16px] font-semibold tracking-[-0.64px] text-[#19363F]">
-                Activos Digitales
-              </h2>
-              <p className="font-inter text-[12px] tracking-[-0.48px] text-[rgba(25,54,63,0.5)]">
-                Administra tus activos y balances de práctica
-              </p>
-            </div>
-            <NumberFlow
-              value={totalInvested}
-              format={USD_FORMAT}
-              className="font-inter text-[40px] font-bold tracking-[-1.6px] text-[#19363F] leading-none"
-            />
-            <span className="self-start rounded-[100px] bg-[rgba(25,54,63,0.04)] px-3 py-1 font-inter text-[10px] tracking-[-0.4px] text-[rgba(25,54,63,0.5)]">
-              Última actualización: ahora
-            </span>
-          </Card>
-
-          {/* Distribución del portafolio — tarjeta estilo presupuesto */}
-          <Card className="flex flex-col gap-3">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <span className="text-[15px] leading-none">💼</span>
-                <h2 className="font-inter text-[15px] font-semibold tracking-[-0.6px] text-[#19363F]">
-                  Portafolio completo
+        {/* ── Fila superior: balance + reparto ──────────────────────── */}
+        <div className="grid grid-cols-[1fr_1.6fr] gap-4 w-full max-lg:grid-cols-1">
+          <Card data-head className="flex flex-col justify-between gap-6">
+            <div className="flex items-start justify-between gap-3">
+              <div className="flex flex-col gap-1">
+                <h2 className="font-inter text-[16px] font-semibold tracking-[-0.64px] text-[#19363F]">
+                  Activos Digitales
                 </h2>
+                <p className="font-inter text-[12px] tracking-[-0.48px] text-[rgba(25,54,63,0.5)]">
+                  Administra tus activos y balances de práctica
+                </p>
               </div>
-              <NumberFlow
-                value={pctOfPortfolio}
-                format={PCT_FORMAT}
-                suffix="%"
-                className="font-inter text-[15px] font-semibold tracking-[-0.6px] text-[#16A34A]"
-              />
+              <button
+                type="button"
+                onClick={refresh}
+                aria-label="Actualizar precios"
+                className="squircle flex size-8 shrink-0 items-center justify-center rounded-[10px] border-[0.7px] border-[rgba(25,54,63,0.1)] text-[rgba(25,54,63,0.5)] transition-colors hover:bg-[rgba(25,54,63,0.04)] hover:text-[#19363F]"
+              >
+                <RefreshIcon ref={refreshRef} className="size-[15px]" />
+              </button>
             </div>
 
-            <div className="flex h-[30px] w-full gap-[6px]">
-              {barSegments.length ? (
-                barSegments.map((seg) => (
-                  <div
-                    key={seg.key}
-                    data-seg={seg.key}
-                    className="h-full rounded-[10px]"
-                    style={{ flexBasis: 0, minWidth: 24, ...SEG_STYLE[seg.key] }}
-                  />
-                ))
-              ) : (
-                <div className="h-full w-full rounded-[10px] bg-[rgba(25,54,63,0.06)]" />
-              )}
-            </div>
-
-            <div className="flex items-baseline justify-between">
+            <div className="flex flex-col gap-1">
               <NumberFlow
                 value={totalInvested}
                 format={USD_FORMAT}
-                className="font-inter text-[16px] font-bold tracking-[-0.64px] text-[#7C5CFC]"
+                className="font-inter text-[40px] font-bold leading-none tracking-[-1.6px] text-[#19363F] max-md:text-[32px]"
               />
-              <NumberFlow
-                value={totalPortfolio}
-                format={USD_FORMAT}
-                className="font-inter text-[15px] tracking-[-0.6px] text-[rgba(25,54,63,0.5)]"
-              />
+              <p className="font-inter text-[11px] tracking-[-0.44px] text-[rgba(25,54,63,0.45)]">
+                {heldCount > 0
+                  ? `Invertido en ${heldCount} ${heldCount === 1 ? "activo" : "activos"}`
+                  : "Todavía sin posiciones"}
+              </p>
             </div>
 
-            <div className="h-px w-full bg-[rgba(25,54,63,0.08)]" />
+            <span className="squircle self-start rounded-[100px] bg-[rgba(25,54,63,0.04)] px-3 py-1 font-inter text-[10px] tracking-[-0.4px] text-[rgba(25,54,63,0.5)]">
+              {isFetching
+                ? "Actualizando precios…"
+                : `Última actualización: ${timeAgo(dataUpdatedAt || undefined)}`}
+            </span>
+          </Card>
 
-            <div className="flex flex-col gap-2">
-              {legend.map((item) => (
-                <div key={item.key} className="flex items-center gap-2">
-                  <span className="size-[13px] rounded-full shrink-0" style={SEG_STYLE[item.key]} />
-                  <p className="font-inter text-[13px] tracking-[-0.52px] text-[rgba(25,54,63,0.5)]">
-                    {item.label}: <NumberFlow value={item.value} format={USD_FORMAT} />
-                  </p>
-                </div>
-              ))}
+          <Card data-head className="flex flex-col gap-4">
+            <div className="flex flex-col gap-0.5">
+              <h2 className="font-inter text-[15px] font-semibold tracking-[-0.6px] text-[#19363F]">
+                Reparto del portafolio
+              </h2>
+              <p className="font-inter text-[12px] tracking-[-0.48px] text-[rgba(25,54,63,0.5)]">
+                Cómo se distribuye tu inversión entre tus activos
+              </p>
             </div>
+            <PortfolioDonut positions={positions} cash={cash} total={totalPortfolio} />
           </Card>
         </div>
 
-        {/* ── Tabla de activos ──────────────────────────────────────── */}
+        {/* ── Barra de filtros ──────────────────────────────────────── */}
+        <div data-head className="flex flex-col gap-3">
+          <div className="flex items-center justify-between gap-3 max-sm:flex-col max-sm:items-stretch">
+            <SegmentedControl options={SCOPES} value={scope} onChange={setScope} />
+            <label className="squircle flex h-9 min-w-0 flex-1 items-center gap-2 rounded-[100px] border-[0.7px] border-[rgba(25,54,63,0.1)] bg-white px-3.5 sm:max-w-[260px]">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                aria-hidden="true"
+                className="size-[14px] shrink-0 text-[rgba(25,54,63,0.35)]"
+              >
+                <circle cx="11" cy="11" r="7" />
+                <path d="m20 20-3.5-3.5" />
+              </svg>
+              <input
+                value={search}
+                onChange={(event) => setSearch(event.target.value)}
+                placeholder="Buscar activo..."
+                className="min-w-0 flex-1 bg-transparent font-inter text-[12px] tracking-[-0.48px] text-[#19363F] outline-none placeholder:text-[rgba(25,54,63,0.35)]"
+              />
+            </label>
+          </div>
+
+          <div className="flex items-center justify-between gap-3 max-sm:flex-col max-sm:items-stretch">
+            <SegmentedControl
+              options={categories}
+              value={category}
+              onChange={setCategory}
+              tone="light"
+            />
+            <SegmentedControl options={RANGES} value={range} onChange={setRange} tone="light" />
+          </div>
+        </div>
+
+        {/* ── Parrilla de activos ───────────────────────────────────── */}
         {isLoading ? (
-          <div className="flex items-center justify-center py-16 w-full">
-            <Spinner />
+          <div className="grid w-full grid-cols-[repeat(auto-fill,minmax(230px,1fr))] gap-3">
+            {SKELETONS.map((id) => (
+              <SkeletonCard key={id} />
+            ))}
           </div>
         ) : isError ? (
-          <div className="flex items-center justify-center py-16 w-full">
+          <div className="flex flex-col items-center gap-3 py-16 w-full">
             <p className="font-inter text-[13px] tracking-[-0.52px] text-[rgba(25,54,63,0.5)]">
               No se pudieron cargar los activos. Inténtalo de nuevo.
             </p>
+            <button
+              type="button"
+              onClick={refresh}
+              className="squircle rounded-[10px] bg-[#19363F] px-4 py-2 font-inter text-[12px] font-medium tracking-[-0.48px] text-white transition-colors hover:bg-[#0f2228]"
+            >
+              Reintentar
+            </button>
           </div>
-        ) : enriched.length === 0 ? (
-          <div className="flex items-center justify-center py-16 w-full">
+        ) : visible.length === 0 ? (
+          <div className="flex flex-col items-center gap-3 py-16 w-full">
             <p className="font-inter text-[13px] tracking-[-0.52px] text-[rgba(25,54,63,0.5)]">
-              No hay activos por ahora.
+              {scope === "mine" && heldCount === 0
+                ? "Todavía no tienes posiciones abiertas."
+                : "Ningún activo coincide con estos filtros."}
             </p>
+            <button
+              type="button"
+              onClick={() => {
+                setScope("all");
+                setCategory("all");
+                setSearch("");
+              }}
+              className="squircle rounded-[10px] border-[0.7px] border-[rgba(25,54,63,0.15)] px-4 py-2 font-inter text-[12px] font-medium tracking-[-0.48px] text-[#19363F] transition-colors hover:bg-[rgba(25,54,63,0.04)]"
+            >
+              Ver todos los activos
+            </button>
           </div>
         ) : (
-          <DataTable
-            data={enriched}
-            columns={ASSET_COLUMNS}
-            filename="activos"
-            searchPlaceholder="Buscar activo..."
-            onRowClick={openToken}
-          />
+          <div className="grid w-full grid-cols-[repeat(auto-fill,minmax(230px,1fr))] gap-3">
+            {visible.map((token) => (
+              <AssetCard
+                key={`${token.address}-${token.chainId}`}
+                token={token}
+                timeFrame={range}
+                onOpen={openToken}
+              />
+            ))}
+          </div>
         )}
       </div>
 

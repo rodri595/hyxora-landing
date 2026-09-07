@@ -1,9 +1,18 @@
+import { gatewayRoot } from "@/utils/gateway";
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
 
-// API detrás de https://hyxora-app-staging.netlify.app (la URL de Netlify sirve
-// el frontend; el JSON vive en el host app-api-staging).
-const TOKEN_API_URL = "https://app-api-staging.hyxora.com";
+/**
+ * `/token/public-list` is app-api's other **public** endpoint — no bot token and
+ * no session, same as `/vault/list` — and it feeds the simulator's catalogue.
+ * Hence bare `axios` rather than `appApiClient`: that client goes through
+ * `/api/app-api`, which is admin-gated.
+ *
+ * It used to point at `app-api-staging.hyxora.com` directly. Now that the
+ * gateway serves app-api at `/app`, it hangs off `gatewayRoot` like everything
+ * else, so one env var moves it between dev and prod.
+ */
+const APP_API = `${gatewayRoot}/app`;
 
 // Stablecoins que el cliente no quiere mostrar en el listado
 // (USDC base/arbitrum/polygon y EURC base).
@@ -18,7 +27,7 @@ export const useGetTokens = (props) => {
   return useQuery({
     queryKey: ["tokens", "public-list"],
     queryFn: async () => {
-      const response = await axios.get(`${TOKEN_API_URL}/token/public-list`);
+      const response = await axios.get(`${APP_API}/token/public-list`);
       const tokens = response?.data?.data?.tokens || response?.data?.tokens || [];
       return tokens.filter((t) => !HIDDEN_ADDRESSES.has(t.address?.toLowerCase()));
     },
