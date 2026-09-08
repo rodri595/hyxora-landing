@@ -1,7 +1,7 @@
 "use client";
 
 import Layout from "@/components/Layout";
-import SectionRail from "@/templates/TermsPage/SectionRail";
+import SectionRail from "@/components/SectionRail";
 
 const TermsPage = () => {
   return (

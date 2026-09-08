@@ -65,6 +65,7 @@ const Footer = () => {
             </MenuItem>
             <MenuItem href="/plans">Planes</MenuItem>
             <MenuItem href="/faq">FAQ</MenuItem>
+            <MenuItem href="/brand-assets">Prensa</MenuItem>
           </nav>
 
           {/* Social Media */}

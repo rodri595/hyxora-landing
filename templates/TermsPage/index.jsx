@@ -2,7 +2,7 @@
 
 import Layout from "@/components/Layout";
 import FeesTable from "@/templates/HomePage/Plans/FeesTable";
-import SectionRail from "./SectionRail";
+import SectionRail from "@/components/SectionRail";
 
 const TermsPage = () => {
   return (

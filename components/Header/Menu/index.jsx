@@ -509,6 +509,14 @@ const MenuComponent = () => {
                 icon={
                   <Icon name="verification" className="w-[16px] h-[16px] " />
                 }
+                title="Sala de prensa"
+                href="/brand-assets"
+                className="w-full max-w-none"
+              />
+              <MenuItem
+                icon={
+                  <Icon name="verification" className="w-[16px] h-[16px] " />
+                }
                 title="Soporte"
                 className="w-full max-w-none"
                 href="mailto:future@hyxora.com"

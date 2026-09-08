@@ -1,0 +1,46 @@
+HYXORA — KIT DE PRENSA
+======================
+
+Contenido de este archivo
+
+  /logos
+    hyxora-isotipo.svg / -1024.png            Isotipo principal (fondo claro)
+    hyxora-isotipo-oscuro.svg / -1024.png     Isotipo sobre fondo oscuro
+    hyxora-isotipo-negro.svg / -1024.png      Monocromo oscuro, fondo transparente
+    hyxora-isotipo-blanco.svg / -1024.png     Monocromo blanco, fondo transparente
+
+  /app
+    hyxora-app-01.png                         Captura de la aplicación
+    hyxora-app-02.png                         Captura de la aplicación
+
+  /documentos
+    hyxora-nota-founders-fase1.pdf            Nota informativa Founders Fase 1
+    hyxora-terminos-nft-founders.pdf          Términos del NFT Founders
+
+Color de marca
+
+  Azul Hyxora     #2D68FF
+  Verde profundo  #19363F
+  Gris marca      #EDEDED
+  Blanco          #FDFDFD
+
+Normas de uso
+
+  · Usa siempre los archivos originales de este kit. No recrees, redibujes ni
+    recolorees el isotipo.
+  · Respeta un margen libre alrededor del logo equivalente a la altura de su
+    marca interior.
+  · No apliques sombras, degradados, contornos ni rotaciones.
+  · Sobre fondos oscuros o fotografías, usa la versión blanca o la versión
+    sobre fondo oscuro.
+  · Hyxora no es un banco: es una interfaz de software de autocustodia. Evita
+    describirla como banco, entidad de pago o gestora de fondos.
+
+Escritura de marca
+
+  Hyxora (siempre con H mayúscula). El modelo de producto se escribe «noBanco»,
+  con n minúscula y B mayúscula.
+
+Contacto de prensa
+
+  future@hyxora.com · https://hyxora.com/brand-assets

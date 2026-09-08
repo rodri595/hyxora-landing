@@ -17,7 +17,7 @@ const faqItems = [
     id: 2,
     question: "¿Es Hyxora un banco o una app de criptomonedas?",
     answer:
-      "Ninguna de las dos cosas por separado. Hyxora es lo que denominamos un NoBanco, que intenta mejorar las opciones existentes mediante una tecnología de vanguardia.",
+      "Ninguna de las dos cosas por separado. Hyxora es lo que denominamos un noBanco, que intenta mejorar las opciones existentes mediante una tecnología de vanguardia.",
   },
   {
     id: 3,

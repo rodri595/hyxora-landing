@@ -1,7 +1,7 @@
 const Info = () => {
   const leftSectionData = {
     title: "¿Por qué ",
-    subtitle: "somos un NoBanco? ",
+    subtitle: "somos un noBanco? ",
     // description:
     //   "Opera desde tu app y tarjeta de forma habitual y maneja desde un mismo dispositivo todos tus activos",
     steps: [
