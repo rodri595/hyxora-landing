@@ -39,7 +39,7 @@ const faqItems = [
   },
   {
     id: 6,
-    question: "¿Qué diferencia hay entre el plan Basic (1,99 €) y el Premium (9,99 €)?",
+    question: "¿Qué diferencia hay entre el plan Basic ($1.99) y el Premium ($9.99)?",
     answer:
       "El plan Basic te da acceso a la entrada en el mundo Crypto desde el mundo financiero tradicional: tendrás una cuenta fíat con IBAN , transferencias, tarjeta fiat-crypto, y podrás intercambiar (swap) entre monedas fíat- Crypto y Crypto-Crypto. El plan Premium es el Basic pero añadiendo la entrada en las oportunidades que nos ofrece el mercado de las finanzas descentralizadas DeFi, donde encontrarás opciones un poco más complejas. Además de estas funcionalidades, los accesos a la parte de Academia, Comité Consultivo, etc, así como la propia estética y accesos también serán más completos en Premium que en Basic.",
   },
@@ -53,7 +53,7 @@ const faqItems = [
     id: 8,
     question: "Si no me convence, ¿me devuelven el dinero?",
     answer:
-      "Sí, devolución 100 % automática en menos de 48 horas si cancelas antes del día 15. Queremos que te quedes porque te encanta, no por miedo a perder 1,99 €.",
+      "Sí, devolución 100 % automática en menos de 48 horas si cancelas antes del día 15. Queremos que te quedes porque te encanta, no por miedo a perder $1.99.",
   },
   {
     id: 9,

@@ -205,14 +205,14 @@ const Plans = () => {
                       <>
                         <div className="flex items-center">
                           <span className="text-2xl font-medium text-t-secondary tracking-[-0.03em] relative top-1 mr-0.5">
-                            €
+                            $
                           </span>
                           <span className="text-[40px] font-normal text-t-primary tracking-[-0.03em] leading-[3rem]">
                             {isYearly ? plan.yearlyPrice : plan.monthlyPrice}
                           </span>
                         </div>
                         <div className="flex flex-col text-xs font-medium text-t-secondary tracking-[-0.01em] leading-4">
-                          <span>EUR /</span>
+                          <span>USD /</span>
                           <span className={isYearly ? " uppercase font-semibold" : ""}>
                             {isYearly ? "año" : "mes"}
                           </span>
@@ -222,14 +222,14 @@ const Plans = () => {
                       <>
                         <div className="flex items-center">
                           <span className="text-2xl font-medium text-t-secondary tracking-[-0.03em] relative top-1 mr-0.5">
-                            €
+                            $
                           </span>
                           <span className="text-[40px] font-normal text-t-primary tracking-[-0.03em] leading-[3rem]">
                             {plan.price}
                           </span>
                         </div>
                         <div className="flex flex-col text-xs font-medium text-t-secondary tracking-[-0.01em] leading-4">
-                          <span>EUR /</span>
+                          <span>USD /</span>
                           <span>mes</span>
                         </div>
                       </>
