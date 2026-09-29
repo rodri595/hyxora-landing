@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import { consumePendingScroll } from "@/hooks/useSectionScroll";
 import Layout from "@/components/Layout";
+import GoldPromoModal from "@/components/GoldPromoModal";
 import Hero from "./Hero";
 import MapSection from "./Map";
 // import Whatis from "./Whatis";
@@ -18,22 +19,25 @@ const HomePage = () => {
   useEffect(() => consumePendingScroll(), []);
 
   return (
-    <Layout
-      isFixedHeader
-      classContainer="flex flex-col gap-[130px] maxmd:gap-[80px]"
-    >
-      <Hero />
-      <MapSection />
-      {/* <Whatis /> */}
-      <Info />
-      <Why />
-      <Finance />
-      <Foundersv2 />
-      <Roadmap />
-      <Plans />
-      <FAQ />
-      <CTA />
-    </Layout>
+    <>
+      <Layout
+        isFixedHeader
+        classContainer="flex flex-col gap-[130px] maxmd:gap-[80px]"
+      >
+        <Hero />
+        <MapSection />
+        {/* <Whatis /> */}
+        <Info />
+        <Why />
+        <Finance />
+        <Foundersv2 />
+        <Roadmap />
+        <Plans />
+        <FAQ />
+        <CTA />
+      </Layout>
+      <GoldPromoModal />
+    </>
   );
 };
 

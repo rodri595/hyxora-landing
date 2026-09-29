@@ -411,3 +411,88 @@ html[data-theme="dark"] .dropdown-arrow-up:before {
 .mask-right {
   mask-image: linear-gradient(to right, black 90%, transparent 100%);
 }
+
+/* ---------------------------------------------------------------
+ * Squircles — superellipse corners (|x|⁴ + |y|⁴ = r⁴), the iOS icon
+ * shape. Three tiers, picked by the browser, no JS:
+ *
+ *   1. Chromium 139+           `corner-shape: squircle`. Part of the
+ *      box, so border, box-shadow and overflow follow the curve.
+ *   2. Safari 18.4+ (iOS too)  `clip-path: shape()`. A clip, so an
+ *      outer box-shadow or a border is cut off at the corners: put
+ *      shadows on a wrapper as `drop-shadow`, borders through
+ *      `squircle-ring`.
+ *   3. Older browsers          plain `border-radius`.
+ *
+ * Tier 2 zeroes the radius: the circular corner sits inside the
+ * squircle and would clip it back to an ordinary rounded rect.
+ *
+ * The same number reads squarer than a border-radius (~1.8× matches a
+ * circular corner), and nested squircles stay concentric when the
+ * inner radius is the outer one minus the gap between them.
+ *
+ *   squircle [--sq-r:28px]
+ * --------------------------------------------------------------- */
+@utility squircle {
+  --sq-edge: min(var(--sq-r, 1rem), 50%);
+  --sq-ctrl: calc(min(var(--sq-r, 1rem), 50%) * 0.091);
+  border-radius: var(--sq-r, 1rem);
+  /* biome-ignore lint/correctness/noUnknownProperty: Chromium 139+, newer than Biome's list */
+  corner-shape: squircle;
+
+  @supports (clip-path: shape(from 0 0, line to 0 0)) {
+    /* biome-ignore lint/correctness/noUnknownProperty: see corner-shape above */
+    @supports not (corner-shape: squircle) {
+      border-radius: 0;
+      /* Control points at 0.091r land the curve's midpoint on the
+       * superellipse; 50% clamps each axis so short boxes don't fold. */
+      clip-path: shape(
+        from 0 var(--sq-edge),
+        curve to var(--sq-edge) 0 with 0 var(--sq-ctrl) / var(--sq-ctrl) 0,
+        line to calc(100% - var(--sq-edge)) 0,
+        curve to 100% var(--sq-edge) with calc(100% - var(--sq-ctrl)) 0 / 100%
+          var(--sq-ctrl),
+        line to 100% calc(100% - var(--sq-edge)),
+        curve to calc(100% - var(--sq-edge)) 100% with 100%
+          calc(100% - var(--sq-ctrl)) / calc(100% - var(--sq-ctrl)) 100%,
+        line to var(--sq-edge) 100%,
+        curve to 0 calc(100% - var(--sq-edge)) with var(--sq-ctrl) 100% / 0
+          calc(100% - var(--sq-ctrl)),
+        close
+      );
+    }
+  }
+}
+
+/* A border that follows the squircle on every tier. Set the colours
+ * through --sq-ring / --sq-fill (and --sq-ring-w, 1px by default), not
+ * border-* / bg-*: on Safari the ring *is* the element's background and
+ * a ::before clipped one ring-width smaller paints the fill over it —
+ * so --sq-fill has to be opaque. */
+@utility squircle-ring {
+  /* The ::before's radius, resolved here: on the ::before itself it would
+   * read its own name, a cycle CSS throws away. */
+  --sq-r-in: max(calc(var(--sq-r, 1rem) - var(--sq-ring-w, 1px)), 0px);
+  border: var(--sq-ring-w, 1px) solid var(--sq-ring, transparent);
+  background-color: var(--sq-fill, transparent);
+
+  @supports (clip-path: shape(from 0 0, line to 0 0)) {
+    /* biome-ignore lint/correctness/noUnknownProperty: see corner-shape in squircle */
+    @supports not (corner-shape: squircle) {
+      position: relative;
+      isolation: isolate;
+      border-color: transparent;
+      background-color: var(--sq-ring, transparent);
+
+      &::before {
+        --sq-r: var(--sq-r-in);
+        content: "";
+        position: absolute;
+        inset: 0;
+        z-index: -1;
+        background-color: var(--sq-fill, transparent);
+        @apply squircle;
+      }
+    }
+  }
+}
