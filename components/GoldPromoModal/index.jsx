@@ -17,10 +17,10 @@ if (typeof window !== "undefined") {
   CustomEase.create("snap", "0.23,1,0.32,1");
 }
 
-// «Tu fidelidad es ORO»: anyone registered in the app by 30/09/2026 (Madrid)
+// «Tu fidelidad es ORO»: anyone registered in the app by 30/10/2026 (Madrid)
 // gets the monthly plan fee back in digital gold in Oct, Nov and Dec 2026.
 // Once that day is over the invitation to sign up is moot, so it stops.
-const PROMO_ENDS_AT = new Date("2026-10-01T00:00:00+02:00");
+const PROMO_ENDS_AT = new Date("2026-10-30T00:00:00+02:00");
 const STORAGE_KEY = "hyxora:promo-oro-2026";
 // Late enough that the hero has landed and hydration (Privy included) is done,
 // so the entrance isn't competing with page load for frames.
@@ -537,7 +537,7 @@ const Copy = ({ onClose }) => (
     >
       <p>
         Todos los usuarios de Hyxora registrados en la app hasta el{" "}
-        <strong className="font-medium text-white/90">30/09/2026</strong> recibirán a partir de
+        <strong className="font-medium text-white/90">30/10/2026</strong> recibirán a partir de
         octubre con la entrada de los planes de suscripción, el coste de la misma mensual en{" "}
         <strong className="font-medium text-[#E8C375]">ORO DIGITAL</strong> en la app.
       </p>
