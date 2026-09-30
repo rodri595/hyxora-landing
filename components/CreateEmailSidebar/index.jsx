@@ -13,18 +13,34 @@ import { useCallback, useMemo, useRef, useState } from "react";
 
 gsap.registerPlugin(useGSAP);
 
-const CreateEmailSidebar = ({ onClose }) => {
+/**
+ * @param {Object} props
+ * @param {() => void} [props.onClose]
+ * @param {string[]} [props.initialEmails] Recipients already ticked on open.
+ * @param {boolean} [props.embedded] Inside another panel that owns the card, the
+ * title and the close button — the Cerebro user drawer. Drops those, and "Añadir
+ * todos", which from one user's drawer is a click away from mailing everyone.
+ */
+const CreateEmailSidebar = ({ onClose, initialEmails = [], embedded = false }) => {
   const panelRef = useRef(null);
   const { data: allUsers = [], error: usersError, isLoading: usersLoading } = useGetAllUsers();
-  const { mutate: sendEmails, isPending, isSuccess, error: sendError } = useSendTextEmails();
+  const {
+    mutate: sendEmails,
+    isPending,
+    isSuccess,
+    error: sendError,
+    reset: resetSend,
+  } = useSendTextEmails();
 
   const [search, setSearch] = useState("");
-  const [selectedEmails, setSelectedEmails] = useState([]);
+  const [selectedEmails, setSelectedEmails] = useState(() => initialEmails.filter(Boolean));
   const [subject, setSubject] = useState("");
   const [content, setContent] = useState("");
 
   useGSAP(
     () => {
+      // The delay waits for a sliding wrapper to open; embedded there is none.
+      if (embedded) return;
       gsap.fromTo(
         panelRef.current,
         { opacity: 0 },
@@ -85,13 +101,30 @@ const CreateEmailSidebar = ({ onClose }) => {
     sendEmails({ emails: selectedEmails, subject: subject.trim(), texts });
   };
 
+  // Embedded there is no panel to close after a send, so the success screen offers
+  // the next email instead. Recipients stay: it is still the same user's drawer.
+  const handleWriteAnother = () => {
+    resetSend();
+    setSubject("");
+    setContent("");
+  };
+
   return (
     <div
       ref={panelRef}
-      className="flex flex-col w-full h-full bg-white rounded-xl border-[0.7px] border-[rgba(25,54,63,0.08)] shadow-[0px_2px_12px_0px_rgba(25,54,63,0.08)] overflow-hidden"
+      className={cn(
+        "flex flex-col w-full h-full bg-white overflow-hidden",
+        !embedded &&
+          "rounded-xl border-[0.7px] border-[rgba(25,54,63,0.08)] shadow-[0px_2px_12px_0px_rgba(25,54,63,0.08)]"
+      )}
     >
       {/* Header */}
-      <div className="flex items-center justify-between gap-3 px-4 py-3 border-b-[0.7px] border-[rgba(25,54,63,0.08)] shrink-0">
+      <div
+        className={cn(
+          "flex items-center justify-between gap-3 px-4 py-3 border-b-[0.7px] border-[rgba(25,54,63,0.08)] shrink-0",
+          embedded && "hidden"
+        )}
+      >
         <p className="font-inter font-semibold text-[12px] tracking-[-0.48px] text-[#19363F]">
           {isSuccess ? "Email enviado" : "Nuevo email"}
         </p>
@@ -137,10 +170,10 @@ const CreateEmailSidebar = ({ onClose }) => {
           </div>
           <button
             type="button"
-            onClick={onClose}
+            onClick={embedded ? handleWriteAnother : onClose}
             className="mt-2 h-8 px-5 rounded-lg bg-[#19363F] text-white font-inter text-[12px] font-medium tracking-[-0.48px] hover:bg-[#0f2228] transition-colors"
           >
-            Cerrar
+            {embedded ? "Escribir otro" : "Cerrar"}
           </button>
         </div>
       ) : (
@@ -154,13 +187,15 @@ const CreateEmailSidebar = ({ onClose }) => {
                   <span className="font-inter text-[10px] font-medium tracking-[-0.4px] text-[rgba(25,54,63,0.4)] uppercase">
                     Destinatarios
                   </span>
-                  <button
-                    type="button"
-                    onClick={allSelected ? removeAll : addAll}
-                    className="font-inter text-[10px] font-medium tracking-[-0.4px] text-[#19363F] hover:underline"
-                  >
-                    {allSelected ? "Quitar todos" : `Añadir todos (${usersWithEmail.length})`}
-                  </button>
+                  {!embedded && (
+                    <button
+                      type="button"
+                      onClick={allSelected ? removeAll : addAll}
+                      className="font-inter text-[10px] font-medium tracking-[-0.4px] text-[#19363F] hover:underline"
+                    >
+                      {allSelected ? "Quitar todos" : `Añadir todos (${usersWithEmail.length})`}
+                    </button>
+                  )}
                 </div>
 
                 <Field

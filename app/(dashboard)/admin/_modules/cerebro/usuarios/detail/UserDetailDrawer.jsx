@@ -1,17 +1,20 @@
 "use client";
 
 import CopyButton from "@/components/CopyButton";
+import CreateEmailSidebar from "@/components/CreateEmailSidebar";
 import Tabs from "@/components/Tabs";
 import { cerebroPlanLabel } from "@/constants/cerebro";
 import { useGetUserDetail } from "@/hooks/cerebro/useGetUserDetail";
 import { useGetUserPnl } from "@/hooks/cerebro/useGetUserPnl";
 import { useGetUserVaults } from "@/hooks/cerebro/useGetUserVaults";
+import { cn } from "@/utils";
 import { formatUsd, shortenHash, timeAgo } from "@/utils/format";
 import { useEffect, useMemo, useState } from "react";
 import { RefreshButton } from "../../../shared/Panel";
 import QueryState from "../../../shared/QueryState";
 import { TX_PAGE_SIZE } from "../constants";
 import CarteraTab from "./CarteraTab";
+import FoundersTab from "./FoundersTab";
 import ResumenTab from "./ResumenTab";
 import SepaTab from "./SepaTab";
 import TransaccionesTab from "./TransaccionesTab";
@@ -79,14 +82,32 @@ const displayName = (user) =>
  * must not blank the identity block, the same reasoning that keeps «Margen de
  * subsidio» on two loaders in Sistema.
  *
+ * Two tabs are not Cerebro at all, and sit outside its gate for that reason:
+ * «Web founders» is the founders-site account `/admin?tab=users` shows, joined in
+ * `usuarios/founders.js`, and «Email» is the Emails tab's own composer, addressed to
+ * this user.
+ *
  * @param {Object} props
  * @param {Object} props.user The `/users` row the drawer was opened from. Every field
  * on it is already correct, so the header and the identity block render instantly
  * and the detail request only fills in what the list row doesn't carry.
+ * @param {import("../founders").FounderMatch | null} props.founder
+ * @param {"loading" | "error" | "ready"} props.foundersStatus
+ * @param {Error | null} [props.foundersError]
  * @param {() => void} props.onClose
  */
-const UserDetailDrawer = ({ user, onClose }) => {
+const UserDetailDrawer = ({ user, founder, foundersStatus, foundersError, onClose }) => {
   const [tab, setTab] = useState("resumen");
+  // The composer mounts on first visit and then only hides, so a half-written email
+  // survives a look at another tab — reading the account while writing to it is the
+  // point of having it here. Not mounted up front because it reads its recipient
+  // once, and by the first click the founders email it may fall back on has loaded.
+  const [composerMounted, setComposerMounted] = useState(false);
+
+  const handleTabChange = (next) => {
+    setTab(next);
+    if (next === "email") setComposerMounted(true);
+  };
 
   const detail = useGetUserDetail(user.privyId, { pageSize: TX_PAGE_SIZE });
   const pnl = useGetUserPnl(user.privyId);
@@ -142,6 +163,8 @@ const UserDetailDrawer = ({ user, onClose }) => {
     { id: "cartera", label: `Cartera${positions.count > 0 ? ` (${positions.count})` : ""}` },
     { id: "transacciones", label: `Transacciones${txTotal > 0 ? ` (${txTotal})` : ""}` },
     { id: "sepa", label: `SEPA${sepaCount > 0 ? ` (${sepaCount})` : ""}` },
+    { id: "founders", label: "Web founders" },
+    { id: "email", label: "Email" },
   ];
 
   return (
@@ -198,7 +221,7 @@ const UserDetailDrawer = ({ user, onClose }) => {
         <Tabs
           tabs={tabs}
           value={tab}
-          onChange={setTab}
+          onChange={handleTabChange}
           className="min-w-0 flex-1 overflow-x-auto overscroll-x-contain border-b-0"
         />
         {/* One button for all three queries: they describe one account, and
@@ -215,43 +238,66 @@ const UserDetailDrawer = ({ user, onClose }) => {
           scrolling to the end of a user's transactions must not start scrolling the
           admin page behind the drawer. Everywhere that only wants a nested scroller
           to work, `allowNestedScroll` already handles it. */}
-      <div className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden" data-lenis-prevent>
-        <QueryState isLoading={detail.isLoading} error={detail.error}>
-          {tab === "resumen" && (
-            <ResumenTab
-              user={merged}
-              tvl={tvl}
-              margin={margin}
-              freeVsPaid={freeVsPaid}
-              positionCount={positions.count}
-              pnlUsd={readPnlData?.totalPnlUsd ?? null}
-              detailLoaded={Boolean(data)}
-            />
-          )}
+      <div
+        className={cn(
+          "min-h-0 flex-1 overflow-y-auto overflow-x-hidden",
+          tab === "email" && "hidden"
+        )}
+        data-lenis-prevent
+      >
+        {tab === "founders" ? (
+          <FoundersTab
+            user={merged}
+            founder={founder}
+            status={foundersStatus}
+            error={foundersError}
+          />
+        ) : (
+          <QueryState isLoading={detail.isLoading} error={detail.error}>
+            {tab === "resumen" && (
+              <ResumenTab
+                user={merged}
+                tvl={tvl}
+                margin={margin}
+                freeVsPaid={freeVsPaid}
+                positionCount={positions.count}
+                pnlUsd={readPnlData?.totalPnlUsd ?? null}
+                detailLoaded={Boolean(data)}
+              />
+            )}
 
-          {tab === "cartera" && (
-            <CarteraTab
-              positions={positions}
-              pnl={readPnlData}
-              vaultPositions={vaultPositions}
-              isPnlLoading={pnl.isLoading}
-              pnlError={pnl.error}
-              pnlKeys={describeShape(pnl.data)}
-              snapshotDate={tvl.date}
-            />
-          )}
+            {tab === "cartera" && (
+              <CarteraTab
+                positions={positions}
+                pnl={readPnlData}
+                vaultPositions={vaultPositions}
+                isPnlLoading={pnl.isLoading}
+                pnlError={pnl.error}
+                pnlKeys={describeShape(pnl.data)}
+                snapshotDate={tvl.date}
+              />
+            )}
 
-          {tab === "transacciones" && (
-            <TransaccionesTab
-              privyId={user.privyId}
-              initialRows={initialTxRows}
-              initialTotal={txTotal}
-            />
-          )}
+            {tab === "transacciones" && (
+              <TransaccionesTab
+                privyId={user.privyId}
+                initialRows={initialTxRows}
+                initialTotal={txTotal}
+              />
+            )}
 
-          {tab === "sepa" && <SepaTab orders={data?.rampOrders} />}
-        </QueryState>
+            {tab === "sepa" && <SepaTab orders={data?.rampOrders} />}
+          </QueryState>
+        )}
       </div>
+
+      {/* The composer scrolls its own form and pins its send button, so it takes the
+          body's place rather than sitting inside that scroller. */}
+      {composerMounted && (
+        <div className={cn("min-h-0 flex-1", tab !== "email" && "hidden")} data-lenis-prevent>
+          <CreateEmailSidebar embedded initialEmails={[merged.email || founder?.user?.email]} />
+        </div>
+      )}
     </div>
   );
 };

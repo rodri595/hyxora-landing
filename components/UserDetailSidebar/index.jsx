@@ -34,7 +34,9 @@ const STATUS_CLASSES = {
 
 // ── PaymentCard ────────────────────────────────────────────────────────────────
 
-const PaymentCard = ({ payment }) => {
+// Exported for the Cerebro user drawer's «Web founders» tab, which lists the same
+// payments and should render them the same way.
+export const PaymentCard = ({ payment }) => {
   const info = parsePaymentInfo(payment.data);
   const statusCls = STATUS_CLASSES[payment.status] ?? "bg-[rgba(25,54,63,0.06)] text-[#19363F]";
 

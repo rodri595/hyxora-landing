@@ -3,6 +3,7 @@
 import CopyButton from "@/components/CopyButton";
 import DataTable from "@/components/DataTable";
 import { cerebroPlanLabel } from "@/constants/cerebro";
+import { useGetAllUsers } from "@/hooks/admin/useGetAllUsers";
 import { useGetUsers } from "@/hooks/cerebro/useGetUsers";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 import { cn } from "@/utils";
@@ -16,6 +17,7 @@ import ScopeTabs from "./ScopeTabs";
 import { DETAIL_DRAWER_WIDTH, USER_PAGE_SIZE, USER_PAGE_SIZES } from "./constants";
 import UserDetailDrawer from "./detail/UserDetailDrawer";
 import { KycBadge, MembershipBadge, NftChip } from "./detail/parts";
+import { findFounderUser, indexFounderUsers, withFounderFields } from "./founders";
 
 gsap.registerPlugin(useGSAP);
 
@@ -106,15 +108,78 @@ const IdCell = ({ value, lead = 10, tail = 6 }) => {
 };
 
 /**
+ * A row with no founders record means one of three things, and only one of them is
+ * "no account on the founders site" — so the other two get a look of their own
+ * rather than a dash that would read as that answer.
+ *
+ * @param {Object} props
+ * @param {"loading" | "error" | "ready"} props.status
+ */
+const NoFounderCell = ({ status }) => {
+  if (status === "loading") return <span className="text-[rgba(25,54,63,0.3)]">…</span>;
+
+  if (status === "error") {
+    return (
+      <span className="whitespace-nowrap text-amber-700" title="/admin/getAllUsers no respondió">
+        sin dato
+      </span>
+    );
+  }
+
+  return (
+    <span
+      className="text-[rgba(25,54,63,0.3)]"
+      title="Sin cuenta en la web founders con este correo ni esta wallet"
+    >
+      —
+    </span>
+  );
+};
+
+/**
+ * The founders-site account in one cell: how many payments it has and whether it
+ * is an admin there — the two things on `/admin?tab=users` this table has no other
+ * column for. The tooltip says which key made the match.
+ */
+const FounderCell = ({ row, status }) => {
+  if (!row.founderMatch) return <NoFounderCell status={status} />;
+
+  const count = row.founderPayments ?? 0;
+
+  return (
+    <div
+      className="flex items-center gap-1.5"
+      title={row.founderMatch === "wallet" ? "Vinculado por wallet" : "Vinculado por correo"}
+    >
+      <span
+        className={cn(
+          "whitespace-nowrap tabular-nums",
+          count > 0 ? "font-medium text-[#19363F]" : "text-[rgba(25,54,63,0.45)]"
+        )}
+      >
+        {count} {count === 1 ? "pago" : "pagos"}
+      </span>
+      {row.founderRole === "Admin" && (
+        <span className="inline-flex items-center rounded-[5px] bg-[#19363F] px-1.5 py-0.5 font-inter text-[9px] font-medium tracking-[-0.36px] text-white">
+          Admin
+        </span>
+      )}
+    </div>
+  );
+};
+
+/**
  * Column ids are the API's `sort` vocabulary, so a header click maps straight to
  * the query param with no lookup table in between. The columns the endpoint cannot
  * order by — everything but created, tvl, cost, fees, net and plan — say so with
  * `enableSorting: false` rather than offering an arrow that would silently reorder
- * nothing.
+ * nothing. The two founders columns can't sort either: `/users` has never heard of
+ * them, and ordering one page client-side would pass for ordering the table.
  *
  * @param {(user: Object) => void} onOpen
+ * @param {"loading" | "error" | "ready"} foundersStatus
  */
-const buildColumns = (onOpen) => [
+const buildColumns = (onOpen, foundersStatus) => [
   {
     id: "email",
     accessorKey: "email",
@@ -196,6 +261,37 @@ const buildColumns = (onOpen) => [
     header: "KYC",
     enableSorting: false,
     cell: (info) => <KycBadge status={info.getValue()} />,
+  },
+  {
+    id: "phone",
+    accessorKey: "founderPhone",
+    header: "Teléfono",
+    enableSorting: false,
+    cell: (info) => {
+      const phone = info.getValue();
+      if (!phone) {
+        return info.row.original.founderMatch ? (
+          <span className="text-[rgba(25,54,63,0.3)]">—</span>
+        ) : (
+          <NoFounderCell status={foundersStatus} />
+        );
+      }
+
+      return (
+        <div className="flex items-center gap-1.5">
+          <span className="whitespace-nowrap tabular-nums text-[rgba(25,54,63,0.65)]">{phone}</span>
+          <CopyButton text={phone} title="Copiar teléfono" />
+        </div>
+      );
+    },
+  },
+  {
+    id: "founders",
+    accessorKey: "founderPayments",
+    header: "Web founders",
+    enableSorting: false,
+    meta: { label: "Web founders" },
+    cell: (info) => <FounderCell row={info.row.original} status={foundersStatus} />,
   },
   {
     id: "safe",
@@ -304,6 +400,14 @@ const UsersTablePanel = () => {
 
   const search = useDebouncedValue(searchInput, 350);
 
+  // The whole founders list, not a page of it: `/admin/getAllUsers` has no paging,
+  // and it is the same cached query `/admin?tab=users` and the email composer read.
+  // `isPending` rather than `isLoading`: a query still disabled behind its role gate
+  // is not loading, and "ready" there would render every row as "no account".
+  const founders = useGetAllUsers();
+  const founderIndex = useMemo(() => indexFounderUsers(founders.data), [founders.data]);
+  const foundersStatus = founders.isError ? "error" : founders.isPending ? "loading" : "ready";
+
   const { data, error, isLoading, isFetching, refetch } = useGetUsers({
     page: pagination.pageIndex + 1,
     pageSize: pagination.pageSize,
@@ -384,14 +488,27 @@ const UsersTablePanel = () => {
     { dependencies: [isOpen] }
   );
 
-  const columns = useMemo(() => buildColumns(handleOpen), [handleOpen]);
-  const rows = useMemo(() => data?.users ?? [], [data]);
+  const columns = useMemo(
+    () => buildColumns(handleOpen, foundersStatus),
+    [handleOpen, foundersStatus]
+  );
+  const rows = useMemo(
+    () => (data?.users ?? []).map((user) => withFounderFields(founderIndex, user)),
+    [data, founderIndex]
+  );
   const total = data?.total ?? 0;
+
+  // Looked up at render rather than captured on open, so a drawer opened before the
+  // founders list arrived fills in when it does.
+  const selectedFounder = useMemo(
+    () => findFounderUser(founderIndex, selected),
+    [founderIndex, selected]
+  );
 
   return (
     <Panel
       title="Usuarios"
-      description="Cada usuario con su plan, su estado de membresía y KYC, su TVL, lo que ha dejado en comisiones y lo que nos ha costado patrocinarle el gas. El margen es ingresos menos gastos, solo de ese usuario. Abre una fila con el ojo para ver su cartera, sus operaciones y sus órdenes SEPA."
+      description="Cada usuario con su plan, su estado de membresía y KYC, su TVL, lo que ha dejado en comisiones y lo que nos ha costado patrocinarle el gas. El margen es ingresos menos gastos, solo de ese usuario. Teléfono y Web founders salen de su cuenta en la web founders, la misma que lista la pestaña Usuarios. Abre una fila con el ojo para ver su cartera, sus operaciones, sus órdenes SEPA y su cuenta founders, o para escribirle un email."
       action={
         <div className="flex items-center gap-2">
           <ScopeTabs value={scope} onChange={handleScopeChange} />
@@ -432,7 +549,9 @@ const UsersTablePanel = () => {
           no acepta esas columnas. La exportación baja la página que estás viendo, no las {total}{" "}
           filas — sube a 200 por página si necesitas menos tiradas. Si marcas filas, exporta solo
           esas, y la selección vive dentro de la página: al cambiar de página el navegador ya no
-          tiene esas filas, así que marca y exporta página a página.
+          tiene esas filas, así que marca y exporta página a página. Teléfono y Web founders se
+          cruzan con la web founders por correo y, si no coincide, por wallet; «—» es que no tiene
+          cuenta allí. No ordenan ni entran en la búsqueda porque /users no los conoce.
         </p>
       </QueryState>
 
@@ -463,7 +582,14 @@ const UsersTablePanel = () => {
           // Keyed on the user so switching rows remounts rather than reconciling —
           // the tabs, the transactions pager and every scroll position inside belong
           // to one account and none of them should carry over to the next.
-          <UserDetailDrawer key={selected.privyId} user={selected} onClose={handleClose} />
+          <UserDetailDrawer
+            key={selected.privyId}
+            user={selected}
+            founder={selectedFounder}
+            foundersStatus={foundersStatus}
+            foundersError={founders.error}
+            onClose={handleClose}
+          />
         )}
       </div>
     </Panel>

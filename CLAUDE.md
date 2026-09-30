@@ -134,9 +134,18 @@ guide to it, kept here unedited so it diffs cleanly against their next version.
 ### The rule
 
 > **Everything under `app/(dashboard)/admin/_modules/cerebro/` calls the Cerebro
-> API**, with two deliberate exceptions. Planes and Sistema each mark theirs with
+> API**, with three deliberate exceptions. Planes and Sistema each mark theirs with
 > a «Disponible en Cerebro» divider separating the foreign panels above from the
-> Cerebro ones below:
+> Cerebro ones below; Usuarios labels its own «Web founders»:
+>
+> - **Usuarios** — the table's «Teléfono» and «Web founders» columns and the
+>   drawer's «Web founders» and «Email» tabs are the founders site's data, the same
+>   account `/admin?tab=users` lists: `/admin/getAllUsers` via `apiClient`, and the
+>   Emails tab's `CreateEmailSidebar` run `embedded`. The two databases share no id
+>   (the founders record never stores the Privy DID), so `usuarios/founders.js`
+>   joins on **email**, then on the founders `address` against the row's Safe or
+>   signer. Both tabs sit outside the drawer's Cerebro `QueryState`, so a
+>   `/users/{privyId}` outage doesn't hide a phone number, nor the reverse.
 >
 > - **Planes** — the first four panels are the plan *schema* (pricing, fee
 >   matrix, whitelists). Cerebro serves no schema at all; its `/fees/*` report

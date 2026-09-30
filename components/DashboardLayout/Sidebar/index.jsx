@@ -7,7 +7,6 @@ import Spinner from "@/components/Spinner";
 import { roleNames } from "@/constants/roles";
 import { useWeb3 } from "@/context/Web3Provider";
 import { GetMyPayments } from "@/hooks/nfts/GetMyPayments";
-import { useGetSimAccount } from "@/hooks/simulator/useGetSimAccount";
 import { useGetUserInformation } from "@/hooks/user/useGetUserInformation";
 import { cn } from "@/utils";
 import Link from "next/link";
@@ -165,9 +164,6 @@ const Sidebar = ({ isSpecialPage, isSidebarOpen, setIsSidebarOpen }) => {
   const pathname = usePathname();
   const { data: userInformation, isLoading: isLoadingUserInformation } = useGetUserInformation();
   const { data: paymentsData } = GetMyPayments();
-  const { data: simAccount } = useGetSimAccount();
-  const canUseSimulator =
-    simAccount?.user?.status === "active" || simAccount?.user?.role === "admin";
   const hasNft = useMemo(() => {
     if (!paymentsData || paymentsData?.length === 0) return false;
     return paymentsData.some((payment) => payment?.status === "completed" && payment?.tokenId);
@@ -238,24 +234,6 @@ const Sidebar = ({ isSpecialPage, isSidebarOpen, setIsSidebarOpen }) => {
       ),
       href: "/academy",
     },
-    ...(canUseSimulator
-      ? [
-          {
-            id: 6,
-            title: "Simulador de Inversión",
-            description: "Aprende a invertir",
-            icon: (
-              <Icon
-                name="flash-think"
-                className="size-[16px] aspect-square"
-                size={20}
-                fill={isSpecialPage ? "#fff" : "#19363F"}
-              />
-            ),
-            href: "/investment-simulator",
-          },
-        ]
-      : []),
   ];
   return (
     <aside
