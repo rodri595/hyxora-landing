@@ -496,3 +496,14 @@ html[data-theme="dark"] .dropdown-arrow-up:before {
     }
   }
 }
+
+/* `corner-shape` alone, on top of the element's own `rounded-*`: Chromium
+ * 139+ draws a squircle, everything else keeps the ordinary rounded rect.
+ * Nothing is clipped, so borders, shadows and pill radii survive on every
+ * browser — which is the difference from `squircle`, whose Safari tier
+ * zeroes the radius and clips to --sq-r. Used by the investment simulator
+ * and components/DevToolButton. */
+@utility corner-squircle {
+  /* biome-ignore lint/correctness/noUnknownProperty: Chromium 139+, newer than Biome's list */
+  corner-shape: squircle;
+}

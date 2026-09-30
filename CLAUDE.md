@@ -1,40 +1,103 @@
 # Hyxora Landing — project instructions
 
-## Three backends, three axios clients — never mix them
+## One session, five clients — never mix them
 
-This app talks to three separate APIs. Picking the wrong client is the single
-easiest mistake to make here, so the rule is mechanical:
+Every surface this app talks to takes the **same Hyxora session JWT**; what
+differs is the base path and the response shape. Picking the wrong client is
+still the easiest mistake to make here, so the rule is mechanical. All five
+instances come from `createSessionClient()` in `@/utils/axios`, so the session
+header, the shared single-flight re-auth and the 401-buys-one-retry rule are
+written once — **build a new client with that factory, never a bare `axios.create`**.
 
-| Client | Base URL | Auth | Response shape |
+`gateway` below is `NEXT_PUBLIC_HYXORA_API` with the trailing slash stripped —
+exported once as `gatewayRoot` from `@/utils/gateway`, which is dependency-free so
+route handlers and `utils/server/*` can import it too. **Never re-read that env
+var anywhere else, and never give a service its own base-URL var**: one var moves
+every service between dev and prod together, and a per-service override is how a
+build ends up half on gateway-dev.
+
+| Client | Base URL | Authorisation | Response shape |
 |---|---|---|---|
-| `@/utils/axios` (`apiClient`) | `NEXT_PUBLIC_HYXORA_API` | Session JWT cookie, auto re-auth on 401 | `data.data.<key>` |
-| `@/utils/cerebroAxios` (`cerebroClient`) | `NEXT_PUBLIC_CEREBRO_API` | Raw Privy bearer token per request | raw JSON, no envelope |
-| `@/utils/appApiAxios` (`appApiClient`) | `/api/app-api` (local proxy) | Privy bearer → proxy swaps in the bot token | `data.data` |
-| `@/utils/monitoringAxios` (`monitoringClient`) | `/api/monitoring` (our own routes) | Privy bearer → `requireAdmin` | plain JSON, per route |
+| `@/utils/axios` (`apiClient`) | `gateway` + `/founders` | session JWT — cookie *and* `Bearer` header | `data.data.<key>` |
+| `@/utils/cerebroAxios` (`cerebroClient`) | `gateway` + `/admin` | same session JWT, **plus** the backend's live Privy allowlist | raw JSON, no envelope |
+| `@/utils/appApiAxios` (`appApiClient`) | `/api/app-api` (local proxy → `gateway` + `/app`) | session JWT → proxy swaps in the bot token | `data.data` |
+| `@/utils/monitoringAxios` (`monitoringClient`) | `/api/monitoring` (our own routes) | session JWT → `requireAdmin` | plain JSON, per route |
+| `@/utils/gatewayAdminAxios` (`gatewayAdminClient`) | `gateway` + `/gateway/admin` | session JWT, **plus** the gateway's live Privy allowlist | plain JSON, `{ success, … }` |
 
-**Cerebro** (`admin.hyxora.com/api/v1`) is a cross-project analytics API built by
-another team. It is read-only — every endpoint in `admin.md` is a GET — and it
-authorises against its own server-side `ADMIN_ALLOWLIST_PRIVY_IDS`, which we
-cannot check client-side. A non-allowlisted user just gets a 401; surface it.
+**`/auth/login` wants `Authorization: Bearer <privy token>`** — the scheme, not a
+bare token. A bare one comes back `{ success: false, error: "Missing access
+token" }`, which from the 401-recovery path reads like a rejected login rather
+than a malformed header. Both minting paths (`useAuth.authenticate` and
+`refreshSession`) send it, and both read the answer through `readSessionJwt()`,
+because the gateway has answered `{ data: { jwt } }` and `{ token }` at
+different times and picking one silently leaves storage empty.
 
-**app-api** (`app-api.hyxora.com`) is the mobile/web *app* backend — a different
-host from `NEXT_PUBLIC_HYXORA_API`, even though both expose `/admin/*` paths.
-Its OpenAPI spec is at `/api-docs`. It authenticates with a shared **bot token**
+**The session JWT is mirrored into `sessionStorage` in every environment, and
+replayed as a header.** The cookie is the real credential but is only
+first-party while the app and the gateway share a registrable domain.
+`founder.hyxora.com` → `gateway.hyxora.com` is same-site and fine; the Netlify
+deploys (`*.netlify.app` against `gateway-dev.hyxora.com`) are not, and there
+the gateway's `hyxora_session` cookie — sent `HttpOnly; SameSite=Lax` with no
+`Secure`, confirmed 2026-09-02 — is **blocked by the browser before it is ever
+stored**. `Lax` covers same-site requests and top-level navigations; an XHR
+across sites is neither. So the request that follows carries no `Cookie` at all,
+401s, and the header is the only credential left. Login working on `hyxora.com`
+and 401-looping on Netlify is that difference, not a broken token.
+
+> The gateway-side fix is `SameSite=None; Secure` (the `Secure` is mandatory —
+> `None` without it is rejected too), ideally only for cross-origin frontends so
+> first-party deploys keep `Lax`. **Keep the header fallback regardless**: even
+> a correctly-attributed `SameSite=None` cookie is still third-party, and
+> Chrome's third-party cookie controls and Safari's ITP can drop it anyway.
+
+**Cerebro** is the cross-project analytics API built by another team, and the
+gateway now serves it at **`/admin`** — `/admin` is to Cerebro exactly what
+`/founders` is to this app's own backend, so every path in `admin.md` hangs off
+there. It used to stand alone on `admin.hyxora.com/api/v1` behind a raw Privy
+bearer minted per request; that host, that token and the `NEXT_PUBLIC_CEREBRO_API`
+var are all gone. Same login as everything else.
+
+> It is read-only — every endpoint in `admin.md` is a GET — and it still
+> authorises against the backend's `ADMIN_ALLOWLIST_PRIVY_IDS`, checked live and
+> **separate from the `Admin` role `useIsAdmin()` reads**. So passing our own
+> gate is not a prediction of the answer: a valid session can still be refused,
+> and a 401/403 must be surfaced rather than pre-empted.
+
+**app-api** is the mobile/web *app* backend, served by the gateway at **`/app`**.
+Its OpenAPI spec is at `/api-docs`, and it is the **one service here that does
+not take the session JWT**: it authenticates with a shared **bot token**
 (`Authorization: Bot <token>`) that unlocks `/admin/users`, every user's
 portfolio and transactions, and `/bank/{wallet}/kyc`.
+
+> Now that both are on one host, `/app/admin/fees` and `/admin/fees` are two
+> different endpoints one path segment apart — app-api's fee *schema* and
+> Cerebro's fees *collected*. Read the service prefix, not the `/admin` after it.
 
 > That token must never reach the browser. It lives in `HYXORA_BOT_TOKEN`
 > (server-only, no `NEXT_PUBLIC_`) and only `app/api/app-api/[...path]/route.js`
 > reads it. That route is a **keyhole, not a tunnel**: it forwards an explicit
 > allowlist of GET paths and nothing else, so adding a panel means adding its
-> endpoint there deliberately. It authorises by replaying the caller's Privy
-> token against Cerebro, keeping one allowlist rather than a second copy.
+> endpoint there deliberately. It authorises by replaying the caller's session
+> against `/admin/system/health`, keeping one allowlist rather than a second copy.
+>
+> So a request through it is authorised **twice, on two different credentials**:
+> the caller proves they are an allowlisted admin with their own session, and
+> only then does the route spend the bot token on their behalf. The gateway move
+> did not dissolve this route, and nothing about `/app` being on the same host
+> makes it safe to call from the browser.
+
+`/app/vault/list` is the exception that proves it: app-api's one **public**
+endpoint, no bot token and no session, read by `hooks/vault/useGetVaults` with
+bare `axios` because it feeds the logged-out simulator pages. It is the only
+app-api call that does not go through the proxy — everything else does.
 
 **`/api/monitoring/*`** are our own route handlers, for things no API serves:
 service pings, the Solana fee-payer balance, the Zerion treasury scan and live
 `eth_gasPrice`. They hold `ZERION_API_KEY`, the per-chain RPC URLs and
 `SOLANA_RPC_URL` — all server-only, all gated by `requireAdmin`
-(`utils/server/requireAdmin.js`), which defers to the same Cerebro allowlist.
+(`utils/server/requireAdmin.js`), which defers to the same gateway allowlist. It
+forwards whatever `Bearer` arrived rather than assuming a credential type, so it
+stays correct if the browser's ever changes again.
 
 > Every route there holds a credential, and that is the bar for adding one.
 > `holdings-index` used to be the exception — a *fan-out* that replayed the
@@ -42,6 +105,28 @@ service pings, the Solana fee-payer balance, the Zerion treasury scan and live
 > join Cerebro didn't expose. `/holdings/holders` (2026-08-25) does that join in
 > SQL upstream, so the route is gone. Take the lesson with it: a fan-out here is a
 > workaround for a missing endpoint, and it is worth asking for the endpoint first.
+
+**`/gateway/admin/*`** is the gateway's own admin surface — rate-limit counters
+and IP bans. It is served by the gateway *itself* and never proxied to a backend,
+which is why it sits beside `/auth` rather than under `/admin`: same host, but
+one service down is not the other. `docs/RATE_LIMITING.md` is the backend's own
+guide to it, kept here unedited so it diffs cleanly against their next version.
+
+> It wants **both** credentials: a valid gateway JWT *and* the caller's Privy ID
+> in `ADMIN_ALLOWLIST_PRIVY_IDS`, checked live rather than read off the token —
+> the same list Cerebro reads. So `useIsAdmin()` only decides who bothers to ask;
+> a 401 (bad/absent JWT) or 403 (not allowlisted) is still the real answer and
+> must be surfaced. The surface is exempt from rate limiting on purpose, which is
+> the point: a throttled admin can still reach the endpoint that unthrottles.
+>
+> Two things about the counters shape every panel that reads them. They live in
+> the gateway's **memory** and roll over each window, so the list is a live poll
+> and never a cache. And `limit`/`windowMs` come back on every response because
+> they are config-controlled — **read them, never hardcode 100/60s.**
+>
+> `hooks/admin/useResetIpBans` predates this client and still calls
+> `/gateway/admin/ip-bans/reset` through `apiClient` with an absolute URL, from
+> the DEV panel. If it grows a second caller, move it here.
 
 > **Never import `utils/server/*` from a client component.** It is what stands
 > between a public marketing site and every user's KYC.
@@ -141,16 +226,24 @@ balances, fees and error counts — a mocked figure is something someone acts on
 
 ## Hooks live with their API
 
-- `hooks/cerebro/` → Cerebro only, gated by `useCerebroAccess()` (`ready && authenticated`).
+- `hooks/cerebro/` → Cerebro (`gateway/admin`) only, gated by `useCerebroAccess()`.
 - `hooks/appApi/` → app-api via the proxy, gated by `useAppApiAccess()` (same
-  precondition — the proxy does the real authorisation). Types in
+  precondition — the proxy does the real authorisation, and `hooks/monitoring/`
+  uses this gate too). Types in
   `hooks/appApi/types.js`. **Money is in minor units and fees in basis points**:
   `price: 1900` is €19.00, `feeBps: 20` is 0.20%.
 - `hooks/admin/` → Hyxora backend admin endpoints, gated by the `roleNames.admin`
-  check against `useGetUserInformation()` plus `isSessionReady`. Note
-  `useGetFeeSchema`/`useGetWhitelist` here overlap with `hooks/appApi/` — they ask
-  `api.hyxora.com` for same-named paths with guessed field names, and feed the
-  separate `comisiones/` tab. Reconcile before adding a third copy.
+  check against `useGetUserInformation()` plus `isSessionReady`. It used to hold a
+  `useGetFeeSchema`/`useGetWhitelist` pair asking `api.hyxora.com` for the same
+  schema `hooks/appApi/` serves, on guessed paths (`/admin/tokens`, `/admin/vaults`)
+  with guessed field names. They fed a separate «Comisiones» tab and were deleted
+  along with it — **app-api is the one source for the fee schema and the whitelists**,
+  read through `cerebro/planes/`. Don't add a second copy back.
+- `hooks/gateway/` → the gateway's own `/gateway/admin/*` surface via
+  `gatewayAdminClient`, gated by `useIsAdmin()`. Types in `hooks/gateway/types.js`.
+  The reads poll (`refetchInterval`) instead of caching, because the counters are
+  in-memory and expire with the window; the writes are `retry: false`, because a
+  silent second attempt is not what a reset button should do.
 - One hook per file, named `useGetX.jsx` / `useX.jsx`, JS not TS.
 - Cerebro hooks carry JSDoc `@param`/`@return` with `@import` types from
   `hooks/cerebro/types.js`. Keep that up when adding endpoints.
@@ -164,12 +257,32 @@ _modules/
                    MeterBar (one labelled proportion), CompositionBar (how a
                    total splits across its biggest contributors), ChartTooltip
   cerebro/         Cerebro API only — sistema/ redes/ planes/ …
-  comisiones/      Fee schema + whitelists — Hyxora API (deliberately outside cerebro/)
   UsersModule.jsx  …and the other original admin tabs
 ```
 
 Top-level tabs live in `components/AdminTabBar` + the `moduleMap` in
 `admin/page.jsx`. Cerebro nests a second tab bar on `?tab=cerebro&sub=<id>`.
+
+**«Rate limits»** (`?tab=rate-limits`) is the support desk for a throttled user:
+`/rate-limits` listed in a DataTable, a drawer per row, and a confirmation before
+anything is cleared. Two details there are the feature rather than decoration.
+The manual «resetear por referencia o email» box sits **outside** the query's
+loading/error branch, because a reference that no longer resolves is exactly when
+the list is least useful and the reset most needed — a failing `/rate-limits`
+must not take the reset form down with it. And a row is reset by its **`target`**,
+never by its `id`: the API takes exactly one selector and 400s on two, the target
+*is* the counter's key, and the id can expire between the poll and the click.
+`SessionGate` is the other half — it shows the `rateLimitId` from a 429 so the
+user has something to quote that identifies nobody.
+
+To produce a 429 on purpose, the DEV panel's «Probar rate limit» fires N requests
+at a chosen endpoint (`hooks/devtools/useRateLimitProbe.jsx`). Its target list is
+closed for a reason: **every path must be one that actually exists**, because the
+gateway fail-bans an IP that probes *unknown* paths with a 403 only an admin can
+clear, and **nothing may touch `/auth/login`**, whose failures feed the separate
+twenty-hour login ban. It uses bare `axios`, never `apiClient` — that instance
+re-authenticates on 401, so a run against a 401 endpoint would become a run
+against `/auth/login`.
 
 ### The user drawer
 

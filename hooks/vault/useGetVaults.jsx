@@ -1,7 +1,14 @@
-import axios from "axios";
+import { gatewayRoot } from "@/utils/gateway";
 import { useQuery } from "@tanstack/react-query";
+import axios from "axios";
 
-const VAULT_API_URL = "https://app-api.hyxora.com";
+/**
+ * `/vault/list` is app-api's one **public** endpoint — no bot token, no session —
+ * and it feeds the logged-out simulator pages. Hence bare `axios` rather than
+ * `appApiClient`: that client goes through `/api/app-api`, which is admin-gated,
+ * and this call must work for a visitor who has never signed in.
+ */
+const VAULT_API_URL = `${gatewayRoot}/app`;
 
 export const useGetVaults = (props) => {
   return useQuery({

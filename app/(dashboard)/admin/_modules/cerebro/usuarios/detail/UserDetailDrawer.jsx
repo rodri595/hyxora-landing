@@ -16,12 +16,14 @@ import ResumenTab from "./ResumenTab";
 import SepaTab from "./SepaTab";
 import TransaccionesTab from "./TransaccionesTab";
 import {
+  describeShape,
   groupPositions,
   readFreeVsPaid,
   readMargin,
   readPnl,
   readTvl,
   readTxRows,
+  readUserRecord,
   readVaultPositions,
 } from "./normalize";
 import { KycBadge, NftChip } from "./parts";
@@ -107,11 +109,16 @@ const UserDetailDrawer = ({ user, onClose }) => {
   const data = detail.data;
 
   // The list row is the base and the detail response overlays it: `/users` already
-  // carries the handles, the plan and both addresses, while `solanaAddress`,
+  // carries the handles, the plan and the first Safe, while `solanaAddress`,
   // `membershipStartDate` and `membershipPaymentType` only exist on the user record
   // the detail endpoint embeds. Merging this way means the identity block is filled
   // in from the first paint and simply gains fields.
-  const merged = useMemo(() => ({ ...user, ...(data?.user ?? {}) }), [user, data]);
+  //
+  // It goes through `readUserRecord` rather than a spread because that record is a
+  // port like every other response here, and a port arrives with the spellings its
+  // query produced — a `solana_address` spread over a component reading
+  // `solanaAddress` renders a dash that reads as "no Solana wallet".
+  const merged = useMemo(() => readUserRecord(user, data), [user, data]);
 
   const tvl = useMemo(() => readTvl(data?.portfolio?.tvl), [data]);
   const margin = useMemo(() => readMargin(data?.portfolio?.margin), [data]);
@@ -218,6 +225,7 @@ const UserDetailDrawer = ({ user, onClose }) => {
               freeVsPaid={freeVsPaid}
               positionCount={positions.count}
               pnlUsd={readPnlData?.totalPnlUsd ?? null}
+              detailLoaded={Boolean(data)}
             />
           )}
 
@@ -227,6 +235,8 @@ const UserDetailDrawer = ({ user, onClose }) => {
               pnl={readPnlData}
               vaultPositions={vaultPositions}
               isPnlLoading={pnl.isLoading}
+              pnlError={pnl.error}
+              pnlKeys={describeShape(pnl.data)}
               snapshotDate={tvl.date}
             />
           )}

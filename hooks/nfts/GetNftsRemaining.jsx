@@ -14,13 +14,12 @@ export const GetNftsRemaining = (props) => {
       const response = await apiClient.get("/nft-remaining");
       return response?.data;
     },
+    retry: false,
     enabled:
-      typeof props === "undefined"
-        ? true
-        : props.enabled &&
-          !!smartWalletAddress &&
-          authenticated &&
-          ready &&
-          isSessionReady,
+      !!smartWalletAddress &&
+      authenticated &&
+      ready &&
+      isSessionReady &&
+      (props?.enabled ?? true),
   });
 };

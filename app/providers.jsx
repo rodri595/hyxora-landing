@@ -1,16 +1,17 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
-import { ReactLenis } from "lenis/react";
-import { ThemeProvider } from "next-themes";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Buffer } from "buffer";
+import DevToolButton from "@/components/DevToolButton";
+import { AppLaunchProvider } from "@/context/AppLaunchProvider";
+import { Web3Provider } from "@/context/Web3Provider";
 import { PrivyProvider } from "@privy-io/react-auth";
 import { SmartWalletsProvider } from "@privy-io/react-auth/smart-wallets";
-import { base, arbitrum, baseSepolia } from "viem/chains";
-import { Web3Provider } from "@/context/Web3Provider";
-import { AppLaunchProvider } from "@/context/AppLaunchProvider";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { ReactLenis } from "lenis/react";
+import { ThemeProvider } from "next-themes";
+import { useEffect, useMemo, useState } from "react";
 import { Tooltip } from "react-tooltip";
+import { arbitrum, base, baseSepolia } from "viem/chains";
 
 const queryClient = new QueryClient();
 const appId = process.env.NEXT_PUBLIC_PRIVY_APP_ID;
@@ -66,10 +67,7 @@ const Providers = ({ children }) => {
     return () => window.removeEventListener("resize", checkMobile);
   }, []);
 
-  const scrollSettings = useMemo(
-    () => (isMobile ? LENIS_MOBILE : LENIS_DESKTOP),
-    [isMobile],
-  );
+  const scrollSettings = useMemo(() => (isMobile ? LENIS_MOBILE : LENIS_DESKTOP), [isMobile]);
 
   return (
     <>
@@ -86,12 +84,7 @@ const Providers = ({ children }) => {
               theme: "light",
               accentColor: "#1b5ffd",
               walletChainType: "ethereum-only",
-              walletList: [
-                "metamask",
-                "rabby_wallet",
-                "coinbase_wallet",
-                "detected_wallets",
-              ],
+              walletList: ["metamask", "rabby_wallet", "coinbase_wallet", "detected_wallets"],
             },
             defaultChain: base,
             supportedChains: [baseSepolia, base, arbitrum],
@@ -129,6 +122,7 @@ const Providers = ({ children }) => {
                 <ThemeProvider defaultTheme="light" disableTransitionOnChange>
                   <ReactLenis root options={scrollSettings}>
                     {children}
+                    <DevToolButton />
                   </ReactLenis>
                 </ThemeProvider>
               </AppLaunchProvider>

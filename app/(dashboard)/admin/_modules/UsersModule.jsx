@@ -9,6 +9,8 @@ import UserDetailSidebar from "@/components/UserDetailSidebar";
 import { useGetAllPayments } from "@/hooks/admin/useGetAllPayments";
 import { useGetAllUsers } from "@/hooks/admin/useGetAllUsers";
 import { useGetAllPolls } from "@/hooks/poll/useGetAllPolls";
+import { useGetAllSimUsers } from "@/hooks/simulator/useGetAllSimUsers";
+import { useGetSimAccount } from "@/hooks/simulator/useGetSimAccount";
 import { cn } from "@/utils";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
@@ -23,12 +25,54 @@ const TABS = [
   { id: "nft-buyers", label: "Compradores NFT" },
 ];
 
+// Simulator status badge — "active" (default, has access) vs "suspended" (revoked by an admin).
+const SIM_STATUS_STYLES = {
+  active: "bg-emerald-50 text-emerald-700 border-emerald-200",
+  suspended: "bg-[rgba(25,54,63,0.06)] text-[rgba(25,54,63,0.55)] border-[rgba(25,54,63,0.1)]",
+};
+const SIM_STATUS_LABEL = { active: "Activo", suspended: "Sin acceso" };
+
+// Sim money is stored as integer cents.
+const formatCents = (cents) =>
+  new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+  }).format((cents ?? 0) / 100);
+
 const UsersModule = () => {
   const { data, isLoading, isError } = useGetAllUsers();
   const { data: allPayments, isLoading: isLoadingPayments } = useGetAllPayments();
   const { data: allPolls } = useGetAllPolls();
+  const { data: simUsersData } = useGetAllSimUsers();
+  const { data: simAccount } = useGetSimAccount();
+  // Sim columns/tabs are only shown to viewers who are admins on the simulator backend.
+  const isSimAdmin = simAccount?.user?.role === "admin";
   const rows = useMemo(() => data ?? [], [data]);
   const [activeTab, setActiveTab] = useState("all");
+
+  // Main-backend users and sim users share no id — email is the join key, with
+  // the wallet address as a fallback. Key the lookup by both (lowercased).
+  const simByKey = useMemo(() => {
+    const map = {};
+    if (!Array.isArray(simUsersData)) return map;
+    for (const su of simUsersData) {
+      const em = su?.email?.toLowerCase?.();
+      const w = su?.wallet?.toLowerCase?.();
+      if (em) map[em] = su;
+      if (w && !map[w]) map[w] = su;
+    }
+    return map;
+  }, [simUsersData]);
+
+  const getSimForUser = useCallback(
+    (user) => {
+      if (!user) return null;
+      const em = user?.email?.toLowerCase?.();
+      const w = user?.address?.toLowerCase?.();
+      return (em && simByKey[em]) || (w && simByKey[w]) || null;
+    },
+    [simByKey]
+  );
 
   // Build per-user vote counts from all polls
   const userVotesMap = useMemo(() => {
@@ -535,6 +579,78 @@ const UsersModule = () => {
           );
         },
       },
+      ...(isSimAdmin
+        ? [
+            {
+              id: "simStatus",
+              header: "Sim estado",
+              size: 96,
+              accessorFn: (row) => {
+                const sim = getSimForUser(row);
+                return sim ? (SIM_STATUS_LABEL[sim.status] ?? sim.status) : "—";
+              },
+              cell: (info) => {
+                const label = info.getValue();
+                if (label === "—") return <span className="text-[rgba(25,54,63,0.3)]">—</span>;
+                const sim = getSimForUser(info.row.original);
+                const cls = SIM_STATUS_STYLES[sim?.status] ?? SIM_STATUS_STYLES.suspended;
+                return (
+                  <span
+                    className={cn(
+                      "inline-flex items-center px-1.5 py-0.5 rounded-[5px] font-inter text-[10px] font-medium tracking-[-0.3px] border",
+                      cls
+                    )}
+                  >
+                    {label}
+                  </span>
+                );
+              },
+            },
+            {
+              id: "simBalance",
+              header: "Sim balance",
+              size: 100,
+              accessorFn: (row) => {
+                const sim = getSimForUser(row);
+                return sim ? (sim.cashBalanceCents ?? 0) : null;
+              },
+              cell: (info) => {
+                const val = info.getValue();
+                if (val === null || val === undefined)
+                  return <span className="text-[rgba(25,54,63,0.3)]">—</span>;
+                return (
+                  <span className="font-inter text-[11px] font-semibold tabular-nums tracking-[-0.44px] text-[#19363F]">
+                    {formatCents(val)}
+                  </span>
+                );
+              },
+            },
+            {
+              id: "simTxs",
+              header: "Sim txs",
+              size: 72,
+              accessorFn: (row) => {
+                const sim = getSimForUser(row);
+                return sim ? (sim.txCount ?? 0) : null;
+              },
+              cell: (info) => {
+                const val = info.getValue();
+                if (val === null || val === undefined)
+                  return <span className="text-[rgba(25,54,63,0.3)]">—</span>;
+                return (
+                  <span
+                    className={cn(
+                      "font-inter text-[11px] font-semibold tabular-nums",
+                      val > 0 ? "text-[#19363F]" : "text-[rgba(25,54,63,0.25)]"
+                    )}
+                  >
+                    {val}
+                  </span>
+                );
+              },
+            },
+          ]
+        : []),
       {
         id: "actions",
         header: "",
@@ -596,8 +712,10 @@ const UsersModule = () => {
         },
       },
     ],
-    [onSelectUser]
+    [onSelectUser, getSimForUser, isSimAdmin]
   );
+
+  const displayedSimUser = getSimForUser(displayedUser);
 
   if (isLoading)
     return (
@@ -663,6 +781,7 @@ const UsersModule = () => {
           <UserDetailSidebar
             key={displayedUser._id}
             user={displayedUser}
+            simUser={displayedSimUser}
             mode={sidebarMode}
             onClose={handleClose}
           />
@@ -700,6 +819,7 @@ const UsersModule = () => {
           <UserDetailSidebar
             key={displayedUser._id}
             user={displayedUser}
+            simUser={displayedSimUser}
             mode={sidebarMode}
             onClose={handleClose}
           />

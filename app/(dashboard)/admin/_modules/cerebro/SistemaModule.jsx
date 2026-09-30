@@ -1,7 +1,6 @@
 "use client";
 
 import ConnectionPanel from "./sistema/ConnectionPanel";
-import SentryPanel from "./sistema/SentryPanel";
 import SystemStatusPanel from "./sistema/SystemStatusPanel";
 import TvlFreshnessPanel from "./sistema/TvlFreshnessPanel";
 import UnpricedPositionsPanel from "./sistema/UnpricedPositionsPanel";

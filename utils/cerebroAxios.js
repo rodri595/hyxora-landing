@@ -1,39 +1,25 @@
-import axios from "axios";
+import { createSessionClient, gatewayRoot } from "@/utils/axios";
 
 /**
- * Cerebro = the cross-project admin/insight API (admin.hyxora.com).
- * Separate from `@/utils/axios`: it does NOT use the Hyxora session cookie/JWT.
- * Every request carries a raw Privy access token, and the caller's Privy ID
- * must sit in the backend's ADMIN_ALLOWLIST_PRIVY_IDS allowlist.
+ * Cerebro = the cross-project admin/insight API, now served by the gateway at
+ * `/admin` instead of standing alone on `admin.hyxora.com/api/v1`.
+ *
+ * That move collapsed what used to be the interesting difference between this
+ * client and `@/utils/axios`: it is **the same login as everything else**, a
+ * Hyxora session JWT, and `/admin` is to Cerebro what `/founders` is to the
+ * founders service. No Privy access token is minted per request any more, and
+ * no separate env var points at a second host.
+ *
+ * What stays true: the gateway still authorises against the backend's
+ * `ADMIN_ALLOWLIST_PRIVY_IDS`, which is a *different* list from the `Admin` role
+ * `useIsAdmin()` reads. So a caller who passes our client-side gate can still be
+ * refused here, and the UI must surface that rather than pre-empt it.
+ *
+ * Responses are raw JSON — no `data.data` envelope, unlike `apiClient`.
  */
-const baseURL = process.env.NEXT_PUBLIC_CEREBRO_API || "https://admin.hyxora.com/api/v1";
+export const cerebroBaseUrl = `${gatewayRoot}/admin`;
 
-const cerebroClient = axios.create({ baseURL });
-
-// Privy mints short-lived access tokens, so resolve one per request rather than
-// caching it on the instance. getAccessToken() reuses/refreshes internally.
-cerebroClient.interceptors.request.use(
-  async (config) => {
-    const { getAccessToken } = await import("@privy-io/react-auth");
-    const accessToken = await getAccessToken();
-    if (accessToken) {
-      config.headers.Authorization = `Bearer ${accessToken}`;
-    }
-    return config;
-  },
-  (error) => Promise.reject(error)
-);
-
-// Cerebro answers `{ error: string }` on failure — surface that instead of the
-// generic "Request failed with status code 401"
-cerebroClient.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    const message = error?.response?.data?.error;
-    if (message) error.message = message;
-    return Promise.reject(error);
-  }
-);
+const cerebroClient = createSessionClient({ baseURL: cerebroBaseUrl });
 
 /**
  * Strip empty query params so UI inputs left blank don't reach the API as `?plan=`.

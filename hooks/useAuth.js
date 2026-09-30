@@ -1,23 +1,27 @@
-import apiClient from "@/utils/axios";
+import { authClient, readSessionJwt } from "@/utils/axios";
 
 export function useAuth() {
-    const authenticate = async (jwt) => {
-        const response = await apiClient.post(
-            "/authenticate",
-            {},
-            { headers: { Authorization: jwt } }
-        );
-        if (response.data?.data?.jwt) {
-            sessionStorage.setItem("jwt", response.data.data.jwt);
-        }
-        return response.data;
-    };
+  const authenticate = async (jwt) => {
+    const response = await authClient.post(
+      "/login",
+      {},
+      { headers: { Authorization: `Bearer ${jwt}` } }
+    );
+    // Mirrored in every environment, not just dev: the cookie the gateway sets
+    // is third-party on a Netlify origin and may never be stored, and this is
+    // the credential every `createSessionClient` instance falls back to.
+    const session = readSessionJwt(response.data);
+    if (session) {
+      sessionStorage.setItem("jwt", session);
+    }
+    return response.data;
+  };
 
-    const invalidateSession = async () => {
-        const response = await apiClient.post("/logout", {});
-        sessionStorage.removeItem("jwt");
-        return response.data;
-    };
+  const invalidateSession = async () => {
+    const response = await authClient.post("/logout", {});
+    sessionStorage.removeItem("jwt");
+    return response.data;
+  };
 
-    return { authenticate, invalidateSession };
+  return { authenticate, invalidateSession };
 }

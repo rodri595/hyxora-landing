@@ -10,9 +10,10 @@ import { useQuery } from "@tanstack/react-query";
  * Not to be confused with Cerebro's `/fees/*`, which report revenue already
  * collected. Different data; only the revenue side lives in admin.md.
  *
- * Distinct too from `hooks/admin/useGetFeeSchema`, which asks api.hyxora.com for
- * the same-named path with a session JWT and guessed field names. This one is
- * the host the ported dashboard actually read, and the shape is verified.
+ * This is the only fee-schema hook. A `hooks/admin/useGetFeeSchema` twin used to
+ * ask api.hyxora.com for the same-named path with a session JWT and guessed field
+ * names; it was deleted with the «Comisiones» tab it fed. app-api is the host the
+ * ported dashboard actually read, and the shape here is verified.
  *
  * @param {Object} [params]
  * @param {boolean} [params.includeInactive] Default true — the matrix greys inactive

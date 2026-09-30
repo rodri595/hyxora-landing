@@ -305,6 +305,134 @@ export const pendingDeposits = (rows) =>
   );
 
 /* -------------------------------------------------------------------------- */
+/* The user record                                                            */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * Every Safe the account owns, out of the `safe_addresses` jsonb.
+ *
+ * The column is a `{ chainKey: [address, …] }` map and the same CREATE2 address
+ * repeats under every chain, which is why the old dashboard flattens, lowercases
+ * and dedupes it before rendering — `Object.values(...).flat()` then a `Set`, and
+ * this is that. A user who moved between Safes on the same chain legitimately has
+ * more than one, and showing only the first hides the address half their cost and
+ * fee rows join on.
+ *
+ * @param {Object | null} record
+ * @param {string | null} [fallback] The single `safeAddress` the `/users` row carries.
+ * @return {string[]}
+ */
+const readSafes = (record, fallback) => {
+  const map = record?.safeAddresses ?? record?.safe_addresses ?? null;
+  const flat = [];
+
+  if (map && typeof map === "object") {
+    for (const value of Object.values(map)) {
+      if (Array.isArray(value)) flat.push(...value);
+      else if (typeof value === "string") flat.push(value);
+    }
+  }
+
+  const single = firstString(record?.safeAddress, record?.safe_address, fallback);
+  if (single) flat.push(single);
+
+  const seen = new Set();
+  const out = [];
+  for (const entry of flat) {
+    const address = firstString(entry);
+    if (!address) continue;
+    const key = address.toLowerCase();
+    if (seen.has(key)) continue;
+    seen.add(key);
+    out.push(key);
+  }
+  return out;
+};
+
+/**
+ * The account, merged from the `/users` row the drawer was opened from and the user
+ * record `/users/{privyId}` embeds.
+ *
+ * **Three fields exist only on the detail record**: `solanaAddress`,
+ * `membershipStartDate` and `membershipPaymentType`. That is not an accident of
+ * this port — `getUsersOverview`, which `/users` is a port of, has no
+ * `solana_address` in its SELECT at all, while `getUserPortfolio` returns the whole
+ * `users` row. So the list can never supply them and the detail response is the
+ * only place they can come from.
+ *
+ * Which is why this reads **both spellings of everything**. That record was the one
+ * Cerebro response the drawer spread raw, and every other port in this API arrives
+ * with the SQL spellings its query produced — `/holdings` sending `chain`,
+ * `/fees/diagnostics` sending `operationType`, `/users/{privyId}/transactions`
+ * sending `blockTimestamp`. A record keyed `solana_address` spread over a component
+ * reading `solanaAddress` renders a dash, and a dash looks exactly like a user who
+ * has no Solana wallet.
+ *
+ * The detail record wins where both carry a field and the row stands in wherever it
+ * is null, so the identity block fills from the first paint and only gains fields.
+ *
+ * @param {Object} row The `/users` row. Already correct; never overwritten by a null.
+ * @param {Object | null} detail The `/users/{privyId}` response.
+ * @return {Object} The shape the tabs render, plus `safeAddresses` (every Safe) and
+ * `hasRecord` — whether the detail response embedded a user record at all, which is
+ * the difference between "this account has no Solana wallet" and "we were never
+ * sent one".
+ */
+export const readUserRecord = (row, detail) => {
+  // `getUserPortfolio` returns `{ user, nftBalance, nftTokenIds, positions, tvl }`,
+  // so the record sits at `user` and the NFT fields beside it rather than inside it.
+  // A port that flattened the envelope would put everything at the top level, and
+  // one that kept its own nesting would hang it off `portfolio` — read all three.
+  const record = detail?.user ?? detail?.portfolio?.user ?? null;
+  const source = record ?? detail ?? null;
+  const base = row ?? {};
+
+  const pick = (...keys) => {
+    const values = [];
+    for (const key of keys) values.push(source?.[key]);
+    for (const key of keys) values.push(base?.[key]);
+    return firstString(...values);
+  };
+
+  const tokenIds = [source?.nftTokenIds, source?.nft_token_ids, base?.nftTokenIds].find((value) =>
+    Array.isArray(value)
+  );
+
+  // A record was read if there was a `user` object, or — for a port that flattened
+  // the envelope — if the response carried one of the three fields that exist
+  // nowhere else. Anything the `/users` row already has proves nothing here.
+  const hasRecord =
+    Boolean(record) ||
+    ["solanaAddress", "solana_address", "membershipStartDate", "membership_start_date"].some(
+      (key) => source?.[key] != null
+    );
+
+  return {
+    ...base,
+    privyId: pick("privyId", "privy_id") ?? base.privyId,
+    email: pick("email"),
+    username: pick("username"),
+    twitterUsername: pick("twitterUsername", "twitter_username"),
+    signerAddress: pick("signerAddress", "signer_address", "signer"),
+    // `solana` is app-api's spelling for the same Base58 wallet — `AdminUserItem` in
+    // the old dashboard's backend client — so it is read here too, in case the port
+    // took the field from there rather than from the column.
+    solanaAddress: pick("solanaAddress", "solana_address", "solanaWallet", "solana"),
+    plan: pick("plan") ?? base.plan,
+    membershipStatus: pick("membershipStatus", "membership_status"),
+    membershipRenewDate: pick("membershipRenewDate", "membership_renew_date"),
+    membershipStartDate: pick("membershipStartDate", "membership_start_date"),
+    membershipPaymentType: pick("membershipPaymentType", "membership_payment_type"),
+    kycStatus: pick("kycStatus", "kyc_status"),
+    createdAt: pick("createdAt", "created_at"),
+    safeAddresses: readSafes(source, base.safeAddress),
+    nftBalance: firstNumber(source?.nftBalance, source?.nft_balance, base.nftBalance) ?? 0,
+    nftTokenIds: tokenIds ?? [],
+    hasRecord,
+  };
+};
+
+/* -------------------------------------------------------------------------- */
 /* Headline blocks                                                            */
 /* -------------------------------------------------------------------------- */
 
@@ -395,10 +523,19 @@ export const readFreeVsPaid = (freeVsPaid) => {
  * @param {Object | null} data Response of `/users/{privyId}/vaults`.
  * @return {{ totalPnlUsd: number | null, positions: Object[] } | null}
  */
-export const readVaultPositions = (data) => {
-  // The backend's own envelope is `{ data: { positions } }`; the proxy may or may
-  // not have unwrapped it, so try both before giving up.
-  const source = Array.isArray(data?.positions) ? data : data?.data;
+export const readVaultPositions = (data) => unwrap(data, readVaultPositionsAt);
+
+/**
+ * One level of a `/vaults` response, without the envelope hunting.
+ *
+ * Its sibling `/pnl` answers `{ privyId, pnl }`, so this one is read through the
+ * same `unwrap` on the assumption it wraps the payload the same way — under its own
+ * name, under `data`, or not at all.
+ *
+ * @param {Object} source
+ * @return {{ totalPnlUsd: number | null, positions: Object[] } | null}
+ */
+function readVaultPositionsAt(source) {
   const positions = Array.isArray(source?.positions) ? source.positions : [];
   if (positions.length === 0) return null;
 
@@ -422,16 +559,24 @@ export const readVaultPositions = (data) => {
     totalAssetsUsd: firstNumber(source?.totalAssetsUsd),
     positions: rows,
   };
-};
+}
 
 /**
  * One half of the PnL summary — EVM or Solana — whichever field names it turns up
  * under.
  *
- * `costBasis` is derived as value − gain rather than read: that identity is what
- * makes the percentage mean "return on what was put in", and deriving it keeps the
- * figure consistent with the two numbers printed beside it whether or not the
- * endpoint sends a basis of its own.
+ * The old dashboard's panel is sourced from **Zerion's `/wallets/{address}/pnl`**
+ * (its own header says "Hyxora (Zerion)"), and those attributes are snake_case and
+ * named nothing like ours: `total_gain`, `realized_gain`, `unrealized_gain`,
+ * `net_invested`, `relative_total_gain_percentage`. Whether the app backend renames
+ * them before Cerebro proxies them is exactly the sort of thing that differs per
+ * port, so both vocabularies are read and a gain is reconstructed from its realized
+ * and unrealized halves when only those two arrive.
+ *
+ * `costBasis` prefers `net_invested` when the response carries it and is otherwise
+ * derived as value − gain: that identity is what makes the percentage mean "return
+ * on what was put in", and deriving it keeps the figure consistent with the two
+ * numbers printed beside it.
  *
  * @param {Object | null} block
  * @return {{ pnlUsd: number | null, valueUsd: number | null, pct: number | null } | null}
@@ -439,24 +584,103 @@ export const readVaultPositions = (data) => {
 const readPnlBlock = (block) => {
   if (!block || typeof block !== "object") return null;
 
-  const pnlUsd = firstNumber(block.pnlUsd, block.totalPnlUsd, block.pnl, block.unrealizedPnlUsd);
+  const realized = firstNumber(block.realizedPnlUsd, block.realized_gain, block.realizedGain);
+  const unrealized = firstNumber(
+    block.unrealizedPnlUsd,
+    block.unrealized_gain,
+    block.unrealizedGain
+  );
+
+  const pnlUsd =
+    firstNumber(
+      block.pnlUsd,
+      block.totalPnlUsd,
+      block.pnl,
+      block.total_gain,
+      block.totalGain,
+      block.gainUsd
+    ) ??
+    // Whichever halves arrived, and null when neither did — a fabricated $0.00 here
+    // is indistinguishable from a user who broke exactly even.
+    sumDefined(realized, unrealized);
+
   const valueUsd = firstNumber(
     block.valueUsd,
     block.totalValueUsd,
     block.assetsUsd,
     block.totalAssetsUsd,
-    block.tvlUsd
+    block.tvlUsd,
+    block.totalUsd,
+    block.balanceUsd,
+    block.total_value,
+    block.value
   );
 
   if (pnlUsd === null && valueUsd === null) return null;
 
-  const costBasis = valueUsd !== null && pnlUsd !== null ? valueUsd - pnlUsd : null;
+  const costBasis =
+    firstNumber(block.costBasisUsd, block.costBasis, block.net_invested, block.netInvested) ??
+    (valueUsd !== null && pnlUsd !== null ? valueUsd - pnlUsd : null);
 
   return {
     pnlUsd,
     valueUsd,
-    pct: costBasis && costBasis !== 0 ? (pnlUsd / costBasis) * 100 : null,
+    pct:
+      firstNumber(
+        block.relative_total_gain_percentage,
+        block.relativeTotalGainPercentage,
+        block.pnlPct,
+        block.roi,
+        block.roe
+      ) ?? (costBasis && pnlUsd !== null ? (pnlUsd / costBasis) * 100 : null),
   };
+};
+
+/**
+ * The envelope keys a Cerebro per-user response wraps its payload in.
+ *
+ * `/users/{privyId}/pnl` answers **`{ privyId, pnl }`** — confirmed on the wire —
+ * so the figures are one level below where the endpoint's name suggests. The proxy
+ * may or may not also have left the app backend's own `{ data }` around it, and
+ * `/vaults` follows the same pattern under its own name. Rather than guess which
+ * layers are present, `unwrap` peels them one at a time and lets the reader decide
+ * when it has found something.
+ */
+const ENVELOPE_KEYS = ["data", "pnl", "vaults", "result", "payload"];
+
+/**
+ * Apply `read` at each level of a nested response, outermost first, and return the
+ * first level it could make sense of.
+ *
+ * Descending only when the current level yields *nothing* is what makes this safe:
+ * a response whose payload is already at the top can't be skipped past, and a key
+ * like `pnl` that holds a number rather than an object is simply not an envelope.
+ *
+ * @param {Object | null} data
+ * @param {(source: Object) => any} read
+ * @return {any} Whatever `read` returned, or null.
+ */
+const unwrap = (data, read) => {
+  let source = data;
+
+  for (let depth = 0; depth < 4; depth++) {
+    if (!source || typeof source !== "object" || Array.isArray(source)) return null;
+
+    const parsed = read(source);
+    if (parsed) return parsed;
+
+    let next = null;
+    for (const key of ENVELOPE_KEYS) {
+      const value = source[key];
+      if (value && typeof value === "object") {
+        next = value;
+        break;
+      }
+    }
+    source = next;
+  }
+
+  return null;
 };
 
 /**
@@ -475,13 +699,24 @@ const readPnlBlock = (block) => {
  * @return {{ totalPnlUsd: number | null, totalValueUsd: number | null, evm: Object | null,
  * solana: Object | null, vaults: Object | null } | null}
  */
-export const readPnl = (data) => {
-  const source = data?.data && typeof data.data === "object" ? data.data : data;
-  if (!source || typeof source !== "object") return null;
+export const readPnl = (data) => unwrap(data, readPnlAt);
 
-  const evm = readPnlBlock(source.evm ?? source.evmPnl);
-  const solana = readPnlBlock(source.solana ?? source.solanaPnl ?? source.xstocks);
-  const vaults = readPnlBlock(source.vaults ?? source.vaultPnl);
+/**
+ * One level of a `/pnl` response, without the envelope hunting.
+ *
+ * @param {Object} source
+ * @return {Object | null}
+ */
+function readPnlAt(source) {
+  const evm = readPnlBlock(source.evm ?? source.evmPnl ?? source.ethereum);
+  const solana = readPnlBlock(
+    source.solana ?? source.solanaPnl ?? source.xstocks ?? source.xStocks ?? source.sol
+  );
+  const vaults = readPnlBlock(source.vaults ?? source.vaultPnl ?? source.vaultsPnl);
+
+  // The totals may arrive flat on the response or under a summary object of their
+  // own; a response carrying only the halves gets them summed below instead.
+  const totals = source.total ?? source.totals ?? source.summary ?? source;
 
   // `sumDefined` and not `a + b`: two halves that each reported a *value* and no
   // PnL would add up to a confident +$0.00, which is the one thing this endpoint
@@ -489,10 +724,60 @@ export const readPnl = (data) => {
   // It returns null when neither half carried the figure, which is the honest answer.
   const sumHalves = (key) => sumDefined(evm?.[key], solana?.[key]);
 
-  const totalPnlUsd = firstNumber(source.totalPnlUsd, source.pnlUsd) ?? sumHalves("pnlUsd");
-  const totalValueUsd = firstNumber(source.totalValueUsd, source.valueUsd) ?? sumHalves("valueUsd");
+  const totalPnlUsd =
+    firstNumber(
+      source.totalPnlUsd,
+      source.pnlUsd,
+      totals?.totalPnlUsd,
+      totals?.pnlUsd,
+      totals?.total_gain,
+      totals?.totalGain
+    ) ?? sumHalves("pnlUsd");
+
+  const totalValueUsd =
+    firstNumber(
+      source.totalValueUsd,
+      source.valueUsd,
+      totals?.totalValueUsd,
+      totals?.valueUsd,
+      totals?.totalUsd
+    ) ?? sumHalves("valueUsd");
 
   if (totalPnlUsd === null && !evm && !solana) return null;
 
   return { totalPnlUsd, totalValueUsd, evm, solana, vaults };
+}
+
+/**
+ * The shape of a response nothing could be read out of, one level deep.
+ *
+ * Only ever used in an empty state. An undocumented endpoint that answers 200 with
+ * a shape none of the spellings above match leaves the panel with nothing to say
+ * beyond "unreadable", which is true and useless — naming what did arrive turns the
+ * next report into the fix rather than into another round trip. It earned itself
+ * immediately: the first run came back `privyId, pnl`, which is how we learned the
+ * figures sit under an envelope.
+ *
+ * Nested objects are rendered `key{a, b, c}` for that reason — the top-level keys
+ * alone would have said `privyId, pnl` again and cost another round trip.
+ *
+ * @param {Object | null} data
+ * @return {string[]}
+ */
+export const describeShape = (data) => {
+  const source = data?.data && typeof data.data === "object" ? data.data : data;
+  if (!source || typeof source !== "object") return [];
+
+  return Object.keys(source)
+    .slice(0, 12)
+    .map((key) => {
+      const value = source[key];
+      if (!value || typeof value !== "object") return key;
+      const inner = (Array.isArray(value) ? Object.keys(value[0] ?? {}) : Object.keys(value)).slice(
+        0,
+        8
+      );
+      const braces = Array.isArray(value) ? ["[{", "}]"] : ["{", "}"];
+      return inner.length > 0 ? `${key}${braces[0]}${inner.join(", ")}${braces[1]}` : key;
+    });
 };

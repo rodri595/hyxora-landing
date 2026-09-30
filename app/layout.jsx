@@ -2,6 +2,7 @@ import { Inter } from "next/font/google";
 import Providers from "./providers";
 import "./globals.css";
 import ToastHaptics from "@/components/ToastHaptics";
+import { privyEnvGuardScript } from "@/utils/privyEnvGuard";
 import { Toaster } from "react-hot-toast";
 
 const inter = Inter({
@@ -121,6 +122,11 @@ export default function RootLayout({ children }) {
   return (
     <html lang="es" suppressHydrationWarning>
       <head>
+        {/* Drops a Privy session minted by a different Privy app before the SDK
+            can read it — see utils/privyEnvGuard. Blocking and first in <head>
+            on purpose: an effect runs long after Privy has booted. */}
+        {/* biome-ignore lint/security/noDangerouslySetInnerHtml: inline guard must run before the bundle */}
+        <script dangerouslySetInnerHTML={{ __html: privyEnvGuardScript() }} />
         {/* Structured Data */}
         <script type="application/ld+json">{JSON.stringify(jsonLd)}</script>
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />

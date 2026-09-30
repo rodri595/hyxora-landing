@@ -1,6 +1,6 @@
 /**
- * Response shapes for the Hyxora app backend (app-api.hyxora.com), reached
- * through `/api/app-api`.
+ * Response shapes for the Hyxora app backend (the gateway's `/app` service),
+ * reached through `/api/app-api`.
  *
  * Verified 2026-08-24 against the OpenAPI spec at app-api.hyxora.com/api-docs
  * and, for `/membership` and the fee schema, against live responses from the

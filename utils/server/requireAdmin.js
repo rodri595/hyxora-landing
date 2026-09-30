@@ -1,4 +1,5 @@
 import { createHash } from "node:crypto";
+import { gatewayRoot } from "@/utils/gateway";
 
 /**
  * Admin gate shared by every route handler under `app/api/` that touches a
@@ -7,28 +8,32 @@ import { createHash } from "node:crypto";
  * ⚠️ SERVER ONLY. Never import this from a client component: it is the thing
  * standing between a public marketing site and every user's KYC.
  *
- * Authorisation is delegated to Cerebro rather than re-implemented here. The
- * caller's Privy token is replayed against `GET /system/health`, which checks
- * `ADMIN_ALLOWLIST_PRIVY_IDS` server-side. A 200 means the caller is an admin.
- * One allowlist, already maintained by the backend team, instead of a second
- * copy here that would silently drift out of sync.
+ * Authorisation is delegated to the gateway rather than re-implemented here.
+ * The caller's session JWT is replayed against `GET /admin/system/health`, which
+ * checks `ADMIN_ALLOWLIST_PRIVY_IDS` server-side. A 200 means the caller is an
+ * admin. One allowlist, already maintained by the backend team, instead of a
+ * second copy here that would silently drift out of sync.
+ *
+ * Deliberately credential-agnostic: it forwards whatever `Bearer` arrived and
+ * lets the gateway judge it, so it stays correct if the browser's credential
+ * ever changes again.
  */
 
-const CEREBRO_API = process.env.NEXT_PUBLIC_CEREBRO_API || "https://admin.hyxora.com/api/v1";
+const HEALTH_URL = `${gatewayRoot}/admin/system/health`;
 
-/** Verdicts are cached briefly so a tab full of panels costs one Cerebro call, not eight. */
+/** Verdicts are cached briefly so a tab full of panels costs one gateway call, not eight. */
 const VERDICT_TTL_MS = 60_000;
 
 /**
- * Privy rotates access tokens, so every refresh produces a new digest and a new
- * entry. Without a bound this Map would grow for the life of the server process.
+ * Sessions are re-minted on expiry, so every refresh produces a new digest and a
+ * new entry. Without a bound this Map would grow for the life of the process.
  * Expired entries are swept on write, and the cap is a backstop for the case
  * where a burst arrives faster than entries expire.
  */
 const MAX_VERDICTS = 500;
 const verdicts = new Map();
 
-/** Privy tokens are bearer credentials — key the cache by digest, never hold the raw token. */
+/** Session JWTs are bearer credentials — key the cache by digest, never hold the raw token. */
 const digest = (token) => createHash("sha256").update(token).digest("hex");
 
 const remember = (key, ok) => {
@@ -47,24 +52,25 @@ const remember = (key, ok) => {
 };
 
 /**
- * @param {string} token Caller's Privy access token.
- * @return {Promise<boolean>} Whether Cerebro accepts them as an allowlisted admin.
+ * @param {string} token Caller's Hyxora session JWT.
+ * @return {Promise<boolean>} Whether the gateway accepts them as an allowlisted admin.
  */
 const isAllowlistedAdmin = async (token) => {
   const key = digest(token);
   const cached = verdicts.get(key);
   if (cached && cached.expiresAt > Date.now()) return cached.ok;
 
-  const response = await fetch(`${CEREBRO_API}/system/health`, {
+  const response = await fetch(HEALTH_URL, {
     headers: { Authorization: `Bearer ${token}` },
     cache: "no-store",
     signal: AbortSignal.timeout(10_000),
   });
 
-  // 5xx means Cerebro is unwell, not that the caller is unauthorised. Caching a
-  // `false` for that would lock every admin out for a minute past the recovery.
+  // 5xx means the gateway is unwell, not that the caller is unauthorised.
+  // Caching a `false` for that would lock every admin out for a minute past the
+  // recovery.
   if (response.status >= 500) {
-    throw new Error(`Cerebro respondió ${response.status}`);
+    throw new Error(`El gateway respondió ${response.status}`);
   }
 
   const ok = response.ok;
@@ -82,25 +88,25 @@ const isAllowlistedAdmin = async (token) => {
  */
 export const requireAdmin = async (request) => {
   const header = request.headers.get("authorization") ?? "";
-  const privyToken = header.startsWith("Bearer ") ? header.slice(7) : null;
+  const token = header.startsWith("Bearer ") ? header.slice(7) : null;
 
-  if (!privyToken) {
-    return Response.json({ error: "Falta el token de Privy." }, { status: 401 });
+  if (!token) {
+    return Response.json({ error: "Falta el token de sesión." }, { status: 401 });
   }
 
   let allowed;
   try {
-    allowed = await isAllowlistedAdmin(privyToken);
+    allowed = await isAllowlistedAdmin(token);
   } catch {
     return Response.json(
-      { error: "No se pudo verificar el acceso contra Cerebro." },
+      { error: "No se pudo verificar el acceso contra el gateway." },
       { status: 502 }
     );
   }
 
   if (!allowed) {
     return Response.json(
-      { error: "Tu ID de Privy no está en ADMIN_ALLOWLIST_PRIVY_IDS." },
+      { error: "Sesión no válida, o tu ID de Privy no está en ADMIN_ALLOWLIST_PRIVY_IDS." },
       { status: 401 }
     );
   }

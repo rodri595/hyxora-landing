@@ -1,5 +1,5 @@
 /**
- * Shared JSDoc typedefs for the Cerebro admin API (admin.hyxora.com/api/v1).
+ * Shared JSDoc typedefs for the Cerebro admin API (the gateway's /admin service).
  * Runtime-free: this module exists so hooks can `@import` these shapes and get
  * autocomplete on `data` without moving the project to TypeScript.
  */

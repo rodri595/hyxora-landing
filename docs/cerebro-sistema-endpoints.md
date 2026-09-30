@@ -61,6 +61,14 @@ da como base `https://admin.wafflemakr.xyz/api/v1`, y `NEXT_PUBLIC_CEREBRO_API`
 apunta a `https://admin.hyxora.com/api/v1`. Es la misma app en otro despliegue: si
 las tres rutas dan 404 ahí, es que todavía no se han promocionado.
 
+> **Desactualizado desde 2026-09-02.** Cerebro se sirve ahora por el gateway en
+> `/admin` (`NEXT_PUBLIC_HYXORA_API` + `/admin`) y con el JWT de sesión de siempre;
+> ni `NEXT_PUBLIC_CEREBRO_API` ni el token de Privy por petición existen ya. Los
+> hosts que aparecen arriba y más abajo son el registro de cómo se pidieron y se
+> probaron estos endpoints, no la ruta por la que se llaman hoy. Las rutas en sí
+> (`/users/activation`, `/system/tvl-freshness`, …) no cambiaron: cuelgan de
+> `/admin`.
+
 Las dos correcciones del final del documento quedaron reconocidas: HyperEVM es 999 y
 `/holdings` manda el slug de Zerion.
 
