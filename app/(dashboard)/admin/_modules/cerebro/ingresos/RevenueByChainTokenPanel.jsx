@@ -6,6 +6,7 @@ import { useGetTreasuryByToken } from "@/hooks/cerebro/useGetTreasuryByToken";
 import { cn } from "@/utils";
 import { formatNumber, formatUsd, formatUsdPrecise, shortenHash } from "@/utils/format";
 import { useMemo, useState } from "react";
+import { PanelNote } from "../../shared/Explanations";
 import Panel, { RefreshButton } from "../../shared/Panel";
 import QueryState from "../../shared/QueryState";
 import { REVENUE_TOKEN_DAYS, REVENUE_TOKEN_WINDOWS } from "./constants";
@@ -106,7 +107,7 @@ const ChainCell = ({ label, entries, totalUsd, share, isActive, isEmpty, onSelec
       <span className="font-inter text-[11px] font-semibold tracking-[-0.44px] text-[#19363F]">
         {label}
       </span>
-      <span className="font-inter text-[10px] tabular-nums tracking-[-0.4px] text-[rgba(25,54,63,0.4)]">
+      <span className="font-inter text-[10px] tabular-nums tracking-[-0.4px] text-[rgba(25,54,63,0.68)]">
         {formatNumber(entries)}
       </span>
     </span>
@@ -114,7 +115,7 @@ const ChainCell = ({ label, entries, totalUsd, share, isActive, isEmpty, onSelec
     <span
       className={cn(
         "font-inter text-[13px] font-semibold tabular-nums tracking-[-0.52px]",
-        totalUsd > 0 ? "text-emerald-700" : "text-[rgba(25,54,63,0.3)]"
+        totalUsd > 0 ? "text-emerald-700" : "text-[rgba(25,54,63,0.5)]"
       )}
     >
       {formatUsd(totalUsd, { decimals: totalUsd > 0 && totalUsd < 1 ? 4 : 2 })}
@@ -210,7 +211,7 @@ const RevenueByChainTokenPanel = ({ includeNonWhitelisted = false }) => {
               accessorKey: "chainName",
               header: "Cadena",
               cell: (info) => (
-                <span className="font-medium text-[rgba(25,54,63,0.7)]">{info.getValue()}</span>
+                <span className="font-medium text-[rgba(25,54,63,0.85)]">{info.getValue()}</span>
               ),
               footer: () => "Total",
             },
@@ -223,7 +224,7 @@ const RevenueByChainTokenPanel = ({ includeNonWhitelisted = false }) => {
           <div className="flex flex-col">
             <span className="font-medium text-[#19363F]">{info.getValue()}</span>
             {info.row.original.tokenAddress ? (
-              <span className="font-mono text-[10px] tracking-tight text-[rgba(25,54,63,0.35)]">
+              <span className="font-mono text-[10px] tracking-tight text-[rgba(25,54,63,0.68)]">
                 {shortenHash(info.row.original.tokenAddress)}
               </span>
             ) : null}
@@ -234,14 +235,14 @@ const RevenueByChainTokenPanel = ({ includeNonWhitelisted = false }) => {
       {
         accessorKey: "operationLabel",
         header: "Tipo de op",
-        cell: (info) => <span className="text-[rgba(25,54,63,0.65)]">{info.getValue()}</span>,
+        cell: (info) => <span className="text-[rgba(25,54,63,0.85)]">{info.getValue()}</span>,
       },
       {
         accessorKey: "transfers",
         header: "Transferencias",
         meta: { align: "right" },
         cell: (info) => (
-          <span className="tabular-nums text-[rgba(25,54,63,0.7)]">
+          <span className="tabular-nums text-[rgba(25,54,63,0.85)]">
             {formatNumber(info.getValue())}
           </span>
         ),
@@ -253,11 +254,11 @@ const RevenueByChainTokenPanel = ({ includeNonWhitelisted = false }) => {
         meta: { align: "right" },
         cell: (info) => {
           const value = info.getValue();
-          if (value === null) return <span className="text-[rgba(25,54,63,0.35)]">—</span>;
+          if (value === null) return <span className="text-[rgba(25,54,63,0.68)]">—</span>;
           return (
             <span className="tabular-nums text-[#19363F]">
               {formatTokenAmount(value)}{" "}
-              <span className="text-[10px] text-[rgba(25,54,63,0.4)]">
+              <span className="text-[10px] text-[rgba(25,54,63,0.68)]">
                 {info.row.original.tokenSymbol}
               </span>
             </span>
@@ -270,7 +271,7 @@ const RevenueByChainTokenPanel = ({ includeNonWhitelisted = false }) => {
         meta: { align: "right" },
         cell: (info) => {
           const value = info.getValue() ?? 0;
-          if (value <= 0) return <span className="text-[rgba(25,54,63,0.3)]">—</span>;
+          if (value <= 0) return <span className="text-[rgba(25,54,63,0.5)]">—</span>;
           return (
             <span className="font-medium tabular-nums text-emerald-700">
               {formatUsdPrecise(value)}
@@ -302,7 +303,7 @@ const RevenueByChainTokenPanel = ({ includeNonWhitelisted = false }) => {
                   "rounded-md px-2 py-1 font-inter text-[11px] font-medium tabular-nums tracking-[-0.44px] transition-colors",
                   days === option
                     ? "bg-[#19363F] text-white"
-                    : "text-[rgba(25,54,63,0.55)] hover:bg-[rgba(25,54,63,0.04)]"
+                    : "text-[rgba(25,54,63,0.75)] hover:bg-[rgba(25,54,63,0.04)]"
                 )}
               >
                 {option === 365 ? "1 a" : `${option} d`}
@@ -359,11 +360,11 @@ const RevenueByChainTokenPanel = ({ includeNonWhitelisted = false }) => {
           />
         </div>
 
-        <p className="mt-2 font-inter text-[10px] leading-[1.5] tracking-[-0.4px] text-[rgba(25,54,63,0.4)]">
+        <PanelNote className="mt-2">
           Las redes salen siempre todas, con $0 si no registraron entradas en la ventana. Ethereum
           queda fuera: la app dejó de usarla y su histórico no cuenta en ningún desglose. El total
           del pie sigue al filtro y a la búsqueda de la tabla.
-        </p>
+        </PanelNote>
       </QueryState>
     </Panel>
   );

@@ -6,6 +6,7 @@ import { useGetServiceHealth } from "@/hooks/monitoring/useGetServiceHealth";
 import { useGetSolanaFunding } from "@/hooks/monitoring/useGetSolanaFunding";
 import { cn } from "@/utils";
 import { formatUsd, timeAgo } from "@/utils/format";
+import { PanelNote } from "../../../shared/Explanations";
 import Panel, { RefreshButton } from "../../../shared/Panel";
 import QueryState from "../../../shared/QueryState";
 import LiquidationList from "./LiquidationList";
@@ -16,7 +17,7 @@ const TONES = {
   bad: "border-red-200 bg-red-50 text-red-700",
   warn: "border-amber-200 bg-amber-50 text-amber-800",
   good: "border-emerald-200 bg-emerald-50 text-emerald-700",
-  muted: "border-[rgba(25,54,63,0.1)] bg-[rgba(25,54,63,0.03)] text-[rgba(25,54,63,0.6)]",
+  muted: "border-[rgba(25,54,63,0.1)] bg-[rgba(25,54,63,0.03)] text-[rgba(25,54,63,0.75)]",
 };
 
 const Banner = ({ tone, children }) => (
@@ -35,16 +36,16 @@ const Section = ({ title, meta, children, footnote }) => (
     <h4 className="mb-2 flex flex-wrap items-baseline gap-x-2 font-inter text-[11px] font-semibold tracking-[-0.44px] text-[#19363F]">
       {title}
       {meta && (
-        <span className="font-normal tabular-nums text-[10px] tracking-[-0.4px] text-[rgba(25,54,63,0.4)]">
+        <span className="font-normal tabular-nums text-[10px] tracking-[-0.4px] text-[rgba(25,54,63,0.68)]">
           {meta}
         </span>
       )}
     </h4>
     {children}
     {footnote && (
-      <p className="mt-2 font-inter text-[10px] leading-[1.5] tracking-[-0.4px] text-[rgba(25,54,63,0.4)]">
+      <PanelNote className="mt-2">
         {footnote}
-      </p>
+      </PanelNote>
     )}
   </div>
 );

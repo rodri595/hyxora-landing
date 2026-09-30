@@ -36,7 +36,7 @@ const AddressLink = ({ address, chainId, lead = 6, tail = 4, className }) => {
 
   if (!url) {
     return (
-      <span className={cn("font-mono text-[10px] text-[rgba(25,54,63,0.5)]", className)}>
+      <span className={cn("font-mono text-[10px] text-[rgba(25,54,63,0.75)]", className)}>
         {label}
       </span>
     );
@@ -49,7 +49,7 @@ const AddressLink = ({ address, chainId, lead = 6, tail = 4, className }) => {
       rel="noreferrer"
       title={address}
       className={cn(
-        "inline-flex items-center gap-1 font-mono text-[10px] text-[rgba(25,54,63,0.55)] hover:text-[#19363F] transition-colors",
+        "inline-flex items-center gap-1 font-mono text-[10px] text-[rgba(25,54,63,0.75)] hover:text-[#19363F] transition-colors",
         className
       )}
     >

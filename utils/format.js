@@ -26,13 +26,23 @@ export const formatMoney = (value, currency = "USD", options = {}) => {
   const { compact = false, decimals, fallback = "—" } = options;
   if (typeof value !== "number" || !Number.isFinite(value)) return fallback;
 
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: currency || "USD",
+  const code = currency || "USD";
+  const digits = {
     notation: compact ? "compact" : "standard",
     maximumFractionDigits: decimals ?? (compact ? 1 : 2),
     minimumFractionDigits: decimals ?? (compact ? 0 : 2),
-  }).format(value);
+  };
+
+  // Intl throws a RangeError on anything that isn't a three-letter code, and ramp
+  // orders carry token legs ("USDC") beside the fiat ones. Print those as
+  // "1,000.00 USDC" rather than taking the whole table down.
+  if (!/^[A-Za-z]{3}$/.test(code)) {
+    return `${new Intl.NumberFormat("en-US", digits).format(value)} ${code}`;
+  }
+
+  return new Intl.NumberFormat("en-US", { style: "currency", currency: code, ...digits }).format(
+    value
+  );
 };
 
 /**

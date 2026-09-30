@@ -5,6 +5,7 @@ import { cerebroChainLabel, cerebroOperationLabel } from "@/constants/cerebro";
 import { useGetExpensiveOperations } from "@/hooks/cerebro/useGetExpensiveOperations";
 import { formatDateTime, formatNumber, formatUsd, shortenHash } from "@/utils/format";
 import { useMemo, useState } from "react";
+import { PanelNote } from "../../shared/Explanations";
 import Panel, { RefreshButton } from "../../shared/Panel";
 import QueryState from "../../shared/QueryState";
 import TxLink from "../../shared/TxLink";
@@ -72,21 +73,21 @@ const UserCell = ({ row }) => {
 
   if (email) {
     return (
-      <span className="text-[rgba(25,54,63,0.7)]" title={sender || undefined}>
+      <span className="text-[rgba(25,54,63,0.85)]" title={sender || undefined}>
         {email}
       </span>
     );
   }
   if (twitterUsername) {
     return (
-      <span className="text-[rgba(25,54,63,0.7)]" title={sender || undefined}>
+      <span className="text-[rgba(25,54,63,0.85)]" title={sender || undefined}>
         @{twitterUsername}
       </span>
     );
   }
   if (privyId) {
     return (
-      <span className="font-mono text-[10px] text-[rgba(25,54,63,0.5)]" title={privyId}>
+      <span className="font-mono text-[10px] text-[rgba(25,54,63,0.75)]" title={privyId}>
         {shortenHash(privyId, { lead: 14, tail: 4 })}
       </span>
     );
@@ -96,21 +97,21 @@ const UserCell = ({ row }) => {
     // dash: it's still the thread back to whoever's gas we paid.
     return (
       <span
-        className="font-mono text-[10px] text-[rgba(25,54,63,0.4)]"
+        className="font-mono text-[10px] text-[rgba(25,54,63,0.68)]"
         title={`Sin usuario asociado — firmó ${sender}`}
       >
         {shortenHash(sender)}
       </span>
     );
   }
-  return <span className="text-[rgba(25,54,63,0.3)]">—</span>;
+  return <span className="text-[rgba(25,54,63,0.5)]">—</span>;
 };
 
 const timeColumn = {
   accessorKey: "timestamp",
   header: "Hora",
   cell: (info) => (
-    <span className="tabular-nums text-[rgba(25,54,63,0.65)]">
+    <span className="tabular-nums text-[rgba(25,54,63,0.85)]">
       {formatDateTime(info.getValue())}
     </span>
   ),
@@ -125,7 +126,7 @@ const chainColumn = {
 const operationColumn = {
   accessorKey: "operationLabel",
   header: "Operación",
-  cell: (info) => <span className="text-[rgba(25,54,63,0.65)]">{info.getValue() || "—"}</span>,
+  cell: (info) => <span className="text-[rgba(25,54,63,0.85)]">{info.getValue() || "—"}</span>,
 };
 
 const userColumn = {
@@ -145,7 +146,7 @@ const gasColumn = {
   header: "Gas on-chain",
   meta: { align: "right", label: "Gas" },
   cell: (info) => (
-    <span className="tabular-nums text-[rgba(25,54,63,0.7)]">
+    <span className="tabular-nums text-[rgba(25,54,63,0.85)]">
       {formatUsd(info.getValue(), { decimals: 6 })}
     </span>
   ),
@@ -237,11 +238,11 @@ const ExpensiveOpsPanel = () => {
           dense
         />
 
-        <p className="font-inter text-[10px] leading-[1.5] tracking-[-0.4px] text-[rgba(25,54,63,0.4)] mt-2">
+        <PanelNote className="mt-2">
           «Usuario» es el correo o el Twitter de quien firmó la operación; cuando ninguna wallet
           conocida coincide con el emisor, se muestra su dirección. «Coste» es lo que factura
           Pimlico, recargo incluido.
-        </p>
+        </PanelNote>
       </QueryState>
     </Panel>
   );

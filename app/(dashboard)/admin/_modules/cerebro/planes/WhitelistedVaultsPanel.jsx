@@ -5,6 +5,7 @@ import { appApiChainLabels } from "@/constants/appApi";
 import { useGetWhitelistedVaults } from "@/hooks/appApi/useGetWhitelistedVaults";
 import { shortenHash } from "@/utils/format";
 import { useMemo } from "react";
+import { PanelNote } from "../../shared/Explanations";
 import Panel, { RefreshButton } from "../../shared/Panel";
 import QueryState from "../../shared/QueryState";
 import StatusBadge from "../../shared/StatusBadge";
@@ -21,26 +22,26 @@ const columns = [
   {
     accessorKey: "chainLabel",
     header: "Red",
-    cell: (info) => <span className="text-[rgba(25,54,63,0.5)]">{info.getValue()}</span>,
+    cell: (info) => <span className="text-[rgba(25,54,63,0.75)]">{info.getValue()}</span>,
   },
   {
     accessorKey: "type",
     header: "Protocolo",
-    cell: (info) => <span className="text-[rgba(25,54,63,0.65)]">{info.getValue() ?? "—"}</span>,
+    cell: (info) => <span className="text-[rgba(25,54,63,0.85)]">{info.getValue() ?? "—"}</span>,
   },
   {
     accessorKey: "defillamaId",
     header: "DefiLlama ID",
     cell: (info) => {
       const id = info.getValue();
-      if (!id) return <span className="text-[rgba(25,54,63,0.3)]">—</span>;
+      if (!id) return <span className="text-[rgba(25,54,63,0.5)]">—</span>;
 
       return (
         <code
           className={
             looksLikePlaceholder(id)
               ? "font-mono text-[10px] tracking-tight text-amber-700 bg-amber-50 border border-amber-200 rounded-[4px] px-1 py-0.5"
-              : "font-mono text-[10px] tracking-tight text-[rgba(25,54,63,0.55)]"
+              : "font-mono text-[10px] tracking-tight text-[rgba(25,54,63,0.75)]"
           }
         >
           {id}
@@ -52,7 +53,7 @@ const columns = [
     accessorKey: "address",
     header: "Dirección",
     cell: (info) => (
-      <code className="font-mono text-[10px] tracking-tight text-[rgba(25,54,63,0.55)]">
+      <code className="font-mono text-[10px] tracking-tight text-[rgba(25,54,63,0.75)]">
         {shortenHash(info.getValue())}
       </code>
     ),
@@ -112,10 +113,10 @@ const WhitelistedVaultsPanel = () => {
           dense
         />
 
-        <p className="font-inter text-[10px] leading-[1.5] tracking-[-0.4px] text-[rgba(25,54,63,0.4)] mt-2">
+        <PanelNote className="mt-2">
           Vista de solo lectura. Un DefiLlama ID marcado en ámbar es sospechosamente corto para un
           UUID — suele ser un valor de prueba que dejaría el APY mal en la app.
-        </p>
+        </PanelNote>
       </QueryState>
     </Panel>
   );

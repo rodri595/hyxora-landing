@@ -21,24 +21,24 @@ const columns = [
   {
     accessorKey: "symbol",
     header: "Símbolo",
-    cell: (info) => <span className="text-[rgba(25,54,63,0.65)]">{info.getValue() ?? "—"}</span>,
+    cell: (info) => <span className="text-[rgba(25,54,63,0.85)]">{info.getValue() ?? "—"}</span>,
   },
   {
     accessorKey: "chainName",
     header: "Redes",
-    cell: (info) => <span className="text-[rgba(25,54,63,0.5)]">{info.getValue()}</span>,
+    cell: (info) => <span className="text-[rgba(25,54,63,0.75)]">{info.getValue()}</span>,
   },
   {
     accessorKey: "holders",
     header: "Titulares",
     meta: { align: "right" },
     cell: (info) => (
-      <span className="tabular-nums text-[rgba(25,54,63,0.7)]">
+      <span className="tabular-nums text-[rgba(25,54,63,0.85)]">
         {formatNumber(info.getValue())}
       </span>
     ),
     // Not summed on purpose — a user in two vaults would be counted twice.
-    footer: () => <span className="text-[rgba(25,54,63,0.3)]">—</span>,
+    footer: () => <span className="text-[rgba(25,54,63,0.5)]">—</span>,
   },
   {
     accessorKey: "totalUsd",

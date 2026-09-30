@@ -182,7 +182,7 @@ const ExportDropdown = ({ onExport, count }) => {
         onClick={() => setOpen((v) => !v)}
         className={cn(
           "flex items-center gap-1.5 h-7.5 px-2.5 rounded-lg border-[0.7px] border-[rgba(25,54,63,0.08)] bg-white",
-          "font-inter font-medium text-[11px] tracking-[-0.44px] text-[rgba(25,54,63,0.7)]",
+          "font-inter font-medium text-[11px] tracking-[-0.44px] text-[rgba(25,54,63,0.85)]",
           "hover:bg-[rgba(25,54,63,0.03)] transition-colors",
           "shadow-[0px_0px_4px_0px_inset_rgba(25,54,63,0.04)]"
         )}
@@ -261,7 +261,7 @@ const ColumnToggle = ({ table }) => {
         onClick={() => setOpen((v) => !v)}
         className={cn(
           "flex items-center gap-1.5 h-7.5 px-2.5 rounded-lg border-[0.7px] border-[rgba(25,54,63,0.08)] bg-white",
-          "font-inter font-medium text-[11px] tracking-[-0.44px] text-[rgba(25,54,63,0.7)]",
+          "font-inter font-medium text-[11px] tracking-[-0.44px] text-[rgba(25,54,63,0.85)]",
           "hover:bg-[rgba(25,54,63,0.03)] transition-colors",
           "shadow-[0px_0px_4px_0px_inset_rgba(25,54,63,0.04)]"
         )}
@@ -363,7 +363,7 @@ const PageButton = ({ onClick, disabled, label, children }) => (
     className={cn(
       "flex items-center gap-1 h-7 px-2 rounded-lg border-[0.7px] font-inter text-[11px] font-medium tracking-[-0.44px] transition-colors",
       disabled
-        ? "border-[rgba(25,54,63,0.06)] text-[rgba(25,54,63,0.25)] cursor-not-allowed"
+        ? "border-[rgba(25,54,63,0.06)] text-[rgba(25,54,63,0.5)] cursor-not-allowed"
         : "border-[rgba(25,54,63,0.12)] text-[#19363F] hover:bg-[rgba(25,54,63,0.04)]"
     )}
   >
@@ -377,19 +377,26 @@ const PageButton = ({ onClick, disabled, label, children }) => (
  * `getRowCount()` covers both modes: client-side it's the filtered row count, so
  * searching re-bases "Mostrando X–Y de Z"; server-side it's the `rowCount` the API
  * reported, which is larger than the rows actually loaded.
+ *
+ * With no total to trust (`totalKnown` false) there is no "de Z", no page count and
+ * no jump to the last page; `hasNextPage` alone decides whether «Siguiente» works.
  */
-const PaginationBar = ({ table, pageSizeOptions }) => {
+const PaginationBar = ({ table, pageSizeOptions, totalKnown, hasNextPage }) => {
   const { pageIndex, pageSize } = table.getState().pagination;
+  const offset = pageIndex * pageSize;
+  const loaded = table.getRowModel().rows.length;
   const total = table.getRowCount();
   const pageCount = table.getPageCount();
-  const first = total === 0 ? 0 : pageIndex * pageSize + 1;
-  const last = Math.min(total, (pageIndex + 1) * pageSize);
+  const first = (totalKnown ? total : loaded) === 0 ? 0 : offset + 1;
+  const last = totalKnown ? Math.min(total, offset + pageSize) : first && offset + loaded;
+  const canNext = totalKnown ? table.getCanNextPage() : hasNextPage;
 
   return (
     <div className="flex items-center justify-between gap-3 flex-wrap mt-2.5">
       <div className="flex items-center gap-2">
-        <span className="font-inter text-[11px] tabular-nums tracking-[-0.44px] text-[rgba(25,54,63,0.45)] whitespace-nowrap">
-          Mostrando {first}–{last} de {total}
+        <span className="font-inter text-[11px] tabular-nums tracking-[-0.44px] text-[rgba(25,54,63,0.68)] whitespace-nowrap">
+          Mostrando {first}–{last}
+          {totalKnown && ` de ${total}`}
         </span>
 
         {pageSizeOptions.length > 1 && (
@@ -428,21 +435,19 @@ const PaginationBar = ({ table, pageSizeOptions }) => {
           <span className="hidden sm:inline">Anterior</span>
         </PageButton>
 
-        <span className="font-inter text-[11px] tabular-nums tracking-[-0.44px] text-[rgba(25,54,63,0.5)] px-1 whitespace-nowrap">
-          Página {pageCount === 0 ? 0 : pageIndex + 1} de {pageCount}
+        <span className="font-inter text-[11px] tabular-nums tracking-[-0.44px] text-[rgba(25,54,63,0.75)] px-1 whitespace-nowrap">
+          {totalKnown
+            ? `Página ${pageCount === 0 ? 0 : pageIndex + 1} de ${pageCount}`
+            : `Página ${pageIndex + 1}`}
         </span>
 
-        <PageButton
-          onClick={() => table.nextPage()}
-          disabled={!table.getCanNextPage()}
-          label="Página siguiente"
-        >
+        <PageButton onClick={() => table.nextPage()} disabled={!canNext} label="Página siguiente">
           <span className="hidden sm:inline">Siguiente</span>
           <PageArrow />
         </PageButton>
         <PageButton
           onClick={() => table.setPageIndex(pageCount - 1)}
-          disabled={!table.getCanNextPage()}
+          disabled={!totalKnown || !canNext}
           label="Última página"
         >
           <PageArrow double />
@@ -514,7 +519,11 @@ const ALIGN_CLASS = {
  * @param {boolean} [manualPagination]      - Server owns paging. Requires `rowCount`.
  * @param {boolean} [manualSorting]         - Server owns sorting.
  * @param {boolean} [manualFiltering]       - Server owns the search.
- * @param {number} [rowCount]               - Total rows on the server, for the pager.
+ * @param {number | null} [rowCount]        - Total rows on the server, for the pager.
+ *   `null` means the server gave no count worth showing: the pager then runs
+ *   open-ended, page by page, on `hasNextPage`.
+ * @param {boolean} [hasNextPage]           - With `rowCount={null}` only: whether a
+ *   page follows this one — usually "this page came back full".
  * @param {SortingState} [sorting]          - Controlled sorting. Overrides `initialSorting`.
  * @param {Function} [onSortingChange]
  * @param {{ pageIndex: number, pageSize: number }} [pagination] - Controlled pagination.
@@ -554,6 +563,7 @@ const DataTable = ({
   manualSorting = false,
   manualFiltering = false,
   rowCount,
+  hasNextPage = false,
   sorting: sortingProp,
   onSortingChange: onSortingChangeProp,
   pagination: paginationProp,
@@ -576,6 +586,7 @@ const DataTable = ({
   const setGlobalFilter = onGlobalFilterChangeProp ?? setInternalGlobalFilter;
   const pagination = paginationProp ?? internalPagination;
   const setPagination = onPaginationChangeProp ?? setInternalPagination;
+  const totalKnown = !manualPagination || rowCount != null;
 
   const tableColumns = useMemo(() => {
     // Expander first, then selection, so the chevron sits at the row edge where
@@ -654,7 +665,9 @@ const DataTable = ({
     manualSorting,
     manualFiltering,
     // Only meaningful when the server paginates; otherwise TanStack counts the rows.
-    rowCount: manualPagination ? rowCount : undefined,
+    // An unknown count is TanStack's `pageCount: -1`, never a guessed total.
+    rowCount: manualPagination && totalKnown ? rowCount : undefined,
+    pageCount: manualPagination && !totalKnown ? -1 : undefined,
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
@@ -732,7 +745,7 @@ const DataTable = ({
 
           <div className="flex min-w-0 flex-wrap items-center gap-2">
             {showRowCount && (
-              <span className="font-inter text-[11px] tracking-[-0.44px] text-[rgba(25,54,63,0.45)] whitespace-nowrap">
+              <span className="font-inter text-[11px] tracking-[-0.44px] text-[rgba(25,54,63,0.68)] whitespace-nowrap">
                 {selectedCount > 0 ? `${selectedCount} seleccionados` : `${totalRows} filas`}
               </span>
             )}
@@ -778,7 +791,7 @@ const DataTable = ({
                       className={cn(
                         headerPad,
                         ALIGN_CLASS[align],
-                        "font-inter font-medium text-[11px] tracking-[-0.44px] text-[rgba(25,54,63,0.55)] whitespace-nowrap select-none",
+                        "font-inter font-medium text-[11px] tracking-[-0.44px] text-[rgba(25,54,63,0.75)] whitespace-nowrap select-none",
                         header.column.getCanSort() &&
                           "cursor-pointer hover:text-[#19363F] transition-colors"
                       )}
@@ -825,7 +838,7 @@ const DataTable = ({
               <tr>
                 <td
                   colSpan={tableColumns.length}
-                  className="text-center py-10 font-inter text-[12px] text-[rgba(25,54,63,0.35)] tracking-[-0.48px]"
+                  className="text-center py-10 font-inter text-[12px] text-[rgba(25,54,63,0.68)] tracking-[-0.48px]"
                 >
                   {emptyLabel}
                 </td>
@@ -930,7 +943,14 @@ const DataTable = ({
         </table>
       </div>
 
-      {enablePagination && <PaginationBar table={table} pageSizeOptions={pageSizeOptions} />}
+      {enablePagination && (
+        <PaginationBar
+          table={table}
+          pageSizeOptions={pageSizeOptions}
+          totalKnown={totalKnown}
+          hasNextPage={hasNextPage}
+        />
+      )}
     </div>
   );
 };

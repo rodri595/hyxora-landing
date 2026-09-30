@@ -75,7 +75,7 @@ const DonutTooltip = (props) => {
           {slice?.label}
         </span>
       </div>
-      <p className="font-inter text-[10px] tracking-[-0.4px] text-[rgba(25,54,63,0.5)] mt-1">
+      <p className="font-inter text-[10px] tracking-[-0.4px] text-[rgba(25,54,63,0.75)] mt-1">
         {formatNumber(slice?.opsCount)} tx · {formatUsdPrecise(slice?.feesUsd)}
       </p>
     </TooltipSurface>
@@ -200,7 +200,7 @@ const RevenueByOperationPanel = () => {
                 <span
                   className={cn(
                     "min-w-0 truncate font-inter text-[11px] tracking-[-0.44px]",
-                    isIdle ? "text-[rgba(25,54,63,0.35)]" : "text-[#19363F]"
+                    isIdle ? "text-[rgba(25,54,63,0.68)]" : "text-[#19363F]"
                   )}
                   title={row.label}
                 >
@@ -209,7 +209,7 @@ const RevenueByOperationPanel = () => {
                 <span
                   className={cn(
                     "shrink-0 font-inter text-[10px] tabular-nums tracking-[-0.4px] ml-auto",
-                    isIdle ? "text-[rgba(25,54,63,0.25)]" : "text-[rgba(25,54,63,0.45)]"
+                    isIdle ? "text-[rgba(25,54,63,0.5)]" : "text-[rgba(25,54,63,0.68)]"
                   )}
                 >
                   {formatNumber(row.opsCount)} tx
@@ -217,7 +217,7 @@ const RevenueByOperationPanel = () => {
                 <span
                   className={cn(
                     "shrink-0 font-inter text-[11px] font-semibold tabular-nums tracking-[-0.44px] w-[72px] sm:w-[92px] text-right",
-                    isIdle ? "text-[rgba(25,54,63,0.3)]" : "text-[#19363F]"
+                    isIdle ? "text-[rgba(25,54,63,0.5)]" : "text-[#19363F]"
                   )}
                 >
                   {isIdle ? "$0" : formatUsdPrecise(row.feesUsd)}

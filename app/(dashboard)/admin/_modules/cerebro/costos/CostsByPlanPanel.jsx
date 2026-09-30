@@ -62,7 +62,7 @@ const NetCell = ({ value }) => (
   <span
     className={cn(
       "font-medium tabular-nums",
-      value === null ? "text-[rgba(25,54,63,0.3)]" : value < 0 ? "text-red-600" : "text-emerald-700"
+      value === null ? "text-[rgba(25,54,63,0.5)]" : value < 0 ? "text-red-600" : "text-emerald-700"
     )}
   >
     {value !== null && value > 0 ? "+" : ""}
@@ -74,7 +74,7 @@ const CountCell = ({ value }) => (
   <span
     className={cn(
       "tabular-nums",
-      value === null ? "text-[rgba(25,54,63,0.3)]" : "text-[rgba(25,54,63,0.7)]"
+      value === null ? "text-[rgba(25,54,63,0.5)]" : "text-[rgba(25,54,63,0.85)]"
     )}
   >
     {formatNumber(value)}
@@ -151,7 +151,7 @@ const CostsByPlanPanel = () => {
         ),
         meta: { align: "right", label: "Media por usuario" },
         cell: (info) => (
-          <span className="tabular-nums text-[rgba(25,54,63,0.55)]">
+          <span className="tabular-nums text-[rgba(25,54,63,0.75)]">
             {formatUsd(info.getValue(), { decimals: 6 })}
           </span>
         ),
@@ -165,7 +165,7 @@ const CostsByPlanPanel = () => {
         ),
         meta: { align: "right", label: "Media por activo" },
         cell: (info) => (
-          <span className="tabular-nums text-[rgba(25,54,63,0.7)]">
+          <span className="tabular-nums text-[rgba(25,54,63,0.85)]">
             {formatUsd(info.getValue(), { decimals: 6 })}
           </span>
         ),
@@ -180,7 +180,7 @@ const CostsByPlanPanel = () => {
             <span
               className={cn(
                 "font-medium tabular-nums",
-                value > 0 ? "text-emerald-700" : "text-[rgba(25,54,63,0.3)]"
+                value > 0 ? "text-emerald-700" : "text-[rgba(25,54,63,0.5)]"
               )}
             >
               {value > 0 ? formatUsd(value, { decimals: 2 }) : "—"}

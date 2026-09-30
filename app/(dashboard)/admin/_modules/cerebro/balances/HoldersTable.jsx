@@ -17,12 +17,12 @@ import { holderLabel } from "./holders";
 const SnapshotCell = ({ value }) => {
   const hours = hoursSince(value);
   if (hours === null) {
-    return <span className="italic text-[rgba(25,54,63,0.3)]">nunca</span>;
+    return <span className="italic text-[rgba(25,54,63,0.5)]">nunca</span>;
   }
 
   return (
     <span
-      className={cn(hours > 24 ? "text-amber-700" : "text-[rgba(25,54,63,0.5)]")}
+      className={cn(hours > 24 ? "text-amber-700" : "text-[rgba(25,54,63,0.75)]")}
       title={`Última actualización de Zerion: ${new Date(value).toISOString().slice(0, 16)}`}
     >
       {timeAgo(value)}
@@ -44,7 +44,7 @@ const ValueCell = ({ value, chainCount, chainsLabel }) => (
   >
     {formatUsd(value, { decimals: 2 })}
     {chainCount > 1 && (
-      <span className="ml-1 font-normal text-[10px] text-[rgba(25,54,63,0.35)]">
+      <span className="ml-1 font-normal text-[10px] text-[rgba(25,54,63,0.68)]">
         ×{chainCount} redes
       </span>
     )}
@@ -70,13 +70,13 @@ const columns = [
     accessorKey: "plan",
     header: "Plan",
     cell: (info) => (
-      <span className="text-[rgba(25,54,63,0.65)]">{cerebroPlanLabel(info.getValue())}</span>
+      <span className="text-[rgba(25,54,63,0.85)]">{cerebroPlanLabel(info.getValue())}</span>
     ),
   },
   {
     accessorKey: "chainsLabel",
     header: "Redes",
-    cell: (info) => <span className="text-[rgba(25,54,63,0.45)]">{info.getValue() || "—"}</span>,
+    cell: (info) => <span className="text-[rgba(25,54,63,0.68)]">{info.getValue() || "—"}</span>,
   },
   {
     accessorKey: "tvlRefreshedAt",

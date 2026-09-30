@@ -5,6 +5,7 @@ import { fromMinorUnits } from "@/constants/appApi";
 import { useGetMemberships } from "@/hooks/appApi/useGetMemberships";
 import { formatMoney } from "@/utils/format";
 import { useMemo } from "react";
+import { PanelNote } from "../../shared/Explanations";
 import Panel, { RefreshButton } from "../../shared/Panel";
 import QueryState from "../../shared/QueryState";
 import StatusBadge from "../../shared/StatusBadge";
@@ -32,7 +33,7 @@ const columns = [
     accessorKey: "interval",
     header: "Ciclo",
     cell: (info) => (
-      <span className="text-[rgba(25,54,63,0.65)]">
+      <span className="text-[rgba(25,54,63,0.85)]">
         {info.getValue() === "year" ? "Anual" : "Mensual"}
       </span>
     ),
@@ -43,9 +44,9 @@ const columns = [
     cell: (info) => {
       const id = info.getValue();
       return id ? (
-        <code className="font-mono text-[10px] tracking-tight text-[rgba(25,54,63,0.6)]">{id}</code>
+        <code className="font-mono text-[10px] tracking-tight text-[rgba(25,54,63,0.75)]">{id}</code>
       ) : (
-        <span className="text-[rgba(25,54,63,0.3)]">Sin producto</span>
+        <span className="text-[rgba(25,54,63,0.5)]">Sin producto</span>
       );
     },
   },
@@ -105,10 +106,10 @@ const PlanesPanel = () => {
           dense
         />
 
-        <p className="font-inter text-[10px] leading-[1.5] tracking-[-0.4px] text-[rgba(25,54,63,0.4)] mt-2">
+        <PanelNote className="mt-2">
           Un plan sin producto de Stripe no se cobra por Stripe — es asignación manual, como Staff
           Member. La moneda varía por plan, así que la columna de precio no se suma.
-        </p>
+        </PanelNote>
       </QueryState>
     </Panel>
   );

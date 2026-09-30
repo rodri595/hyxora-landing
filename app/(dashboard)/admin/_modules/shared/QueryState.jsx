@@ -49,7 +49,7 @@ const QueryState = ({ isLoading, error, isEmpty = false, emptyLabel = "Sin datos
 
   if (isEmpty) {
     return (
-      <p className="font-inter text-[11px] tracking-[-0.44px] text-[rgba(25,54,63,0.4)] py-2">
+      <p className="font-inter text-[11px] tracking-[-0.44px] text-[rgba(25,54,63,0.68)] py-2">
         {emptyLabel}
       </p>
     );

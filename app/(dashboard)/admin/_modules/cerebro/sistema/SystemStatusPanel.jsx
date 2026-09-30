@@ -123,11 +123,11 @@ const SystemStatusPanel = () => {
         header: "Cadena",
         cell: ({ row }) => (
           <span
-            className={cn(row.original.isCold ? "text-[rgba(25,54,63,0.4)]" : "text-[#19363F]")}
+            className={cn(row.original.isCold ? "text-[rgba(25,54,63,0.68)]" : "text-[#19363F]")}
           >
             {row.original.chainName}
             {row.original.isCold && (
-              <span className="ml-1.5 text-[10px] text-[rgba(25,54,63,0.35)]">(inactiva)</span>
+              <span className="ml-1.5 text-[10px] text-[rgba(25,54,63,0.68)]">(inactiva)</span>
             )}
           </span>
         ),
@@ -136,7 +136,7 @@ const SystemStatusPanel = () => {
         accessorKey: "kind",
         header: "Tipo",
         cell: (info) => (
-          <span className="font-mono text-[10px] tracking-tight text-[rgba(25,54,63,0.6)]">
+          <span className="font-mono text-[10px] tracking-tight text-[rgba(25,54,63,0.75)]">
             {info.getValue()}
           </span>
         ),
@@ -146,7 +146,7 @@ const SystemStatusPanel = () => {
         header: "Último bloque",
         meta: { align: "right" },
         cell: (info) => (
-          <span className="tabular-nums text-[rgba(25,54,63,0.6)]">
+          <span className="tabular-nums text-[rgba(25,54,63,0.75)]">
             {info.getValue() === null ? "—" : formatNumber(info.getValue())}
           </span>
         ),
@@ -164,7 +164,7 @@ const SystemStatusPanel = () => {
             <span
               className={cn(
                 "inline-flex items-center gap-1 tabular-nums",
-                isStale ? "text-red-600 font-medium" : "text-[rgba(25,54,63,0.5)]"
+                isStale ? "text-red-600 font-medium" : "text-[rgba(25,54,63,0.75)]"
               )}
             >
               {timeAgo(row.original.updatedAt)}
@@ -236,14 +236,14 @@ const SystemStatusPanel = () => {
 
         <div className="flex flex-wrap items-center gap-x-5 gap-y-1.5 mt-3 pt-3 border-t-[0.7px] border-[rgba(25,54,63,0.06)]">
           <div className="flex items-center gap-1.5">
-            <span className="font-inter text-[10px] tracking-[-0.4px] text-[rgba(25,54,63,0.45)]">
+            <span className="font-inter text-[10px] tracking-[-0.4px] text-[rgba(25,54,63,0.68)]">
               Caché del backend
             </span>
             <span
               className={cn(
                 "font-inter text-[10px] font-medium tabular-nums tracking-[-0.4px]",
                 backendCacheOk === null || backendCacheOk === undefined
-                  ? "text-[rgba(25,54,63,0.35)]"
+                  ? "text-[rgba(25,54,63,0.68)]"
                   : backendCacheOk
                     ? "text-emerald-700"
                     : "text-red-600"
@@ -254,19 +254,19 @@ const SystemStatusPanel = () => {
           </div>
 
           <div className="flex items-center gap-1.5">
-            <span className="font-inter text-[10px] tracking-[-0.4px] text-[rgba(25,54,63,0.45)]">
+            <span className="font-inter text-[10px] tracking-[-0.4px] text-[rgba(25,54,63,0.68)]">
               Última fee de tesorería
             </span>
-            <span className="font-inter text-[10px] tabular-nums text-[rgba(25,54,63,0.65)]">
+            <span className="font-inter text-[10px] tabular-nums text-[rgba(25,54,63,0.85)]">
               {timeAgo(latest.latestTreasuryFee ?? latest.latest_treasury_fee)}
             </span>
           </div>
 
           <div className="flex items-center gap-1.5">
-            <span className="font-inter text-[10px] tracking-[-0.4px] text-[rgba(25,54,63,0.45)]">
+            <span className="font-inter text-[10px] tracking-[-0.4px] text-[rgba(25,54,63,0.68)]">
               Última operación de usuario
             </span>
-            <span className="font-inter text-[10px] tabular-nums text-[rgba(25,54,63,0.65)]">
+            <span className="font-inter text-[10px] tabular-nums text-[rgba(25,54,63,0.85)]">
               {timeAgo(latest.latestUserOp ?? latest.latest_user_op)}
             </span>
           </div>

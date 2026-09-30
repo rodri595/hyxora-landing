@@ -1,17 +1,16 @@
 import { useCerebroAccess } from "@/hooks/cerebro/useCerebroAccess";
-import cerebroClient, { cleanParams } from "@/utils/cerebroAxios";
+import { SWEEP_MAX_PAGES, fetchAllUsers } from "@/hooks/cerebro/useGetUsersSweep";
+import cerebroClient from "@/utils/cerebroAxios";
 import { useQuery } from "@tanstack/react-query";
 
 /** @import { UserActivation } from "./types" */
 
-/** Balance over this counts as funded — the threshold `/users/activation` uses. */
-const FUNDED_USD = 0.5;
-
-/** What we ask for. The API caps it at 200 and may hand back fewer. */
-const PAGE_SIZE = 200;
-
-/** Stop sweeping rather than paging forever if the pager ever misbehaves. */
-const MAX_PAGES = 25;
+/**
+ * Balance over this counts as funded — the threshold `/users/activation` uses. The
+ * users table's «con saldo» filter reads the same line, so the two never disagree
+ * about who has money in.
+ */
+export const FUNDED_USD = 0.5;
 
 /**
  * Cerebro serialises Postgres `numeric` as a quoted string on several endpoints,
@@ -66,45 +65,6 @@ const classify = (row) => {
 };
 
 /**
- * Every user, a page at a time, keyed by `privyId` so a repeated page cannot
- * double-count anyone.
- *
- * The stop condition is an empty page and not a short one: the API is free to cap
- * `pageSize` below what we asked for, and treating a 50-row answer to a 200-row
- * request as "the end" is what made the first version of this read one page and
- * report a fifth of the funnel without a word.
- *
- * @return {Promise<{ rows: Object[], total: number | null, truncated: boolean }>}
- */
-const fetchAllUsers = async () => {
-  const byId = new Map();
-  let total = null;
-  let page = 1;
-  let truncated = false;
-
-  while (page <= MAX_PAGES) {
-    const response = await cerebroClient.get("/users", {
-      params: cleanParams({ page, pageSize: PAGE_SIZE, sort: "tvl", dir: "desc" }),
-    });
-
-    const body = response?.data ?? {};
-    const users = Array.isArray(body.users) ? body.users : [];
-    for (const user of users) byId.set(user?.privyId ?? `row-${byId.size}`, user);
-
-    const reported = count(body.total);
-    if (reported !== null) total = reported;
-
-    if (users.length === 0) break;
-    if (total !== null && byId.size >= total) break;
-
-    page += 1;
-    if (page > MAX_PAGES) truncated = true;
-  }
-
-  return { rows: [...byId.values()], total, truncated };
-};
-
-/**
  * The onboarding funnel, assembled here instead of read from `/users/activation`.
  *
  * That endpoint shipped on 2026-08-27 and answers **500 —
@@ -114,9 +74,10 @@ const fetchAllUsers = async () => {
  * a caller can work around. Swap this body for a single GET the day it is fixed —
  * the shape returned here is deliberately the one that endpoint documents.
  *
- * It sweeps `/users` in full — three requests at today's ~450 accounts, more if the
- * API caps the page below 200 — and classifies each row with `classify()`. That is
- * the fan-out CLAUDE.md warns about, and it is a workaround, not an architecture.
+ * It sweeps `/users` in full with `fetchAllUsers` — three requests at today's ~450
+ * accounts, more if the API caps the page below 200 — and classifies each row with
+ * `classify()`. That is the fan-out CLAUDE.md warns about, and it is a workaround,
+ * not an architecture.
  *
  * Counting per row rather than deriving one bucket by subtraction is what makes the
  * five sum to the sweep by construction. The cross-checks are therefore against
@@ -177,7 +138,7 @@ export const useGetUserActivation = () => {
       const warnings = [];
       if (sweep.truncated) {
         warnings.push(
-          `El barrido paró en ${MAX_PAGES} páginas con ${swept} usuarios leídos, así que los tramos cuentan de menos.`
+          `El barrido paró en ${SWEEP_MAX_PAGES} páginas con ${swept} usuarios leídos, así que los tramos cuentan de menos.`
         );
       }
       if (statsTotal !== null && swept !== statsTotal) {

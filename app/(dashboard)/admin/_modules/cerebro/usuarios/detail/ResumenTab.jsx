@@ -22,7 +22,7 @@ const formatDay = (value) => {
   return Number.isNaN(date.getTime()) ? null : toDayString(date);
 };
 
-const Dash = () => <span className="font-inter text-[11px] text-[rgba(25,54,63,0.3)]">—</span>;
+const Dash = () => <span className="font-inter text-[11px] text-[rgba(25,54,63,0.5)]">—</span>;
 
 /**
  * Every address the account owns, in one block.
@@ -184,7 +184,7 @@ const MarginBlock = ({ margin }) => (
       title="Ingresos y gastos (histórico)"
       subtitle="Lo que este usuario ha dejado en comisiones frente a lo que nos ha costado patrocinarle el gas."
       aside={
-        <span className="font-inter text-[10px] tracking-[-0.4px] text-[rgba(25,54,63,0.4)]">
+        <span className="font-inter text-[10px] tracking-[-0.4px] text-[rgba(25,54,63,0.68)]">
           Excluye ventas de NFT
         </span>
       }
@@ -332,7 +332,7 @@ const ResumenTab = ({ user, tvl, margin, freeVsPaid, positionCount, pnlUsd, deta
         aside={
           tvl.refreshedAt && (
             <span
-              className="font-inter text-[10px] tracking-[-0.4px] text-[rgba(25,54,63,0.4)]"
+              className="font-inter text-[10px] tracking-[-0.4px] text-[rgba(25,54,63,0.68)]"
               title={`Cartera actualizada ${tvl.refreshedAt}`}
             >
               Cartera {timeAgo(tvl.refreshedAt)}

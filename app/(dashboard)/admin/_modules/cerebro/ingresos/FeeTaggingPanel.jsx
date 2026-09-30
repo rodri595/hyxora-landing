@@ -6,6 +6,7 @@ import { useGetFeesDiagnostics } from "@/hooks/cerebro/useGetFeesDiagnostics";
 import { cn } from "@/utils";
 import { formatNumber, formatUsd } from "@/utils/format";
 import { useMemo, useState } from "react";
+import { PanelNote } from "../../shared/Explanations";
 import Panel, { RefreshButton } from "../../shared/Panel";
 import PendingEndpoint from "../../shared/PendingEndpoint";
 import QueryState from "../../shared/QueryState";
@@ -22,15 +23,15 @@ import { DIAGNOSTICS_DAYS, DIAGNOSTICS_LIMIT, DIAGNOSTICS_WINDOWS } from "./cons
  * column exists to show.
  */
 const SourceBadge = ({ source }) => {
-  if (!source) return <span className="text-[rgba(25,54,63,0.25)]">—</span>;
+  if (!source) return <span className="text-[rgba(25,54,63,0.5)]">—</span>;
 
   return (
     <span
       className={cn(
-        "inline-flex rounded-full border px-1.5 py-0.5 font-inter text-[9px] font-medium tracking-[0.2px]",
+        "inline-flex rounded-full border px-1.5 py-0.5 font-inter text-[10px] font-medium tracking-[0.2px]",
         source.startsWith("hyxora")
           ? "border-emerald-200 bg-emerald-50 text-emerald-700"
-          : "border-[rgba(25,54,63,0.1)] bg-[rgba(25,54,63,0.04)] text-[rgba(25,54,63,0.55)]"
+          : "border-[rgba(25,54,63,0.1)] bg-[rgba(25,54,63,0.04)] text-[rgba(25,54,63,0.75)]"
       )}
     >
       {source}
@@ -74,9 +75,9 @@ const columns = [
     header: "Método padre",
     cell: (info) => {
       const method = info.getValue();
-      if (!method) return <span className="text-[rgba(25,54,63,0.25)]">—</span>;
+      if (!method) return <span className="text-[rgba(25,54,63,0.5)]">—</span>;
 
-      return <span className="font-mono text-[10px] text-[rgba(25,54,63,0.6)]">{method}</span>;
+      return <span className="font-mono text-[10px] text-[rgba(25,54,63,0.75)]">{method}</span>;
     },
   },
   {
@@ -84,7 +85,7 @@ const columns = [
     header: "Transferencias",
     meta: { align: "right" },
     cell: (info) => (
-      <span className="tabular-nums text-[rgba(25,54,63,0.7)]">
+      <span className="tabular-nums text-[rgba(25,54,63,0.85)]">
         {formatNumber(info.getValue())}
       </span>
     ),
@@ -95,7 +96,7 @@ const columns = [
     meta: { align: "right" },
     cell: (info) => {
       const value = info.getValue();
-      if (!value) return <span className="text-[rgba(25,54,63,0.3)]">$0</span>;
+      if (!value) return <span className="text-[rgba(25,54,63,0.5)]">$0</span>;
 
       return (
         <span className="font-medium tabular-nums text-[#19363F]">
@@ -226,7 +227,7 @@ const FeeTaggingPanel = () => {
                   "rounded-md px-2 py-1 font-inter text-[11px] font-medium tabular-nums tracking-[-0.44px] transition-colors",
                   days === option
                     ? "bg-[#19363F] text-white"
-                    : "text-[rgba(25,54,63,0.55)] hover:bg-[rgba(25,54,63,0.04)]"
+                    : "text-[rgba(25,54,63,0.75)] hover:bg-[rgba(25,54,63,0.04)]"
                 )}
               >
                 {option === 365 ? "1 a" : `${option} d`}
@@ -253,14 +254,14 @@ const FeeTaggingPanel = () => {
           dense
         />
 
-        <p className="mt-2.5 font-inter text-[10px] leading-[1.5] tracking-[-0.4px] text-[rgba(25,54,63,0.4)]">
+        <PanelNote className="mt-2.5">
           El dashboard antiguo leía esta tabla sin ventana, sobre todo el histórico. Cerebro exige
           una y la limita a 365 días, así que «1 a» es lo más parecido: a 30 días desaparecen los
           grupos etiquetados por el backend, que son más antiguos que la ventana.
-        </p>
+        </PanelNote>
 
         {truncated && (
-          <p className="mt-1.5 font-inter text-[10px] leading-[1.5] tracking-[-0.4px] text-[rgba(25,54,63,0.4)]">
+          <p className="mt-1.5 font-inter text-[10px] leading-[1.5] tracking-[-0.4px] text-[rgba(25,54,63,0.68)]">
             Agrupado en el front sobre las {formatNumber(sampled)} filas más recientes de la ventana
             — el endpoint devuelve como mucho {DIAGNOSTICS_LIMIT} y no pagina, así que estos
             recuentos son una muestra, no el total.

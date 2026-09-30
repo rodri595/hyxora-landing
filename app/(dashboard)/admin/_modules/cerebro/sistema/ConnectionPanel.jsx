@@ -10,7 +10,7 @@ import Panel, { RefreshButton } from "../../shared/Panel";
 
 const Row = ({ label, children }) => (
   <div className="flex items-start gap-3 py-1.5 border-b-[0.7px] border-[rgba(25,54,63,0.05)] last:border-b-0">
-    <span className="font-inter text-[10px] tracking-[-0.4px] text-[rgba(25,54,63,0.45)] w-[120px] shrink-0 pt-px">
+    <span className="font-inter text-[10px] tracking-[-0.4px] text-[rgba(25,54,63,0.68)] w-[120px] shrink-0 pt-px">
       {label}
     </span>
     <div className="flex-1 min-w-0">{children}</div>
@@ -41,7 +41,7 @@ const ConnectionPanel = () => {
   const state = isFetching ? "loading" : error ? "error" : data ? "ok" : "idle";
 
   const statusPill = {
-    idle: { label: "Sin probar", className: "bg-[rgba(25,54,63,0.06)] text-[rgba(25,54,63,0.55)]" },
+    idle: { label: "Sin probar", className: "bg-[rgba(25,54,63,0.06)] text-[rgba(25,54,63,0.75)]" },
     loading: {
       label: "Probando…",
       className: "bg-amber-50 text-amber-700 border border-amber-200",
@@ -72,7 +72,7 @@ const ConnectionPanel = () => {
           {statusPill.label}
         </span>
         {latencyMs !== null && state === "ok" && (
-          <span className="font-inter text-[10px] tabular-nums text-[rgba(25,54,63,0.4)]">
+          <span className="font-inter text-[10px] tabular-nums text-[rgba(25,54,63,0.68)]">
             {latencyMs} ms
           </span>
         )}
@@ -80,7 +80,7 @@ const ConnectionPanel = () => {
 
       <div className="flex flex-col">
         <Row label="Endpoint">
-          <span className="font-mono text-[10px] tracking-tight text-[rgba(25,54,63,0.65)] break-all">
+          <span className="font-mono text-[10px] tracking-tight text-[rgba(25,54,63,0.85)] break-all">
             GET {cerebroBaseUrl}/system/health
           </span>
         </Row>
@@ -99,19 +99,19 @@ const ConnectionPanel = () => {
         <Row label="Tu Privy ID">
           {privyId ? (
             <div className="flex items-center gap-1.5 min-w-0">
-              <span className="font-mono text-[10px] tracking-tight text-[rgba(25,54,63,0.65)] truncate">
+              <span className="font-mono text-[10px] tracking-tight text-[rgba(25,54,63,0.85)] truncate">
                 {privyId}
               </span>
               <CopyButton text={privyId} />
             </div>
           ) : (
-            <span className="font-inter text-[10px] text-[rgba(25,54,63,0.35)]">—</span>
+            <span className="font-inter text-[10px] text-[rgba(25,54,63,0.68)]">—</span>
           )}
         </Row>
 
         {dataUpdatedAt > 0 && (
           <Row label="Última lectura">
-            <span className="font-inter text-[10px] tabular-nums text-[rgba(25,54,63,0.55)]">
+            <span className="font-inter text-[10px] tabular-nums text-[rgba(25,54,63,0.75)]">
               {new Date(dataUpdatedAt).toLocaleString()}
             </span>
           </Row>
@@ -142,11 +142,11 @@ const ConnectionPanel = () => {
 
       {data && (
         <details className="mt-2.5">
-          <summary className="cursor-pointer font-inter text-[10px] font-medium text-[rgba(25,54,63,0.5)] hover:text-[#19363F] tracking-[-0.4px] transition-colors list-none">
+          <summary className="cursor-pointer font-inter text-[10px] font-medium text-[rgba(25,54,63,0.75)] hover:text-[#19363F] tracking-[-0.4px] transition-colors list-none">
             Ver JSON completo
           </summary>
           <pre
-            className="mt-2 max-h-[320px] overflow-auto overscroll-contain rounded-lg bg-[rgba(25,54,63,0.03)] border-[0.7px] border-[rgba(25,54,63,0.08)] p-2.5 font-mono text-[10px] leading-[1.5] text-[rgba(25,54,63,0.7)]"
+            className="mt-2 max-h-[320px] overflow-auto overscroll-contain rounded-lg bg-[rgba(25,54,63,0.03)] border-[0.7px] border-[rgba(25,54,63,0.08)] p-2.5 font-mono text-[10px] leading-[1.5] text-[rgba(25,54,63,0.85)]"
           >
             {JSON.stringify(data, null, 2)}
           </pre>

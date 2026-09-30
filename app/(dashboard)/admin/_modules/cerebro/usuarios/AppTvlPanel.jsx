@@ -15,12 +15,13 @@ import {
 } from "recharts";
 import { AnimatedCount, AnimatedMoney } from "../../shared/AnimatedValue";
 import { TooltipSurface, tooltipWrapperStyle, useHeldTooltip } from "../../shared/ChartTooltip";
+import { PanelNote } from "../../shared/Explanations";
 import Panel, { RefreshButton } from "../../shared/Panel";
 import QueryState from "../../shared/QueryState";
 import StatCard from "../../shared/StatCard";
 import { GROWTH_DAYS, TVL_LINE } from "./constants";
 
-const AXIS = "rgba(25,54,63,0.4)";
+const AXIS = "rgba(25,54,63,0.68)";
 const GRID = "rgba(25,54,63,0.08)";
 
 const DAY_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
@@ -57,10 +58,10 @@ const ChartTooltip = (props) => {
 
   return (
     <TooltipSurface visible={visible}>
-      <p className="font-inter text-[10px] font-medium tracking-[-0.4px] text-[rgba(25,54,63,0.45)] mb-1">
+      <p className="font-inter text-[10px] font-medium tracking-[-0.4px] text-[rgba(25,54,63,0.68)] mb-1">
         {label}
       </p>
-      <p className="font-inter text-[11px] tracking-[-0.44px] text-[rgba(25,54,63,0.6)]">
+      <p className="font-inter text-[11px] tracking-[-0.44px] text-[rgba(25,54,63,0.75)]">
         <span className="font-semibold tabular-nums text-emerald-700">
           {formatUsd(point?.tvlUsd, { decimals: 0 })}
         </span>
@@ -202,7 +203,7 @@ const AppTvlPanel = () => {
           </ResponsiveContainer>
 
           {change !== null && (
-            <p className="font-inter text-[10px] leading-[1.5] tracking-[-0.4px] text-[rgba(25,54,63,0.4)] mt-2">
+            <p className="font-inter text-[10px] leading-[1.5] tracking-[-0.4px] text-[rgba(25,54,63,0.68)] mt-2">
               Del {first.day} al {last.day}, de {formatUsd(first.tvlUsd, { decimals: 0 })} a{" "}
               {formatUsd(last.tvlUsd, { decimals: 0 })} —{" "}
               <span className={change >= 0 ? "text-emerald-700" : "text-red-600"}>
@@ -216,10 +217,10 @@ const AppTvlPanel = () => {
         </QueryState>
       </div>
 
-      <p className="font-inter text-[10px] leading-[1.5] tracking-[-0.4px] text-[rgba(25,54,63,0.4)] mt-2">
+      <PanelNote className="mt-2">
         Los snapshots por usuario se refrescan con la actividad, así que el TVL total mezcla fechas:
         es la suma del último dato de cada uno, no una foto de un instante concreto.
-      </p>
+      </PanelNote>
     </Panel>
   );
 };

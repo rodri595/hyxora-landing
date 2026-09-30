@@ -7,6 +7,7 @@ import { useGetGasPrices } from "@/hooks/monitoring/useGetGasPrices";
 import { cn } from "@/utils";
 import { formatNumber, formatPercent } from "@/utils/format";
 import { useMemo } from "react";
+import { PanelNote } from "../../shared/Explanations";
 import Panel, { RefreshButton } from "../../shared/Panel";
 import QueryState from "../../shared/QueryState";
 
@@ -27,7 +28,7 @@ const columns = [
       const { error } = info.row.original;
       if (error) return <span className="font-inter text-[10px] text-red-600">{error}</span>;
       return (
-        <span className="tabular-nums text-[rgba(25,54,63,0.7)]">
+        <span className="tabular-nums text-[rgba(25,54,63,0.85)]">
           {formatNumber(info.getValue(), { decimals: 3 })}
         </span>
       );
@@ -40,7 +41,7 @@ const columns = [
     cell: (info) => {
       const value = info.getValue();
       return value === null ? (
-        <span className="text-[rgba(25,54,63,0.3)]">—</span>
+        <span className="text-[rgba(25,54,63,0.5)]">—</span>
       ) : (
         <span className="tabular-nums font-medium text-[#19363F]">
           {formatNumber(value, { decimals: 2 })}
@@ -53,11 +54,11 @@ const columns = [
     header: "Origen",
     cell: (info) => {
       const source = info.getValue();
-      if (source === null) return <span className="text-[rgba(25,54,63,0.3)]">—</span>;
+      if (source === null) return <span className="text-[rgba(25,54,63,0.5)]">—</span>;
       return source === "override" ? (
         <span className="font-medium text-[#19363F]">Configurado</span>
       ) : (
-        <span className="text-[rgba(25,54,63,0.45)]">Predeterminado</span>
+        <span className="text-[rgba(25,54,63,0.68)]">Predeterminado</span>
       );
     },
   },
@@ -67,7 +68,7 @@ const columns = [
     meta: { align: "right" },
     cell: (info) => {
       const pct = info.getValue();
-      if (pct === null) return <span className="text-[rgba(25,54,63,0.3)]">—</span>;
+      if (pct === null) return <span className="text-[rgba(25,54,63,0.5)]">—</span>;
       return (
         <span
           className={cn(
@@ -170,11 +171,11 @@ const GasLimitsPanel = () => {
           </p>
         )}
 
-        <p className="font-inter text-[10px] leading-[1.5] tracking-[-0.4px] text-[rgba(25,54,63,0.4)] mt-2">
+        <PanelNote className="mt-2">
           Vista de solo lectura: los límites se editan en el Panel de Admin de la app (Configuración
           → Límites de Gas), no aquí. «Predeterminado» significa que nadie ha guardado un límite
           para esa red y la app usa su valor por defecto.
-        </p>
+        </PanelNote>
       </QueryState>
     </Panel>
   );

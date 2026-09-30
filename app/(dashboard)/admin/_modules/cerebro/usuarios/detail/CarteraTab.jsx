@@ -77,7 +77,7 @@ const AssetCell = ({ row, isVault }) => {
           {primary}
         </span>
         {secondary && secondary !== primary && (
-          <span className="truncate font-inter text-[10px] tracking-[-0.4px] text-[rgba(25,54,63,0.45)]">
+          <span className="truncate font-inter text-[10px] tracking-[-0.4px] text-[rgba(25,54,63,0.68)]">
             {secondary}
           </span>
         )}
@@ -106,7 +106,7 @@ const positionColumns = (isVault) => [
     accessorKey: "chainLabel",
     header: "Red",
     cell: (info) => (
-      <span className="whitespace-nowrap font-inter text-[11px] tracking-[-0.44px] text-[rgba(25,54,63,0.6)]">
+      <span className="whitespace-nowrap font-inter text-[11px] tracking-[-0.44px] text-[rgba(25,54,63,0.75)]">
         {info.getValue()}
       </span>
     ),
@@ -126,7 +126,7 @@ const positionColumns = (isVault) => [
     header: "Precio",
     meta: { align: "right" },
     cell: (info) => (
-      <span className="tabular-nums text-[rgba(25,54,63,0.55)]">
+      <span className="tabular-nums text-[rgba(25,54,63,0.75)]">
         {formatPrice(info.getValue())}
       </span>
     ),
@@ -208,7 +208,7 @@ const PnlCard = ({ label, block, note }) => {
         <SignedUsd value={block.pnlUsd} className="text-[13px]" />
       </div>
 
-      <div className="flex items-baseline justify-between gap-2 font-inter text-[10px] tracking-[-0.4px] text-[rgba(25,54,63,0.45)]">
+      <div className="flex items-baseline justify-between gap-2 font-inter text-[10px] tracking-[-0.4px] text-[rgba(25,54,63,0.68)]">
         <span className="tabular-nums">
           {block.valueUsd === null
             ? "—"
@@ -228,7 +228,7 @@ const PnlCard = ({ label, block, note }) => {
       </div>
 
       {note && (
-        <span className="font-inter text-[10px] tracking-[-0.4px] text-[rgba(25,54,63,0.4)]">
+        <span className="font-inter text-[10px] tracking-[-0.4px] text-[rgba(25,54,63,0.68)]">
           {note}
         </span>
       )}
@@ -269,7 +269,7 @@ const PnlBlock = ({ pnl, vaultPositions, isLoading, error, shape }) => {
         <SectionHeader
           title="Rendimiento (PnL)"
           aside={
-            <span className="font-inter text-[10px] tracking-[-0.4px] text-[rgba(25,54,63,0.4)]">
+            <span className="font-inter text-[10px] tracking-[-0.4px] text-[rgba(25,54,63,0.68)]">
               Fuente: Hyxora
             </span>
           }
@@ -317,7 +317,7 @@ const PnlBlock = ({ pnl, vaultPositions, isLoading, error, shape }) => {
           <div className="flex items-baseline gap-2">
             <SignedUsd value={pnl.totalPnlUsd} className="text-[14px]" />
             {pnl.totalValueUsd !== null && (
-              <span className="font-inter text-[10px] tabular-nums tracking-[-0.4px] text-[rgba(25,54,63,0.4)]">
+              <span className="font-inter text-[10px] tabular-nums tracking-[-0.4px] text-[rgba(25,54,63,0.68)]">
                 sobre {formatUsd(pnl.totalValueUsd, { decimals: 0 })}
               </span>
             )}
@@ -340,22 +340,22 @@ const PnlBlock = ({ pnl, vaultPositions, isLoading, error, shape }) => {
 
       {vaultPositions && vaultPositions.positions.length > 0 && (
         <div className="flex flex-col gap-1.5 rounded-lg border-[0.7px] border-[rgba(25,54,63,0.08)] bg-[rgba(25,54,63,0.015)] px-3 py-2.5">
-          <span className="font-inter text-[10px] font-medium uppercase tracking-[0.4px] text-[rgba(25,54,63,0.4)]">
+          <span className="font-inter text-[10px] font-medium uppercase tracking-[0.4px] text-[rgba(25,54,63,0.68)]">
             Por vault
           </span>
           {vaultPositions.positions.map((position) => (
             <div key={position.id} className="flex items-baseline justify-between gap-3">
-              <span className="min-w-0 truncate font-inter text-[11px] tracking-[-0.44px] text-[rgba(25,54,63,0.7)]">
+              <span className="min-w-0 truncate font-inter text-[11px] tracking-[-0.44px] text-[rgba(25,54,63,0.85)]">
                 {position.name}
                 {position.chainLabel !== "—" && (
-                  <span className="ml-1.5 text-[10px] text-[rgba(25,54,63,0.35)]">
+                  <span className="ml-1.5 text-[10px] text-[rgba(25,54,63,0.68)]">
                     {position.chainLabel}
                   </span>
                 )}
               </span>
               <span className="flex shrink-0 items-baseline gap-2">
                 {position.assetsUsd !== null && (
-                  <span className="font-inter text-[10px] tabular-nums tracking-[-0.4px] text-[rgba(25,54,63,0.4)]">
+                  <span className="font-inter text-[10px] tabular-nums tracking-[-0.4px] text-[rgba(25,54,63,0.68)]">
                     {formatUsd(position.assetsUsd, { decimals: 2 })}
                   </span>
                 )}

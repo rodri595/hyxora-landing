@@ -5,6 +5,7 @@ import { appApiChainLabels } from "@/constants/appApi";
 import { useGetWhitelistedTokens } from "@/hooks/appApi/useGetWhitelistedTokens";
 import { formatNumber, shortenHash } from "@/utils/format";
 import { useMemo } from "react";
+import { PanelNote } from "../../shared/Explanations";
 import Panel, { RefreshButton } from "../../shared/Panel";
 import QueryState from "../../shared/QueryState";
 import StatusBadge from "../../shared/StatusBadge";
@@ -18,19 +19,19 @@ const columns = [
   {
     accessorKey: "name",
     header: "Nombre",
-    cell: (info) => <span className="text-[rgba(25,54,63,0.65)]">{info.getValue() ?? "—"}</span>,
+    cell: (info) => <span className="text-[rgba(25,54,63,0.85)]">{info.getValue() ?? "—"}</span>,
   },
   {
     accessorKey: "chainLabel",
     header: "Red",
-    cell: (info) => <span className="text-[rgba(25,54,63,0.5)]">{info.getValue()}</span>,
+    cell: (info) => <span className="text-[rgba(25,54,63,0.75)]">{info.getValue()}</span>,
   },
   {
     accessorKey: "decimals",
     header: "Decimales",
     meta: { align: "right" },
     cell: (info) => (
-      <span className="tabular-nums text-[rgba(25,54,63,0.7)]">
+      <span className="tabular-nums text-[rgba(25,54,63,0.85)]">
         {formatNumber(info.getValue())}
       </span>
     ),
@@ -39,7 +40,7 @@ const columns = [
     accessorKey: "address",
     header: "Dirección",
     cell: (info) => (
-      <code className="font-mono text-[10px] tracking-tight text-[rgba(25,54,63,0.55)]">
+      <code className="font-mono text-[10px] tracking-tight text-[rgba(25,54,63,0.75)]">
         {shortenHash(info.getValue())}
       </code>
     ),
@@ -102,10 +103,10 @@ const WhitelistedTokensPanel = () => {
           dense
         />
 
-        <p className="font-inter text-[10px] leading-[1.5] tracking-[-0.4px] text-[rgba(25,54,63,0.4)] mt-2">
+        <PanelNote className="mt-2">
           Vista de solo lectura. El mismo símbolo puede repetirse en varias redes — cada fila es un
           contrato distinto, así que compara por red y dirección, no por símbolo.
-        </p>
+        </PanelNote>
       </QueryState>
     </Panel>
   );

@@ -34,7 +34,7 @@ import { formatUsdPrecise } from "@/utils/format";
  */
 export const DetailField = ({ label, children, value, copy, mono, hint, className }) => (
   <div className={cn("flex min-w-0 flex-col gap-1", className)}>
-    <span className="font-inter text-[9px] font-medium uppercase tracking-[0.5px] text-[rgba(25,54,63,0.4)]">
+    <span className="font-inter text-[10px] font-medium uppercase tracking-[0.5px] text-[rgba(25,54,63,0.68)]">
       {label}
     </span>
 
@@ -44,7 +44,7 @@ export const DetailField = ({ label, children, value, copy, mono, hint, classNam
           className={cn(
             "min-w-0 truncate",
             mono
-              ? "font-mono text-[10px] tracking-tight text-[rgba(25,54,63,0.75)]"
+              ? "font-mono text-[10px] tracking-tight text-[rgba(25,54,63,0.85)]"
               : "font-inter text-[11px] tracking-[-0.44px] text-[#19363F]"
           )}
           title={value ?? undefined}
@@ -56,7 +56,7 @@ export const DetailField = ({ label, children, value, copy, mono, hint, classNam
     </div>
 
     {hint && (
-      <span className="font-inter text-[10px] leading-[1.4] tracking-[-0.4px] text-[rgba(25,54,63,0.4)]">
+      <span className="font-inter text-[10px] leading-[1.4] tracking-[-0.4px] text-[rgba(25,54,63,0.68)]">
         {hint}
       </span>
     )}
@@ -98,12 +98,12 @@ const KYC_DOTS = {
  * @param {string | null | undefined} props.status
  */
 export const KycBadge = ({ status }) => {
-  if (!status) return <span className="text-[rgba(25,54,63,0.3)]">—</span>;
+  if (!status) return <span className="text-[rgba(25,54,63,0.5)]">—</span>;
 
   const upper = String(status).toUpperCase();
   if (upper === "NOT_AVAILABLE" || upper === "NONE") {
     return (
-      <span className="inline-flex items-center rounded-full border border-[rgba(25,54,63,0.08)] bg-[rgba(25,54,63,0.03)] px-1.5 py-0.5 font-inter text-[9px] font-medium uppercase tracking-[0.4px] text-[rgba(25,54,63,0.4)]">
+      <span className="inline-flex items-center rounded-full border border-[rgba(25,54,63,0.08)] bg-[rgba(25,54,63,0.03)] px-1.5 py-0.5 font-inter text-[10px] font-medium uppercase tracking-[0.4px] text-[rgba(25,54,63,0.68)]">
         sin KYC
       </span>
     );
@@ -113,9 +113,9 @@ export const KycBadge = ({ status }) => {
     <span
       title="Estado de KYC del banco de Hyxora. APPROVED desbloquea las órdenes SEPA."
       className={cn(
-        "inline-flex items-center gap-1 rounded-full border px-1.5 py-0.5 font-inter text-[9px] font-medium uppercase tracking-[0.4px]",
+        "inline-flex items-center gap-1 rounded-full border px-1.5 py-0.5 font-inter text-[10px] font-medium uppercase tracking-[0.4px]",
         KYC_TONES[upper] ??
-          "border-[rgba(25,54,63,0.08)] bg-[rgba(25,54,63,0.04)] text-[rgba(25,54,63,0.55)]"
+          "border-[rgba(25,54,63,0.08)] bg-[rgba(25,54,63,0.04)] text-[rgba(25,54,63,0.75)]"
       )}
     >
       <span className={cn("size-1 rounded-full", KYC_DOTS[upper] ?? "bg-[rgba(25,54,63,0.3)]")} />
@@ -133,14 +133,14 @@ export const KycBadge = ({ status }) => {
  * @param {string | null | undefined} props.status
  */
 export const MembershipBadge = ({ status }) => {
-  if (!status) return <span className="text-[rgba(25,54,63,0.3)]">—</span>;
+  if (!status) return <span className="text-[rgba(25,54,63,0.5)]">—</span>;
 
   const active = String(status).toLowerCase() === "active";
 
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1 rounded-full border px-1.5 py-0.5 font-inter text-[9px] font-medium uppercase tracking-[0.4px]",
+        "inline-flex items-center gap-1 rounded-full border px-1.5 py-0.5 font-inter text-[10px] font-medium uppercase tracking-[0.4px]",
         active
           ? "border-emerald-200 bg-emerald-50 text-emerald-700"
           : "border-amber-200 bg-amber-50 text-amber-700"
@@ -168,7 +168,7 @@ export const NftChip = ({ balance, tokenIds = [] }) => {
   return (
     <span
       title={ids.length > 0 ? `Token IDs: ${ids.map((id) => `#${id}`).join(", ")}` : undefined}
-      className="inline-flex shrink-0 items-center gap-1 rounded-full border border-amber-200 bg-amber-50 px-1.5 py-0.5 font-inter text-[9px] font-medium tracking-[-0.36px] text-amber-700"
+      className="inline-flex shrink-0 items-center gap-1 rounded-full border border-amber-200 bg-amber-50 px-1.5 py-0.5 font-inter text-[10px] font-medium tracking-[-0.36px] text-amber-700"
     >
       ◆ {balance} NFT{balance > 1 ? "s" : ""}
     </span>
@@ -187,7 +187,7 @@ export const NftChip = ({ balance, tokenIds = [] }) => {
  * @param {string | null} props.operation
  */
 export const OperationBadge = ({ operation }) => {
-  if (!operation) return <span className="text-[rgba(25,54,63,0.3)]">—</span>;
+  if (!operation) return <span className="text-[rgba(25,54,63,0.5)]">—</span>;
 
   const color = cerebroOperationColor(cerebroOperationKey(operation));
 
@@ -219,14 +219,14 @@ const RAMP_TONES = {
  * @param {string | null} props.status
  */
 export const RampStatusBadge = ({ status }) => {
-  if (!status || status === "—") return <span className="text-[rgba(25,54,63,0.3)]">—</span>;
+  if (!status || status === "—") return <span className="text-[rgba(25,54,63,0.5)]">—</span>;
 
   return (
     <span
       className={cn(
-        "inline-flex items-center whitespace-nowrap rounded-full border px-1.5 py-0.5 font-inter text-[9px] font-medium uppercase tracking-[0.4px]",
+        "inline-flex items-center whitespace-nowrap rounded-full border px-1.5 py-0.5 font-inter text-[10px] font-medium uppercase tracking-[0.4px]",
         RAMP_TONES[status.toLowerCase()] ??
-          "border-[rgba(25,54,63,0.08)] bg-[rgba(25,54,63,0.04)] text-[rgba(25,54,63,0.55)]"
+          "border-[rgba(25,54,63,0.08)] bg-[rgba(25,54,63,0.04)] text-[rgba(25,54,63,0.75)]"
       )}
     >
       {status}
@@ -249,14 +249,14 @@ export const RampStatusBadge = ({ status }) => {
  */
 export const SignedUsd = ({ value, dashZero = false, className }) => {
   if (typeof value !== "number" || !Number.isFinite(value) || (dashZero && value === 0)) {
-    return <span className={cn("text-[rgba(25,54,63,0.3)]", className)}>—</span>;
+    return <span className={cn("text-[rgba(25,54,63,0.5)]", className)}>—</span>;
   }
 
   return (
     <span
       className={cn(
         "font-medium tabular-nums",
-        value > 0 ? "text-emerald-700" : value < 0 ? "text-red-600" : "text-[rgba(25,54,63,0.55)]",
+        value > 0 ? "text-emerald-700" : value < 0 ? "text-red-600" : "text-[rgba(25,54,63,0.75)]",
         className
       )}
     >
@@ -281,7 +281,7 @@ export const SectionHeader = ({ title, subtitle, aside }) => (
         {title}
       </h4>
       {subtitle && (
-        <p className="mt-0.5 font-inter text-[10px] leading-[1.5] tracking-[-0.4px] text-[rgba(25,54,63,0.45)]">
+        <p className="mt-0.5 font-inter text-[10px] leading-[1.5] tracking-[-0.4px] text-[rgba(25,54,63,0.68)]">
           {subtitle}
         </p>
       )}
@@ -299,7 +299,7 @@ export const SectionHeader = ({ title, subtitle, aside }) => (
  * @param {React.ReactNode} props.children
  */
 export const Footnote = ({ children }) => (
-  <p className="font-inter text-[10px] leading-[1.5] tracking-[-0.4px] text-[rgba(25,54,63,0.4)]">
+  <p className="font-inter text-[10px] leading-[1.5] tracking-[-0.4px] text-[rgba(25,54,63,0.68)]">
     {children}
   </p>
 );
@@ -312,7 +312,7 @@ export const Footnote = ({ children }) => (
  * @param {React.ReactNode} props.children
  */
 export const EmptyBlock = ({ children }) => (
-  <div className="rounded-lg border border-dashed border-[rgba(25,54,63,0.12)] px-3 py-6 text-center font-inter text-[11px] tracking-[-0.44px] text-[rgba(25,54,63,0.4)]">
+  <div className="rounded-lg border border-dashed border-[rgba(25,54,63,0.12)] px-3 py-6 text-center font-inter text-[11px] tracking-[-0.44px] text-[rgba(25,54,63,0.68)]">
     {children}
   </div>
 );

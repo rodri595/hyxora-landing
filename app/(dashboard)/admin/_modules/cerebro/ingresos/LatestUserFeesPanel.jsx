@@ -5,6 +5,7 @@ import { cerebroChainLabel, cerebroOperationLabels } from "@/constants/cerebro";
 import { useGetFeesRecent } from "@/hooks/cerebro/useGetFeesRecent";
 import { formatDateTime, formatNumber, formatUsd, shortenHash } from "@/utils/format";
 import { useMemo, useState } from "react";
+import { PanelNote } from "../../shared/Explanations";
 import Panel, { RefreshButton } from "../../shared/Panel";
 import QueryState from "../../shared/QueryState";
 import TxLink from "../../shared/TxLink";
@@ -42,7 +43,7 @@ const columns = [
     header: "Hora",
     enableSorting: false,
     cell: (info) => (
-      <span className="tabular-nums text-[rgba(25,54,63,0.65)]">
+      <span className="tabular-nums text-[rgba(25,54,63,0.85)]">
         {formatDateTime(info.getValue())}
       </span>
     ),
@@ -57,7 +58,7 @@ const columns = [
     accessorKey: "operationLabel",
     header: "Op",
     enableSorting: false,
-    cell: (info) => <span className="text-[rgba(25,54,63,0.65)]">{info.getValue()}</span>,
+    cell: (info) => <span className="text-[rgba(25,54,63,0.85)]">{info.getValue()}</span>,
   },
   {
     accessorKey: "from",
@@ -65,9 +66,9 @@ const columns = [
     enableSorting: false,
     cell: (info) => {
       const value = info.getValue();
-      if (!value) return <span className="text-[rgba(25,54,63,0.3)]">—</span>;
+      if (!value) return <span className="text-[rgba(25,54,63,0.5)]">—</span>;
       return (
-        <span className="font-mono text-[10px] text-[rgba(25,54,63,0.55)]" title={value}>
+        <span className="font-mono text-[10px] text-[rgba(25,54,63,0.75)]" title={value}>
           {shortenHash(value)}
         </span>
       );
@@ -78,7 +79,7 @@ const columns = [
     header: "Token",
     enableSorting: false,
     cell: (info) => (
-      <span className="font-medium text-[rgba(25,54,63,0.7)]">{info.getValue() ?? "—"}</span>
+      <span className="font-medium text-[rgba(25,54,63,0.85)]">{info.getValue() ?? "—"}</span>
     ),
   },
   {
@@ -169,12 +170,12 @@ const LatestUserFeesPanel = ({ includeNonWhitelisted = false }) => {
           dense
         />
 
-        <p className="font-inter text-[10px] leading-[1.5] tracking-[-0.4px] text-[rgba(25,54,63,0.4)] mt-2">
+        <PanelNote className="mt-2">
           Sin ventana de días: esto recorre el registro entero, no los últimos 30 días como el resto
           de la pestaña. El endpoint no acepta búsqueda ni orden, así que la tabla no los ofrece —
           filtrar solo esta página daría la impresión de haber buscado en todas. La exportación baja
           la página que estás viendo, no las {formatNumber(total)} filas.
-        </p>
+        </PanelNote>
       </QueryState>
     </Panel>
   );

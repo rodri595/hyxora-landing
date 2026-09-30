@@ -6,6 +6,7 @@ import { formatNumber } from "@/utils/format";
 import { useMemo } from "react";
 import { AnimatedCount } from "../../shared/AnimatedValue";
 import CompositionBar from "../../shared/CompositionBar";
+import { PanelNote } from "../../shared/Explanations";
 import MeterBar from "../../shared/MeterBar";
 import Panel, { RefreshButton } from "../../shared/Panel";
 import QueryState from "../../shared/QueryState";
@@ -68,7 +69,7 @@ const PlanDistributionPanel = () => {
           </div>
 
           <div>
-            <h4 className="font-inter text-[10px] font-medium uppercase tracking-[0.6px] text-[rgba(25,54,63,0.4)] mb-2">
+            <h4 className="font-inter text-[10px] font-medium uppercase tracking-[0.6px] text-[rgba(25,54,63,0.68)] mb-2">
               Reparto de cuentas
             </h4>
             <CompositionBar
@@ -80,7 +81,7 @@ const PlanDistributionPanel = () => {
 
           {funnels.length > 0 && (
             <div>
-              <h4 className="font-inter text-[10px] font-medium uppercase tracking-[0.6px] text-[rgba(25,54,63,0.4)] mb-2">
+              <h4 className="font-inter text-[10px] font-medium uppercase tracking-[0.6px] text-[rgba(25,54,63,0.68)] mb-2">
                 Registro completado por plan
               </h4>
               <div className="flex flex-col gap-2">
@@ -95,11 +96,11 @@ const PlanDistributionPanel = () => {
                   />
                 ))}
               </div>
-              <p className="font-inter text-[10px] leading-[1.5] tracking-[-0.4px] text-[rgba(25,54,63,0.4)] mt-2">
+              <PanelNote className="mt-2">
                 La barra llena es quien terminó el onboarding; lo que falta son cuentas creadas que
                 se quedaron a medias. Un plan al 100% no significa que estén activos, solo
                 registrados.
-              </p>
+              </PanelNote>
             </div>
           )}
         </div>

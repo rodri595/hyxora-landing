@@ -54,11 +54,11 @@ const BalanceCard = ({ label, value, unit, hint, low = false, children }) => (
     )}
   >
     <div className="flex items-center justify-between gap-2">
-      <span className="font-inter text-[10px] tracking-[-0.4px] text-[rgba(25,54,63,0.5)]">
+      <span className="font-inter text-[10px] tracking-[-0.4px] text-[rgba(25,54,63,0.75)]">
         {label}
       </span>
       {low && (
-        <span className="rounded-full border border-red-200 bg-red-100/70 px-1.5 py-0.5 font-inter text-[9px] font-medium uppercase tracking-[0.4px] text-red-700">
+        <span className="rounded-full border border-red-200 bg-red-100/70 px-1.5 py-0.5 font-inter text-[10px] font-medium uppercase tracking-[0.4px] text-red-700">
           Recargar
         </span>
       )}
@@ -72,13 +72,13 @@ const BalanceCard = ({ label, value, unit, hint, low = false, children }) => (
     >
       {value}
       {unit && (
-        <span className="font-normal text-[13px] tracking-[-0.52px] text-[rgba(25,54,63,0.4)]">
+        <span className="font-normal text-[13px] tracking-[-0.52px] text-[rgba(25,54,63,0.68)]">
           {unit}
         </span>
       )}
     </div>
 
-    <div className="mt-1 font-inter text-[10px] leading-[1.5] tracking-[-0.4px] text-[rgba(25,54,63,0.45)]">
+    <div className="mt-1 font-inter text-[10px] leading-[1.5] tracking-[-0.4px] text-[rgba(25,54,63,0.68)]">
       {hint}
     </div>
 
@@ -220,19 +220,19 @@ const PimlicoCard = ({ query }) => {
       <form onSubmit={apply} className="mt-2 flex flex-wrap items-center gap-1.5">
         <label
           htmlFor="pimlico-balance"
-          className="font-inter text-[10px] tracking-[-0.4px] text-[rgba(25,54,63,0.45)]"
+          className="font-inter text-[10px] tracking-[-0.4px] text-[rgba(25,54,63,0.68)]"
         >
           Saldo real hoy
         </label>
         <div className="flex items-center rounded-lg border-[0.7px] border-[rgba(25,54,63,0.12)] bg-white pl-2">
-          <span className="font-inter text-[11px] text-[rgba(25,54,63,0.35)]">$</span>
+          <span className="font-inter text-[11px] text-[rgba(25,54,63,0.68)]">$</span>
           <input
             id="pimlico-balance"
             inputMode="decimal"
             value={draft}
             onChange={(event) => setDraft(event.target.value)}
             placeholder={formatNumber(runway.balanceUsd, { decimals: 2 })}
-            className="w-[76px] bg-transparent px-1 py-1 font-inter text-[11px] tabular-nums tracking-[-0.44px] text-[#19363F] outline-none placeholder:text-[rgba(25,54,63,0.3)]"
+            className="w-[76px] bg-transparent px-1 py-1 font-inter text-[11px] tabular-nums tracking-[-0.44px] text-[#19363F] outline-none placeholder:text-[rgba(25,54,63,0.5)]"
           />
         </div>
         <button
@@ -242,7 +242,7 @@ const PimlicoCard = ({ query }) => {
             "rounded-lg border-[0.7px] px-2 py-1 font-inter text-[10px] font-medium tracking-[-0.4px] transition-colors",
             canApply
               ? "border-[rgba(25,54,63,0.12)] text-[#19363F] hover:bg-[rgba(25,54,63,0.04)]"
-              : "border-[rgba(25,54,63,0.08)] text-[rgba(25,54,63,0.3)] cursor-not-allowed"
+              : "border-[rgba(25,54,63,0.08)] text-[rgba(25,54,63,0.5)] cursor-not-allowed"
           )}
         >
           Recalcular
@@ -254,7 +254,7 @@ const PimlicoCard = ({ query }) => {
               setAnchor(null);
               setDraft("");
             }}
-            className="font-inter text-[10px] tracking-[-0.4px] text-[rgba(25,54,63,0.45)] underline underline-offset-2 hover:text-[#19363F]"
+            className="font-inter text-[10px] tracking-[-0.4px] text-[rgba(25,54,63,0.68)] underline underline-offset-2 hover:text-[#19363F]"
           >
             Volver al depósito
           </button>

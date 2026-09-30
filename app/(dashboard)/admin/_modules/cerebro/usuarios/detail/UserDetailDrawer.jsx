@@ -179,7 +179,7 @@ const UserDetailDrawer = ({ user, founder, foundersStatus, foundersError, onClos
           </div>
 
           <div className="flex flex-wrap items-center gap-1.5">
-            <span className="font-inter text-[10px] font-medium tracking-[-0.4px] text-[rgba(25,54,63,0.55)]">
+            <span className="font-inter text-[10px] font-medium tracking-[-0.4px] text-[rgba(25,54,63,0.75)]">
               {cerebroPlanLabel(merged.plan)}
             </span>
             <NftChip balance={merged.nftBalance} tokenIds={merged.nftTokenIds} />
@@ -194,7 +194,7 @@ const UserDetailDrawer = ({ user, founder, foundersStatus, foundersError, onClos
             <span className="font-inter text-[13px] font-semibold tabular-nums tracking-[-0.52px] text-[#19363F]">
               {tvl.totalUsd === null ? "—" : formatUsd(tvl.totalUsd, { decimals: 0 })}
             </span>
-            <span className="font-inter text-[9px] uppercase tracking-[0.4px] text-[rgba(25,54,63,0.4)]">
+            <span className="font-inter text-[10px] uppercase tracking-[0.4px] text-[rgba(25,54,63,0.68)]">
               {tvl.refreshedAt ? timeAgo(tvl.refreshedAt) : "valor"}
             </span>
           </div>
@@ -203,7 +203,7 @@ const UserDetailDrawer = ({ user, founder, foundersStatus, foundersError, onClos
             type="button"
             onClick={onClose}
             aria-label="Cerrar panel"
-            className="mt-0.5 flex size-6 shrink-0 items-center justify-center rounded-md text-[rgba(25,54,63,0.4)] transition-colors hover:bg-[rgba(25,54,63,0.06)] hover:text-[#19363F]"
+            className="mt-0.5 flex size-6 shrink-0 items-center justify-center rounded-md text-[rgba(25,54,63,0.68)] transition-colors hover:bg-[rgba(25,54,63,0.06)] hover:text-[#19363F]"
           >
             <CloseIcon />
           </button>

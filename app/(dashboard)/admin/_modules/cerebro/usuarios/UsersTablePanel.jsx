@@ -4,20 +4,28 @@ import CopyButton from "@/components/CopyButton";
 import DataTable from "@/components/DataTable";
 import { cerebroPlanLabel } from "@/constants/cerebro";
 import { useGetAllUsers } from "@/hooks/admin/useGetAllUsers";
+import { useGetUserStats } from "@/hooks/cerebro/useGetUserStats";
 import { useGetUsers } from "@/hooks/cerebro/useGetUsers";
+import { SWEEP_MAX_PAGES, useGetUsersSweep } from "@/hooks/cerebro/useGetUsersSweep";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 import { cn } from "@/utils";
 import { formatUsd, shortenHash, toDayString } from "@/utils/format";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import { useCallback, useMemo, useRef, useState } from "react";
+import { PanelNote } from "../../shared/Explanations";
 import Panel, { RefreshButton } from "../../shared/Panel";
 import QueryState from "../../shared/QueryState";
-import ScopeTabs from "./ScopeTabs";
-import { DETAIL_DRAWER_WIDTH, USER_PAGE_SIZE, USER_PAGE_SIZES } from "./constants";
+import { firstNumber } from "../../shared/aggregate";
+import UserQueryPrompt from "./UserQueryPrompt";
+import { DETAIL_DRAWER_WIDTH, GROWTH_DAYS, USER_PAGE_SIZE, USER_PAGE_SIZES } from "./constants";
 import UserDetailDrawer from "./detail/UserDetailDrawer";
 import { KycBadge, MembershipBadge, NftChip } from "./detail/parts";
 import { findFounderUser, indexFounderUsers, withFounderFields } from "./founders";
+import { matchesFilters } from "./userQuery";
+
+const DEFAULT_SORTING = [{ id: "tvl", desc: true }];
+const NO_FILTERS = {};
 
 gsap.registerPlugin(useGSAP);
 
@@ -28,6 +36,33 @@ gsap.registerPlugin(useGSAP);
  * somebody else. `privyId` is the one field every /users row carries.
  */
 const getRowId = (row) => row.privyId;
+
+/**
+ * The pager's total, or null when nothing trustworthy says how many rows there are.
+ *
+ * Every page button sat disabled at 25, 50 and 200 rows a page, which is what a
+ * `/users` `total` that is missing (0 pages) or that echoes the page it came with
+ * (1 page) both look like. So a count is believed only if it could be one: never
+ * below the rows already paged past, and not equal to a first page that came back
+ * full — that is a page length. Null makes the pager run open-ended, one page at a
+ * time for as long as pages come back full.
+ *
+ * @param {unknown[]} candidates Counts in order of preference, quoted or not.
+ * @param {{ pageIndex: number, pageSize: number, loaded: number }} page
+ * @return {number | null}
+ */
+const resolveTotal = (candidates, { pageIndex, pageSize, loaded }) => {
+  const seen = pageIndex * pageSize + loaded;
+  const firstPageFull = pageIndex === 0 && loaded >= pageSize;
+
+  for (const candidate of candidates) {
+    const value = firstNumber(candidate);
+    if (value === null || value < seen) continue;
+    if (firstPageFull && value === loaded) continue;
+    return value;
+  }
+  return null;
+};
 
 const formatDay = (value) => {
   if (!value) return "—";
@@ -42,7 +77,7 @@ const formatDay = (value) => {
  */
 const MoneyCell = ({ value, tone }) => {
   if (typeof value !== "number" || !Number.isFinite(value) || value === 0) {
-    return <span className="text-[rgba(25,54,63,0.3)]">—</span>;
+    return <span className="text-[rgba(25,54,63,0.5)]">—</span>;
   }
 
   return (
@@ -59,7 +94,7 @@ const MoneyCell = ({ value, tone }) => {
 
 const NetCell = ({ value }) => {
   if (typeof value !== "number" || !Number.isFinite(value) || value === 0) {
-    return <span className="text-[rgba(25,54,63,0.3)]">—</span>;
+    return <span className="text-[rgba(25,54,63,0.5)]">—</span>;
   }
 
   return (
@@ -92,12 +127,12 @@ const EyeIcon = () => (
  * to discover, it is the point of the column.
  */
 const IdCell = ({ value, lead = 10, tail = 6 }) => {
-  if (!value) return <span className="text-[rgba(25,54,63,0.3)]">—</span>;
+  if (!value) return <span className="text-[rgba(25,54,63,0.5)]">—</span>;
 
   return (
     <div className="flex items-center gap-1.5">
       <span
-        className="font-mono text-[10px] tracking-tight text-[rgba(25,54,63,0.6)]"
+        className="font-mono text-[10px] tracking-tight text-[rgba(25,54,63,0.75)]"
         title={value}
       >
         {shortenHash(value, { lead, tail })}
@@ -116,7 +151,7 @@ const IdCell = ({ value, lead = 10, tail = 6 }) => {
  * @param {"loading" | "error" | "ready"} props.status
  */
 const NoFounderCell = ({ status }) => {
-  if (status === "loading") return <span className="text-[rgba(25,54,63,0.3)]">…</span>;
+  if (status === "loading") return <span className="text-[rgba(25,54,63,0.5)]">…</span>;
 
   if (status === "error") {
     return (
@@ -128,7 +163,7 @@ const NoFounderCell = ({ status }) => {
 
   return (
     <span
-      className="text-[rgba(25,54,63,0.3)]"
+      className="text-[rgba(25,54,63,0.5)]"
       title="Sin cuenta en la web founders con este correo ni esta wallet"
     >
       —
@@ -154,13 +189,13 @@ const FounderCell = ({ row, status }) => {
       <span
         className={cn(
           "whitespace-nowrap tabular-nums",
-          count > 0 ? "font-medium text-[#19363F]" : "text-[rgba(25,54,63,0.45)]"
+          count > 0 ? "font-medium text-[#19363F]" : "text-[rgba(25,54,63,0.68)]"
         )}
       >
         {count} {count === 1 ? "pago" : "pagos"}
       </span>
       {row.founderRole === "Admin" && (
-        <span className="inline-flex items-center rounded-[5px] bg-[#19363F] px-1.5 py-0.5 font-inter text-[9px] font-medium tracking-[-0.36px] text-white">
+        <span className="inline-flex items-center rounded-[5px] bg-[#19363F] px-1.5 py-0.5 font-inter text-[10px] font-medium tracking-[-0.36px] text-white">
           Admin
         </span>
       )}
@@ -204,7 +239,7 @@ const buildColumns = (onOpen, foundersStatus) => [
               {primary}
             </span>
             {email && handle && (
-              <span className="truncate font-inter text-[10px] tracking-[-0.4px] text-[rgba(25,54,63,0.4)]">
+              <span className="truncate font-inter text-[10px] tracking-[-0.4px] text-[rgba(25,54,63,0.68)]">
                 {handle}
               </span>
             )}
@@ -228,7 +263,7 @@ const buildColumns = (onOpen, foundersStatus) => [
     header: "Plan",
     cell: (info) => (
       <div className="flex items-center gap-1.5">
-        <span className="whitespace-nowrap text-[rgba(25,54,63,0.65)]">
+        <span className="whitespace-nowrap text-[rgba(25,54,63,0.85)]">
           {cerebroPlanLabel(info.getValue())}
         </span>
         <NftChip balance={info.row.original.nftBalance} tokenIds={info.row.original.nftTokenIds} />
@@ -247,7 +282,7 @@ const buildColumns = (onOpen, foundersStatus) => [
         <div className="flex flex-col gap-0.5">
           <MembershipBadge status={info.getValue()} />
           {renew && (
-            <span className="whitespace-nowrap font-inter text-[10px] tabular-nums tracking-[-0.4px] text-[rgba(25,54,63,0.4)]">
+            <span className="whitespace-nowrap font-inter text-[10px] tabular-nums tracking-[-0.4px] text-[rgba(25,54,63,0.68)]">
               renueva {formatDay(renew)}
             </span>
           )}
@@ -271,7 +306,7 @@ const buildColumns = (onOpen, foundersStatus) => [
       const phone = info.getValue();
       if (!phone) {
         return info.row.original.founderMatch ? (
-          <span className="text-[rgba(25,54,63,0.3)]">—</span>
+          <span className="text-[rgba(25,54,63,0.5)]">—</span>
         ) : (
           <NoFounderCell status={foundersStatus} />
         );
@@ -279,7 +314,7 @@ const buildColumns = (onOpen, foundersStatus) => [
 
       return (
         <div className="flex items-center gap-1.5">
-          <span className="whitespace-nowrap tabular-nums text-[rgba(25,54,63,0.65)]">{phone}</span>
+          <span className="whitespace-nowrap tabular-nums text-[rgba(25,54,63,0.85)]">{phone}</span>
           <CopyButton text={phone} title="Copiar teléfono" />
         </div>
       );
@@ -342,7 +377,7 @@ const buildColumns = (onOpen, foundersStatus) => [
     header: "Registrado",
     meta: { align: "right" },
     cell: (info) => (
-      <span className="whitespace-nowrap tabular-nums text-[rgba(25,54,63,0.5)]">
+      <span className="whitespace-nowrap tabular-nums text-[rgba(25,54,63,0.75)]">
         {formatDay(info.getValue())}
       </span>
     ),
@@ -361,7 +396,7 @@ const buildColumns = (onOpen, foundersStatus) => [
         type="button"
         aria-label={`Ver detalle de ${row.original.email || row.original.privyId}`}
         onClick={() => onOpen(row.original)}
-        className="flex size-6 items-center justify-center rounded-md text-[rgba(25,54,63,0.4)] transition-colors hover:bg-[rgba(25,54,63,0.08)] hover:text-[#19363F]"
+        className="flex size-6 items-center justify-center rounded-md text-[rgba(25,54,63,0.68)] transition-colors hover:bg-[rgba(25,54,63,0.08)] hover:text-[#19363F]"
       >
         <EyeIcon />
       </button>
@@ -373,11 +408,19 @@ const buildColumns = (onOpen, foundersStatus) => [
  * The user table, paginated, sorted and searched by the server, with a per-user
  * drawer behind the eye button on each row.
  *
- * `/users` caps at 200 rows a page, so none of that can happen client-side — the
- * browser never holds more than one page. DataTable runs in its server-driven mode
- * and every control maps to a query param: the scope tabs to `scope`, the search
- * box to `search`, a header click to `sort` + `dir`, the pager to `page` and
- * `pageSize`.
+ * It runs in one of two modes, and `UserQueryPrompt` — the sentence above the table
+ * — is what switches between them:
+ *
+ * - **Paged**, the default. `/users` caps at 200 rows a page, so DataTable runs
+ *   server-driven and every control maps to a query param: the prompt's scope to
+ *   `scope`, the search box to `search`, a header click or the prompt's order to
+ *   `sort` + `dir`, the pager to `page` and `pageSize`.
+ * - **Swept**, while any prompt filter is on. `/users` has no parameter for plan,
+ *   KYC, membership, balance, margin, NFT or signup date, and filtering the one page
+ *   the browser holds would pass for filtering the table. So `useGetUsersSweep` reads
+ *   every row for the same scope, search and order, `matchesFilters` narrows it here,
+ *   and DataTable pages the result client-side. Sort and search still go to the
+ *   server, so they mean exactly what they mean in paged mode.
  *
  * The table is wide on purpose — identity, membership, KYC and our economics on the
  * user are four different questions and each is somebody's first column — so the
@@ -386,8 +429,9 @@ const buildColumns = (onOpen, foundersStatus) => [
  */
 const UsersTablePanel = () => {
   const [scope, setScope] = useState("all");
+  const [filters, setFilters] = useState(NO_FILTERS);
   const [searchInput, setSearchInput] = useState("");
-  const [sorting, setSorting] = useState([{ id: "tvl", desc: true }]);
+  const [sorting, setSorting] = useState(DEFAULT_SORTING);
   const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: USER_PAGE_SIZE });
 
   // `isOpen` drives the animation; `selected` persists through the close so the
@@ -408,14 +452,27 @@ const UsersTablePanel = () => {
   const founderIndex = useMemo(() => indexFounderUsers(founders.data), [founders.data]);
   const foundersStatus = founders.isError ? "error" : founders.isPending ? "loading" : "ready";
 
-  const { data, error, isLoading, isFetching, refetch } = useGetUsers({
-    page: pagination.pageIndex + 1,
-    pageSize: pagination.pageSize,
+  const refined = Object.keys(filters).length > 0;
+  const serverQuery = {
     sort: sorting[0]?.id,
     dir: sorting[0]?.desc ? "desc" : "asc",
     search: search || undefined,
     scope: scope === "inactive" ? "inactive" : undefined,
-  });
+  };
+
+  // Only one of the two is ever enabled, so a mode costs its own requests and nothing
+  // for the other.
+  const paged = useGetUsers(
+    { ...serverQuery, page: pagination.pageIndex + 1, pageSize: pagination.pageSize },
+    { enabled: !refined }
+  );
+  const sweep = useGetUsersSweep(serverQuery, { enabled: refined });
+  const { data, error, isLoading, isFetching, refetch } = refined ? sweep : paged;
+
+  // The query `UserGrowthPanel` already makes on this tab, so it costs no request.
+  // Its `totalUsers` is the whole population: the pager's count when `/users` sends
+  // none worth believing and neither a search nor a scope narrows the list.
+  const stats = useGetUserStats({ days: GROWTH_DAYS });
 
   const resetPage = useCallback(
     () => setPagination((prev) => (prev.pageIndex === 0 ? prev : { ...prev, pageIndex: 0 })),
@@ -444,13 +501,25 @@ const UsersTablePanel = () => {
     [resetPage]
   );
 
-  const handleScopeChange = useCallback(
+  // One entry point for everything the prompt can change, so a suggestion that sets
+  // scope, order and filters at once is one page reset, not three.
+  const handleQueryChange = useCallback(
     (next) => {
-      setScope(next);
+      if (next.scope !== undefined) setScope(next.scope);
+      if (next.sorting !== undefined) setSorting([next.sorting]);
+      if (next.filters !== undefined) setFilters(next.filters);
       resetPage();
     },
     [resetPage]
   );
+
+  const handleReset = useCallback(() => {
+    setScope("all");
+    setSorting(DEFAULT_SORTING);
+    setFilters(NO_FILTERS);
+    setSearchInput("");
+    resetPage();
+  }, [resetPage]);
 
   const handleOpen = useCallback((user) => {
     setSelected(user);
@@ -492,11 +561,32 @@ const UsersTablePanel = () => {
     () => buildColumns(handleOpen, foundersStatus),
     [handleOpen, foundersStatus]
   );
-  const rows = useMemo(
-    () => (data?.users ?? []).map((user) => withFounderFields(founderIndex, user)),
-    [data, founderIndex]
-  );
-  const total = data?.total ?? 0;
+  const rows = useMemo(() => {
+    const users = refined
+      ? (sweep.data?.rows ?? []).filter((user) => matchesFilters(user, filters))
+      : (paged.data?.users ?? []);
+    return users.map((user) => withFounderFields(founderIndex, user));
+  }, [refined, sweep.data, paged.data, filters, founderIndex]);
+
+  // Swept, every match is in hand and the count is just how many there are. Paged,
+  // `totalUsers` is what the old page called this count, and a port may have kept it.
+  // `unfiltered` stays about the /users query alone: prompt filters never reach it,
+  // they switch the table to the sweep.
+  const unfiltered = !search && scope !== "inactive";
+  const total = refined
+    ? rows.length
+    : resolveTotal([data?.total, data?.totalUsers, unfiltered ? stats.data?.totalUsers : null], {
+        pageIndex: pagination.pageIndex,
+        pageSize: pagination.pageSize,
+        loaded: rows.length,
+      });
+
+  const isDefaultQuery =
+    scope === "all" &&
+    !refined &&
+    !searchInput &&
+    sorting[0]?.id === DEFAULT_SORTING[0].id &&
+    sorting[0]?.desc === DEFAULT_SORTING[0].desc;
 
   // Looked up at render rather than captured on open, so a drawer opened before the
   // founders list arrived fills in when it does.
@@ -511,26 +601,59 @@ const UsersTablePanel = () => {
       description="Cada usuario con su plan, su estado de membresía y KYC, su TVL, lo que ha dejado en comisiones y lo que nos ha costado patrocinarle el gas. El margen es ingresos menos gastos, solo de ese usuario. Teléfono y Web founders salen de su cuenta en la web founders, la misma que lista la pestaña Usuarios. Abre una fila con el ojo para ver su cartera, sus operaciones, sus órdenes SEPA y su cuenta founders, o para escribirle un email."
       action={
         <div className="flex items-center gap-2">
-          <ScopeTabs value={scope} onChange={handleScopeChange} />
           <RefreshButton onClick={() => refetch()} isLoading={isFetching} />
         </div>
       }
     >
+      {/* Outside QueryState: a failing or slow /users must not take away the controls
+          that change what is being asked of it. */}
+      <UserQueryPrompt
+        scope={scope}
+        sorting={sorting[0]}
+        filters={filters}
+        search={searchInput}
+        onChange={handleQueryChange}
+        onClearSearch={() => handleSearchChange("")}
+        onReset={handleReset}
+        isDefault={isDefaultQuery}
+        result={{
+          count: total,
+          population: refined ? (sweep.data?.rows.length ?? null) : null,
+          isLoading,
+          isFetching,
+          isError: Boolean(error),
+        }}
+      />
+
+      {refined && sweep.data?.truncated && (
+        <p className="mb-2 rounded-lg border-[0.7px] border-amber-200 bg-amber-50/60 px-2.5 py-2 font-inter text-[11px] leading-[1.5] tracking-[-0.4px] text-amber-700">
+          La lectura paró en {SWEEP_MAX_PAGES} páginas con {sweep.data.rows.length} usuarios: el
+          filtro solo ve esos, así que puede faltar gente.
+        </p>
+      )}
+
       <QueryState isLoading={isLoading} error={error}>
         <DataTable
           data={rows}
           columns={columns}
           filename="cerebro-usuarios"
           searchPlaceholder="Busca por correo o usuario..."
-          emptyLabel="Ningún usuario coincide con la búsqueda."
+          emptyLabel={
+            refined
+              ? "Nadie cumple todos los filtros. Quita alguno en la frase de arriba."
+              : "Ningún usuario coincide con la búsqueda."
+          }
           showRowCount={false}
           enableColumnToggle
           getRowId={getRowId}
           enablePagination
-          manualPagination
+          // Swept, the rows are every match and DataTable pages them itself. Sort and
+          // search stay manual in both modes: the sweep already asked the server.
+          manualPagination={!refined}
           manualSorting
           manualFiltering
-          rowCount={total}
+          rowCount={refined ? undefined : total}
+          hasNextPage={rows.length >= pagination.pageSize}
           pagination={pagination}
           onPaginationChange={setPagination}
           sorting={sorting}
@@ -543,16 +666,21 @@ const UsersTablePanel = () => {
           dense
         />
 
-        <p className="font-inter text-[10px] leading-[1.5] tracking-[-0.4px] text-[rgba(25,54,63,0.4)] mt-2">
+        <PanelNote className="mt-2">
           La búsqueda de /users mira correo y nombre de usuario; el dashboard original busca además
           por wallet, signer y handle. Correo, membresía, KYC y Safe no ordenan porque el endpoint
-          no acepta esas columnas. La exportación baja la página que estás viendo, no las {total}{" "}
-          filas — sube a 200 por página si necesitas menos tiradas. Si marcas filas, exporta solo
-          esas, y la selección vive dentro de la página: al cambiar de página el navegador ya no
-          tiene esas filas, así que marca y exporta página a página. Teléfono y Web founders se
-          cruzan con la web founders por correo y, si no coincide, por wallet; «—» es que no tiene
-          cuenta allí. No ordenan ni entran en la búsqueda porque /users no los conoce.
-        </p>
+          no acepta esas columnas.{" "}
+          {refined
+            ? "Con un filtro puesto, /users no sabe filtrar por él, así que la tabla lee todos los usuarios de la búsqueda y filtra aquí: el recuento es exacto y la exportación baja todos los que cumplen, no solo esta página. Si marcas filas, exporta solo esas."
+            : `La exportación baja la página que estás viendo, no ${
+                total === null ? "la lista entera" : `las ${total} filas`
+              } — sube a 200 por página si necesitas menos tiradas. Si marcas filas, exporta solo esas, y la selección vive dentro de la página: al cambiar de página el navegador ya no tiene esas filas, así que marca y exporta página a página.`}{" "}
+          «Con saldo» es más de $0,50, el mismo umbral que el embudo de activación de Sistema.
+          «Inactivos» es el scope de /users, basado en la última actividad registrada, que no es lo
+          mismo que no haber usado nunca el producto. Teléfono y Web founders se cruzan con la web
+          founders por correo y, si no coincide, por wallet; «—» es que no tiene cuenta allí. No
+          ordenan ni entran en la búsqueda ni en los filtros porque /users no los conoce.
+        </PanelNote>
       </QueryState>
 
       {/* Backdrop. Present at every breakpoint — the drawer overlays the table on a

@@ -3,6 +3,7 @@
 import { useGetTvlFreshness } from "@/hooks/cerebro/useGetTvlFreshness";
 import { formatDateTime, formatNumber, timeAgo } from "@/utils/format";
 import { AnimatedCount } from "../../shared/AnimatedValue";
+import { PanelNote } from "../../shared/Explanations";
 import Panel, { RefreshButton } from "../../shared/Panel";
 import QueryState from "../../shared/QueryState";
 import StatCard from "../../shared/StatCard";
@@ -12,11 +13,11 @@ const isCount = (value) => typeof value === "number" && Number.isFinite(value);
 /** One labelled figure on the footer line. */
 const Fact = ({ label, value, title }) => (
   <div className="flex items-center gap-1.5">
-    <span className="font-inter text-[10px] tracking-[-0.4px] text-[rgba(25,54,63,0.45)]">
+    <span className="font-inter text-[10px] tracking-[-0.4px] text-[rgba(25,54,63,0.68)]">
       {label}
     </span>
     <span
-      className="font-inter text-[10px] tabular-nums tracking-[-0.4px] text-[rgba(25,54,63,0.65)]"
+      className="font-inter text-[10px] tabular-nums tracking-[-0.4px] text-[rgba(25,54,63,0.85)]"
       title={title}
     >
       {value}
@@ -95,12 +96,12 @@ const TvlFreshnessPanel = () => {
           <Fact label="Más antiguo" value={timeAgo(oldest)} title={formatDateTime(oldest)} />
         </div>
 
-        <p className="mt-2 font-inter text-[10px] leading-[1.5] tracking-[-0.4px] text-[rgba(25,54,63,0.4)]">
+        <PanelNote className="mt-2">
           Los cuatro tramos son excluyentes y suman el total, que solo cuenta usuarios con Safe: una
           cuenta de Privy sin wallet no tiene nada que refrescar. Cerebro es de solo lectura, así
           que «Actualizar» aquí vuelve a leer el histograma — disparar el refresco de Zerion sigue
           siendo cosa del cron y de los botones del dashboard antiguo.
-        </p>
+        </PanelNote>
       </QueryState>
     </Panel>
   );

@@ -6,6 +6,7 @@ import { formatDateTime, formatNumber, formatUsd, shortenHash } from "@/utils/fo
 import { useMemo } from "react";
 import AddressLink from "../../shared/AddressLink";
 import { AnimatedCount } from "../../shared/AnimatedValue";
+import { PanelNote } from "../../shared/Explanations";
 import MeterBar from "../../shared/MeterBar";
 import Panel, { RefreshButton } from "../../shared/Panel";
 import QueryState from "../../shared/QueryState";
@@ -38,7 +39,7 @@ const UserCell = ({ row }) => {
   }
 
   return (
-    <span className="font-mono text-[10px] text-[rgba(25,54,63,0.5)]" title={row.privyId}>
+    <span className="font-mono text-[10px] text-[rgba(25,54,63,0.75)]" title={row.privyId}>
       {shortenHash(row.privyId ?? "", { lead: 14, tail: 4 })}
     </span>
   );
@@ -62,7 +63,7 @@ const SAFE_COLUMN = {
   enableSorting: false,
   cell: (info) => {
     const value = info.getValue();
-    if (!value) return <span className="text-[rgba(25,54,63,0.3)]">—</span>;
+    if (!value) return <span className="text-[rgba(25,54,63,0.5)]">—</span>;
     return <AddressLink address={value} />;
   },
 };
@@ -72,7 +73,7 @@ const REST_COLUMNS = [
     accessorKey: "createdAt",
     header: "Alta",
     cell: (info) => (
-      <span className="tabular-nums text-[rgba(25,54,63,0.5)]">
+      <span className="tabular-nums text-[rgba(25,54,63,0.75)]">
         {formatDateTime(info.getValue())}
       </span>
     ),
@@ -142,13 +143,13 @@ const UserActivationPanel = () => {
 
         <div className="flex flex-col gap-3.5 sm:flex-row sm:items-stretch">
           <div className="flex flex-col justify-center gap-0.5 rounded-lg border-[0.7px] border-[rgba(25,54,63,0.08)] px-3.5 py-3 sm:min-w-44">
-            <span className="font-inter text-[10px] font-medium uppercase tracking-[0.6px] text-[rgba(25,54,63,0.4)]">
+            <span className="font-inter text-[10px] font-medium uppercase tracking-[0.6px] text-[rgba(25,54,63,0.68)]">
               Usuarios totales
             </span>
             <span className="font-inter text-[22px] font-semibold leading-tight tracking-[-0.88px] text-[#19363F]">
               <AnimatedCount value={total} />
             </span>
-            <span className="font-inter text-[10px] tabular-nums tracking-[-0.4px] text-[rgba(25,54,63,0.45)]">
+            <span className="font-inter text-[10px] tabular-nums tracking-[-0.4px] text-[rgba(25,54,63,0.68)]">
               {isCount(buckets?.active) && isCount(total) && total > 0
                 ? `${formatNumber((buckets.active / total) * 100, { decimals: 1 })}% ha llegado a usar la app`
                 : "—"}
@@ -171,7 +172,7 @@ const UserActivationPanel = () => {
         {notes.map((note) => (
           <p
             key={note}
-            className="mt-2 font-inter text-[10px] leading-[1.5] tracking-[-0.4px] text-[rgba(25,54,63,0.4)]"
+            className="mt-2 font-inter text-[10px] leading-[1.5] tracking-[-0.4px] text-[rgba(25,54,63,0.68)]"
           >
             {note}
           </p>
@@ -181,7 +182,7 @@ const UserActivationPanel = () => {
           <h4 className="mb-2 flex flex-wrap items-baseline gap-x-2 font-inter text-[11px] font-semibold tracking-[-0.44px] text-[#19363F]">
             Fondos aparcados
             {parked.length > 0 && (
-              <span className="font-normal tabular-nums text-[10px] tracking-[-0.4px] text-[rgba(25,54,63,0.4)]">
+              <span className="font-normal tabular-nums text-[10px] tracking-[-0.4px] text-[rgba(25,54,63,0.68)]">
                 {formatNumber(parked.length)} {parked.length === 1 ? "usuario" : "usuarios"} ·{" "}
                 {formatUsd(parkedUsd, { decimals: 2 })}
               </span>
@@ -189,7 +190,7 @@ const UserActivationPanel = () => {
           </h4>
 
           {parked.length === 0 ? (
-            <p className="font-inter text-[11px] tracking-[-0.44px] text-[rgba(25,54,63,0.4)]">
+            <p className="font-inter text-[11px] tracking-[-0.44px] text-[rgba(25,54,63,0.68)]">
               Nadie tiene saldo en una Safe que no haya usado nunca.
             </p>
           ) : (
@@ -207,14 +208,14 @@ const UserActivationPanel = () => {
             />
           )}
 
-          <p className="mt-2 font-inter text-[10px] leading-[1.5] tracking-[-0.4px] text-[rgba(25,54,63,0.4)]">
+          <PanelNote className="mt-2">
             Gente cuyo dinero está en una Safe que nunca han usado — la promo de EURC de mayo dejó
             un grupo. Es una lista de contacto, no una estadística. «Desplegada» es tener gasto
             patrocinado: solo pagamos gas de una Safe que ya existe. «Usada» se aproxima con
             comisiones pagadas o más de una operación patrocinada, porque /users no expone
             actividades ni órdenes de ramp — quien solo hizo operaciones gratuitas cae un tramo más
             abajo del que le toca. El umbral de saldo es $0.50.
-          </p>
+          </PanelNote>
         </div>
       </QueryState>
     </Panel>

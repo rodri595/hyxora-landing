@@ -18,14 +18,14 @@ const LEVEL_TONES = {
   fatal: "bg-red-50 text-red-700 border-red-200",
   error: "bg-red-50 text-red-700 border-red-200",
   warning: "bg-amber-50 text-amber-700 border-amber-200",
-  info: "bg-[rgba(25,54,63,0.05)] text-[rgba(25,54,63,0.5)] border-[rgba(25,54,63,0.08)]",
-  debug: "bg-[rgba(25,54,63,0.05)] text-[rgba(25,54,63,0.4)] border-[rgba(25,54,63,0.08)]",
+  info: "bg-[rgba(25,54,63,0.05)] text-[rgba(25,54,63,0.75)] border-[rgba(25,54,63,0.08)]",
+  debug: "bg-[rgba(25,54,63,0.05)] text-[rgba(25,54,63,0.68)] border-[rgba(25,54,63,0.08)]",
 };
 
 const LevelBadge = ({ level }) => (
   <span
     className={cn(
-      "inline-flex items-center px-1.5 py-0.5 rounded-full border font-inter text-[9px] font-medium uppercase tracking-[0.4px]",
+      "inline-flex items-center px-1.5 py-0.5 rounded-full border font-inter text-[10px] font-medium uppercase tracking-[0.4px]",
       LEVEL_TONES[level] ?? LEVEL_TONES.info
     )}
   >
@@ -50,7 +50,7 @@ const columns = [
             {info.getValue()}
           </span>
           <span
-            className="truncate font-mono text-[10px] text-[rgba(25,54,63,0.4)]"
+            className="truncate font-mono text-[10px] text-[rgba(25,54,63,0.68)]"
             title={culprit}
           >
             {shortId ? `${shortId} · ` : ""}
@@ -71,7 +71,7 @@ const columns = [
         <span
           className={cn(
             "font-medium tabular-nums",
-            value > 0 ? "text-red-600" : "text-[rgba(25,54,63,0.3)]"
+            value > 0 ? "text-red-600" : "text-[rgba(25,54,63,0.5)]"
           )}
         >
           {formatNumber(value)}
@@ -84,7 +84,7 @@ const columns = [
     header: "Total",
     meta: { align: "right" },
     cell: (info) => (
-      <span className="tabular-nums text-[rgba(25,54,63,0.6)]">
+      <span className="tabular-nums text-[rgba(25,54,63,0.75)]">
         {formatNumber(info.getValue())}
       </span>
     ),
@@ -94,7 +94,7 @@ const columns = [
     header: "Usuarios",
     meta: { align: "right" },
     cell: (info) => (
-      <span className="tabular-nums text-[rgba(25,54,63,0.6)]">
+      <span className="tabular-nums text-[rgba(25,54,63,0.75)]">
         {formatNumber(info.getValue())}
       </span>
     ),
@@ -104,7 +104,7 @@ const columns = [
     header: "Última vez",
     meta: { align: "right" },
     cell: (info) => (
-      <span className="tabular-nums text-[rgba(25,54,63,0.5)]">
+      <span className="tabular-nums text-[rgba(25,54,63,0.75)]">
         {info.getValue() ? timeAgo(info.getValue()) : "—"}
       </span>
     ),
@@ -121,7 +121,7 @@ const columns = [
           href={url}
           target="_blank"
           rel="noreferrer"
-          className="font-inter text-[10px] font-medium text-[rgba(25,54,63,0.5)] hover:text-[#19363F] transition-colors whitespace-nowrap"
+          className="font-inter text-[10px] font-medium text-[rgba(25,54,63,0.75)] hover:text-[#19363F] transition-colors whitespace-nowrap"
         >
           Abrir ↗
         </a>

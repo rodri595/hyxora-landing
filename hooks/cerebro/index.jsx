@@ -24,6 +24,7 @@ export { useGetFeesRecent } from "./useGetFeesRecent";
 
 export { useGetUserStats } from "./useGetUserStats";
 export { useGetUsers } from "./useGetUsers";
+export { useGetUsersSweep } from "./useGetUsersSweep";
 export { useGetUserDetail } from "./useGetUserDetail";
 export { useGetUserTransactions } from "./useGetUserTransactions";
 export { useGetUserVaults } from "./useGetUserVaults";

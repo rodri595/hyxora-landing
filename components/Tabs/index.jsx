@@ -36,7 +36,7 @@ const Tabs = ({ tabs, value, onChange, className, ...rest }) => (
           "py-2.5 mr-4 font-inter text-[11px] font-medium tracking-[-0.44px] border-b-[1.5px] -mb-px transition-colors whitespace-nowrap",
           value === tab.id
             ? "border-[#19363F] text-[#19363F] "
-            : "border-transparent text-[rgba(25,54,63,0.45)] hover:text-[rgba(25,54,63,0.7)]"
+            : "border-transparent text-[rgba(25,54,63,0.68)] hover:text-[rgba(25,54,63,0.85)]"
         )}
       >
         {tab.label}

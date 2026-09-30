@@ -18,6 +18,7 @@ import {
 } from "recharts";
 import { TooltipSurface, tooltipWrapperStyle, useHeldTooltip } from "../../shared/ChartTooltip";
 import CompositionBar from "../../shared/CompositionBar";
+import { PanelNote } from "../../shared/Explanations";
 import Panel, { RefreshButton } from "../../shared/Panel";
 import QueryState from "../../shared/QueryState";
 import { COST_COLOR, REVENUE_COLOR } from "../resumen/constants";
@@ -35,11 +36,11 @@ const numberOrNull = (value) => (Number.isFinite(Number(value)) ? Number(value) 
 
 /** Muted zero, so a row with real activity stands out from an idle chain. */
 const Count = ({ value }) => {
-  if (value === null) return <span className="tabular-nums text-[rgba(25,54,63,0.3)]">—</span>;
+  if (value === null) return <span className="tabular-nums text-[rgba(25,54,63,0.5)]">—</span>;
 
   return (
     <span
-      className={cn("tabular-nums", value > 0 ? "text-[#19363F]" : "text-[rgba(25,54,63,0.3)]")}
+      className={cn("tabular-nums", value > 0 ? "text-[#19363F]" : "text-[rgba(25,54,63,0.5)]")}
     >
       {formatNumber(value)}
     </span>
@@ -47,16 +48,16 @@ const Count = ({ value }) => {
 };
 
 const Usd = ({ value, decimals = 3 }) => (
-  <span className="tabular-nums text-[rgba(25,54,63,0.7)]">{formatUsd(value, { decimals })}</span>
+  <span className="tabular-nums text-[rgba(25,54,63,0.85)]">{formatUsd(value, { decimals })}</span>
 );
 
 const Cursor = ({ value }) => (
-  <span className="tabular-nums text-[rgba(25,54,63,0.5)]">
+  <span className="tabular-nums text-[rgba(25,54,63,0.75)]">
     {value === null ? "—" : formatNumber(value)}
   </span>
 );
 
-const AXIS = "rgba(25,54,63,0.4)";
+const AXIS = "rgba(25,54,63,0.68)";
 const GRID = "rgba(25,54,63,0.08)";
 
 const PnlTooltip = (props) => {
@@ -66,7 +67,7 @@ const PnlTooltip = (props) => {
 
   return (
     <TooltipSurface visible={visible}>
-      <p className="font-inter text-[10px] font-medium tracking-[-0.4px] text-[rgba(25,54,63,0.45)] mb-1">
+      <p className="font-inter text-[10px] font-medium tracking-[-0.4px] text-[rgba(25,54,63,0.68)] mb-1">
         {label}
       </p>
       {[
@@ -75,7 +76,7 @@ const PnlTooltip = (props) => {
       ].map((row) => (
         <div key={row.key} className="flex items-center gap-2">
           <span className="size-[7px] shrink-0 rounded-full" style={{ background: row.color }} />
-          <span className="font-inter text-[11px] tracking-[-0.44px] text-[rgba(25,54,63,0.6)]">
+          <span className="font-inter text-[11px] tracking-[-0.44px] text-[rgba(25,54,63,0.75)]">
             {row.name}
           </span>
           <span className="font-inter text-[11px] font-semibold tabular-nums tracking-[-0.44px] text-[#19363F] ml-auto pl-3">
@@ -84,7 +85,7 @@ const PnlTooltip = (props) => {
         </div>
       ))}
       <div className="mt-1 flex items-center gap-2 border-t-[0.7px] border-[rgba(25,54,63,0.08)] pt-1">
-        <span className="font-inter text-[11px] tracking-[-0.44px] text-[rgba(25,54,63,0.6)]">
+        <span className="font-inter text-[11px] tracking-[-0.44px] text-[rgba(25,54,63,0.75)]">
           Margen
         </span>
         <span
@@ -180,7 +181,7 @@ const ChainsPanel = () => {
             <span className="font-medium text-[#19363F]">{info.getValue()}</span>
             {info.row.original.nonEvm ? (
               <span
-                className="rounded bg-[rgba(25,54,63,0.06)] px-1.5 py-0.5 text-[10px] font-normal text-[rgba(25,54,63,0.5)]"
+                className="rounded bg-[rgba(25,54,63,0.06)] px-1.5 py-0.5 text-[10px] font-normal text-[rgba(25,54,63,0.75)]"
                 title="Cadena no EVM: no hay UserOps ERC-4337 ni indexers por bloque, así que las columnas de ops y cursores no aplican."
               >
                 no EVM
@@ -292,7 +293,7 @@ const ChainsPanel = () => {
       <QueryState isLoading={isLoading} error={error}>
         <div className="flex flex-col gap-4 mb-4">
           <div>
-            <h4 className="font-inter text-[10px] font-medium uppercase tracking-[0.6px] text-[rgba(25,54,63,0.4)] mb-2">
+            <h4 className="font-inter text-[10px] font-medium uppercase tracking-[0.6px] text-[rgba(25,54,63,0.68)] mb-2">
               Reparto del TVL por red
             </h4>
             <CompositionBar
@@ -305,14 +306,14 @@ const ChainsPanel = () => {
           </div>
 
           <div>
-            <h4 className="font-inter text-[10px] font-medium uppercase tracking-[0.6px] text-[rgba(25,54,63,0.4)] mb-2">
+            <h4 className="font-inter text-[10px] font-medium uppercase tracking-[0.6px] text-[rgba(25,54,63,0.68)] mb-2">
               Comisiones contra gastos · {DAYS}d
             </h4>
             {/* layout="vertical": chain names read left-to-right at any width, where
                 an X-axis category would collide or rotate on a phone. Height grows
                 with the row count so the bars keep a constant thickness. */}
             {pnlRows.length === 0 ? (
-              <p className="font-inter text-[11px] tracking-[-0.44px] text-[rgba(25,54,63,0.4)] py-2">
+              <p className="font-inter text-[11px] tracking-[-0.44px] text-[rgba(25,54,63,0.68)] py-2">
                 Ninguna red registró comisiones ni gastos en la ventana.
               </p>
             ) : (
@@ -350,7 +351,7 @@ const ChainsPanel = () => {
                     iconType="circle"
                     iconSize={7}
                     formatter={(value) => (
-                      <span className="font-inter text-[10px] tracking-[-0.4px] text-[rgba(25,54,63,0.6)]">
+                      <span className="font-inter text-[10px] tracking-[-0.4px] text-[rgba(25,54,63,0.75)]">
                         {value}
                       </span>
                     )}
@@ -365,10 +366,10 @@ const ChainsPanel = () => {
                 </BarChart>
               </ResponsiveContainer>
             )}
-            <p className="font-inter text-[10px] leading-[1.5] tracking-[-0.4px] text-[rgba(25,54,63,0.4)] mt-1">
+            <PanelNote className="mt-1">
               Las dos barras son cifras absolutas, no una resta: una red gana dinero cuando la verde
               pasa a la roja. El margen exacto está en el tooltip y en la tabla.
-            </p>
+            </PanelNote>
           </div>
         </div>
 
@@ -385,16 +386,16 @@ const ChainsPanel = () => {
           emptyLabel="Ninguna cadena devolvió datos."
         />
 
-        <div className="flex flex-col gap-1 mt-3">
-          <p className="font-inter text-[10px] leading-[1.5] tracking-[-0.4px] text-[rgba(25,54,63,0.4)]">
+        <div className="flex flex-col gap-1">
+          <PanelNote className="mt-3">
             Las redes salen siempre todas y en el mismo orden, con $0 si no registraron actividad en
             la ventana. La ventana la fija el endpoint en {DAYS} días. Margen = comisiones − gastos.
-          </p>
-          <p className="font-inter text-[10px] leading-[1.5] tracking-[-0.4px] text-[rgba(25,54,63,0.4)]">
+          </PanelNote>
+          <PanelNote>
             Comisiones cuenta solo lo que pagó un Safe de usuario, sin las ventas de NFT. Solana no
             es EVM: tiene TVL, comisiones y coste de fee-payer, pero ni UserOps ni cursores de
             bloque, y por eso esas celdas van con «—».
-          </p>
+          </PanelNote>
         </div>
       </QueryState>
     </Panel>

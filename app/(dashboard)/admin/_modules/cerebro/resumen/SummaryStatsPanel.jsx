@@ -15,11 +15,11 @@ import { sumDefined } from "../../shared/aggregate";
 
 const GroupLabel = ({ children, note }) => (
   <div className="flex items-baseline gap-2 mb-2">
-    <span className="font-inter text-[10px] font-medium uppercase tracking-[0.6px] text-[rgba(25,54,63,0.4)]">
+    <span className="font-inter text-[10px] font-medium uppercase tracking-[0.6px] text-[rgba(25,54,63,0.68)]">
       {children}
     </span>
     {note && (
-      <span className="font-inter text-[10px] tracking-[-0.4px] text-[rgba(25,54,63,0.3)]">
+      <span className="font-inter text-[10px] tracking-[-0.4px] text-[rgba(25,54,63,0.5)]">
         {note}
       </span>
     )}

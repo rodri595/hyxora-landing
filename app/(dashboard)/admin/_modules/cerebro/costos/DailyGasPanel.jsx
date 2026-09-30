@@ -14,11 +14,12 @@ import {
   YAxis,
 } from "recharts";
 import { TooltipSurface, tooltipWrapperStyle, useHeldTooltip } from "../../shared/ChartTooltip";
+import { PanelNote } from "../../shared/Explanations";
 import Panel, { RefreshButton } from "../../shared/Panel";
 import QueryState from "../../shared/QueryState";
 import { COST_DAYS, COST_LINE } from "./constants";
 
-const AXIS = "rgba(25,54,63,0.4)";
+const AXIS = "rgba(25,54,63,0.68)";
 const GRID = "rgba(25,54,63,0.08)";
 
 const ChartTooltip = (props) => {
@@ -28,12 +29,12 @@ const ChartTooltip = (props) => {
 
   return (
     <TooltipSurface visible={visible}>
-      <p className="font-inter text-[10px] font-medium tracking-[-0.4px] text-[rgba(25,54,63,0.45)] mb-1">
+      <p className="font-inter text-[10px] font-medium tracking-[-0.4px] text-[rgba(25,54,63,0.68)] mb-1">
         {label}
       </p>
       <div className="flex items-center gap-2">
         <span className="size-[7px] shrink-0 rounded-full" style={{ background: COST_LINE }} />
-        <span className="font-inter text-[11px] tracking-[-0.44px] text-[rgba(25,54,63,0.6)]">
+        <span className="font-inter text-[11px] tracking-[-0.44px] text-[rgba(25,54,63,0.75)]">
           Gastos
         </span>
         <span className="font-inter text-[11px] font-semibold tabular-nums tracking-[-0.44px] text-[#19363F] ml-auto pl-3">
@@ -129,7 +130,7 @@ const DailyGasPanel = () => {
               iconType="circle"
               iconSize={7}
               formatter={() => (
-                <span className="font-inter text-[10px] tracking-[-0.4px] text-[rgba(25,54,63,0.6)]">
+                <span className="font-inter text-[10px] tracking-[-0.4px] text-[rgba(25,54,63,0.75)]">
                   Gastos
                 </span>
               )}
@@ -147,12 +148,12 @@ const DailyGasPanel = () => {
           </AreaChart>
         </ResponsiveContainer>
 
-        <p className="font-inter text-[10px] leading-[1.6] tracking-[-0.4px] text-[rgba(25,54,63,0.4)] mt-2">
+        <PanelNote className="mt-2">
           Conciliación con Pimlico: el dashboard original calcula el gasto como gas on-chain × 1.10
           (el recargo de Pimlico), y concilia contra <em>Verifying Paymaster Spending</em> en
           dashboard.pimlico.io. Cerebro devuelve un único <code>costUsd</code> por día, sin separar
           gas de factura, así que desde aquí no se puede cuadrar día a día.
-        </p>
+        </PanelNote>
       </QueryState>
     </Panel>
   );

@@ -38,7 +38,7 @@ const CountCell = ({ value }) => (
   <span
     className={cn(
       "tabular-nums",
-      value === null ? "text-[rgba(25,54,63,0.3)]" : "text-[rgba(25,54,63,0.7)]"
+      value === null ? "text-[rgba(25,54,63,0.5)]" : "text-[rgba(25,54,63,0.85)]"
     )}
   >
     {formatNumber(value)}

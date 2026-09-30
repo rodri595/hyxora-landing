@@ -25,7 +25,7 @@ const StreamStrip = ({ title, meta, hint, items }) => (
     </span>
 
     {meta && (
-      <span className="font-inter text-[10px] tracking-[-0.4px] text-[rgba(25,54,63,0.5)] bg-white border-[0.7px] border-[rgba(25,54,63,0.08)] rounded-full px-2 py-0.5">
+      <span className="font-inter text-[10px] tracking-[-0.4px] text-[rgba(25,54,63,0.75)] bg-white border-[0.7px] border-[rgba(25,54,63,0.08)] rounded-full px-2 py-0.5">
         {meta}
       </span>
     )}
@@ -33,7 +33,7 @@ const StreamStrip = ({ title, meta, hint, items }) => (
     <div className="flex flex-wrap items-center gap-x-4 gap-y-1 ml-auto">
       {items.map((item) => (
         <span key={item.label} className="flex items-center gap-1.5">
-          <span className="font-inter text-[10px] tracking-[-0.4px] text-[rgba(25,54,63,0.5)]">
+          <span className="font-inter text-[10px] tracking-[-0.4px] text-[rgba(25,54,63,0.75)]">
             {item.label}
           </span>
           <span
@@ -53,7 +53,7 @@ const StreamStrip = ({ title, meta, hint, items }) => (
     </div>
 
     {hint && (
-      <span className="font-inter text-[10px] leading-[1.5] tracking-[-0.4px] text-[rgba(25,54,63,0.35)] basis-full">
+      <span className="font-inter text-[10px] leading-[1.5] tracking-[-0.4px] text-[rgba(25,54,63,0.68)] basis-full">
         {hint}
       </span>
     )}

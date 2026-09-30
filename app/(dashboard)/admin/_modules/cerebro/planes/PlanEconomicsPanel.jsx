@@ -5,6 +5,7 @@ import { useGetCostsByPlan } from "@/hooks/cerebro/useGetCostsByPlan";
 import { cn } from "@/utils";
 import { formatNumber, formatUsd } from "@/utils/format";
 import { useMemo } from "react";
+import { PanelNote } from "../../shared/Explanations";
 import Panel, { RefreshButton } from "../../shared/Panel";
 import QueryState from "../../shared/QueryState";
 
@@ -50,7 +51,7 @@ const PlanEconomicsPanel = () => {
         header: "Ops",
         meta: { align: "right" },
         cell: (info) => (
-          <span className="tabular-nums text-[rgba(25,54,63,0.7)]">
+          <span className="tabular-nums text-[rgba(25,54,63,0.85)]">
             {formatNumber(info.getValue())}
           </span>
         ),
@@ -61,7 +62,7 @@ const PlanEconomicsPanel = () => {
         header: "Gastos",
         meta: { align: "right" },
         cell: (info) => (
-          <span className="tabular-nums text-[rgba(25,54,63,0.7)]">
+          <span className="tabular-nums text-[rgba(25,54,63,0.85)]">
             {formatUsd(info.getValue(), { decimals: 2 })}
           </span>
         ),
@@ -72,7 +73,7 @@ const PlanEconomicsPanel = () => {
         header: "Comisiones",
         meta: { align: "right" },
         cell: (info) => (
-          <span className="tabular-nums text-[rgba(25,54,63,0.7)]">
+          <span className="tabular-nums text-[rgba(25,54,63,0.85)]">
             {formatUsd(info.getValue(), { decimals: 2 })}
           </span>
         ),
@@ -132,11 +133,11 @@ const PlanEconomicsPanel = () => {
           dense
         />
 
-        <p className="font-inter text-[10px] leading-[1.5] tracking-[-0.4px] text-[rgba(25,54,63,0.4)] mt-2.5">
+        <PanelNote className="mt-2.5">
           /costs/by-plan no acepta ventana de fechas, así que estas cifras son acumuladas. Para un
           rango concreto y el top de holdings por plan está `useGetPnlMembership`, que sí pide
           from/to.
-        </p>
+        </PanelNote>
       </QueryState>
     </Panel>
   );

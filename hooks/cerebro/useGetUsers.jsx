@@ -18,10 +18,13 @@ import { keepPreviousData, useQuery } from "@tanstack/react-query";
  * @param {"asc" | "desc"} [params.dir] Sort direction. API default "desc".
  * @param {string} [params.search] Free-text filter over email / username.
  * @param {"active" | "inactive"} [params.scope] Restrict to active or inactive users.
+ * @param {Object} [options]
+ * @param {boolean} [options.enabled] On top of the Cerebro access gate — off while the
+ * users table is reading `useGetUsersSweep` instead.
  * @return {import("@tanstack/react-query").UseQueryResult<CerebroUsersPage>} `data.users`
  * plus `page` / `pageSize` / `total` for the pager.
  */
-export const useGetUsers = (params = {}) => {
+export const useGetUsers = (params = {}, { enabled: wanted = true } = {}) => {
   const { enabled, privyId } = useCerebroAccess();
   const { page, pageSize, sort, dir, search, scope } = params;
 
@@ -38,6 +41,6 @@ export const useGetUsers = (params = {}) => {
     refetchOnWindowFocus: false,
     refetchOnMount: false,
     retry: false,
-    enabled,
+    enabled: enabled && wanted,
   });
 };

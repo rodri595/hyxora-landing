@@ -26,7 +26,7 @@ const SistemaModule = () => (
     {/* <SentryPanel /> */}
 
     <div className="flex items-center gap-3 pt-1">
-      <span className="font-inter text-[10px] font-medium uppercase tracking-[0.6px] text-[rgba(25,54,63,0.35)] whitespace-nowrap">
+      <span className="font-inter text-[10px] font-medium uppercase tracking-[0.6px] text-[rgba(25,54,63,0.68)] whitespace-nowrap">
         Disponible en Cerebro
       </span>
       <span className="h-px flex-1 bg-[rgba(25,54,63,0.08)]" />

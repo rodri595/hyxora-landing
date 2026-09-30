@@ -111,7 +111,7 @@ const CompositionBar = ({
 
   if (segments.length === 0 || denominator <= 0) {
     return (
-      <p className="font-inter text-[11px] tracking-[-0.44px] text-[rgba(25,54,63,0.4)] py-2">
+      <p className="font-inter text-[11px] tracking-[-0.44px] text-[rgba(25,54,63,0.68)] py-2">
         {emptyLabel}
       </p>
     );
@@ -167,7 +167,7 @@ const CompositionBar = ({
             <span
               className={cn(
                 "truncate font-inter text-[11px] tracking-[-0.44px]",
-                segment.isRest ? "text-[rgba(25,54,63,0.45)]" : "text-[rgba(25,54,63,0.7)]"
+                segment.isRest ? "text-[rgba(25,54,63,0.68)]" : "text-[rgba(25,54,63,0.85)]"
               )}
               title={segment.label}
             >
@@ -176,7 +176,7 @@ const CompositionBar = ({
             <span className="ml-auto shrink-0 font-inter text-[11px] font-medium tabular-nums tracking-[-0.44px] text-[#19363F]">
               {formatValue(segment.value)}
             </span>
-            <span className="shrink-0 font-inter text-[10px] tabular-nums tracking-[-0.4px] text-[rgba(25,54,63,0.4)] w-9 text-right">
+            <span className="shrink-0 font-inter text-[10px] tabular-nums tracking-[-0.4px] text-[rgba(25,54,63,0.68)] w-9 text-right">
               {formatPercent(shareOf(segment.value), { decimals: 1 })}
             </span>
           </div>
@@ -184,7 +184,7 @@ const CompositionBar = ({
       </div>
 
       {(footnote || dropped > 0) && (
-        <p className="font-inter text-[10px] leading-[1.5] tracking-[-0.4px] text-[rgba(25,54,63,0.4)]">
+        <p className="font-inter text-[10px] leading-[1.5] tracking-[-0.4px] text-[rgba(25,54,63,0.68)]">
           {footnote}
           {dropped > 0 && (
             <>

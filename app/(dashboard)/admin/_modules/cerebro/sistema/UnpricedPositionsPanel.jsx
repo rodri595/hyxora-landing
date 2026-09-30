@@ -4,6 +4,7 @@ import { cerebroChainLabel } from "@/constants/cerebro";
 import { useGetUnpricedPositions } from "@/hooks/cerebro/useGetUnpricedPositions";
 import { formatNumber } from "@/utils/format";
 import { useMemo } from "react";
+import { PanelNote } from "../../shared/Explanations";
 import Panel, { RefreshButton } from "../../shared/Panel";
 import QueryState from "../../shared/QueryState";
 
@@ -109,12 +110,12 @@ const UnpricedPositionsPanel = () => {
               ))}
             </div>
 
-            <p className="mt-2.5 font-inter text-[10px] leading-[1.5] tracking-[-0.4px] text-[rgba(25,54,63,0.4)]">
+            <PanelNote className="mt-2.5">
               Las fichas van ordenadas por usuarios afectados. Un mismo usuario puede tener varias
               posiciones sin precio, así que sumarlas da más que los usuarios afectados. Se
               recalcula en cada refresco de Zerion: si la fuente de precios vuelve, la ficha
               desaparece sola.
-            </p>
+            </PanelNote>
           </>
         ) : (
           <div className="flex items-center gap-2 rounded-lg border-[0.7px] border-emerald-200 bg-emerald-50/60 px-3 py-2.5 text-emerald-700">

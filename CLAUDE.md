@@ -264,13 +264,37 @@ balances, fees and error counts — a mocked figure is something someone acts on
 _modules/
   shared/          Panel, StatCard, QueryState, PendingEndpoint, StatusBadge,
                    MeterBar (one labelled proportion), CompositionBar (how a
-                   total splits across its biggest contributors), ChartTooltip
+                   total splits across its biggest contributors), ChartTooltip,
+                   Explanations (the «Explicaciones» switch and PanelNote)
   cerebro/         Cerebro API only — sistema/ redes/ planes/ …
   UsersModule.jsx  …and the other original admin tabs
 ```
 
 Top-level tabs live in `components/AdminTabBar` + the `moduleMap` in
 `admin/page.jsx`. Cerebro nests a second tab bar on `?tab=cerebro&sub=<id>`.
+
+**Cerebro folds its prose, never its data.** It is read by the client, who wants the
+numbers, and by the team, who also want how each is computed and where it is known
+to be wrong. Every `Panel` description, and every `PanelNote` inside a panel, hides
+behind an ⓘ beside the title unless the «Explicaciones» switch on the Cerebro tab
+bar is on (off by default, remembered per browser). So a footnote that *explains* is
+a `PanelNote`; a line that carries a figure of its own — a share, a change over the
+window, a burn rate — or warns that the data is partial (a cap hit, a sample, a
+truncated sweep) stays a plain `<p>` and is always visible. Folding a caveat that
+changes how a number reads would be hiding data.
+
+**The users table is asked in a sentence.** `usuarios/UserQueryPrompt` renders the
+table's state as «Muéstrame [todos los usuarios] con plan [Premium], ordenados por
+[más dinero dentro]», every blue word a menu, plus suggested questions underneath.
+It looks like an AI prompt on purpose and is not one: nothing is typed or
+interpreted, and each word maps to one thing in `usuarios/userQuery.js`. Scope and
+order are `/users` params. The filters (plan, membresía, KYC, saldo, margen, NFT,
+registro) are not — `/users` has no such params — so any filter switches the table
+from one server page to `useGetUsersSweep`, the same full sweep the activation
+funnel uses, filtered client-side. Filtering the one page the browser holds would
+pass for filtering the table. It is the fan-out this file warns about, made only
+while a filter is on; asking Cerebro for `plan` / `kyc` / `membership` / `minTvl` /
+`since` on `/users` is what retires it.
 
 **«Rate limits»** (`?tab=rate-limits`) is the support desk for a throttled user:
 `/rate-limits` listed in a DataTable, a drawer per row, and a confirmation before
@@ -471,6 +495,12 @@ Render "—" and say the field is missing.
   running it over a whole directory reformats untouched files and pollutes the diff.
 - Money/number/relative-time formatting: `@/utils/format`.
 - Admin UI copy is in Spanish.
+- **Text contrast in the admin has a floor.** Secondary text is `#19363F` at one of
+  four alphas: `0.85` and `0.75` for secondary copy, `0.68` for the faintest text
+  meant to be read (4.8:1 on white — WCAG AA, which these 10–11px sizes need), and
+  `0.5` only for placeholders like «—» and disabled states. The client complained
+  about contrast on 2026-09-30, when Cerebro had eleven levels reaching down to 0.25
+  (1.6:1); every level below 0.68 was remapped. Don't add text under 0.68 again.
 - `scrollbar-thin` / `scrollbar-thumb-*` classes appear around the codebase but
   are inert — there's no Tailwind scrollbar plugin. Scrollbars are styled globally
   in `app/globals.css`. Don't add them to new code.

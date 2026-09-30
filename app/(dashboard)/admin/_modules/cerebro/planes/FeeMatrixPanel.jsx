@@ -6,6 +6,7 @@ import { useGetFeeSchema } from "@/hooks/appApi/useGetFeeSchema";
 import { cn } from "@/utils";
 import { formatPercent, formatUsd } from "@/utils/format";
 import { useMemo } from "react";
+import { PanelNote } from "../../shared/Explanations";
 import Panel, { RefreshButton } from "../../shared/Panel";
 import QueryState from "../../shared/QueryState";
 
@@ -18,7 +19,7 @@ import QueryState from "../../shared/QueryState";
  * value still visible so a disabled fee can be reviewed rather than hidden.
  */
 const FeeCell = ({ cell }) => {
-  if (!cell) return <span className="text-[rgba(25,54,63,0.25)]">—</span>;
+  if (!cell) return <span className="text-[rgba(25,54,63,0.5)]">—</span>;
 
   const { percent, min, max, isActive } = cell;
   const bounds = [
@@ -31,13 +32,13 @@ const FeeCell = ({ cell }) => {
       <span
         className={cn(
           "font-medium tabular-nums",
-          isActive ? "text-[#19363F]" : "text-[rgba(25,54,63,0.35)] line-through"
+          isActive ? "text-[#19363F]" : "text-[rgba(25,54,63,0.68)] line-through"
         )}
       >
         {formatPercent(percent)}
       </span>
       {bounds.length > 0 && (
-        <span className="font-inter text-[9px] tracking-[-0.36px] text-[rgba(25,54,63,0.45)]">
+        <span className="font-inter text-[10px] tracking-[-0.36px] text-[rgba(25,54,63,0.68)]">
           {bounds.join(" · ")}
         </span>
       )}
@@ -141,12 +142,12 @@ const FeeMatrixPanel = () => {
           dense
         />
 
-        <p className="font-inter text-[10px] leading-[1.5] tracking-[-0.4px] text-[rgba(25,54,63,0.4)] mt-2">
+        <PanelNote className="mt-2">
           «—» significa que ese plan no tiene comisión definida para esa operación, que no es lo
           mismo que 0%: una transferencia interna a 0% es gratuita a propósito. Las comisiones
           desactivadas salen tachadas en gris. Los planes sin ninguna comisión (Staff Member,
           BUSINESS) no aparecen como columna.
-        </p>
+        </PanelNote>
       </QueryState>
     </Panel>
   );

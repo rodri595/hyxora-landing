@@ -20,12 +20,12 @@ import { Footnote, OperationBadge, SignedUsd } from "./parts";
  */
 const DetailCell = ({ detail }) => {
   const { from, to, hop } = detail;
-  if (!from && !to) return <span className="text-[rgba(25,54,63,0.3)]">—</span>;
+  if (!from && !to) return <span className="text-[rgba(25,54,63,0.5)]">—</span>;
 
   return (
-    <span className="whitespace-nowrap font-inter text-[11px] tracking-[-0.44px] text-[rgba(25,54,63,0.7)]">
+    <span className="whitespace-nowrap font-inter text-[11px] tracking-[-0.44px] text-[rgba(25,54,63,0.85)]">
       {from && to ? `${from} → ${to}` : (from ?? to)}
-      {hop && <span className="ml-1.5 text-[10px] text-[rgba(25,54,63,0.35)]">· {hop}</span>}
+      {hop && <span className="ml-1.5 text-[10px] text-[rgba(25,54,63,0.68)]">· {hop}</span>}
     </span>
   );
 };
@@ -41,7 +41,7 @@ const columns = [
     accessorKey: "timestamp",
     header: "Hora",
     cell: (info) => (
-      <span className="whitespace-nowrap tabular-nums text-[rgba(25,54,63,0.55)]">
+      <span className="whitespace-nowrap tabular-nums text-[rgba(25,54,63,0.75)]">
         {formatDateTime(info.getValue())}
       </span>
     ),
@@ -51,7 +51,7 @@ const columns = [
     accessorKey: "chainLabel",
     header: "Red",
     cell: (info) => (
-      <span className="whitespace-nowrap text-[rgba(25,54,63,0.65)]">{info.getValue()}</span>
+      <span className="whitespace-nowrap text-[rgba(25,54,63,0.85)]">{info.getValue()}</span>
     ),
   },
   {
@@ -75,7 +75,7 @@ const columns = [
     cell: (info) => {
       const row = info.row.original;
       const value = info.getValue();
-      if (value === null) return <span className="text-[rgba(25,54,63,0.3)]">—</span>;
+      if (value === null) return <span className="text-[rgba(25,54,63,0.5)]">—</span>;
 
       return (
         <span
@@ -100,7 +100,7 @@ const columns = [
     meta: { align: "right" },
     cell: (info) => {
       const value = info.getValue();
-      if (!value) return <span className="text-[rgba(25,54,63,0.3)]">—</span>;
+      if (!value) return <span className="text-[rgba(25,54,63,0.5)]">—</span>;
 
       return (
         <span
@@ -128,7 +128,7 @@ const columns = [
       info.getValue() ? (
         <TxLink chainId={info.row.original.chainId} txHash={info.getValue()} />
       ) : (
-        <span className="text-[rgba(25,54,63,0.3)]">—</span>
+        <span className="text-[rgba(25,54,63,0.5)]">—</span>
       ),
   },
 ];

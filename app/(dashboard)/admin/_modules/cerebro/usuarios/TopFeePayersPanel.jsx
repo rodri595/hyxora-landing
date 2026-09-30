@@ -28,7 +28,7 @@ const PayerCell = ({ row }) => {
     );
   }
   return (
-    <span className="font-mono text-[10px] text-[rgba(25,54,63,0.5)]" title={row.privyId}>
+    <span className="font-mono text-[10px] text-[rgba(25,54,63,0.75)]" title={row.privyId}>
       {shortenHash(row.privyId ?? "", { lead: 14, tail: 4 })}
     </span>
   );
@@ -40,7 +40,7 @@ const columns = [
     header: "#",
     enableSorting: false,
     cell: (info) => (
-      <span className="tabular-nums text-[rgba(25,54,63,0.35)]">{info.row.index + 1}</span>
+      <span className="tabular-nums text-[rgba(25,54,63,0.68)]">{info.row.index + 1}</span>
     ),
     footer: () => "Total",
   },
@@ -54,9 +54,9 @@ const columns = [
     header: "Safe",
     cell: (info) => {
       const value = info.getValue();
-      if (!value) return <span className="text-[rgba(25,54,63,0.3)]">—</span>;
+      if (!value) return <span className="text-[rgba(25,54,63,0.5)]">—</span>;
       return (
-        <span className="font-mono text-[10px] text-[rgba(25,54,63,0.5)]" title={value}>
+        <span className="font-mono text-[10px] text-[rgba(25,54,63,0.75)]" title={value}>
           {shortenHash(value)}
         </span>
       );
@@ -68,14 +68,14 @@ const columns = [
     meta: { align: "right" },
     cell: (info) => {
       const value = info.getValue();
-      if (!Number.isFinite(value)) return <span className="text-[rgba(25,54,63,0.3)]">—</span>;
+      if (!Number.isFinite(value)) return <span className="text-[rgba(25,54,63,0.5)]">—</span>;
       return (
-        <span className="tabular-nums text-[rgba(25,54,63,0.5)]">
+        <span className="tabular-nums text-[rgba(25,54,63,0.75)]">
           {formatPercent(value, { decimals: 1 })}
         </span>
       );
     },
-    footer: () => <span className="text-[rgba(25,54,63,0.3)]">—</span>,
+    footer: () => <span className="text-[rgba(25,54,63,0.5)]">—</span>,
   },
   {
     accessorKey: "totalUsd",
@@ -182,7 +182,7 @@ const TopFeePayersPanel = () => {
         />
 
         {topThreeShare !== null && rows.length > 3 && (
-          <p className="font-inter text-[10px] leading-[1.5] tracking-[-0.4px] text-[rgba(25,54,63,0.4)] mt-2">
+          <p className="font-inter text-[10px] leading-[1.5] tracking-[-0.4px] text-[rgba(25,54,63,0.68)] mt-2">
             Los tres primeros son el {formatPercent(topThreeShare, { decimals: 0 })} de estas{" "}
             {formatNumber(rows.length)} filas. Ojo con leerlo como cuota de todos los ingresos: el
             endpoint devuelve solo la cabeza de la lista, no el total — ese está en Ingresos.

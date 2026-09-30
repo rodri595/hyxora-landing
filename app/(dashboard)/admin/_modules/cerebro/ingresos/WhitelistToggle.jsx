@@ -23,7 +23,7 @@ import { cn } from "@/utils";
  */
 const WhitelistToggle = ({ value, onChange }) => (
   <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
-    <p className="font-inter text-[11px] leading-[1.5] tracking-[-0.44px] text-[rgba(25,54,63,0.5)]">
+    <p className="font-inter text-[11px] leading-[1.5] tracking-[-0.44px] text-[rgba(25,54,63,0.75)]">
       {value
         ? "Mostrando todas las entradas al tesoro, incluidos tokens fuera de la lista blanca: entra polvo y airdrops de spam cuyo valor en USD es una estimación."
         : "Mostrando solo entradas en tokens de la lista blanca de Hyxora, que es lo que cobramos de verdad."}

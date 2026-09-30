@@ -24,7 +24,7 @@ const DonutTooltip = (props) => {
           {slice?.label}
         </span>
       </div>
-      <p className="font-inter text-[10px] tracking-[-0.4px] text-[rgba(25,54,63,0.5)] mt-1">
+      <p className="font-inter text-[10px] tracking-[-0.4px] text-[rgba(25,54,63,0.75)] mt-1">
         {formatNumber(slice?.opsCount)} tx · {formatUsdPrecise(slice?.value)} · {slice?.share}
       </p>
     </TooltipSurface>
@@ -134,7 +134,7 @@ const OperationDonutPanel = ({ filters, valueKey, title, description, emptyLabel
               >
                 {row.label}
               </span>
-              <span className="shrink-0 font-inter text-[10px] tabular-nums tracking-[-0.4px] text-[rgba(25,54,63,0.45)] ml-auto">
+              <span className="shrink-0 font-inter text-[10px] tabular-nums tracking-[-0.4px] text-[rgba(25,54,63,0.68)] ml-auto">
                 {formatNumber(row.opsCount)} tx
               </span>
               <span className="shrink-0 font-inter text-[11px] font-semibold tabular-nums tracking-[-0.44px] text-[#19363F] w-[72px] sm:w-[92px] text-right">

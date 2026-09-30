@@ -17,7 +17,7 @@ import Panel, { RefreshButton } from "../../shared/Panel";
 import QueryState from "../../shared/QueryState";
 import { GROWTH_DAYS, GROWTH_LINE, RECENT_DAYS } from "./constants";
 
-const AXIS = "rgba(25,54,63,0.4)";
+const AXIS = "rgba(25,54,63,0.68)";
 const GRID = "rgba(25,54,63,0.08)";
 
 const ChartTooltip = (props) => {
@@ -27,10 +27,10 @@ const ChartTooltip = (props) => {
 
   return (
     <TooltipSurface visible={visible}>
-      <p className="font-inter text-[10px] font-medium tracking-[-0.4px] text-[rgba(25,54,63,0.45)] mb-1">
+      <p className="font-inter text-[10px] font-medium tracking-[-0.4px] text-[rgba(25,54,63,0.68)] mb-1">
         {label}
       </p>
-      <p className="font-inter text-[11px] tracking-[-0.44px] text-[rgba(25,54,63,0.6)]">
+      <p className="font-inter text-[11px] tracking-[-0.44px] text-[rgba(25,54,63,0.75)]">
         <span className="font-semibold tabular-nums text-[#19363F]">
           {formatNumber(point?.users)}
         </span>{" "}
@@ -183,7 +183,7 @@ const UserGrowthPanel = () => {
       }
       action={
         <div className="flex items-center gap-2.5">
-          <span className="font-inter text-[11px] tabular-nums tracking-[-0.44px] text-[rgba(25,54,63,0.45)] whitespace-nowrap hidden sm:inline">
+          <span className="font-inter text-[11px] tabular-nums tracking-[-0.44px] text-[rgba(25,54,63,0.68)] whitespace-nowrap hidden sm:inline">
             {formatNumber(data?.totalUsers)} usuarios ·{" "}
             <span className="text-emerald-700">
               +{formatNumber(recentSignups)} últimos {RECENT_DAYS}d

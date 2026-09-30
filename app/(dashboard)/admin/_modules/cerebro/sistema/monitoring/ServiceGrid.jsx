@@ -36,8 +36,8 @@ const ServiceRow = ({ service }) => {
         />
         <span className="truncate font-inter text-[11px] font-medium tracking-[-0.44px] text-[#19363F]">
           {service.name}
-          <span className="text-[rgba(25,54,63,0.25)]"> · </span>
-          <span className="font-normal text-[rgba(25,54,63,0.55)]">
+          <span className="text-[rgba(25,54,63,0.5)]"> · </span>
+          <span className="font-normal text-[rgba(25,54,63,0.75)]">
             {ENV_LABELS[service.env] ?? service.env}
           </span>
         </span>
@@ -50,14 +50,14 @@ const ServiceRow = ({ service }) => {
             ? "font-medium text-red-600"
             : isSlow
               ? "text-amber-700"
-              : "text-[rgba(25,54,63,0.5)]"
+              : "text-[rgba(25,54,63,0.75)]"
         )}
       >
         {isUp ? (
           <>
             {formatNumber(service.latencyMs)} ms
             {service.httpStatus !== null && (
-              <span className="text-[rgba(25,54,63,0.3)]"> · {service.httpStatus}</span>
+              <span className="text-[rgba(25,54,63,0.5)]"> · {service.httpStatus}</span>
             )}
           </>
         ) : (

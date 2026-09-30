@@ -6,6 +6,7 @@ import { useGetHoldings } from "@/hooks/cerebro/useGetHoldings";
 import { formatNumber, formatUsd } from "@/utils/format";
 import { useCallback, useMemo } from "react";
 import CompositionBar from "../../shared/CompositionBar";
+import { PanelNote } from "../../shared/Explanations";
 import Panel, { RefreshButton } from "../../shared/Panel";
 import QueryState from "../../shared/QueryState";
 import { sumColumn } from "../../shared/aggregate";
@@ -22,24 +23,24 @@ const columns = [
   {
     accessorKey: "name",
     header: "Nombre",
-    cell: (info) => <span className="text-[rgba(25,54,63,0.65)]">{info.getValue() ?? "—"}</span>,
+    cell: (info) => <span className="text-[rgba(25,54,63,0.85)]">{info.getValue() ?? "—"}</span>,
   },
   {
     accessorKey: "chainName",
     header: "Redes",
-    cell: (info) => <span className="text-[rgba(25,54,63,0.5)]">{info.getValue()}</span>,
+    cell: (info) => <span className="text-[rgba(25,54,63,0.75)]">{info.getValue()}</span>,
   },
   {
     accessorKey: "holders",
     header: "Titulares",
     meta: { align: "right" },
     cell: (info) => (
-      <span className="tabular-nums text-[rgba(25,54,63,0.7)]">
+      <span className="tabular-nums text-[rgba(25,54,63,0.85)]">
         {formatNumber(info.getValue())}
       </span>
     ),
     // Not summed on purpose — the same user holds several of these.
-    footer: () => <span className="text-[rgba(25,54,63,0.3)]">—</span>,
+    footer: () => <span className="text-[rgba(25,54,63,0.5)]">—</span>,
   },
   {
     accessorKey: "totalUsd",
@@ -150,11 +151,11 @@ const TopTokensPanel = () => {
           dense
         />
 
-        <p className="font-inter text-[10px] leading-[1.5] tracking-[-0.4px] text-[rgba(25,54,63,0.4)] mt-2">
+        <PanelNote className="mt-2">
           Los titulares no se suman: un mismo usuario cuenta en cada token que tiene, así que la
           columna no tiene total. La búsqueda de arriba solo filtra estas filas; la de titulares al
           abrir una es del servidor y busca por símbolo, no por red.
-        </p>
+        </PanelNote>
       </QueryState>
     </Panel>
   );

@@ -18,7 +18,7 @@ import Panel, { RefreshButton } from "../../shared/Panel";
 import QueryState from "../../shared/QueryState";
 import { REVENUE_DAYS, REVENUE_LINE } from "./constants";
 
-const AXIS = "rgba(25,54,63,0.4)";
+const AXIS = "rgba(25,54,63,0.68)";
 const GRID = "rgba(25,54,63,0.08)";
 
 const ChartTooltip = (props) => {
@@ -28,12 +28,12 @@ const ChartTooltip = (props) => {
 
   return (
     <TooltipSurface visible={visible}>
-      <p className="font-inter text-[10px] font-medium tracking-[-0.4px] text-[rgba(25,54,63,0.45)] mb-1">
+      <p className="font-inter text-[10px] font-medium tracking-[-0.4px] text-[rgba(25,54,63,0.68)] mb-1">
         {label}
       </p>
       <div className="flex items-center gap-2">
         <span className="size-[7px] shrink-0 rounded-full" style={{ background: REVENUE_LINE }} />
-        <span className="font-inter text-[11px] tracking-[-0.44px] text-[rgba(25,54,63,0.6)]">
+        <span className="font-inter text-[11px] tracking-[-0.44px] text-[rgba(25,54,63,0.75)]">
           Ingresos
         </span>
         <span className="font-inter text-[11px] font-semibold tabular-nums tracking-[-0.44px] text-[#19363F] ml-auto pl-3">
@@ -123,7 +123,7 @@ const DailyRevenuePanel = () => {
               iconType="circle"
               iconSize={7}
               formatter={() => (
-                <span className="font-inter text-[10px] tracking-[-0.4px] text-[rgba(25,54,63,0.6)]">
+                <span className="font-inter text-[10px] tracking-[-0.4px] text-[rgba(25,54,63,0.75)]">
                   Ingresos
                 </span>
               )}

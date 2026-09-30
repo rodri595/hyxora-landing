@@ -54,7 +54,7 @@ const AmountCell = ({ row }) => {
     );
   }
 
-  return <span className="text-[rgba(25,54,63,0.3)]">—</span>;
+  return <span className="text-[rgba(25,54,63,0.5)]">—</span>;
 };
 
 const columns = [
@@ -74,7 +74,7 @@ const columns = [
               ? "font-inter text-[11px] font-medium tracking-[-0.44px] text-emerald-700"
               : direction === "offramp"
                 ? "font-inter text-[11px] font-medium tracking-[-0.44px] text-red-600"
-                : "text-[rgba(25,54,63,0.3)]"
+                : "text-[rgba(25,54,63,0.5)]"
           }
         >
           {label}
@@ -88,11 +88,11 @@ const columns = [
     header: "ID de orden",
     cell: (info) => {
       const value = info.getValue();
-      if (!value) return <span className="text-[rgba(25,54,63,0.3)]">—</span>;
+      if (!value) return <span className="text-[rgba(25,54,63,0.5)]">—</span>;
 
       return (
         <div className="flex items-center gap-1.5">
-          <span className="font-mono text-[10px] tracking-tight text-[rgba(25,54,63,0.7)]">
+          <span className="font-mono text-[10px] tracking-tight text-[rgba(25,54,63,0.85)]">
             {value}
           </span>
           {/* The order id doubles as the bank reference the user quotes, so it gets
@@ -124,7 +124,7 @@ const columns = [
 
       return (
         <div className="flex flex-col">
-          <span className="whitespace-nowrap tabular-nums text-[rgba(25,54,63,0.6)]">
+          <span className="whitespace-nowrap tabular-nums text-[rgba(25,54,63,0.75)]">
             {formatDay(info.getValue())}
           </span>
           {stuck && (
@@ -145,7 +145,7 @@ const columns = [
       info.getValue() ? (
         <TxLink chainId={info.row.original.chainId} txHash={info.getValue()} />
       ) : (
-        <span className="text-[rgba(25,54,63,0.3)]">—</span>
+        <span className="text-[rgba(25,54,63,0.5)]">—</span>
       ),
   },
   {
@@ -155,10 +155,10 @@ const columns = [
     meta: { align: "right" },
     cell: (info) => {
       const value = info.getValue();
-      if (!value) return <span className="text-[rgba(25,54,63,0.3)]">—</span>;
+      if (!value) return <span className="text-[rgba(25,54,63,0.5)]">—</span>;
 
       return (
-        <span className="tabular-nums text-[rgba(25,54,63,0.7)]">
+        <span className="tabular-nums text-[rgba(25,54,63,0.85)]">
           {formatFiat(value, info.row.original.currency)}
         </span>
       );

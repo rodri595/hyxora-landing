@@ -4,6 +4,7 @@ import Spinner from "@/components/Spinner";
 import Tabs from "@/components/Tabs";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, lazy, useCallback, useEffect, useRef } from "react";
+import { ExplanationsProvider, ExplanationsToggle } from "./shared/Explanations";
 
 /**
  * Cerebro shell — the read-only analytics side of the admin, backed by the
@@ -73,41 +74,50 @@ const CerebroModule = () => {
   );
 
   return (
-    // No card chrome below `sm`: a bordered, padded box inside the already-padded
-    // admin section is two frames around the same content, and on a phone that
-    // second frame costs more width than it earns. The panels inside carry their
-    // own borders, so the grouping still reads.
-    <div className="flex flex-col flex-1 w-0 min-h-0 h-full overflow-hidden py-2.5 sm:rounded-xl sm:border-[0.7px] sm:border-[rgba(25,54,63,0.08)] sm:px-4 sm:py-3 sm:shadow-[0px_2px_12px_0px_rgba(25,54,63,0.08)]">
-      {/* overflow-x-auto: Tabs is a plain flex row with no wrap, and 8 labels
-          clip on narrow viewports. Lenis' allowNestedScroll gives the strip its
-          sideways swipe without data-lenis-prevent, which would also have eaten the
-          vertical gestures the strip has no use for. */}
-      <Tabs
-        tabs={CEREBRO_TABS}
-        value={activeTab}
-        onChange={handleTabChange}
-        className="mb-3 shrink-0 overflow-x-auto overscroll-x-contain"
-      />
+    <ExplanationsProvider>
+      {/* No card chrome below `sm`: a bordered, padded box inside the already-padded
+          admin section is two frames around the same content, and on a phone that
+          second frame costs more width than it earns. The panels inside carry their
+          own borders, so the grouping still reads.
+          The tinted canvas is what the panels stand on: white cards on a white page
+          had no figure/ground at all, and a dashboard this dense needs each card to
+          read as one unit before any of its numbers do. On a phone the page itself is
+          the canvas and each bordered panel spans it, so there is nothing to tint. */}
+      <div className="flex flex-col flex-1 w-0 min-h-0 h-full overflow-hidden py-2.5 sm:rounded-xl sm:border-[0.7px] sm:border-[rgba(25,54,63,0.08)] sm:bg-[#F3F6F7] sm:px-4 sm:py-3 sm:shadow-[0px_2px_12px_0px_rgba(25,54,63,0.08)]">
+        <div className="mb-3 flex shrink-0 items-end gap-2">
+          {/* overflow-x-auto: Tabs is a plain flex row with no wrap, and 8 labels
+              clip on narrow viewports. Lenis' allowNestedScroll gives the strip its
+              sideways swipe without data-lenis-prevent, which would also have eaten the
+              vertical gestures the strip has no use for. */}
+          <Tabs
+            tabs={CEREBRO_TABS}
+            value={activeTab}
+            onChange={handleTabChange}
+            className="min-w-0 flex-1 overflow-x-auto overscroll-x-contain"
+          />
+          <ExplanationsToggle className="mb-0.5" />
+        </div>
 
-      {/* The tab body is this page's real scroller. Lenis smooth-scrolls the
-          document, which this sits inside and never reaches, so without the opt-out
-          a wheel or touch drag here scrolls nothing at all. */}
-      <div
-        ref={bodyRef}
-        className="flex-1 min-w-0 min-h-0 overflow-y-auto overflow-x-hidden"
-        data-lenis-prevent
-      >
-        <Suspense
-          fallback={
-            <div className="flex items-center justify-center w-full h-full py-12">
-              <Spinner />
-            </div>
-          }
+        {/* The tab body is this page's real scroller. Lenis smooth-scrolls the
+            document, which this sits inside and never reaches, so without the opt-out
+            a wheel or touch drag here scrolls nothing at all. */}
+        <div
+          ref={bodyRef}
+          className="flex-1 min-w-0 min-h-0 overflow-y-auto overflow-x-hidden"
+          data-lenis-prevent
         >
-          <Module />
-        </Suspense>
+          <Suspense
+            fallback={
+              <div className="flex items-center justify-center w-full h-full py-12">
+                <Spinner />
+              </div>
+            }
+          >
+            <Module />
+          </Suspense>
+        </div>
       </div>
-    </div>
+    </ExplanationsProvider>
   );
 };
 

@@ -32,7 +32,7 @@ const TxLink = ({ chainId, txHash, lead = 8, tail = 4 }) => {
   const label = shortenHash(txHash, { lead, tail });
 
   if (!url) {
-    return <span className="font-mono text-[10px] text-[rgba(25,54,63,0.5)]">{label}</span>;
+    return <span className="font-mono text-[10px] text-[rgba(25,54,63,0.75)]">{label}</span>;
   }
 
   return (
@@ -40,7 +40,7 @@ const TxLink = ({ chainId, txHash, lead = 8, tail = 4 }) => {
       href={url}
       target="_blank"
       rel="noreferrer"
-      className="inline-flex items-center gap-1 font-mono text-[10px] text-[rgba(25,54,63,0.6)] hover:text-[#19363F] transition-colors"
+      className="inline-flex items-center gap-1 font-mono text-[10px] text-[rgba(25,54,63,0.75)] hover:text-[#19363F] transition-colors"
     >
       {label}
       <ExternalIcon />

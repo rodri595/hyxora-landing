@@ -3,6 +3,7 @@
 import { useGetFounderEconomics } from "@/hooks/cerebro/useGetFounderEconomics";
 import { formatNumber, formatPercent, formatUsd } from "@/utils/format";
 import { AnimatedCount, AnimatedMoney } from "../../shared/AnimatedValue";
+import { PanelNote } from "../../shared/Explanations";
 import Panel, { RefreshButton } from "../../shared/Panel";
 import QueryState from "../../shared/QueryState";
 import StatCard from "../../shared/StatCard";
@@ -103,11 +104,11 @@ const FounderEconomicsPanel = () => {
           </p>
         )}
 
-        <p className="font-inter text-[10px] leading-[1.5] tracking-[-0.4px] text-[rgba(25,54,63,0.4)] mt-2">
+        <PanelNote className="mt-2">
           {data?.note ??
             "Los ingresos son una estimación calculada sobre la actividad on-chain, no facturación."}{" "}
           Por eso hay dos cifras: la conservadora es el suelo, la estimada la más probable.
-        </p>
+        </PanelNote>
       </QueryState>
     </Panel>
   );

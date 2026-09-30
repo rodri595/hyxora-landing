@@ -6,6 +6,7 @@ import { useGetPnlOperations } from "@/hooks/cerebro/useGetPnlOperations";
 import { cn } from "@/utils";
 import { formatNumber, formatUsd, formatUsdPrecise } from "@/utils/format";
 import { useMemo } from "react";
+import { PanelNote } from "../../shared/Explanations";
 
 const money = (value, { signed = false } = {}) => {
   if (typeof value !== "number" || !Number.isFinite(value)) return "—";
@@ -14,7 +15,7 @@ const money = (value, { signed = false } = {}) => {
 
 const Figure = ({ label, value, tone }) => (
   <div className="flex min-w-0 flex-1 flex-col items-center gap-0.5">
-    <span className="font-inter text-[9px] font-medium uppercase tracking-[0.5px] text-[rgba(25,54,63,0.4)]">
+    <span className="font-inter text-[10px] font-medium uppercase tracking-[0.5px] text-[rgba(25,54,63,0.68)]">
       {label}
     </span>
     <span
@@ -34,7 +35,7 @@ const Figure = ({ label, value, tone }) => (
 );
 
 const SectionLabel = ({ children }) => (
-  <span className="font-inter text-[9px] font-medium uppercase tracking-[0.5px] text-[rgba(25,54,63,0.4)] block mb-1.5">
+  <span className="font-inter text-[10px] font-medium uppercase tracking-[0.5px] text-[rgba(25,54,63,0.68)] block mb-1.5">
     {children}
   </span>
 );
@@ -82,7 +83,7 @@ const MembershipCard = ({ row, filters }) => {
         <h4 className="font-inter text-[13px] font-semibold tracking-[-0.52px] text-[#19363F]">
           {cerebroPlanLabel(row.plan)}
         </h4>
-        <span className="font-inter text-[11px] tabular-nums tracking-[-0.44px] text-[rgba(25,54,63,0.45)]">
+        <span className="font-inter text-[11px] tabular-nums tracking-[-0.44px] text-[rgba(25,54,63,0.68)]">
           {formatNumber(row.usersCount)} usuarios
         </span>
       </div>
@@ -105,7 +106,7 @@ const MembershipCard = ({ row, filters }) => {
             <Spinner className="size-4" />
           </div>
         ) : operations.length === 0 ? (
-          <p className="font-inter text-[10px] tracking-[-0.4px] text-[rgba(25,54,63,0.35)] py-1">
+          <p className="font-inter text-[10px] tracking-[-0.4px] text-[rgba(25,54,63,0.68)] py-1">
             Sin actividad en la ventana.
           </p>
         ) : (
@@ -116,16 +117,16 @@ const MembershipCard = ({ row, filters }) => {
             <table className="w-full min-w-[300px] border-collapse">
               <thead>
                 <tr className="border-b-[0.7px] border-[rgba(25,54,63,0.08)]">
-                  <th className="text-left font-inter text-[10px] font-medium tracking-[-0.4px] text-[rgba(25,54,63,0.45)] pb-1">
+                  <th className="text-left font-inter text-[10px] font-medium tracking-[-0.4px] text-[rgba(25,54,63,0.68)] pb-1">
                     Funcionalidad
                   </th>
-                  <th className="text-right font-inter text-[10px] font-medium tracking-[-0.4px] text-[rgba(25,54,63,0.45)] pb-1">
+                  <th className="text-right font-inter text-[10px] font-medium tracking-[-0.4px] text-[rgba(25,54,63,0.68)] pb-1">
                     Ingresos
                   </th>
-                  <th className="text-right font-inter text-[10px] font-medium tracking-[-0.4px] text-[rgba(25,54,63,0.45)] pb-1">
+                  <th className="text-right font-inter text-[10px] font-medium tracking-[-0.4px] text-[rgba(25,54,63,0.68)] pb-1">
                     Gastos
                   </th>
-                  <th className="text-right font-inter text-[10px] font-medium tracking-[-0.4px] text-[rgba(25,54,63,0.45)] pb-1">
+                  <th className="text-right font-inter text-[10px] font-medium tracking-[-0.4px] text-[rgba(25,54,63,0.68)] pb-1">
                     Margen
                   </th>
                 </tr>
@@ -172,7 +173,7 @@ const MembershipCard = ({ row, filters }) => {
                   <span className="font-inter text-[11px] font-medium tracking-[-0.44px] text-[#19363F]">
                     {holding.symbol}
                   </span>
-                  <span className="font-inter text-[10px] tabular-nums tracking-[-0.4px] text-[rgba(25,54,63,0.5)]">
+                  <span className="font-inter text-[10px] tabular-nums tracking-[-0.4px] text-[rgba(25,54,63,0.75)]">
                     {formatUsd(holding.totalUsd, { decimals: 0 })}
                   </span>
                 </div>
@@ -186,10 +187,10 @@ const MembershipCard = ({ row, filters }) => {
             ))}
           </div>
 
-          <p className="font-inter text-[10px] leading-[1.5] tracking-[-0.4px] text-[rgba(25,54,63,0.35)] mt-2">
+          <PanelNote className="mt-2">
             Las barras están a escala del activo más grande del plan. No son el % de la cartera:
             /pnl/membership devuelve el top de posiciones pero no el total sobre el que calcularlo.
-          </p>
+          </PanelNote>
         </div>
       )}
     </section>

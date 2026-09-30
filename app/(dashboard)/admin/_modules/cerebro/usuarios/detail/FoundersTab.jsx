@@ -40,7 +40,7 @@ const ErrorBlock = ({ what, error }) => {
 };
 
 const RoleBadge = ({ role }) => {
-  if (!role) return <span className="text-[rgba(25,54,63,0.3)]">—</span>;
+  if (!role) return <span className="text-[rgba(25,54,63,0.5)]">—</span>;
 
   return (
     <span
@@ -58,7 +58,7 @@ const SIM_STATUS = {
   active: { label: "Activo", className: "border-emerald-200 bg-emerald-50 text-emerald-700" },
   suspended: {
     label: "Sin acceso",
-    className: "border-[rgba(25,54,63,0.1)] bg-[rgba(25,54,63,0.06)] text-[rgba(25,54,63,0.55)]",
+    className: "border-[rgba(25,54,63,0.1)] bg-[rgba(25,54,63,0.06)] text-[rgba(25,54,63,0.75)]",
   },
 };
 
@@ -164,7 +164,7 @@ const FoundersTab = ({ user, founder, status, error }) => {
           subtitle="La ficha de la pestaña Usuarios del admin. Sale del backend de la web founders, no de Cerebro."
           aside={
             record && (
-              <span className="font-inter text-[10px] tracking-[-0.4px] text-[rgba(25,54,63,0.4)]">
+              <span className="font-inter text-[10px] tracking-[-0.4px] text-[rgba(25,54,63,0.68)]">
                 {founder.matchedBy === "wallet" ? "Vinculado por wallet" : "Vinculado por correo"}
               </span>
             )
@@ -218,7 +218,7 @@ const FoundersTab = ({ user, founder, status, error }) => {
             title="Pagos"
             subtitle="Compras en la web founders con su factura, en cualquier estado: el mismo historial que «Pagos» en la pestaña Usuarios."
             aside={
-              <span className="font-inter text-[10px] tabular-nums tracking-[-0.4px] text-[rgba(25,54,63,0.4)]">
+              <span className="font-inter text-[10px] tabular-nums tracking-[-0.4px] text-[rgba(25,54,63,0.68)]">
                 {payments.length} {payments.length === 1 ? "pago" : "pagos"}
               </span>
             }

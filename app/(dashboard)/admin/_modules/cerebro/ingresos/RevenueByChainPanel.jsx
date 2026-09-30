@@ -6,6 +6,7 @@ import { useGetTreasuryByChain } from "@/hooks/cerebro/useGetTreasuryByChain";
 import { cn } from "@/utils";
 import { formatNumber, formatUsd } from "@/utils/format";
 import { useMemo } from "react";
+import { PanelNote } from "../../shared/Explanations";
 import Panel, { RefreshButton } from "../../shared/Panel";
 import QueryState from "../../shared/QueryState";
 
@@ -89,7 +90,7 @@ const RevenueByChainPanel = ({ includeNonWhitelisted = false }) => {
           <span
             className={cn(
               "font-medium tabular-nums",
-              value > 0 ? "text-emerald-700" : "text-[rgba(25,54,63,0.3)]"
+              value > 0 ? "text-emerald-700" : "text-[rgba(25,54,63,0.5)]"
             )}
           >
             {formatUsd(value, { decimals: value > 0 && value < 1 ? 4 : 2 })}
@@ -113,7 +114,7 @@ const RevenueByChainPanel = ({ includeNonWhitelisted = false }) => {
         header: "Transferencias",
         meta: { align: "right" },
         cell: (info) => (
-          <span className="tabular-nums text-[rgba(25,54,63,0.7)]">
+          <span className="tabular-nums text-[rgba(25,54,63,0.85)]">
             {formatNumber(info.getValue())}
           </span>
         ),
@@ -124,7 +125,7 @@ const RevenueByChainPanel = ({ includeNonWhitelisted = false }) => {
         header: "Tokens",
         meta: { align: "right" },
         cell: (info) => (
-          <span className="tabular-nums text-[rgba(25,54,63,0.7)]">
+          <span className="tabular-nums text-[rgba(25,54,63,0.85)]">
             {formatNumber(info.getValue())}
           </span>
         ),
@@ -152,13 +153,13 @@ const RevenueByChainPanel = ({ includeNonWhitelisted = false }) => {
           dense
         />
 
-        <p className="font-inter text-[10px] leading-[1.5] tracking-[-0.4px] text-[rgba(25,54,63,0.4)] mt-2">
+        <PanelNote className="mt-2">
           {hasUserFees
             ? "«Comisiones de usuario» son las entradas que pagó un Safe de usuario, sin las ventas de NFT; «Total de entradas» suma además el fondeo del equipo y los swaps internos. "
             : "«Total de entradas» incluye el fondeo del equipo y los swaps internos, no solo lo que pagaron los usuarios. "}
           Las redes salen siempre todas y en el mismo orden, con $0 si aún no registraron entradas.
           Ethereum queda fuera: la app dejó de usarla y su histórico no cuenta en ningún desglose.
-        </p>
+        </PanelNote>
       </QueryState>
     </Panel>
   );

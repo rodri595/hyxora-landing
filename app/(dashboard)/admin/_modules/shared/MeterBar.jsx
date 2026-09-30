@@ -37,7 +37,7 @@ const MeterBar = ({ label, value, total, tone = "neutral", hint }) => {
   return (
     <div className="flex flex-col gap-1">
       <div className="flex items-baseline justify-between gap-3">
-        <span className="font-inter text-[11px] tracking-[-0.44px] text-[rgba(25,54,63,0.6)]">
+        <span className="font-inter text-[11px] tracking-[-0.44px] text-[rgba(25,54,63,0.75)]">
           {label}
         </span>
         <span className="flex items-baseline gap-1.5 font-inter text-[11px] tracking-[-0.44px]">
@@ -45,11 +45,11 @@ const MeterBar = ({ label, value, total, tone = "neutral", hint }) => {
             {hasValue ? formatNumber(value) : "—"}
           </span>
           {hasValue && hasTotal && (
-            <span className="tabular-nums text-[rgba(25,54,63,0.4)]">
+            <span className="tabular-nums text-[rgba(25,54,63,0.68)]">
               {share.toFixed(share < 10 ? 1 : 0)}%
             </span>
           )}
-          {hint && <span className="text-[rgba(25,54,63,0.35)]">{hint}</span>}
+          {hint && <span className="text-[rgba(25,54,63,0.68)]">{hint}</span>}
         </span>
       </div>
 

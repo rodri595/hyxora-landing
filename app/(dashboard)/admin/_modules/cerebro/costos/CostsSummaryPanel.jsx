@@ -69,7 +69,7 @@ const CostsSummaryPanel = () => {
       description="Gas que patrocinamos por cuenta del usuario. Los importes se registran en USD al precio del momento de la operación, así que no se mueven con el mercado."
       action={
         <div className="flex items-center gap-2.5">
-          <span className="font-inter text-[11px] tabular-nums tracking-[-0.44px] text-[rgba(25,54,63,0.45)] whitespace-nowrap hidden sm:inline">
+          <span className="font-inter text-[11px] tabular-nums tracking-[-0.44px] text-[rgba(25,54,63,0.68)] whitespace-nowrap hidden sm:inline">
             {formatNumber(ops30d)} ops en los últimos {COST_DAYS} días · histórico{" "}
             {formatNumber(opsLifetime)} ops
           </span>
@@ -111,7 +111,7 @@ const CostsSummaryPanel = () => {
               tone={burnRate >= 100 ? "warning" : burnRate >= 60 ? "neutral" : "good"}
               hint={`de ${formatUsd(revenue30d)} cobrados`}
             />
-            <p className="font-inter text-[10px] leading-[1.5] tracking-[-0.4px] text-[rgba(25,54,63,0.4)] mt-1.5">
+            <p className="font-inter text-[10px] leading-[1.5] tracking-[-0.4px] text-[rgba(25,54,63,0.68)] mt-1.5">
               {burnRate >= 100
                 ? `El gas patrocinado se comió el ${burnRate.toFixed(0)}% de lo cobrado en la ventana: la barra está llena porque el margen es negativo.`
                 : `El gas patrocinado se llevó el ${burnRate.toFixed(0)}% de lo cobrado en la ventana. Los dos importes son de los últimos ${COST_DAYS} días y salen de endpoints distintos (/costs/totals y /fees/totals), así que se comparan por ventana, no operación a operación.`}

@@ -18,7 +18,7 @@ import Panel, { RefreshButton } from "../../shared/Panel";
 import QueryState from "../../shared/QueryState";
 import { COST_COLOR, REVENUE_COLOR, bucketFor } from "./constants";
 
-const AXIS = "rgba(25,54,63,0.4)";
+const AXIS = "rgba(25,54,63,0.68)";
 const GRID = "rgba(25,54,63,0.08)";
 
 const BUCKET_LABEL = { day: "día", week: "semana", month: "mes" };
@@ -34,12 +34,12 @@ const ChartTooltip = (props) => {
 
   return (
     <TooltipSurface visible={visible}>
-      <p className="font-inter text-[10px] font-medium tracking-[-0.4px] text-[rgba(25,54,63,0.45)] mb-1.5">
+      <p className="font-inter text-[10px] font-medium tracking-[-0.4px] text-[rgba(25,54,63,0.68)] mb-1.5">
         {label}
       </p>
 
       {fees === 0 && cost === 0 ? (
-        <p className="font-inter text-[11px] tracking-[-0.44px] text-[rgba(25,54,63,0.4)]">
+        <p className="font-inter text-[11px] tracking-[-0.44px] text-[rgba(25,54,63,0.68)]">
           Sin actividad
         </p>
       ) : (
@@ -53,7 +53,7 @@ const ChartTooltip = (props) => {
                 className="size-[7px] shrink-0 rounded-full"
                 style={{ background: row.color }}
               />
-              <span className="font-inter text-[11px] tracking-[-0.44px] text-[rgba(25,54,63,0.6)]">
+              <span className="font-inter text-[11px] tracking-[-0.44px] text-[rgba(25,54,63,0.75)]">
                 {row.name}
               </span>
               <span className="font-inter text-[11px] font-semibold tabular-nums tracking-[-0.44px] text-[#19363F] ml-auto pl-4">
@@ -63,7 +63,7 @@ const ChartTooltip = (props) => {
           ))}
 
           <div className="mt-1.5 pt-1.5 border-t-[0.7px] border-[rgba(25,54,63,0.08)] flex items-center gap-2">
-            <span className="font-inter text-[11px] tracking-[-0.44px] text-[rgba(25,54,63,0.6)]">
+            <span className="font-inter text-[11px] tracking-[-0.44px] text-[rgba(25,54,63,0.75)]">
               Margen
             </span>
             <span
@@ -176,7 +176,7 @@ const PnlDailyPanel = ({ filters }) => {
               iconType="circle"
               iconSize={7}
               formatter={(value) => (
-                <span className="font-inter text-[10px] tracking-[-0.4px] text-[rgba(25,54,63,0.6)]">
+                <span className="font-inter text-[10px] tracking-[-0.4px] text-[rgba(25,54,63,0.75)]">
                   {value}
                 </span>
               )}

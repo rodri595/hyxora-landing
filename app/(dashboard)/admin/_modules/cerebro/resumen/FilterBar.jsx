@@ -26,7 +26,7 @@ const FilterField = ({ label, htmlFor, children }) => {
   const Wrapper = htmlFor ? "label" : "div";
   return (
     <Wrapper className="flex flex-col gap-1.5" htmlFor={htmlFor}>
-      <span className="font-inter text-[10px] font-medium uppercase tracking-[0.6px] text-[rgba(25,54,63,0.4)]">
+      <span className="font-inter text-[10px] font-medium uppercase tracking-[0.6px] text-[rgba(25,54,63,0.68)]">
         {label}
       </span>
       {children}
@@ -141,7 +141,7 @@ const FilterBar = ({ filters, onApply, onExport, canExport = false }) => {
     // the one that indents further on a phone.
     <section className="flex flex-col gap-3.5 rounded-xl border-[0.7px] border-[rgba(25,54,63,0.08)] bg-white px-2.5 py-2.5 shadow-[0px_2px_12px_0px_rgba(25,54,63,0.06)] sm:px-4 sm:py-3.5">
       <div className="flex flex-wrap items-center gap-2">
-        <span className="font-inter text-[11px] tracking-[-0.44px] text-[rgba(25,54,63,0.45)] mr-1">
+        <span className="font-inter text-[11px] tracking-[-0.44px] text-[rgba(25,54,63,0.68)] mr-1">
           Rangos rápidos:
         </span>
         {QUICK_RANGES.map((range) => (
@@ -154,7 +154,7 @@ const FilterBar = ({ filters, onApply, onExport, canExport = false }) => {
               "rounded-lg px-2.5 py-1 font-inter text-[11px] font-medium tracking-[-0.44px] transition-colors",
               activeRangeId === range.id
                 ? "bg-[#19363F] text-white"
-                : "bg-[rgba(25,54,63,0.04)] text-[rgba(25,54,63,0.6)] hover:bg-[rgba(25,54,63,0.08)] hover:text-[#19363F]"
+                : "bg-[rgba(25,54,63,0.04)] text-[rgba(25,54,63,0.75)] hover:bg-[rgba(25,54,63,0.08)] hover:text-[#19363F]"
             )}
           >
             {range.label}
@@ -235,14 +235,14 @@ const FilterBar = ({ filters, onApply, onExport, canExport = false }) => {
             "rounded-lg px-4 py-2 font-inter text-[12px] font-medium tracking-[-0.48px] transition-colors",
             isDirty
               ? "bg-[#19363F] text-white hover:bg-[#25505c]"
-              : "bg-[rgba(25,54,63,0.06)] text-[rgba(25,54,63,0.3)] cursor-not-allowed"
+              : "bg-[rgba(25,54,63,0.06)] text-[rgba(25,54,63,0.5)] cursor-not-allowed"
           )}
         >
           Aplicar
         </button>
 
         {usersTruncated && (
-          <span className="font-inter text-[10px] leading-[1.5] tracking-[-0.4px] text-[rgba(25,54,63,0.4)]">
+          <span className="font-inter text-[10px] leading-[1.5] tracking-[-0.4px] text-[rgba(25,54,63,0.68)]">
             El desplegable de usuario lista los {userOptions.length} de mayor TVL — /users devuelve
             como mucho {USER_OPTIONS_LIMIT} por página y hay {userTotal}.
           </span>
@@ -256,7 +256,7 @@ const FilterBar = ({ filters, onApply, onExport, canExport = false }) => {
             "ml-auto flex items-center gap-1.5 rounded-lg border-[0.7px] px-3 py-2 font-inter text-[12px] font-medium tracking-[-0.48px] transition-colors",
             canExport
               ? "border-[rgba(25,54,63,0.12)] text-[#19363F] hover:bg-[rgba(25,54,63,0.04)]"
-              : "border-[rgba(25,54,63,0.06)] text-[rgba(25,54,63,0.25)] cursor-not-allowed"
+              : "border-[rgba(25,54,63,0.06)] text-[rgba(25,54,63,0.5)] cursor-not-allowed"
           )}
         >
           <DownloadIcon />

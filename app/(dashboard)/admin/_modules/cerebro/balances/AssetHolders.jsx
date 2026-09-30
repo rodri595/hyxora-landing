@@ -37,7 +37,7 @@ const AssetHolders = ({ query, row, label }) => {
     return (
       <div className="flex items-center gap-2 py-1.5">
         <Spinner className="size-3.5" />
-        <span className="font-inter text-[10px] tracking-[-0.4px] text-[rgba(25,54,63,0.4)]">
+        <span className="font-inter text-[10px] tracking-[-0.4px] text-[rgba(25,54,63,0.68)]">
           Buscando titulares de {label}…
         </span>
       </div>
@@ -65,7 +65,7 @@ const AssetHolders = ({ query, row, label }) => {
       />
 
       {(atCap || filtered > 0) && (
-        <p className="font-inter text-[10px] leading-[1.5] tracking-[-0.4px] text-[rgba(25,54,63,0.4)] mt-1.5">
+        <p className="font-inter text-[10px] leading-[1.5] tracking-[-0.4px] text-[rgba(25,54,63,0.68)] mt-1.5">
           {atCap && (
             <span className="text-amber-700">
               Tope de {formatNumber(HOLDERS_LIMIT)} titulares alcanzado — hay más de los que el

@@ -73,7 +73,7 @@ const RenewalsPanel = () => {
           </p>
         )}
 
-        <p className="font-inter text-[10px] leading-[1.5] tracking-[-0.4px] text-[rgba(25,54,63,0.4)] mt-2">
+        <p className="font-inter text-[10px] leading-[1.5] tracking-[-0.4px] text-[rgba(25,54,63,0.68)] mt-2">
           Solo recuentos: /users/renewals no devuelve quiénes son, así que esto dice cuánto hay en
           juego, no a quién escribir. Para la lista haría falta que el endpoint expusiera los
           usuarios detrás de cada cifra.

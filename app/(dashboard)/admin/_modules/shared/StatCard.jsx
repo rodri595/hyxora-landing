@@ -13,7 +13,7 @@ const VALUE_TONES = {
   neutral: "text-[#19363F]",
   good: "text-emerald-700",
   warning: "text-amber-700",
-  muted: "text-[rgba(25,54,63,0.35)]",
+  muted: "text-[rgba(25,54,63,0.68)]",
 };
 
 /**
@@ -40,11 +40,11 @@ const StatCard = ({ value, label, tone = "neutral", hint }) => (
     >
       {value}
     </span>
-    <span className="font-inter text-[10px] leading-[1.4] tracking-[-0.4px] text-[rgba(25,54,63,0.5)]">
+    <span className="font-inter text-[10px] leading-[1.4] tracking-[-0.4px] text-[rgba(25,54,63,0.75)]">
       {label}
     </span>
     {hint && (
-      <span className="font-inter text-[10px] tracking-[-0.4px] text-[rgba(25,54,63,0.35)]">
+      <span className="font-inter text-[10px] tracking-[-0.4px] text-[rgba(25,54,63,0.68)]">
         {hint}
       </span>
     )}

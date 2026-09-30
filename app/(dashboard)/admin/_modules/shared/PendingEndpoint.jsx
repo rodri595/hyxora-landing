@@ -23,12 +23,12 @@ const PendingEndpoint = ({ needs, fields = [], shape }) => {
     <div className="flex flex-col gap-2 rounded-lg border-[0.7px] border-dashed border-[rgba(25,54,63,0.15)] bg-[rgba(25,54,63,0.02)] px-3 py-2.5">
       <div className="flex items-center gap-1.5">
         <span className="size-1.5 rounded-full bg-[rgba(25,54,63,0.25)]" />
-        <span className="font-inter text-[10px] font-medium uppercase tracking-[0.6px] text-[rgba(25,54,63,0.4)]">
+        <span className="font-inter text-[10px] font-medium uppercase tracking-[0.6px] text-[rgba(25,54,63,0.68)]">
           Pendiente de endpoint
         </span>
       </div>
 
-      <p className="font-inter text-[11px] leading-[1.6] tracking-[-0.44px] text-[rgba(25,54,63,0.55)]">
+      <p className="font-inter text-[11px] leading-[1.6] tracking-[-0.44px] text-[rgba(25,54,63,0.75)]">
         {needs}
       </p>
 
@@ -37,7 +37,7 @@ const PendingEndpoint = ({ needs, fields = [], shape }) => {
           {fields.map((field) => (
             <code
               key={field}
-              className="font-mono text-[10px] tracking-tight text-[rgba(25,54,63,0.55)] bg-white border-[0.7px] border-[rgba(25,54,63,0.1)] rounded-[5px] px-1.5 py-0.5"
+              className="font-mono text-[10px] tracking-tight text-[rgba(25,54,63,0.75)] bg-white border-[0.7px] border-[rgba(25,54,63,0.1)] rounded-[5px] px-1.5 py-0.5"
             >
               {field}
             </code>
@@ -47,7 +47,7 @@ const PendingEndpoint = ({ needs, fields = [], shape }) => {
 
       {shapeJson && (
         <details className="mt-0.5">
-          <summary className="cursor-pointer font-inter text-[10px] font-medium text-[rgba(25,54,63,0.45)] hover:text-[#19363F] tracking-[-0.4px] transition-colors list-none">
+          <summary className="cursor-pointer font-inter text-[10px] font-medium text-[rgba(25,54,63,0.68)] hover:text-[#19363F] tracking-[-0.4px] transition-colors list-none">
             Forma esperada de la respuesta
           </summary>
           <div className="relative mt-1.5">
@@ -55,7 +55,7 @@ const PendingEndpoint = ({ needs, fields = [], shape }) => {
               <CopyButton text={shapeJson} />
             </div>
             <pre
-              className="max-h-[260px] overflow-auto overscroll-contain rounded-lg bg-white border-[0.7px] border-[rgba(25,54,63,0.1)] p-2.5 pr-9 font-mono text-[10px] leading-[1.5] text-[rgba(25,54,63,0.65)]"
+              className="max-h-[260px] overflow-auto overscroll-contain rounded-lg bg-white border-[0.7px] border-[rgba(25,54,63,0.1)] p-2.5 pr-9 font-mono text-[10px] leading-[1.5] text-[rgba(25,54,63,0.85)]"
             >
               {shapeJson}
             </pre>
