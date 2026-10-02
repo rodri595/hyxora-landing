@@ -169,6 +169,12 @@ const Surface = ({ leaving, onClose, onLeft }) => {
         height: radius * 2,
       });
 
+      // A translated child still counts as scrollable overflow, so while the
+      // copy rises from 10px below the scroller would flash a scrollbar (and
+      // reflow the text round it). Held shut until the last block has landed.
+      const scroller = q("[data-scroll]")[0];
+      gsap.set(scroller, { overflowY: "hidden" });
+
       const tl = gsap.timeline({ defaults: { ease: "snap" } });
 
       tl.from(backdrop.current, { opacity: 0, duration: 0.35, ease: "power1.out" }, 0)
@@ -211,7 +217,8 @@ const Surface = ({ leaving, onClose, onLeft }) => {
           q("[data-rise]"),
           { opacity: 0, y: 10, duration: 0.5, stagger: 0.06, clearProps: "opacity,transform" },
           0.44
-        );
+        )
+        .set(scroller, { clearProps: "overflowY" }, ">");
 
       // One month at a time: a node lands, then the rail fills on to the next.
       const fills = q("[data-fill]");
@@ -339,7 +346,7 @@ const Surface = ({ leaving, onClose, onLeft }) => {
               />
             </div>
 
-            <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
+            <div data-scroll className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
               <div className="p-3 pb-0">
                 <Art
                   onClose={() => {
@@ -555,11 +562,11 @@ const Copy = ({ onClose }) => (
       data-rise
       className="squircle flex flex-col divide-y divide-white/[0.06] bg-white/[0.045] [--sq-r:22px]"
     >
-      <Term label="Pago mensual">
+      <Term label="Pago mensual" note="1,99$/mes Basic, 9,99$/mes Premium">
         En el momento que se efectúe el pago mensual, transferiremos a la cuenta el mismo importe en
         Oro digital.
       </Term>
-      <Term label="Pago anual">
+      <Term label="Pago anual" note="19$/año Basic, 96$/año Premium">
         Cada mes recibirás en los 5 primeros días de cada mes, la transferencia en Oro digital
         correspondiente a una mensualidad.
       </Term>
@@ -607,14 +614,17 @@ const Copy = ({ onClose }) => (
   </div>
 );
 
-const Term = ({ label, children }) => (
+const Term = ({ label, note, children }) => (
   <div className="flex flex-col gap-1 px-3.5 py-3">
-    <dt className="flex items-center gap-2 font-medium text-[13px] text-white leading-[18px]">
+    <dt className="flex items-baseline gap-2 font-medium text-[13px] text-white leading-[18px]">
       <span
         aria-hidden="true"
-        className="size-1.5 rounded-full bg-[radial-gradient(circle_at_35%_30%,#FFF1C8,#D9A24A)]"
+        className="size-1.5 shrink-0 -translate-y-px self-center rounded-full bg-[radial-gradient(circle_at_35%_30%,#FFF1C8,#D9A24A)]"
       />
-      {label}
+      <span>
+        {label}
+        {note && <span className="font-normal text-white/60"> ({note})</span>}
+      </span>
     </dt>
     <dd className="text-[13px] text-white/55 leading-[19px]">{children}</dd>
   </div>
