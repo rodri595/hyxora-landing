@@ -498,6 +498,9 @@ const ALIGN_CLASS = {
  * @param {number} [maxHeight]               - Max body height in px before scrolling.
  *   Only meaningful with `bare`; otherwise the table flex-fills its parent.
  * @param {React.ReactNode} [toolbarExtra]   - Extra controls, rendered left of Export.
+ * @param {(rows: object[]) => React.ReactNode} [selectionActions] - Controls that act
+ *   on the ticked rows, rendered beside Export only while something is selected. It
+ *   gets the rows the browser actually holds — the same set Export would write.
  * @param {boolean} [enablePagination]      - Pagination with a page bar under the
  *   table. Default false, so existing tables keep rendering every row.
  * @param {number} [pageSize]               - Rows per page. Default 25.
@@ -554,6 +557,7 @@ const DataTable = ({
   isRowExpandable,
   maxHeight,
   toolbarExtra,
+  selectionActions,
   enablePagination = false,
   pageSize = 25,
   pageSizeOptions = [10, 25, 50, 100],
@@ -699,7 +703,8 @@ const DataTable = ({
     enableExport ||
     showRowCount ||
     enableColumnToggle ||
-    Boolean(toolbarExtra);
+    Boolean(toolbarExtra) ||
+    Boolean(selectionActions);
 
   const headerPad = dense ? "px-2.5 py-1.5" : "px-3 py-2";
   const cellPad = dense ? "px-2.5 py-2 text-[11px]" : "px-3 py-2.5 text-[12px]";
@@ -751,6 +756,7 @@ const DataTable = ({
             )}
             {toolbarExtra}
             {enableColumnToggle && <ColumnToggle table={table} />}
+            {selectedRows.length > 0 && selectionActions?.(selectedRows)}
             {enableExport && <ExportDropdown onExport={handleExport} count={selectedCount} />}
           </div>
         </div>

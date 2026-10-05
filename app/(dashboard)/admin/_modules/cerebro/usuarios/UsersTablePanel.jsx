@@ -17,6 +17,7 @@ import { PanelNote } from "../../shared/Explanations";
 import Panel, { RefreshButton } from "../../shared/Panel";
 import QueryState from "../../shared/QueryState";
 import { firstNumber } from "../../shared/aggregate";
+import BulkEmailDrawer, { BULK_EMAIL_DRAWER_WIDTH, collectRecipients } from "./BulkEmailDrawer";
 import UserQueryPrompt from "./UserQueryPrompt";
 import { DETAIL_DRAWER_WIDTH, GROWTH_DAYS, USER_PAGE_SIZE, USER_PAGE_SIZES } from "./constants";
 import UserDetailDrawer from "./detail/UserDetailDrawer";
@@ -106,6 +107,19 @@ const NetCell = ({ value }) => {
     </span>
   );
 };
+
+const MailIcon = () => (
+  <svg width="12" height="12" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+    <rect x="1.5" y="3" width="13" height="10" rx="1.5" stroke="currentColor" strokeWidth="1.3" />
+    <path
+      d="M2 4.5l6 4.5 6-4.5"
+      stroke="currentColor"
+      strokeWidth="1.3"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </svg>
+);
 
 const EyeIcon = () => (
   <svg width="12" height="12" viewBox="0 0 16 16" fill="none" aria-hidden="true">
@@ -438,6 +452,8 @@ const UsersTablePanel = () => {
   // drawer's content doesn't vanish mid-slide.
   const [isOpen, setIsOpen] = useState(false);
   const [selected, setSelected] = useState(null);
+  // The same drawer, holding the composer for the ticked rows instead of one user.
+  const [mailing, setMailing] = useState(null);
 
   const drawerRef = useRef(null);
   const backdropRef = useRef(null);
@@ -522,9 +538,21 @@ const UsersTablePanel = () => {
   }, [resetPage]);
 
   const handleOpen = useCallback((user) => {
+    setMailing(null);
     setSelected(user);
     setIsOpen(true);
   }, []);
+
+  // Recipients are a snapshot of the selection at the click: the composer reads them
+  // once, and `id` keys it so reopening with other rows ticked is a fresh email.
+  const handleCompose = useCallback(
+    (selectedRows) => {
+      setSelected(null);
+      setMailing({ id: Date.now(), ...collectRecipients(selectedRows, founderIndex) });
+      setIsOpen(true);
+    },
+    [founderIndex]
+  );
 
   const handleClose = useCallback(() => setIsOpen(false), []);
 
@@ -549,7 +577,10 @@ const UsersTablePanel = () => {
           duration: 0.26,
           ease: "power2.in",
           overwrite: true,
-          onComplete: () => setSelected(null),
+          onComplete: () => {
+            setSelected(null);
+            setMailing(null);
+          },
         });
         gsap.to(backdrop, { opacity: 0, duration: 0.22, overwrite: true });
       }
@@ -645,6 +676,16 @@ const UsersTablePanel = () => {
           }
           showRowCount={false}
           enableColumnToggle
+          selectionActions={(selectedRows) => (
+            <button
+              type="button"
+              onClick={() => handleCompose(selectedRows)}
+              className="flex h-7.5 items-center gap-1.5 whitespace-nowrap rounded-lg bg-[#19363F] px-2.5 font-inter text-[11px] font-medium tracking-[-0.44px] text-white transition-colors hover:bg-[#0f2228]"
+            >
+              <MailIcon />
+              Enviar email ({selectedRows.length})
+            </button>
+          )}
           getRowId={getRowId}
           enablePagination
           // Swept, the rows are every match and DataTable pages them itself. Sort and
@@ -675,11 +716,14 @@ const UsersTablePanel = () => {
             : `La exportación baja la página que estás viendo, no ${
                 total === null ? "la lista entera" : `las ${total} filas`
               } — sube a 200 por página si necesitas menos tiradas. Si marcas filas, exporta solo esas, y la selección vive dentro de la página: al cambiar de página el navegador ya no tiene esas filas, así que marca y exporta página a página.`}{" "}
-          «Con saldo» es más de $0,50, el mismo umbral que el embudo de activación de Sistema.
-          «Inactivos» es el scope de /users, basado en la última actividad registrada, que no es lo
-          mismo que no haber usado nunca el producto. Teléfono y Web founders se cruzan con la web
-          founders por correo y, si no coincide, por wallet; «—» es que no tiene cuenta allí. No
-          ordenan ni entran en la búsqueda ni en los filtros porque /users no los conoce.
+          Con filas marcadas aparece «Enviar email», que abre el redactor de la pestaña Emails con
+          esas filas como destinatarios — las mismas que exportaría — usando el correo de la web
+          founders cuando Cerebro no tiene uno. «Con saldo» es más de $0,50, el mismo umbral que el
+          embudo de activación de Sistema. «Inactivos» es el scope de /users, basado en la última
+          actividad registrada, que no es lo mismo que no haber usado nunca el producto. Teléfono y
+          Web founders se cruzan con la web founders por correo y, si no coincide, por wallet; «—»
+          es que no tiene cuenta allí. No ordenan ni entran en la búsqueda ni en los filtros porque
+          /users no los conoce.
         </PanelNote>
       </QueryState>
 
@@ -703,9 +747,18 @@ const UsersTablePanel = () => {
         className="fixed inset-y-0 right-0 z-50 p-2"
         style={{
           transform: "translateX(100%)",
-          width: `min(${DETAIL_DRAWER_WIDTH}px, 100vw)`,
+          width: `min(${mailing ? BULK_EMAIL_DRAWER_WIDTH : DETAIL_DRAWER_WIDTH}px, 100vw)`,
         }}
       >
+        {mailing && (
+          <BulkEmailDrawer
+            key={mailing.id}
+            emails={mailing.emails}
+            selected={mailing.selected}
+            missing={mailing.missing}
+            onClose={handleClose}
+          />
+        )}
         {selected && (
           // Keyed on the user so switching rows remounts rather than reconciling —
           // the tabs, the transactions pager and every scroll position inside belong
