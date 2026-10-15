@@ -31,7 +31,8 @@ const prefersReducedMotion = () => window.matchMedia("(prefers-reduced-motion: r
 
 const wasDismissed = () => {
   try {
-    return localStorage.getItem(STORAGE_KEY) === "1";
+    return false;
+    // return localStorage.getItem(STORAGE_KEY) === "1";
   } catch {
     return false;
   }
@@ -39,7 +40,7 @@ const wasDismissed = () => {
 
 const rememberDismissal = () => {
   try {
-    localStorage.setItem(STORAGE_KEY, "1");
+    // localStorage.setItem(STORAGE_KEY, "1");
   } catch {
     // Storage blocked (private mode): it simply shows again next visit.
   }

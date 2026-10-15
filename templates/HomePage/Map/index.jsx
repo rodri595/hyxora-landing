@@ -1,4 +1,5 @@
 import Globe from "./Globe";
+import CoverageList from "./CoverageList";
 import Link from "next/link";
 import fireSVG from "@/assets/imgs/icons/fire.svg";
 import Image from "@/components/Image";
@@ -58,6 +59,7 @@ const MapSection = () => {
                 Contáctanos
               </a>
             </p>
+            <CoverageList />
           </div>
           {/* Stats */}
           <div className="grid grid-cols-3 gap-7.5 items-start  max-xl:grid-cols-1 w-full">

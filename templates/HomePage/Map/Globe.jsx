@@ -3,25 +3,12 @@ import createGlobe from "cobe";
 import { useEffect, useRef, useCallback } from "react";
 import { useSpring } from "react-spring";
 import { useLenis } from "lenis/react";
+import { COUNTRIES, GROUP_LABELS, RAMPS } from "./countries";
 
-const MARKERS = [
-  // { id: "bogota", location: [4.71, -74.07], label: "Bogotá" },
-  // {
-  //   id: "saopaulo",
-  //   location: [-23.55, -46.63],
-  //   label: "São Paulo",
-  // },
-  // {
-  //   id: "buenosaires",
-  //   location: [-34.6, -58.38],
-  //   label: "Buenos Aires",
-  // },
-  // { id: "caracas", location: [10.48, -66.9], label: "Caracas" },
-  // // Central America / Mexico — blended in
-  { id: "panama", location: [8.98, -79.52], label: "Panamá" },
-  // { id: "mexico", location: [19.43, -99.13], label: "México" },
+const LABELS = [
+  ...COUNTRIES.filter((c) => !c.group).map((c) => ({ id: c.id, anchor: c.id, ramp: c.ramp, label: c.label })),
+  ...GROUP_LABELS,
 ];
-
 const Globe = () => {
   const lenis = useLenis();
   const canvasRef = useRef(null);
@@ -64,7 +51,7 @@ const Globe = () => {
         lenisStoppedRef.current = true;
       }
     },
-    [lenis],
+    [lenis]
   );
 
   const handlePointerMove = useCallback((e) => {
@@ -81,17 +68,11 @@ const Globe = () => {
         velocity.current = {
           phi: Math.max(
             -maxVelocity,
-            Math.min(
-              maxVelocity,
-              ((e.clientX - lastPointer.current.x) / dt) * 0.3,
-            ),
+            Math.min(maxVelocity, ((e.clientX - lastPointer.current.x) / dt) * 0.3)
           ),
           theta: Math.max(
             -maxVelocity,
-            Math.min(
-              maxVelocity,
-              ((e.clientY - lastPointer.current.y) / dt) * 0.08,
-            ),
+            Math.min(maxVelocity, ((e.clientY - lastPointer.current.y) / dt) * 0.08)
           ),
         };
       }
@@ -158,9 +139,10 @@ const Globe = () => {
       arcHeight: 0.1,
       opacity: 0.7,
       markerElevation: 0.0,
-      markers: MARKERS.map((m) => ({
+      markers: COUNTRIES.map((m) => ({
         location: m.location,
         size: 0.03,
+        color: RAMPS[m.ramp].marker,
         id: m.id,
       })),
       // arcs: ARCS.map(({ id, from, to }) => ({ id, from, to })),
@@ -173,10 +155,7 @@ const Globe = () => {
       if (!isPausedRef.current) {
         phi += 0.003 * speedRef.current;
         // Apply momentum with decay
-        if (
-          Math.abs(velocity.current.phi) > 0.0001 ||
-          Math.abs(velocity.current.theta) > 0.0001
-        ) {
+        if (Math.abs(velocity.current.phi) > 0.0001 || Math.abs(velocity.current.theta) > 0.0001) {
           phiOffsetRef.current += velocity.current.phi;
           thetaOffsetRef.current += velocity.current.theta;
           velocity.current.phi *= 0.95;
@@ -193,8 +172,7 @@ const Globe = () => {
       }
       globe.update({
         phi: phi + phiOffsetRef.current + dragOffset.current.phi,
-        theta:
-          s.theta.get() + thetaOffsetRef.current + dragOffset.current.theta,
+        theta: s.theta.get() + thetaOffsetRef.current + dragOffset.current.theta,
         dark: s.dark.get(),
         mapBrightness: s.mapBrightness.get(),
         markerColor: [s.mr.get(), s.mg.get(), s.mb.get()],
@@ -229,7 +207,7 @@ const Globe = () => {
         if (entry.isIntersecting) start();
         else stop();
       },
-      { threshold: 0 },
+      { threshold: 0 }
     );
     observer.observe(canvas);
 
@@ -253,18 +231,19 @@ const Globe = () => {
           speedRef.current = 1;
         }}
       />
-      {/* City name labels — only the curated subset with a `label`. */}
-      {MARKERS.map((m) => (
+      {LABELS.map((l) => (
         <div
-          key={m.id}
-          className="showcase-default-label "
+          key={l.id}
+          className="showcase-default-label"
           style={{
-            positionAnchor: `--cobe-${m.id}`,
-            opacity: `var(--cobe-visible-${m.id}, 0)`,
-            filter: `blur(var(--cobe-visible-${m.id}, 10px))`,
+            positionAnchor: `--cobe-${l.anchor}`,
+            opacity: `var(--cobe-visible-${l.anchor}, 0)`,
+            filter: `blur(var(--cobe-visible-${l.anchor}, 10px))`,
+            "--label-bg": RAMPS[l.ramp].bg,
+            "--label-fg": RAMPS[l.ramp].fg,
           }}
         >
-          {m.label}
+          {l.label}
         </div>
       ))}
     </div>

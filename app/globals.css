@@ -360,8 +360,8 @@ html.lenis body {
   translate: -50% 0;
   margin-bottom: 8px;
   padding: 0.15rem 0.35rem;
-  background: var(--color-text-blue);
-  color: var(--color-bg-surface1);
+  background: var(--label-bg, var(--color-text-blue));
+  color: var(--label-fg, var(--color-bg-surface1));
   font-family: var(--font-inter);
   font-size: 0.6rem;
   letter-spacing: 0.08em;
@@ -380,7 +380,7 @@ html.lenis body {
   left: 50%;
   transform: translate3d(-50%, -1px, 0);
   border: 5px solid transparent;
-  border-top-color: var(--color-text-blue);
+  border-top-color: var(--label-bg, var(--color-text-blue));
 }
 
 .dropdown-arrow-up:before {

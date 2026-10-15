@@ -1,0 +1,196 @@
+// Black: on + off ramp. Grey: off ramp only. Both from the site's #19363f ink.
+export const RAMPS = {
+  both: { bg: "#19363f", fg: "#ffffff", marker: [0.1, 0.21, 0.25], legend: "On & Off ramp" },
+  off: { bg: "#c5cdcf", fg: "#19363f", marker: [0.55, 0.6, 0.62], legend: "Solo Off ramp" },
+};
+
+// `label` is the local name shown on the globe, `name` the Spanish one in the list.
+// Markers sharing a `group` are too close to label one by one, so the globe shows
+// one label for the whole group (see GROUP_LABELS) and the list names them all.
+export const COUNTRIES = [
+  // On + off ramp (EUR)
+  {
+    id: "spain",
+    location: [40.42, -3.7],
+    ramp: "both",
+    group: "eur",
+    label: "España",
+    name: "España",
+  },
+  {
+    id: "austria",
+    location: [48.21, 16.37],
+    ramp: "both",
+    group: "eur",
+    label: "Österreich",
+    name: "Austria",
+  },
+  {
+    id: "belgium",
+    location: [50.85, 4.35],
+    ramp: "both",
+    group: "eur",
+    label: "België",
+    name: "Bélgica",
+  },
+  {
+    id: "croatia",
+    location: [45.82, 15.98],
+    ramp: "both",
+    group: "eur",
+    label: "Hrvatska",
+    name: "Croacia",
+  },
+  {
+    id: "cyprus",
+    location: [35.19, 33.38],
+    ramp: "both",
+    group: "eur",
+    label: "Κύπρος",
+    name: "Chipre",
+  },
+  {
+    id: "estonia",
+    location: [59.44, 24.75],
+    ramp: "both",
+    group: "eur",
+    label: "Eesti",
+    name: "Estonia",
+  },
+  {
+    id: "finland",
+    location: [60.17, 24.94],
+    ramp: "both",
+    group: "eur",
+    label: "Suomi",
+    name: "Finlandia",
+  },
+  {
+    id: "france",
+    location: [48.86, 2.35],
+    ramp: "both",
+    group: "eur",
+    label: "France",
+    name: "Francia",
+  },
+  {
+    id: "germany",
+    location: [52.52, 13.41],
+    ramp: "both",
+    group: "eur",
+    label: "Deutschland",
+    name: "Alemania",
+  },
+  {
+    id: "greece",
+    location: [37.98, 23.73],
+    ramp: "both",
+    group: "eur",
+    label: "Ελλάδα",
+    name: "Grecia",
+  },
+  {
+    id: "ireland",
+    location: [53.35, -6.26],
+    ramp: "both",
+    group: "eur",
+    label: "Éire",
+    name: "Irlanda",
+  },
+  {
+    id: "italy",
+    location: [41.9, 12.5],
+    ramp: "both",
+    group: "eur",
+    label: "Italia",
+    name: "Italia",
+  },
+  {
+    id: "latvia",
+    location: [56.95, 24.11],
+    ramp: "both",
+    group: "eur",
+    label: "Latvija",
+    name: "Letonia",
+  },
+  {
+    id: "lithuania",
+    location: [54.69, 25.28],
+    ramp: "both",
+    group: "eur",
+    label: "Lietuva",
+    name: "Lituania",
+  },
+  {
+    id: "luxembourg",
+    location: [49.61, 6.13],
+    ramp: "both",
+    group: "eur",
+    label: "Lëtzebuerg",
+    name: "Luxemburgo",
+  },
+  {
+    id: "malta",
+    location: [35.9, 14.51],
+    ramp: "both",
+    group: "eur",
+    label: "Malta",
+    name: "Malta",
+  },
+  {
+    id: "netherlands",
+    location: [52.37, 4.9],
+    ramp: "both",
+    group: "eur",
+    label: "Nederland",
+    name: "Países Bajos",
+  },
+  {
+    id: "portugal",
+    location: [38.72, -9.14],
+    ramp: "both",
+    group: "eur",
+    label: "Portugal",
+    name: "Portugal",
+  },
+  {
+    id: "slovakia",
+    location: [48.15, 17.11],
+    ramp: "both",
+    group: "eur",
+    label: "Slovensko",
+    name: "Eslovaquia",
+  },
+  {
+    id: "slovenia",
+    location: [46.06, 14.51],
+    ramp: "both",
+    group: "eur",
+    label: "Slovenija",
+    name: "Eslovenia",
+  },
+
+  // Off ramp only
+  { id: "brazil", location: [-15.79, -47.88], ramp: "off", label: "Brasil", name: "Brasil" },
+  { id: "mexico", location: [19.43, -99.13], ramp: "off", label: "México", name: "México" },
+  {
+    id: "argentina",
+    location: [-34.6, -58.38],
+    ramp: "off",
+    label: "Argentina",
+    name: "Argentina",
+  },
+  { id: "colombia", location: [4.71, -74.07], ramp: "off", label: "Colombia", name: "Colombia" },
+  { id: "peru", location: [-12.05, -77.04], ramp: "off", label: "Perú", name: "Perú" },
+  { id: "venezuela", location: [10.48, -66.9], ramp: "off", label: "Venezuela", name: "Venezuela" },
+];
+
+// One label per group, pinned to a central marker of it.
+export const GROUP_LABELS = [
+  {
+    id: "eur",
+    anchor: "germany",
+    ramp: "both",
+    label: `Zona euro · ${COUNTRIES.filter((c) => c.group === "eur").length} países`,
+  },
+];
