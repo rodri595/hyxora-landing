@@ -1,16 +1,25 @@
 "use client";
 import createGlobe from "cobe";
-import { useEffect, useRef, useCallback } from "react";
-import { useSpring } from "react-spring";
 import { useLenis } from "lenis/react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { useSpring } from "react-spring";
 import { COUNTRIES, GROUP_LABELS, RAMPS } from "./countries";
 
 const LABELS = [
-  ...COUNTRIES.filter((c) => !c.group).map((c) => ({ id: c.id, anchor: c.id, ramp: c.ramp, label: c.label })),
+  ...COUNTRIES.filter((c) => !c.group).map((c) => ({
+    id: c.id,
+    anchor: c.id,
+    ramp: c.ramp,
+    label: c.label,
+  })),
   ...GROUP_LABELS,
 ];
+// Grouped markers sit too close to label all at once, so each gets an invisible
+// hit target on its marker and its own label only while hovered (or tapped).
+const HOVER_LABELS = COUNTRIES.filter((c) => c.group);
 const Globe = () => {
   const lenis = useLenis();
+  const [hovered, setHovered] = useState(null);
   const canvasRef = useRef(null);
   const pointerInteracting = useRef(null);
   const lastPointer = useRef(null);
@@ -231,13 +240,53 @@ const Globe = () => {
           speedRef.current = 1;
         }}
       />
+      {HOVER_LABELS.map((c) => (
+        <div
+          key={`hit-${c.id}`}
+          className="showcase-marker-hit"
+          style={{
+            positionAnchor: `--cobe-${c.id}`,
+            // cobe sets the var to an invalid value while the marker faces us, so
+            // the declaration falls back to `auto`; on the far side it is `none`.
+            pointerEvents: `var(--cobe-visible-${c.id}, none)`,
+          }}
+          onPointerDown={handlePointerDown}
+          onPointerEnter={() => {
+            // Hold the globe still so the marker doesn't slide out from under the cursor.
+            speedRef.current = 0;
+            setHovered(c.id);
+          }}
+          onPointerLeave={() => {
+            speedRef.current = 0.8;
+            setHovered((h) => (h === c.id ? null : h));
+          }}
+        />
+      ))}
+      {HOVER_LABELS.map((c) => (
+        <div
+          key={`label-${c.id}`}
+          className="showcase-default-label showcase-hover-label"
+          style={{
+            positionAnchor: `--cobe-${c.id}`,
+            opacity: hovered === c.id ? `var(--cobe-visible-${c.id}, 0)` : 0,
+            "--label-bg": RAMPS[c.ramp].bg,
+            "--label-fg": RAMPS[c.ramp].fg,
+          }}
+        >
+          {c.label}
+        </div>
+      ))}
       {LABELS.map((l) => (
         <div
           key={l.id}
           className="showcase-default-label"
           style={{
             positionAnchor: `--cobe-${l.anchor}`,
-            opacity: `var(--cobe-visible-${l.anchor}, 0)`,
+            // The group label steps aside while one of its countries is shown.
+            opacity:
+              hovered && GROUP_LABELS.some((g) => g.id === l.id)
+                ? 0
+                : `var(--cobe-visible-${l.anchor}, 0)`,
             filter: `blur(var(--cobe-visible-${l.anchor}, 10px))`,
             "--label-bg": RAMPS[l.ramp].bg,
             "--label-fg": RAMPS[l.ramp].fg,

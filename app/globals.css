@@ -383,6 +383,23 @@ html.lenis body {
   border-top-color: var(--label-bg, var(--color-text-blue));
 }
 
+.showcase-hover-label {
+  z-index: 2;
+  transition: opacity 0.2s;
+}
+
+.showcase-marker-hit {
+  position: absolute;
+  top: anchor(center);
+  left: anchor(center);
+  translate: -50% -50%;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  cursor: pointer;
+  z-index: 1;
+}
+
 .dropdown-arrow-up:before {
   content: "";
   position: absolute;
