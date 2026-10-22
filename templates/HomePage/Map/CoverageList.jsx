@@ -1,6 +1,5 @@
 import { COUNTRIES, RAMPS } from "./countries";
 
-// The globe groups the eurozone into one label, so this is where every country is named.
 const CoverageList = () => (
   <div className="flex w-full flex-col gap-5">
     {Object.entries(RAMPS).map(([key, ramp]) => {

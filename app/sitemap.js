@@ -26,5 +26,11 @@ export default function sitemap() {
             changeFrequency: "monthly",
             priority: 0.7,
         },
+        {
+            url: `${baseUrl}/newsletter`,
+            lastModified: new Date(),
+            changeFrequency: "weekly",
+            priority: 0.6,
+        },
     ];
 }

@@ -1,14 +1,10 @@
 "use client";
 import createGlobe from "cobe";
-import { useEffect, useRef, useCallback } from "react";
-import { useSpring } from "react-spring";
 import { useLenis } from "lenis/react";
-import { COUNTRIES, GROUP_LABELS, RAMPS } from "./countries";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { useSpring } from "react-spring";
+import { COUNTRIES, RAMPS } from "./countries";
 
-const LABELS = [
-  ...COUNTRIES.filter((c) => !c.group).map((c) => ({ id: c.id, anchor: c.id, ramp: c.ramp, label: c.label })),
-  ...GROUP_LABELS,
-];
 const Globe = () => {
   const lenis = useLenis();
   const canvasRef = useRef(null);
@@ -20,6 +16,10 @@ const Globe = () => {
   const thetaOffsetRef = useRef(0);
   const isPausedRef = useRef(false);
   const speedRef = useRef(1);
+  const hoverRef = useRef(false);
+  const focusRef = useRef(null);
+  const [hovered, setHovered] = useState(null);
+  const [focused, setFocused] = useState(null);
   const [spring] = useSpring(() => ({
     theta: 0.2,
     dark: 0,
@@ -44,6 +44,8 @@ const Globe = () => {
       pointerInteracting.current = { x: e.clientX, y: e.clientY };
       if (canvasRef.current) canvasRef.current.style.cursor = "grabbing";
       isPausedRef.current = true;
+      focusRef.current = null;
+      setFocused(null);
       // On touch devices, freeze page scroll while dragging the globe so the
       // gesture doesn't fight Lenis and feel glitchy.
       if (e.pointerType === "touch" && lenis) {
@@ -115,6 +117,7 @@ const Globe = () => {
     if (!canvasRef.current) return;
     const canvas = canvasRef.current;
     let phi = 0;
+    let speed = 1;
     const width = canvas.offsetWidth;
 
     // Lower geometry density on small / touch-first devices to keep the
@@ -139,12 +142,8 @@ const Globe = () => {
       arcHeight: 0.1,
       opacity: 0.7,
       markerElevation: 0.0,
-      markers: COUNTRIES.map((m) => ({
-        location: m.location,
-        size: 0.03,
-        color: RAMPS[m.ramp].marker,
-        id: m.id,
-      })),
+      // Size 0: the dots are the HTML markers below, cobe only supplies their anchors.
+      markers: COUNTRIES.map((m) => ({ location: m.location, size: 0, id: m.id })),
       // arcs: ARCS.map(({ id, from, to }) => ({ id, from, to })),
     });
 
@@ -153,7 +152,15 @@ const Globe = () => {
     function animate() {
       const s = springRef.current;
       if (!isPausedRef.current) {
-        phi += 0.003 * speedRef.current;
+        // Ease to a stop while a country is hovered or picked, so its label holds still.
+        const held = hoverRef.current || focusRef.current !== null;
+        speed += ((held ? 0 : speedRef.current) - speed) * 0.08;
+        phi += 0.003 * speed;
+        // Glide the picked country to the front, the short way round.
+        if (focusRef.current !== null) {
+          const d = focusRef.current - phi - phiOffsetRef.current;
+          phiOffsetRef.current += Math.atan2(Math.sin(d), Math.cos(d)) * 0.08;
+        }
         // Apply momentum with decay
         if (Math.abs(velocity.current.phi) > 0.0001 || Math.abs(velocity.current.theta) > 0.0001) {
           phiOffsetRef.current += velocity.current.phi;
@@ -218,33 +225,61 @@ const Globe = () => {
       globe.destroy();
     };
   }, []);
+  const focusCountry = (c) => {
+    // cobe brings longitude λ to the front at phi = 3π/2 − λ (see its U/O projection).
+    focusRef.current = 1.5 * Math.PI - (c.location[1] * Math.PI) / 180;
+    velocity.current = { phi: 0, theta: 0 };
+    setFocused(c.id);
+  };
+
   return (
-    <div className="flex h-[445px] shrink-0 items-center justify-center overflow-hidden rounded-[16px] border-[0.7px] border-[rgba(25,54,63,0.02)] bg-[rgba(25,54,63,0.02)] shadow-[inset_0px_0px_4px_0px_rgba(25,54,63,0.04)] max-lg:aspect-square max-lg:h-auto max-lg:w-full ">
-      <canvas
-        ref={canvasRef}
-        className="showcases-canvas"
-        onPointerDown={handlePointerDown}
-        onPointerEnter={() => {
-          speedRef.current = 0.8;
-        }}
-        onPointerLeave={() => {
-          speedRef.current = 1;
-        }}
-      />
-      {LABELS.map((l) => (
-        <div
-          key={l.id}
-          className="showcase-default-label"
+    <div
+      className="flex h-[445px] shrink-0 items-center justify-center overflow-hidden rounded-[16px] border-[0.7px] border-[rgba(25,54,63,0.02)] bg-[rgba(25,54,63,0.02)] shadow-[inset_0px_0px_4px_0px_rgba(25,54,63,0.04)] max-lg:aspect-square max-lg:h-auto max-lg:w-full "
+      onPointerEnter={() => {
+        speedRef.current = 0.8;
+      }}
+      onPointerLeave={() => {
+        speedRef.current = 1;
+        hoverRef.current = false;
+        setHovered(null);
+      }}
+    >
+      <canvas ref={canvasRef} className="showcases-canvas" onPointerDown={handlePointerDown} />
+      {COUNTRIES.map((c, i) => (
+        <button
+          key={c.id}
+          type="button"
+          className="globe-marker"
+          aria-label={`${c.name} · ${RAMPS[c.ramp].legend}`}
+          data-active={c.id === hovered || c.id === focused || undefined}
           style={{
-            positionAnchor: `--cobe-${l.anchor}`,
-            opacity: `var(--cobe-visible-${l.anchor}, 0)`,
-            filter: `blur(var(--cobe-visible-${l.anchor}, 10px))`,
-            "--label-bg": RAMPS[l.ramp].bg,
-            "--label-fg": RAMPS[l.ramp].fg,
+            positionAnchor: `--cobe-${c.id}`,
+            // cobe sets this var to a non-number when the point faces us, which makes
+            // each property fall back to its default (opacity 1, scale none, inherited
+            // pointer-events); behind the globe the fallbacks apply.
+            opacity: `var(--cobe-visible-${c.id}, 0)`,
+            scale: `var(--cobe-visible-${c.id}, 0.2)`,
+            pointerEvents: `var(--cobe-visible-${c.id}, none)`,
+            "--marker-bg": RAMPS[c.ramp].bg,
+            "--marker-fg": RAMPS[c.ramp].fg,
+            "--i": i,
           }}
+          onPointerEnter={() => {
+            hoverRef.current = true;
+            setHovered(c.id);
+          }}
+          onPointerLeave={() => {
+            hoverRef.current = false;
+            setHovered(null);
+          }}
+          onFocus={() => focusCountry(c)}
+          onClick={() => focusCountry(c)}
         >
-          {l.label}
-        </div>
+          <span className="globe-marker-label">
+            {c.label}
+            <span>{RAMPS[c.ramp].legend}</span>
+          </span>
+        </button>
       ))}
     </div>
   );

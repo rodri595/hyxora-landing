@@ -181,7 +181,7 @@ const MenuComponent = () => {
   // Close menu when screen resizes above mobile breakpoint
   useEffect(() => {
     const handleResize = () => {
-      if (isActive && window.innerWidth >= 768) {
+      if (isActive && window.innerWidth >= 1280) {
         setIsActive(false);
       }
     };
@@ -241,14 +241,14 @@ const MenuComponent = () => {
         {hintOpen && !isActive && (
           <span
             aria-hidden
-            className="pointer-events-none absolute inset-0 hidden max-md:block rounded-[8px] bg-[#1b5ffd] opacity-30 animate-ping"
+            className="pointer-events-none absolute inset-0 hidden max-xl:block rounded-[8px] bg-[#1b5ffd] opacity-30 animate-ping"
           />
         )}
         <button
           onClick={toggleMenu}
           type="button"
           className={cn(
-            "group hidden max-md:flex rounded-[8px] border-[0.7px] border-[rgba(25,54,63,0.02)] bg-[rgba(25,54,63,0.04)] shadow-[0px_0px_4px_0px_inset_rgba(25,54,63,0.04)] justify-center items-center shrink-0 !h-[32px] !w-[32px] focus:outline-none relative",
+            "group hidden max-xl:flex rounded-[8px] border-[0.7px] border-[rgba(25,54,63,0.02)] bg-[rgba(25,54,63,0.04)] shadow-[0px_0px_4px_0px_inset_rgba(25,54,63,0.04)] justify-center items-center shrink-0 !h-[32px] !w-[32px] focus:outline-none relative",
             hintOpen && "ring-2 ring-[#1b5ffd] ring-offset-2 ring-offset-white",
           )}
         >
@@ -473,6 +473,13 @@ const MenuComponent = () => {
                 image={newListingsIcon}
                 title="Preguntas Frecuentes"
                 href="/faq"
+                className="w-full max-w-none"
+              />
+              <MenuItem
+                image={newListingsIcon}
+                title="Newsletter"
+                description="Avances semanales de Hyxora"
+                href="/newsletter"
                 className="w-full max-w-none"
               />
               <MenuItem

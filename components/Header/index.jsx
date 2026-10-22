@@ -331,16 +331,21 @@ const Header = ({ isFixed }) => {
           </div>
 
           {/* Navigation Menu */}
-          <nav className="flex gap-[18px] items-center justify-center flex-1 max-md:hidden max-lg:gap-[8px]">
+          {/* Seven links don't fit beside the logo and buttons below xl, so the burger takes over there. */}
+          <nav className="flex gap-[18px] items-center justify-center flex-1 max-xl:hidden max-2xl:gap-2">
             <ExploreDropdown />
             <MenuItem href="/founders">NFT Founders</MenuItem>
             <OportunityDropdown />
             <MenuItem href="/podcast">Podcast</MenuItem>
+            <MenuItem href={authenticated ? "/academy" : "/tutorials"}>
+              Tutoriales
+            </MenuItem>
             <MenuItem href="/faq">FAQ</MenuItem>
+            <MenuItem href="/newsletter">Newsletter</MenuItem>
           </nav>
 
           {/* Connect Wallet Button */}
-          <div className="flex items-center justify-end gap-[8px] flex-1 max-md:hidden ">
+          <div className="flex items-center justify-end gap-[8px] flex-1 max-xl:hidden ">
             {!authenticated ? (
               <>
                 {/* Hot Button */}
@@ -416,7 +421,7 @@ const Header = ({ isFixed }) => {
               type="button"
               onClick={() => login()}
               className={cn(
-                "mr-2 hidden max-md:flex bg-[#1b5ffd] border border-[rgba(255,255,255,0.2)] border-solid h-[30px] relative rounded-[100px] cursor-pointer ",
+                "mr-2 hidden max-xl:flex bg-[#1b5ffd] border border-[rgba(255,255,255,0.2)] border-solid h-[30px] relative rounded-[100px] cursor-pointer ",
               )}
             >
               <div className="flex gap-[3px] h-[30px] items-center justify-center overflow-hidden p-[8px] relative rounded-[inherit]">

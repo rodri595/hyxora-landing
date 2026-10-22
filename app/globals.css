@@ -353,34 +353,115 @@ html.lenis body {
   cursor: grabbing;
 }
 
-.showcase-default-label {
+/* Globe country markers: a dot with a sonar ring, its name pops out on hover/tap. */
+.globe-marker {
   position: absolute;
-  bottom: anchor(top);
+  top: anchor(center);
   left: anchor(center);
-  translate: -50% 0;
-  margin-bottom: 8px;
-  padding: 0.15rem 0.35rem;
-  background: var(--label-bg, var(--color-text-blue));
-  color: var(--label-fg, var(--color-bg-surface1));
+  translate: -50% -50%;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: opacity 0.4s, scale 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.globe-marker::before,
+.globe-marker::after {
+  content: "";
+  position: absolute;
+  inset: 3px;
+  border-radius: 50%;
+  background: var(--marker-bg);
+}
+
+.globe-marker::before {
+  z-index: 1;
+  box-shadow: 0 0 0 1.5px #fff;
+  transition: scale 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* Offset per marker so the rings ripple across the globe instead of blinking in unison. */
+.globe-marker::after {
+  animation: globe-marker-ping 2.8s cubic-bezier(0, 0, 0.2, 1) infinite;
+  animation-delay: calc(var(--i) * -0.29s);
+}
+
+.globe-marker[data-active] {
+  z-index: 2;
+}
+
+.globe-marker[data-active]::before {
+  scale: 1.7;
+}
+
+@keyframes globe-marker-ping {
+  0% {
+    scale: 1;
+    opacity: 0.55;
+  }
+  70%,
+  100% {
+    scale: 3.4;
+    opacity: 0;
+  }
+}
+
+.globe-marker-label {
+  position: absolute;
+  bottom: calc(100% + 7px);
+  left: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+  padding: 0.2rem 0.45rem;
+  background: var(--marker-bg);
+  color: var(--marker-fg);
   font-family: var(--font-inter);
-  font-size: 0.6rem;
+  font-size: 0.65rem;
   letter-spacing: 0.08em;
+  line-height: 1.2;
   text-transform: uppercase;
   white-space: nowrap;
-  transition:
-    opacity 0.8s,
-    filter 0.8s;
+  /* Grows out of the dot. */
+  transform-origin: 50% calc(100% + 7px);
+  translate: -50% 4px;
+  scale: 0.3;
+  opacity: 0;
+  filter: blur(4px);
+  transition: opacity 0.2s, filter 0.25s, scale 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), translate
+    0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
   pointer-events: none;
 }
 
-.showcase-default-label::after {
+.globe-marker-label > span {
+  font-size: 0.5rem;
+  letter-spacing: 0.06em;
+  opacity: 0.8;
+}
+
+.globe-marker-label::after {
   content: "";
   position: absolute;
   top: 100%;
   left: 50%;
   transform: translate3d(-50%, -1px, 0);
   border: 5px solid transparent;
-  border-top-color: var(--label-bg, var(--color-text-blue));
+  border-top-color: var(--marker-bg);
+}
+
+.globe-marker[data-active] .globe-marker-label {
+  translate: -50% 0;
+  scale: 1;
+  opacity: 1;
+  filter: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .globe-marker::after {
+    display: none;
+  }
 }
 
 .dropdown-arrow-up:before {
