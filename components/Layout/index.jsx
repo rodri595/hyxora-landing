@@ -1,6 +1,7 @@
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import UpButton from "@/components/UpButton";
+import WhatsAppButton from "@/components/WhatsAppButton";
 import ChatWidget from "@/components/ChatWidget";
 import PurchaseNFTModal from "@/components/PurchaseNFTModal";
 
@@ -22,6 +23,7 @@ const Layout = ({
       <div className={`${classContainer || ""}`}>{children}</div>
       {!isHiddenFooter && <Footer />}
       <UpButton />
+      <WhatsAppButton />
       <ChatWidget />
       <PurchaseNFTModal />
     </div>
