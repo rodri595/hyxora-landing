@@ -1,7 +1,7 @@
 // Black: on + off ramp. Grey: off ramp only. Both from the site's #19363f ink.
 export const RAMPS = {
   both: { bg: "#19363f", fg: "#ffffff", legend: "On & Off ramp" },
-  off: { bg: "#c5cdcf", fg: "#19363f", legend: "Solo Off ramp" },
+  off: { bg: "#19363f", fg: "#ffffff", legend: "Solo Off ramp" },
 };
 
 // `label` is the local name shown on the globe, `name` the Spanish one in the list.

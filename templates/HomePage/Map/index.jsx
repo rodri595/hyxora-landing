@@ -54,9 +54,9 @@ const MapSection = () => {
             {/* Description */}
             <p className="font-normal text-[16px] max-md:text-[14px] max-sm:text-[13px] leading-6 max-sm:leading-5 text-[rgba(25,54,63,0.7)] tracking-[-0.32px] max-sm:tracking-[-0.26px] w-full">
               Estamos abriendo colaboraciones por todo el planeta. ¿Quieres formar parte de la
-              expansión de Hyxora?{" "}
+              expansión de Hyxora? <br />
               <a href="mailto:future@hyxora.com" className="text-[#19363f] underline">
-                Contáctanos
+                Contáctanos a future@hyxora.com
               </a>
             </p>
             {/* <CoverageList /> */}
@@ -73,7 +73,7 @@ const MapSection = () => {
             </div>
             <div className="flex flex-col gap-[16px] items-start max-sm:w-full">
               <p className="font-medium text-[28px] max-lg:text-[24px] max-md:text-[22px] max-sm:text-[20px] leading-[normal] text-[#19363f] tracking-[-1.36px] max-sm:tracking-[-1px]">
-                39 Países
+                52 Países
               </p>
               <p className="font-normal text-[16px] max-md:text-[14px] max-sm:text-[13px] leading-6 max-sm:leading-5 text-[rgba(25,54,63,0.7)] tracking-[-0.32px] max-sm:tracking-[-0.26px]">
                 Retiros en moneda local{" "}
@@ -82,7 +82,7 @@ const MapSection = () => {
             <div className="flex flex-col gap-[16px] items-start max-sm:w-full">
               <p className="font-medium text-[28px] max-lg:text-[24px] max-md:text-[22px] max-sm:text-[20px] leading-[normal] text-[#19363f] tracking-[-1.36px] max-sm:tracking-[-1px]">
                 {/* +10 Comunididades */}
-                +55 NFT Founders
+                +60 NFT Founders
               </p>
               <p className="font-normal text-[16px] max-md:text-[14px] max-sm:text-[13px] leading-6 max-sm:leading-5 text-[rgba(25,54,63,0.7)] tracking-[-0.32px] max-sm:tracking-[-0.26px]">
                 creciendo con founders de todo el mundo
