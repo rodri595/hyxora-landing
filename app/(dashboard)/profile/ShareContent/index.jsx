@@ -20,7 +20,7 @@ const ShareContent = () => {
             />
           }
           title="Factura"
-          description="Rellena los datos de factución"
+          description="Rellena los datos de facturación"
           onClick={() => setInvoiceOpen(true)}
         />
         <Tab
