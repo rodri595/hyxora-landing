@@ -43,6 +43,7 @@ const NewsletterPage = () => {
                 <a
                   key={issue.id}
                   href={issue.href}
+                  download={`Hyxora ${issue.id}.pdf`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="group flex items-center gap-5 border-[rgba(25,54,63,0.08)] border-b p-5 transition-colors duration-300 last:border-b-0 hover:bg-[rgba(25,54,63,0.02)] max-sm:flex-col max-sm:items-start max-sm:gap-3"
@@ -64,7 +65,7 @@ const NewsletterPage = () => {
                     )}
                   </span>
                   <span className="inline-flex h-8 shrink-0 items-center rounded-full border border-[rgba(25,54,63,0.15)] px-3.5 font-inter font-medium text-[13px] text-[#19363f] tracking-[-0.26px] transition-colors duration-300 group-hover:border-[rgba(25,54,63,0.35)] group-hover:bg-white">
-                    Leer
+                    Descargar
                   </span>
                 </a>
               ))}
