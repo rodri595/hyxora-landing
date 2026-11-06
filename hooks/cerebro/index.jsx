@@ -33,6 +33,12 @@ export { useGetUserTrends } from "./useGetUserTrends";
 export { useGetUserActivation } from "./useGetUserActivation";
 export { useGetTopFeePayers } from "./useGetTopFeePayers";
 export { useGetRenewals } from "./useGetRenewals";
+export { useGetUserMembership } from "./useGetUserMembership";
+
+export { useGetMembershipsOverview } from "./useGetMembershipsOverview";
+export { useGetMembershipsTenure } from "./useGetMembershipsTenure";
+export { useGetMembershipsChurn } from "./useGetMembershipsChurn";
+export { useGetMembershipsCancellations } from "./useGetMembershipsCancellations";
 
 export { useGetHoldings } from "./useGetHoldings";
 export { useGetHoldingsHolders } from "./useGetHoldingsHolders";

@@ -795,4 +795,105 @@
  * @property {boolean} isNew
  */
 
+/* -------------------------------------------------------------------------- */
+/* Memberships (Trello #670)                                                   */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * The backend's raw `membership_status`. `"none"` and `null` both mean no paid
+ * membership — registered without a plan, or never enriched by the per-user sync.
+ *
+ * @typedef {"active" | "toCancel" | "toDowngrade" | "pendingPayment" | "suspended"
+ *   | "cancelled" | "none" | null} MembershipStatus
+ */
+
+/**
+ * `lifecycle` is `null` until migration #670 lands in the database.
+ *
+ * @typedef {Object} MembershipsOverview
+ * @property {IsoDate} asOf
+ * @property {{ totalUsers: number, withMembership: number, withoutMembership: number, active: number, toCancel: number, toDowngrade: number, pendingPayment: number, suspended: number, cancelled: number, registeredActive: number }} totals
+ * @property {{ plan: CerebroPlan, status: MembershipStatus, users: number }[]} matrix
+ * @property {{ plan: CerebroPlan, overdue: number, next7: number, next30: number, later: number }[]} renewals
+ * @property {{ plan: CerebroPlan, paymentType: string, users: number }[]} paymentTypes
+ * @property {{ available: boolean, intervals: { plan: CerebroPlan, month: number, year: number }[], pendingCancellations: number, withdrawOnlyGrace: number, pendingDowngrades: number, founderSold: number, founderGracePeriod: number, founderExpired: number } | null} lifecycle
+ * @property {{ enriched: number, neverEnriched: number, lastSyncedAt: IsoDate | null }} sync
+ */
+
+/**
+ * Current members only (`active`, `toCancel`, `toDowngrade`).
+ *
+ * @typedef {Object} MembershipsTenure
+ * @property {number} days
+ * @property {{ plan: CerebroPlan, bucket: "d0-7" | "d8-30" | "d31-90" | "d91-180" | "d181-365" | "y365+", users: number }[]} buckets
+ * @property {{ plan: CerebroPlan, medianDays: number }[]} medians
+ * @property {{ month: string, newMembers: number, stillActive: number }[]} cohorts `month` is "YYYY-MM".
+ */
+
+/**
+ * @typedef {Object} MembershipChurnDay
+ * @property {DayString} day
+ * @property {number} upgrades
+ * @property {number} downgrades
+ * @property {number} cancellationsRequested Status → `toCancel`.
+ * @property {number} activations Status → `active`, new or reactivated.
+ * @property {number} churned Status → `cancelled`/expired.
+ * @property {number} renewalsPaid Renew-date jumps — a payment proxy, not invoices.
+ * @property {number} netMembers activations + upgrades − churned − downgrades.
+ */
+
+/**
+ * Starts 2026-06-10, when `membership_events` began; earlier days have no rows,
+ * which is not the same as zero.
+ *
+ * @typedef {Object} MembershipsChurn
+ * @property {number} days
+ * @property {MembershipChurnDay[]} series
+ * @property {{ upgrades: number, downgrades: number, cancellationsRequested: number, activations: number, churned: number, renewalsPaid: number }} totals
+ */
+
+/**
+ * @typedef {Object} MembershipCancellationRow
+ * @property {string} privyId
+ * @property {string | null} email
+ * @property {string | null} username
+ * @property {CerebroPlan} plan
+ * @property {MembershipStatus} status
+ * @property {string | null} paymentType
+ * @property {"month" | "year" | null} interval
+ * @property {IsoDate | null} cancelRequestedAt
+ * @property {IsoDate | null} cancelEffectiveDate
+ * @property {number | null} daysToCancel Negative once the date has passed.
+ * @property {IsoDate | null} withdrawOnlyUntil
+ * @property {IsoDate | null} cancellationFinalizedAt
+ * @property {string[] | null} surveyReasons Only on finalised rows with a survey.
+ */
+
+/**
+ * `lifecycleAvailable: false` comes with `rows: []` until migration #670.
+ *
+ * @typedef {Object} MembershipsCancellations
+ * @property {number} days
+ * @property {boolean} lifecycleAvailable
+ * @property {{ pendingCancellation: number, inWithdrawGrace: number, finalizedInWindow: number }} counts
+ * @property {MembershipCancellationRow[]} rows Capped at 500.
+ * @property {{ reason: string, users: number }[]} reasons
+ */
+
+/**
+ * @typedef {Object} UserMembershipEvent
+ * @property {IsoDate} occurredAt
+ * @property {"plan" | "membership_status" | "membership_renew_date" | "cancel_effective_date" | string} field
+ * @property {string | null} oldValue
+ * @property {string | null} newValue
+ */
+
+/**
+ * Lifecycle fields are `null` until migration #670.
+ *
+ * @typedef {Object} UserMembership
+ * @property {{ plan: CerebroPlan, membershipStatus: MembershipStatus, membershipPaymentType: string | null, membershipInterval: "month" | "year" | null, membershipStartDate: IsoDate | null, membershipRenewDate: IsoDate | null, cancelRequestedAt: IsoDate | null, cancelEffectiveDate: IsoDate | null, daysToCancel: number | null, withdrawOnlyUntil: IsoDate | null, cancellationFinalizedAt: IsoDate | null, founderStatus: string | null, surveyReasons: string[] | null, detailsSyncedAt: IsoDate | null }} user
+ * @property {UserMembershipEvent[]} events Newest first.
+ */
+
 export {};

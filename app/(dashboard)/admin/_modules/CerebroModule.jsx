@@ -24,6 +24,7 @@ export const CEREBRO_TABS = [
   { id: "costos", label: "Costos" },
   { id: "ingresos", label: "Ingresos" },
   { id: "planes", label: "Planes" },
+  { id: "membresias", label: "Membresías" },
   { id: "redes", label: "Redes" },
   { id: "sistema", label: "Sistema" },
 ];
@@ -34,6 +35,7 @@ const BalancesModule = lazy(() => import("./cerebro/BalancesModule"));
 const CostosModule = lazy(() => import("./cerebro/CostosModule"));
 const IngresosModule = lazy(() => import("./cerebro/IngresosModule"));
 const PlanesModule = lazy(() => import("./cerebro/PlanesModule"));
+const MembresiasModule = lazy(() => import("./cerebro/MembresiasModule"));
 const RedesModule = lazy(() => import("./cerebro/RedesModule"));
 const SistemaModule = lazy(() => import("./cerebro/SistemaModule"));
 
@@ -44,6 +46,7 @@ const moduleMap = {
   costos: CostosModule,
   ingresos: IngresosModule,
   planes: PlanesModule,
+  membresias: MembresiasModule,
   redes: RedesModule,
   sistema: SistemaModule,
 };

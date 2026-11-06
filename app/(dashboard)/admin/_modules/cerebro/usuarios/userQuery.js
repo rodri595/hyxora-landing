@@ -1,4 +1,4 @@
-import { cerebroPlanLabel, cerebroPlans } from "@/constants/cerebro";
+import { cerebroMembershipGroup, cerebroPlanLabel, cerebroPlans } from "@/constants/cerebro";
 import { FUNDED_USD } from "@/hooks/cerebro/useGetUserActivation";
 
 /**
@@ -91,17 +91,16 @@ export const FILTERS = [
     id: "membership",
     label: "Membresía",
     prefix: "con membresía",
+    // Grouped through `cerebroMembershipGroup`, so `toCancel` — still inside the
+    // period they paid for — is «en riesgo» rather than lapsed, and the backend's
+    // literal "none" is no membership rather than an unknown status.
     options: [
       { id: "active", label: "activa" },
+      { id: "pipeline", label: "en riesgo" },
       { id: "lapsed", label: "caducada o cancelada" },
       { id: "none", label: "ninguna" },
     ],
-    match: (row, value) => {
-      const status = String(row.membershipStatus ?? "").toLowerCase();
-      if (value === "none") return !status;
-      if (value === "active") return status === "active";
-      return Boolean(status) && status !== "active";
-    },
+    match: (row, value) => cerebroMembershipGroup(row.membershipStatus) === value,
   },
   {
     id: "kyc",

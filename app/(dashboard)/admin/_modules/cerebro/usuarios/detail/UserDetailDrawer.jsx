@@ -5,6 +5,7 @@ import CreateEmailSidebar from "@/components/CreateEmailSidebar";
 import Tabs from "@/components/Tabs";
 import { cerebroPlanLabel } from "@/constants/cerebro";
 import { useGetUserDetail } from "@/hooks/cerebro/useGetUserDetail";
+import { useGetUserMembership } from "@/hooks/cerebro/useGetUserMembership";
 import { useGetUserPnl } from "@/hooks/cerebro/useGetUserPnl";
 import { useGetUserVaults } from "@/hooks/cerebro/useGetUserVaults";
 import { cn } from "@/utils";
@@ -15,6 +16,7 @@ import QueryState from "../../../shared/QueryState";
 import { TX_PAGE_SIZE } from "../constants";
 import CarteraTab from "./CarteraTab";
 import FoundersTab from "./FoundersTab";
+import MembresiaTab from "./MembresiaTab";
 import ResumenTab from "./ResumenTab";
 import SepaTab from "./SepaTab";
 import TransaccionesTab from "./TransaccionesTab";
@@ -103,15 +105,20 @@ const UserDetailDrawer = ({ user, founder, foundersStatus, foundersError, onClos
   // point of having it here. Not mounted up front because it reads its recipient
   // once, and by the first click the founders email it may fall back on has loaded.
   const [composerMounted, setComposerMounted] = useState(false);
+  // Same idea for the membership timeline: it costs a request and most visits to a
+  // user never open it, so it is asked for on the first visit and kept after.
+  const [membershipVisited, setMembershipVisited] = useState(false);
 
   const handleTabChange = (next) => {
     setTab(next);
     if (next === "email") setComposerMounted(true);
+    if (next === "membresia") setMembershipVisited(true);
   };
 
   const detail = useGetUserDetail(user.privyId, { pageSize: TX_PAGE_SIZE });
   const pnl = useGetUserPnl(user.privyId);
   const vaults = useGetUserVaults(user.privyId);
+  const membership = useGetUserMembership(membershipVisited ? user.privyId : null);
 
   // A different user in the same drawer is a different subject, not a new state for
   // the current one — landing on somebody's SEPA tab because that is where you left
@@ -156,10 +163,12 @@ const UserDetailDrawer = ({ user, founder, foundersStatus, foundersError, onClos
     detail.refetch();
     pnl.refetch();
     vaults.refetch();
+    if (membershipVisited) membership.refetch();
   };
 
   const tabs = [
     { id: "resumen", label: "Resumen" },
+    { id: "membresia", label: "Membresía" },
     { id: "cartera", label: `Cartera${positions.count > 0 ? ` (${positions.count})` : ""}` },
     { id: "transacciones", label: `Transacciones${txTotal > 0 ? ` (${txTotal})` : ""}` },
     { id: "sepa", label: `SEPA${sepaCount > 0 ? ` (${sepaCount})` : ""}` },
@@ -224,12 +233,14 @@ const UserDetailDrawer = ({ user, founder, foundersStatus, foundersError, onClos
           onChange={handleTabChange}
           className="min-w-0 flex-1 overflow-x-auto overscroll-x-contain border-b-0"
         />
-        {/* One button for all three queries: they describe one account, and
+        {/* One button for every query: they describe one account, and
             refreshing the portfolio while leaving a stale PnL beside it would be
             worse than refreshing nothing. */}
         <RefreshButton
           onClick={refetchAll}
-          isLoading={detail.isFetching || pnl.isFetching || vaults.isFetching}
+          isLoading={
+            detail.isFetching || pnl.isFetching || vaults.isFetching || membership.isFetching
+          }
         />
       </div>
 
@@ -252,6 +263,10 @@ const UserDetailDrawer = ({ user, founder, foundersStatus, foundersError, onClos
             status={foundersStatus}
             error={foundersError}
           />
+        ) : tab === "membresia" ? (
+          // Outside the detail gate, like «Web founders»: a /users/{privyId} outage
+          // must not hide a timeline that comes from another endpoint.
+          <MembresiaTab query={membership} />
         ) : (
           <QueryState isLoading={detail.isLoading} error={detail.error}>
             {tab === "resumen" && (

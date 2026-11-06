@@ -230,6 +230,32 @@ that disagrees with `/users/stats`, and `notes` for the activity proxy — `/use
 carries no activities and no ramp orders, so «usada» is a treasury fee or more than
 one sponsored op, and someone whose only use was free and fee-less reads a stage low.
 
+**Memberships (`/memberships/*`, Trello #670)** live on their own tab, «Membresías»
+(`?tab=cerebro&sub=membresias`), plus a «Membresía» tab in the user drawer. The
+backend's guide for them says `admin.hyxora.com/api/v1`; like everything else that is
+now the gateway's `/admin`, through `cerebroClient`. Four things to know:
+
+- **The call budget is the design.** The tab costs four requests — `/overview` feeds
+  two panels from one — and the per-user `/users/{privyId}/membership` is fetched
+  only when somebody opens the drawer tab or expands a pipeline row. The users table
+  adds none: `/users` already carries status and renew date. Don't put per-user
+  membership calls in a table cell.
+- **Until migration #670 is applied the lifecycle fields degrade, not fail**:
+  `overview.lifecycle` is `null`, `/cancellations` answers `lifecycleAvailable: false`
+  with `rows: []`, and the per-user lifecycle fields are `null`. Each renders as
+  «pendiente de la migración», never as an empty pipeline.
+- **`membership_status` has six values plus `"none"`, and `"none"` is a string on the
+  wire.** Bucket them through `cerebroMembershipGroup()` (`constants/cerebro.js`):
+  `toCancel` is still paid and is «en riesgo», not lapsed. The old filter read
+  anything non-active as lapsed, which put every plan-less user there.
+- **`renewalsPaid` and the per-user `membership_renew_date` events are a payment
+  proxy** — jumps of the renew date pushed by `invoice.paid` — and there is no Stripe
+  ledger behind them. Copy says «estimado», never «facturas». History starts
+  2026-06-10; earlier days are missing, not zero.
+
+`/users/renewals` is subsumed by `/memberships/overview.renewals`, so Planes'
+`RenewalsPanel` is a duplicate kept only until the new block is confirmed live.
+
 Never invent placeholder numbers for a missing endpoint. These panels show
 balances, fees and error counts — a mocked figure is something someone acts on.
 

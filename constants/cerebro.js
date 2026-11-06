@@ -406,6 +406,66 @@ export const cerebroPlanLabel = (plan) =>
   typeof plan === "string" && plan.length > 0 ? plan[0].toUpperCase() + plan.slice(1) : "—";
 
 /**
+ * The backend's `membership_status` vocabulary, in lifecycle order, with how each
+ * reads to an operator. `group` is what the users-table filter and the overview
+ * KPIs bucket on:
+ *
+ * - `active` — paid and current.
+ * - `pipeline` — still a member but on the way somewhere worse: asked to cancel
+ *   (still enjoying the paid period), downgrading, or a payment outstanding.
+ * - `lapsed` — no longer a paying member.
+ *
+ * `"none"` is a real value on the wire, not just `null` — reading it as a status
+ * of its own is what filed every plan-less user under «caducada».
+ */
+export const cerebroMembershipStatuses = {
+  active: { label: "activa", tone: "good", group: "active" },
+  toCancel: { label: "cancelará", tone: "warning", group: "pipeline" },
+  toDowngrade: { label: "bajará de plan", tone: "warning", group: "pipeline" },
+  pendingPayment: { label: "pago pendiente", tone: "warning", group: "pipeline" },
+  suspended: { label: "suspendida", tone: "bad", group: "lapsed" },
+  cancelled: { label: "cancelada", tone: "bad", group: "lapsed" },
+};
+
+/**
+ * Normalises a raw status to a key of `cerebroMembershipStatuses`, `"none"` for no
+ * membership, or the raw string for a status this file doesn't know yet — which
+ * the callers treat as lapsed rather than hiding it.
+ *
+ * @param {string | null | undefined} status
+ * @return {string}
+ */
+export const cerebroMembershipKey = (status) => {
+  if (typeof status !== "string" || status.trim() === "") return "none";
+  const raw = status.trim();
+  if (raw.toLowerCase() === "none") return "none";
+  return (
+    Object.keys(cerebroMembershipStatuses).find((key) => key.toLowerCase() === raw.toLowerCase()) ??
+    raw
+  );
+};
+
+/**
+ * @param {string | null | undefined} status
+ * @return {"active" | "pipeline" | "lapsed" | "none"}
+ */
+export const cerebroMembershipGroup = (status) => {
+  const key = cerebroMembershipKey(status);
+  if (key === "none") return "none";
+  return cerebroMembershipStatuses[key]?.group ?? "lapsed";
+};
+
+/**
+ * @param {string | null | undefined} status
+ * @return {string}
+ */
+export const cerebroMembershipLabel = (status) => {
+  const key = cerebroMembershipKey(status);
+  if (key === "none") return "sin membresía";
+  return cerebroMembershipStatuses[key]?.label ?? key;
+};
+
+/**
  * Zerion's protocol names, mapped to the labels the product uses.
  *
  * A port of `VAULT_PROTOCOL_DISPLAY` in `hyxora-admin-main/src/lib/vaults.ts`. It

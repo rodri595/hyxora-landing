@@ -2,6 +2,9 @@
 
 import CopyButton from "@/components/CopyButton";
 import {
+  cerebroMembershipKey,
+  cerebroMembershipLabel,
+  cerebroMembershipStatuses,
   cerebroOperationColor,
   cerebroOperationKey,
   cerebroOperationLabel,
@@ -124,30 +127,49 @@ export const KycBadge = ({ status }) => {
   );
 };
 
+const MEMBERSHIP_TONES = {
+  good: ["border-emerald-200 bg-emerald-50 text-emerald-700", "bg-emerald-500"],
+  warning: ["border-amber-200 bg-amber-50 text-amber-700", "bg-amber-500"],
+  bad: ["border-red-200 bg-red-50 text-red-700", "bg-red-500"],
+};
+
 /**
- * Membership state. `active` is the only good outcome; everything else — cancelled,
- * expired, past_due — is worth an amber so a lapsed founder doesn't read as a
- * healthy one.
+ * Membership state, in Spanish, with the raw backend value in the tooltip.
+ *
+ * Three colours for three situations an operator handles differently: green is paid
+ * and current; amber is still a member but heading out — `toCancel` keeps the paid
+ * period, so it is not lapsed yet and is exactly who a retention email is for; red
+ * is gone. A status `cerebroMembershipStatuses` doesn't know yet stays amber, so a
+ * new lapsed state never reads as healthy. `none` and `null` are the backend's "no
+ * paid membership" and read as the muted pill, like «sin KYC».
  *
  * @param {Object} props
  * @param {string | null | undefined} props.status
  */
 export const MembershipBadge = ({ status }) => {
-  if (!status) return <span className="text-[rgba(25,54,63,0.5)]">—</span>;
+  const key = cerebroMembershipKey(status);
 
-  const active = String(status).toLowerCase() === "active";
+  if (key === "none") {
+    return (
+      <span className="inline-flex items-center whitespace-nowrap rounded-full border border-[rgba(25,54,63,0.08)] bg-[rgba(25,54,63,0.03)] px-1.5 py-0.5 font-inter text-[10px] font-medium uppercase tracking-[0.4px] text-[rgba(25,54,63,0.68)]">
+        sin membresía
+      </span>
+    );
+  }
+
+  const [box, dot] =
+    MEMBERSHIP_TONES[cerebroMembershipStatuses[key]?.tone] ?? MEMBERSHIP_TONES.warning;
 
   return (
     <span
+      title={`membership_status: ${status}`}
       className={cn(
-        "inline-flex items-center gap-1 rounded-full border px-1.5 py-0.5 font-inter text-[10px] font-medium uppercase tracking-[0.4px]",
-        active
-          ? "border-emerald-200 bg-emerald-50 text-emerald-700"
-          : "border-amber-200 bg-amber-50 text-amber-700"
+        "inline-flex items-center gap-1 whitespace-nowrap rounded-full border px-1.5 py-0.5 font-inter text-[10px] font-medium uppercase tracking-[0.4px]",
+        box
       )}
     >
-      <span className={cn("size-1 rounded-full", active ? "bg-emerald-500" : "bg-amber-500")} />
-      {status}
+      <span className={cn("size-1 rounded-full", dot)} />
+      {cerebroMembershipLabel(status)}
     </span>
   );
 };
