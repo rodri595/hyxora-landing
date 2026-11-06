@@ -3,6 +3,14 @@
 // the same in every timezone.
 export const NEWSLETTER_ISSUES = [
   {
+    id: "2026-11-06",
+    date: "2026-11-06",
+    title: "Diario del Nobanco · Nº 2",
+    summary:
+      "Suscripciones activas, la app pendiente de aprobación en Android e iOS, arrancan los directos de HYXplore, eventos en Fuengirola y Madrid, y pruebas de rampas en moneda local fuera de Europa.",
+    href: "/newsletter/2026-11-06.pdf",
+  },
+  {
     id: "2026-10-30",
     date: "2026-10-30",
     title: "Diario del Nobanco · Nº 1",
