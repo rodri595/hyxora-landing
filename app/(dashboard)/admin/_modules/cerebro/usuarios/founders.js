@@ -72,6 +72,26 @@ export const findFounderUser = (index, user) => {
  * @param {FounderIndex} index
  * @param {Object} user
  */
+/**
+ * The founders user record has no name field: the only name that site ever asks for
+ * is the buyer's, typed at NFT checkout and stored on the payment. Newest first,
+ * completed purchases before abandoned ones.
+ *
+ * @param {Object[] | undefined} payments
+ * @return {string | null}
+ */
+const paymentName = (payments) => {
+  if (!Array.isArray(payments)) return null;
+  const named = payments
+    .filter((payment) => typeof payment?.name === "string" && payment.name.trim())
+    .sort(
+      (a, b) =>
+        (b.status === "completed") - (a.status === "completed") ||
+        new Date(b.createdAt) - new Date(a.createdAt)
+    );
+  return named[0]?.name.trim() ?? null;
+};
+
 export const withFounderFields = (index, user) => {
   const match = findFounderUser(index, user);
   const founder = match?.user;
@@ -79,6 +99,8 @@ export const withFounderFields = (index, user) => {
   return {
     ...user,
     founderMatch: match?.matchedBy ?? null,
+    founderName: founder?.name || paymentName(founder?.payments) || null,
+    founderEmail: founder?.email || null,
     founderPhone: founder?.phoneNumber || null,
     founderRole: founder?.role || null,
     founderPayments: founder ? (founder.payments?.length ?? 0) : null,

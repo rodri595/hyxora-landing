@@ -18,6 +18,7 @@ import Panel, { RefreshButton } from "../../shared/Panel";
 import QueryState from "../../shared/QueryState";
 import { firstNumber } from "../../shared/aggregate";
 import BulkEmailDrawer, { BULK_EMAIL_DRAWER_WIDTH, collectRecipients } from "./BulkEmailDrawer";
+import CrmExportDrawer, { CRM_EXPORT_DRAWER_WIDTH } from "./CrmExportDrawer";
 import UserQueryPrompt from "./UserQueryPrompt";
 import { DETAIL_DRAWER_WIDTH, GROWTH_DAYS, USER_PAGE_SIZE, USER_PAGE_SIZES } from "./constants";
 import UserDetailDrawer from "./detail/UserDetailDrawer";
@@ -113,6 +114,18 @@ const MailIcon = () => (
     <rect x="1.5" y="3" width="13" height="10" rx="1.5" stroke="currentColor" strokeWidth="1.3" />
     <path
       d="M2 4.5l6 4.5 6-4.5"
+      stroke="currentColor"
+      strokeWidth="1.3"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </svg>
+);
+
+const DownloadIcon = () => (
+  <svg width="12" height="12" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+    <path
+      d="M8 2v8m0 0L5 7m3 3l3-3M2.5 11v1.5A1.5 1.5 0 004 14h8a1.5 1.5 0 001.5-1.5V11"
       stroke="currentColor"
       strokeWidth="1.3"
       strokeLinecap="round"
@@ -454,6 +467,8 @@ const UsersTablePanel = () => {
   const [selected, setSelected] = useState(null);
   // The same drawer, holding the composer for the ticked rows instead of one user.
   const [mailing, setMailing] = useState(null);
+  // …or the CRM export, which reads every user rather than the rows on screen.
+  const [exporting, setExporting] = useState(false);
 
   const drawerRef = useRef(null);
   const backdropRef = useRef(null);
@@ -539,6 +554,7 @@ const UsersTablePanel = () => {
 
   const handleOpen = useCallback((user) => {
     setMailing(null);
+    setExporting(false);
     setSelected(user);
     setIsOpen(true);
   }, []);
@@ -548,11 +564,19 @@ const UsersTablePanel = () => {
   const handleCompose = useCallback(
     (selectedRows) => {
       setSelected(null);
+      setExporting(false);
       setMailing({ id: Date.now(), ...collectRecipients(selectedRows, founderIndex) });
       setIsOpen(true);
     },
     [founderIndex]
   );
+
+  const handleExportCrm = useCallback(() => {
+    setSelected(null);
+    setMailing(null);
+    setExporting(true);
+    setIsOpen(true);
+  }, []);
 
   const handleClose = useCallback(() => setIsOpen(false), []);
 
@@ -580,6 +604,7 @@ const UsersTablePanel = () => {
           onComplete: () => {
             setSelected(null);
             setMailing(null);
+            setExporting(false);
           },
         });
         gsap.to(backdrop, { opacity: 0, duration: 0.22, overwrite: true });
@@ -632,6 +657,14 @@ const UsersTablePanel = () => {
       description="Cada usuario con su plan, su estado de membresía y KYC, su TVL, lo que ha dejado en comisiones y lo que nos ha costado patrocinarle el gas. El margen es ingresos menos gastos, solo de ese usuario. Teléfono y Web founders salen de su cuenta en la web founders, la misma que lista la pestaña Usuarios. Abre una fila con el ojo para ver su cartera, sus operaciones, sus órdenes SEPA y su cuenta founders, o para escribirle un email."
       action={
         <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={handleExportCrm}
+            className="flex h-7.5 min-w-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-lg bg-[#19363F] px-2.5 font-inter text-[11px] font-medium tracking-[-0.44px] text-white transition-colors hover:bg-[#0f2228]"
+          >
+            <DownloadIcon />
+            Exportar para CRM
+          </button>
           <RefreshButton onClick={() => refetch()} isLoading={isFetching} />
         </div>
       }
@@ -747,9 +780,22 @@ const UsersTablePanel = () => {
         className="fixed inset-y-0 right-0 z-50 p-2"
         style={{
           transform: "translateX(100%)",
-          width: `min(${mailing ? BULK_EMAIL_DRAWER_WIDTH : DETAIL_DRAWER_WIDTH}px, 100vw)`,
+          width: `min(${
+            mailing
+              ? BULK_EMAIL_DRAWER_WIDTH
+              : exporting
+                ? CRM_EXPORT_DRAWER_WIDTH
+                : DETAIL_DRAWER_WIDTH
+          }px, 100vw)`,
         }}
       >
+        {exporting && (
+          <CrmExportDrawer
+            founderIndex={founderIndex}
+            foundersStatus={foundersStatus}
+            onClose={handleClose}
+          />
+        )}
         {mailing && (
           <BulkEmailDrawer
             key={mailing.id}
