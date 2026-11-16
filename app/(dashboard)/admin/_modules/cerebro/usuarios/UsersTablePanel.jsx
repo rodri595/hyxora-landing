@@ -4,6 +4,7 @@ import CopyButton from "@/components/CopyButton";
 import DataTable from "@/components/DataTable";
 import { cerebroPlanLabel } from "@/constants/cerebro";
 import { useGetAllUsers } from "@/hooks/admin/useGetAllUsers";
+import { useGetAppUsers } from "@/hooks/appApi/useGetAppUsers";
 import { useGetUserStats } from "@/hooks/cerebro/useGetUserStats";
 import { useGetUsers } from "@/hooks/cerebro/useGetUsers";
 import { SWEEP_MAX_PAGES, useGetUsersSweep } from "@/hooks/cerebro/useGetUsersSweep";
@@ -18,8 +19,20 @@ import Panel, { RefreshButton } from "../../shared/Panel";
 import QueryState from "../../shared/QueryState";
 import { firstNumber } from "../../shared/aggregate";
 import BulkEmailDrawer, { BULK_EMAIL_DRAWER_WIDTH, collectRecipients } from "./BulkEmailDrawer";
-import CrmExportDrawer, { CRM_EXPORT_DRAWER_WIDTH } from "./CrmExportDrawer";
+import CrmExportDrawer, {
+  CRM_EXPORT_DRAWER_WIDTH,
+  countryName,
+  periodEnd,
+} from "./CrmExportDrawer";
 import UserQueryPrompt from "./UserQueryPrompt";
+import {
+  INTERVALS,
+  PAYMENT_TYPES,
+  RENEWAL_WINDOW_DAYS,
+  daysUntil,
+  indexAppUsers,
+  withAppFields,
+} from "./appUsers";
 import { DETAIL_DRAWER_WIDTH, GROWTH_DAYS, USER_PAGE_SIZE, USER_PAGE_SIZES } from "./constants";
 import UserDetailDrawer from "./detail/UserDetailDrawer";
 import { KycBadge, MembershipBadge, NftChip } from "./detail/parts";
@@ -28,6 +41,27 @@ import { matchesFilters } from "./userQuery";
 
 const DEFAULT_SORTING = [{ id: "tvl", desc: true }];
 const NO_FILTERS = {};
+
+/**
+ * Out of the box the table shows the CRM export's default columns — name, email,
+ * phone, country, plan, membership and its dates — with the membership badge
+ * standing in for «Lead scoring», which is derived from it. Everything else is one
+ * tick away in the column menu.
+ */
+const DEFAULT_COLUMN_VISIBILITY = {
+  privyId: false,
+  membershipRenewed: false,
+  membershipInterval: false,
+  membershipPayment: false,
+  kyc: false,
+  founders: false,
+  safe: false,
+  tvl: false,
+  fees: false,
+  cost: false,
+  net: false,
+  created: false,
+};
 
 gsap.registerPlugin(useGSAP);
 
@@ -231,17 +265,55 @@ const FounderCell = ({ row, status }) => {
 };
 
 /**
+ * A field from app-api's `/admin/users` — name, country, the membership dates.
+ * Same three-way miss as the founders cells: still loading and app-api down must
+ * not read as "this user has no such value".
+ *
+ * @param {Object} props
+ * @param {string | null | undefined} props.value Already formatted for display.
+ * @param {Object} props.row
+ * @param {"loading" | "error" | "ready"} props.status
+ */
+const AppCell = ({ value, row, status }) => {
+  if (value) {
+    return <span className="whitespace-nowrap text-[rgba(25,54,63,0.85)]">{value}</span>;
+  }
+  if (!row.appMatch && status === "loading") {
+    return <span className="text-[rgba(25,54,63,0.5)]">…</span>;
+  }
+  if (!row.appMatch && status === "error") {
+    return (
+      <span
+        className="whitespace-nowrap text-amber-700"
+        title="/admin/users de app-api no respondió"
+      >
+        sin dato
+      </span>
+    );
+  }
+  return <span className="text-[rgba(25,54,63,0.5)]">—</span>;
+};
+
+const daysLabel = (days) => {
+  if (days === 0) return "hoy";
+  const n = Math.abs(days);
+  const span = `${n} ${n === 1 ? "día" : "días"}`;
+  return days > 0 ? `en ${span}` : `hace ${span}`;
+};
+
+/**
  * Column ids are the API's `sort` vocabulary, so a header click maps straight to
  * the query param with no lookup table in between. The columns the endpoint cannot
  * order by — everything but created, tvl, cost, fees, net and plan — say so with
  * `enableSorting: false` rather than offering an arrow that would silently reorder
- * nothing. The two founders columns can't sort either: `/users` has never heard of
- * them, and ordering one page client-side would pass for ordering the table.
+ * nothing. The founders and app-api columns can't sort either: `/users` has never
+ * heard of them, and ordering one page client-side would pass for ordering the table.
  *
  * @param {(user: Object) => void} onOpen
  * @param {"loading" | "error" | "ready"} foundersStatus
+ * @param {"loading" | "error" | "ready"} appStatus
  */
-const buildColumns = (onOpen, foundersStatus) => [
+const buildColumns = (onOpen, foundersStatus, appStatus) => [
   {
     id: "email",
     accessorKey: "email",
@@ -277,6 +349,14 @@ const buildColumns = (onOpen, foundersStatus) => [
     },
   },
   {
+    id: "name",
+    header: "Nombre",
+    enableSorting: false,
+    accessorFn: (row) =>
+      row.fullName || [row.firstName, row.lastName].filter(Boolean).join(" ") || row.founderName,
+    cell: (info) => <AppCell value={info.getValue()} row={info.row.original} status={appStatus} />,
+  },
+  {
     id: "privyId",
     accessorKey: "privyId",
     header: "Privy ID",
@@ -302,20 +382,79 @@ const buildColumns = (onOpen, foundersStatus) => [
     accessorKey: "membershipStatus",
     header: "Membresía",
     enableSorting: false,
+    cell: (info) => <MembershipBadge status={info.getValue()} />,
+  },
+  {
+    id: "membershipStart",
+    header: "Inicio membresía",
+    enableSorting: false,
+    accessorFn: (row) => row.membershipStartDate,
+    cell: (info) => (
+      <AppCell
+        value={info.getValue() && formatDay(info.getValue())}
+        row={info.row.original}
+        status={appStatus}
+      />
+    ),
+  },
+  {
+    id: "membershipEnd",
+    header: "Final membresía",
+    enableSorting: false,
+    // The renewal date, or the cancellation date for someone on their way out —
+    // the same day the CRM export's «Final Membresía» carries.
+    accessorFn: (row) => periodEnd(row),
     cell: (info) => {
-      const renew = info.row.original.membershipRenewDate;
+      const end = info.getValue();
+      const days = daysUntil(end);
+      if (!end || days === null) {
+        return <AppCell value={null} row={info.row.original} status={appStatus} />;
+      }
 
       return (
         <div className="flex flex-col gap-0.5">
-          <MembershipBadge status={info.getValue()} />
-          {renew && (
-            <span className="whitespace-nowrap font-inter text-[10px] tabular-nums tracking-[-0.4px] text-[rgba(25,54,63,0.68)]">
-              renueva {formatDay(renew)}
-            </span>
-          )}
+          <span className="whitespace-nowrap tabular-nums text-[rgba(25,54,63,0.85)]">
+            {formatDay(end)}
+          </span>
+          <span
+            className={cn(
+              "whitespace-nowrap font-inter text-[10px] tabular-nums tracking-[-0.4px]",
+              days < 0 ? "text-red-600" : "text-[rgba(25,54,63,0.68)]"
+            )}
+          >
+            {daysLabel(days)}
+          </span>
         </div>
       );
     },
+  },
+  {
+    id: "membershipRenewed",
+    header: "Última renovación",
+    enableSorting: false,
+    accessorFn: (row) => row.membershipLastRenewedAt,
+    cell: (info) => (
+      <AppCell
+        value={info.getValue() && formatDay(info.getValue())}
+        row={info.row.original}
+        status={appStatus}
+      />
+    ),
+  },
+  {
+    id: "membershipInterval",
+    header: "Periodicidad",
+    enableSorting: false,
+    accessorFn: (row) => INTERVALS[row.membershipInterval] ?? null,
+    cell: (info) => <AppCell value={info.getValue()} row={info.row.original} status={appStatus} />,
+  },
+  {
+    id: "membershipPayment",
+    header: "Forma de pago",
+    enableSorting: false,
+    accessorFn: (row) =>
+      PAYMENT_TYPES[row.membershipPaymentType] ?? row.membershipPaymentType ?? null,
+    cell: (info) => <AppCell value={info.getValue()} row={info.row.original} status={appStatus} />,
   },
   {
     id: "kyc",
@@ -346,6 +485,13 @@ const buildColumns = (onOpen, foundersStatus) => [
         </div>
       );
     },
+  },
+  {
+    id: "country",
+    header: "País",
+    enableSorting: false,
+    accessorFn: (row) => countryName(row.country),
+    cell: (info) => <AppCell value={info.getValue()} row={info.row.original} status={appStatus} />,
   },
   {
     id: "founders",
@@ -451,8 +597,9 @@ const buildColumns = (onOpen, foundersStatus) => [
  *
  * The table is wide on purpose — identity, membership, KYC and our economics on the
  * user are four different questions and each is somebody's first column — so the
- * column menu is on. Hiding a column is per-session and per-browser, which is the
- * right scope for "I am looking at billing today".
+ * column menu is on, and only the CRM columns start visible. Toggling a column is
+ * per-session and per-browser, which is the right scope for "I am looking at
+ * billing today".
  */
 const UsersTablePanel = () => {
   const [scope, setScope] = useState("all");
@@ -482,6 +629,12 @@ const UsersTablePanel = () => {
   const founders = useGetAllUsers();
   const founderIndex = useMemo(() => indexFounderUsers(founders.data), [founders.data]);
   const foundersStatus = founders.isError ? "error" : founders.isPending ? "loading" : "ready";
+
+  // Names, country and the live membership block — the CRM export's columns. One
+  // request for every account, and the same cached query the export drawer reads.
+  const app = useGetAppUsers();
+  const appIndex = useMemo(() => indexAppUsers(app.data?.users), [app.data]);
+  const appStatus = app.isError ? "error" : app.isPending ? "loading" : "ready";
 
   const refined = Object.keys(filters).length > 0;
   const serverQuery = {
@@ -614,15 +767,17 @@ const UsersTablePanel = () => {
   );
 
   const columns = useMemo(
-    () => buildColumns(handleOpen, foundersStatus),
-    [handleOpen, foundersStatus]
+    () => buildColumns(handleOpen, foundersStatus, appStatus),
+    [handleOpen, foundersStatus, appStatus]
   );
+  // Joined before filtering: app-api's membership status replaces Cerebro's, and the
+  // «membresía» filter has to read the same status the badge shows.
   const rows = useMemo(() => {
-    const users = refined
-      ? (sweep.data?.rows ?? []).filter((user) => matchesFilters(user, filters))
-      : (paged.data?.users ?? []);
-    return users.map((user) => withFounderFields(founderIndex, user));
-  }, [refined, sweep.data, paged.data, filters, founderIndex]);
+    const users = (refined ? (sweep.data?.rows ?? []) : (paged.data?.users ?? [])).map((user) =>
+      withAppFields(appIndex, withFounderFields(founderIndex, user))
+    );
+    return refined ? users.filter((user) => matchesFilters(user, filters)) : users;
+  }, [refined, sweep.data, paged.data, filters, founderIndex, appIndex]);
 
   // Swept, every match is in hand and the count is just how many there are. Paged,
   // `totalUsers` is what the old page called this count, and a port may have kept it.
@@ -654,7 +809,7 @@ const UsersTablePanel = () => {
   return (
     <Panel
       title="Usuarios"
-      description="Cada usuario con su plan, su estado de membresía y KYC, su TVL, lo que ha dejado en comisiones y lo que nos ha costado patrocinarle el gas. El margen es ingresos menos gastos, solo de ese usuario. Teléfono y Web founders salen de su cuenta en la web founders, la misma que lista la pestaña Usuarios. Abre una fila con el ojo para ver su cartera, sus operaciones, sus órdenes SEPA y su cuenta founders, o para escribirle un email."
+      description="Cada usuario con su plan, su estado de membresía y KYC, su TVL, lo que ha dejado en comisiones y lo que nos ha costado patrocinarle el gas. El margen es ingresos menos gastos, solo de ese usuario. Teléfono y Web founders salen de su cuenta en la web founders, la misma que lista la pestaña Usuarios. Nombre, país, las fechas de membresía, la periodicidad y la forma de pago salen de la lista de usuarios de la app, las mismas columnas que «Exportar para CRM». Abre una fila con el ojo para ver su cartera, sus operaciones, sus órdenes SEPA y su cuenta founders, o para escribirle un email."
       action={
         <div className="flex items-center gap-2">
           <button
@@ -709,6 +864,7 @@ const UsersTablePanel = () => {
           }
           showRowCount={false}
           enableColumnToggle
+          initialColumnVisibility={DEFAULT_COLUMN_VISIBILITY}
           selectionActions={(selectedRows) => (
             <button
               type="button"
@@ -756,7 +912,15 @@ const UsersTablePanel = () => {
           actividad registrada, que no es lo mismo que no haber usado nunca el producto. Teléfono y
           Web founders se cruzan con la web founders por correo y, si no coincide, por wallet; «—»
           es que no tiene cuenta allí. No ordenan ni entran en la búsqueda ni en los filtros porque
-          /users no los conoce.
+          /users no los conoce. Lo mismo vale para nombre, país y las columnas de membresía —salvo
+          el estado y la forma de pago, que sí tienen filtro—, que vienen de /admin/users de la app
+          y se cruzan por Privy ID, correo o wallet: son el dato en vivo, así que el estado de
+          membresía también sale de ahí cuando lo hay, y Cerebro solo cubre a quien la app no tiene.
+          «Final membresía» es la próxima renovación, o el día que termina si va a cancelar. «Última
+          renovación» solo se registra desde el 10/11/2026. Una membresía activa cuya renovación cae
+          en los próximos {RENEWAL_WINDOW_DAYS} días sale «en renovación», y si la fecha ya pasó sin
+          que el backend registre el cobro, «no renovado»: el backend la sigue dando por activa, así
+          que lo deducimos de la fecha. Las dos tienen su propia opción en el filtro de membresía.
         </PanelNote>
       </QueryState>
 

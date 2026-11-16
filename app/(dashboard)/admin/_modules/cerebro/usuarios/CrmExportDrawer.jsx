@@ -15,7 +15,7 @@ import { useMemo, useState } from "react";
 import * as XLSX from "xlsx";
 import QueryState from "../../shared/QueryState";
 import { firstNumber } from "../../shared/aggregate";
-import { indexAppUsers, withAppFields } from "./appUsers";
+import { INTERVALS, PAYMENT_TYPES, daysUntil, indexAppUsers, withAppFields } from "./appUsers";
 import { withFounderFields } from "./founders";
 
 /** Wide enough for the column list and a preview of five or six columns. */
@@ -25,7 +25,6 @@ export const CRM_EXPORT_DRAWER_WIDTH = 640;
 // the old names back.
 const STORAGE_KEY = "hx-crm-export-v2";
 const PREVIEW_ROWS = 5;
-const DAY_MS = 24 * 60 * 60 * 1000;
 
 const dateFormat = new Intl.DateTimeFormat("es-ES", {
   day: "2-digit",
@@ -45,19 +44,11 @@ const toDate = (value) => {
   return date ? dateFormat.format(date) : null;
 };
 
-const startOfDay = (date) => new Date(date.getFullYear(), date.getMonth(), date.getDate());
-
-const daysUntil = (value) => {
-  const date = parseDate(value);
-  if (!date) return null;
-  return Math.round((startOfDay(date) - startOfDay(new Date())) / DAY_MS);
-};
-
 /**
  * When the paid period ends: the cancellation date for someone on their way out,
  * the renewal date for everyone else, nothing for an account with no membership.
  */
-const periodEnd = (row) => {
+export const periodEnd = (row) => {
   const status = cerebroMembershipKey(row.membershipStatus);
   if (status === "none") return null;
   if (status === "toCancel" && row.cancelEffectiveDate) return row.cancelEffectiveDate;
@@ -77,12 +68,10 @@ const LEAD_SCORE = {
   none: "Lead frío",
 };
 
-const PAYMENT_TYPES = { stripe: "Stripe", onchain: "On-chain", manual: "Manual" };
-
 const regionNames = new Intl.DisplayNames(["es"], { type: "region" });
 
 /** "ES" → "España". Anything that isn't a two-letter code goes out as it came. */
-const countryName = (code) => {
+export const countryName = (code) => {
   if (!code) return null;
   if (!/^[A-Z]{2}$/.test(code)) return code;
   try {
@@ -128,7 +117,7 @@ const CRM_FIELDS = [
   {
     id: "leadScore",
     header: "Lead scoring",
-    hint: "Membresía activa o pendiente de cancelar → Cliente · cancelada o suspendida → Cliente Perdido · sin membresía → Lead frío",
+    hint: "Membresía activa, en renovación o pendiente de cancelar → Cliente · no renovada, cancelada o suspendida → Cliente Perdido · sin membresía → Lead frío",
     on: true,
     value: (row) => LEAD_SCORE[cerebroMembershipGroup(row.membershipStatus)] ?? null,
   },
@@ -219,7 +208,7 @@ const CRM_FIELDS = [
     hint: "Mensual o anual",
     source: "membershipInterval",
     on: false,
-    value: (row) => ({ month: "Mensual", year: "Anual" })[row.membershipInterval] ?? null,
+    value: (row) => INTERVALS[row.membershipInterval] ?? null,
   },
   {
     id: "paymentType",

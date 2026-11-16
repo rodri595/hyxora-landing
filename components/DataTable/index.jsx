@@ -488,6 +488,8 @@ const ALIGN_CLASS = {
  * @param {boolean} [enableExport]           - Export dropdown. Default true.
  * @param {boolean} [showRowCount]           - "N filas" counter. Default true.
  * @param {boolean} [enableColumnToggle]     - Column visibility menu. Default false.
+ * @param {Record<string, boolean>} [initialColumnVisibility] - Column id → false
+ *   for the columns that start hidden. Read once, on mount.
  * @param {boolean} [enableFooter]           - Render <tfoot> from each column's
  *   `footer` definition — used for totals rows. Default false.
  * @param {boolean} [bare]                   - Drop the outer border/shadow and the
@@ -548,6 +550,7 @@ const DataTable = ({
   enableExport = true,
   showRowCount = true,
   enableColumnToggle = false,
+  initialColumnVisibility = {},
   enableFooter = false,
   bare = false,
   dense = false,
@@ -580,7 +583,7 @@ const DataTable = ({
   const [internalSorting, setInternalSorting] = useState(initialSorting);
   const [internalGlobalFilter, setInternalGlobalFilter] = useState("");
   const [rowSelection, setRowSelection] = useState({});
-  const [columnVisibility, setColumnVisibility] = useState({});
+  const [columnVisibility, setColumnVisibility] = useState(initialColumnVisibility);
   const [internalPagination, setInternalPagination] = useState({ pageIndex: 0, pageSize });
   const [expanded, setExpanded] = useState({});
 

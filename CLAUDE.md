@@ -325,7 +325,7 @@ table's state as «Muéstrame [todos los usuarios] con plan [Premium], ordenados
 [más dinero dentro]», every blue word a menu, plus suggested questions underneath.
 It looks like an AI prompt on purpose and is not one: nothing is typed or
 interpreted, and each word maps to one thing in `usuarios/userQuery.js`. Scope and
-order are `/users` params. The filters (plan, membresía, KYC, saldo, margen, NFT,
+order are `/users` params. The filters (plan, membresía, forma de pago, KYC, saldo, margen, NFT,
 registro) are not — `/users` has no such params — so any filter switches the table
 from one server page to `useGetUsersSweep`, the same full sweep the activation
 funnel uses, filtered client-side. Filtering the one page the browser holds would
@@ -421,7 +421,9 @@ membership, KYC, and our economics on the user — and each is somebody's first
 column, so it is wide by design rather than by accident. Give a header-less column
 a `meta.label` (the menu falls back to the raw column id otherwise) and
 `enableHiding: false` to anything that must not be hidden — the actions column is
-the only way into the drawer.
+the only way into the drawer. `initialColumnVisibility` (`{ id: false }`) sets
+which columns start hidden: that table opens on the CRM export's default columns
+and leaves the rest to the menu.
 
 `renderSubRow(rowData, row)` turns rows into expandable ones — a chevron column
 appears and the returned node renders full-width underneath. `isRowExpandable`

@@ -1,5 +1,11 @@
-import { cerebroMembershipGroup, cerebroPlanLabel, cerebroPlans } from "@/constants/cerebro";
+import {
+  cerebroMembershipGroup,
+  cerebroMembershipKey,
+  cerebroPlanLabel,
+  cerebroPlans,
+} from "@/constants/cerebro";
 import { FUNDED_USD } from "@/hooks/cerebro/useGetUserActivation";
+import { PAYMENT_TYPES } from "./appUsers";
 
 /**
  * The vocabulary of the users table's prompt: a sentence of clickable tokens that
@@ -93,14 +99,31 @@ export const FILTERS = [
     prefix: "con membresía",
     // Grouped through `cerebroMembershipGroup`, so `toCancel` — still inside the
     // period they paid for — is «en riesgo» rather than lapsed, and the backend's
-    // literal "none" is no membership rather than an unknown status.
+    // literal "none" is no membership rather than an unknown status. The two renewal
+    // states also match on their own key, so support can list exactly who to chase.
     options: [
       { id: "active", label: "activa" },
+      { id: "renewing", label: "en renovación" },
       { id: "pipeline", label: "en riesgo" },
+      { id: "notRenewed", label: "no renovada" },
       { id: "lapsed", label: "caducada o cancelada" },
       { id: "none", label: "ninguna" },
     ],
-    match: (row, value) => cerebroMembershipGroup(row.membershipStatus) === value,
+    match: (row, value) =>
+      cerebroMembershipGroup(row.membershipStatus) === value ||
+      cerebroMembershipKey(row.membershipStatus) === value,
+  },
+  {
+    id: "payment",
+    label: "Forma de pago",
+    prefix: "con forma de pago",
+    // app-api's `membershipPaymentType`, joined onto the row before filtering. A
+    // value outside these three matches none of them rather than the wrong one.
+    options: [
+      ...Object.entries(PAYMENT_TYPES).map(([id, label]) => ({ id, label })),
+      { id: "none", label: "ninguna" },
+    ],
+    match: (row, value) => String(row.membershipPaymentType || "none").toLowerCase() === value,
   },
   {
     id: "kyc",

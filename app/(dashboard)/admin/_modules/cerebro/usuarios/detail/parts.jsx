@@ -162,7 +162,7 @@ export const MembershipBadge = ({ status }) => {
 
   return (
     <span
-      title={`membership_status: ${status}`}
+      title={cerebroMembershipStatuses[key]?.hint ?? `membership_status: ${status}`}
       className={cn(
         "inline-flex items-center gap-1 whitespace-nowrap rounded-full border px-1.5 py-0.5 font-inter text-[10px] font-medium uppercase tracking-[0.4px]",
         box

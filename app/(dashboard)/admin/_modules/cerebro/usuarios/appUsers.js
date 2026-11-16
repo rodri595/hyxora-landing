@@ -1,4 +1,4 @@
-import { cerebroPlanLabel } from "@/constants/cerebro";
+import { cerebroMembershipKey, cerebroPlanLabel } from "@/constants/cerebro";
 
 /**
  * Joining a Cerebro `/users` row to the app backend's own `/admin/users` record,
@@ -16,6 +16,24 @@ import { cerebroPlanLabel } from "@/constants/cerebro";
 
 const lower = (value) => (typeof value === "string" && value ? value.toLowerCase() : null);
 const text = (value) => (typeof value === "string" && value.trim() ? value.trim() : null);
+
+const DAY_MS = 24 * 60 * 60 * 1000;
+const startOfDay = (date) => new Date(date.getFullYear(), date.getMonth(), date.getDate());
+
+/** Whole days from today to `value`, negative once it has passed; null for no date. */
+export const daysUntil = (value) => {
+  if (!value) return null;
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return null;
+  return Math.round((startOfDay(date) - startOfDay(new Date())) / DAY_MS);
+};
+
+/** app-api's `membershipPaymentType` and `membershipInterval`, as the admin reads them. */
+export const PAYMENT_TYPES = { stripe: "Stripe", onchain: "On-chain", manual: "Manual" };
+export const INTERVALS = { month: "Mensual", year: "Anual" };
+
+/** How close the renewal day has to be for an active membership to read «en renovación». */
+export const RENEWAL_WINDOW_DAYS = 10;
 
 /**
  * @typedef {{ byPrivyId: Map<string, AppApiUser>, byEmail: Map<string, AppApiUser>, byWallet: Map<string, AppApiUser> }} AppUserIndex
@@ -77,7 +95,7 @@ const findAppUser = (index, row) => {
  * @param {AppUserIndex} index
  * @param {Object} row
  */
-export const withAppFields = (index, row) => {
+const joinAppFields = (index, row) => {
   const app = findAppUser(index, row);
   if (!app) {
     return {
@@ -110,3 +128,27 @@ export const withAppFields = (index, row) => {
     cancelEffectiveDate: app.cancelEffectiveDate ?? null,
   };
 };
+
+/**
+ * The backend says `active` until a renewal lands, so a renewal that is days away
+ * and one that never came (a failed charge, a lost webhook) both look like any
+ * other active member. Read off the renew date instead: «en renovación» inside the
+ * window, «no renovado» once the day has gone by — the renewal day itself is still
+ * «en renovación». Only `active`: every other status already says where it's going.
+ *
+ * @param {Object} row
+ */
+const withRenewalState = (row) => {
+  if (cerebroMembershipKey(row.membershipStatus) !== "active") return row;
+  const days = daysUntil(row.membershipRenewDate);
+  if (days === null || days > RENEWAL_WINDOW_DAYS) return row;
+  return { ...row, membershipStatus: days < 0 ? "notRenewed" : "renewing" };
+};
+
+/**
+ * The Cerebro row with app-api's fields laid over it, and its renewal state.
+ *
+ * @param {AppUserIndex} index
+ * @param {Object} row
+ */
+export const withAppFields = (index, row) => withRenewalState(joinAppFields(index, row));

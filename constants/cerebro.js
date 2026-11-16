@@ -417,12 +417,28 @@ export const cerebroPlanLabel = (plan) =>
  *
  * `"none"` is a real value on the wire, not just `null` — reading it as a status
  * of its own is what filed every plan-less user under «caducada».
+ *
+ * `renewing` and `notRenewed` are ours, never on the wire: an `active` row read
+ * against its renew date by `usuarios/appUsers.js`. `hint` replaces the badge's
+ * raw-status tooltip for them, since the backend never said those words.
  */
 export const cerebroMembershipStatuses = {
   active: { label: "activa", tone: "good", group: "active" },
+  renewing: {
+    label: "en renovación",
+    tone: "warning",
+    group: "active",
+    hint: "Activa; la renovación cae en los próximos días",
+  },
   toCancel: { label: "cancelará", tone: "warning", group: "pipeline" },
   toDowngrade: { label: "bajará de plan", tone: "warning", group: "pipeline" },
   pendingPayment: { label: "pago pendiente", tone: "warning", group: "pipeline" },
+  notRenewed: {
+    label: "no renovado",
+    tone: "bad",
+    group: "lapsed",
+    hint: "El backend la da por activa, pero la fecha de renovación ya pasó sin cobro",
+  },
   suspended: { label: "suspendida", tone: "bad", group: "lapsed" },
   cancelled: { label: "cancelada", tone: "bad", group: "lapsed" },
 };
