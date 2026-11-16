@@ -3,6 +3,14 @@
 // the same in every timezone.
 export const NEWSLETTER_ISSUES = [
   {
+    id: "2026-11-13",
+    date: "2026-11-13",
+    title: "Diario del Nobanco · Nº 3",
+    summary:
+      "El ORO estable frente a la volatilidad, la app ya en pruebas en iOS, HYXplore con Víctor Ronco, eventos en Fuengirola y Madrid, el reembolso en ORO de «Tu fidelidad es ORO» y HYXkarma ya visible en la app.",
+    href: "/newsletter/2026-11-13.pdf",
+  },
+  {
     id: "2026-11-06",
     date: "2026-11-06",
     title: "Diario del Nobanco · Nº 2",
