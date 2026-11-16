@@ -5,6 +5,7 @@ import { cerebroPlanLabel } from "@/constants/cerebro";
 import { formatNumber, formatUsd, formatUsdPrecise, timeAgo, toDayString } from "@/utils/format";
 import AddressLink from "../../../shared/AddressLink";
 import StatCard from "../../../shared/StatCard";
+import { PAYMENT_TYPES, countryName } from "../appUsers";
 import {
   DetailField,
   EmptyBlock,
@@ -114,9 +115,19 @@ const IdentityBlock = ({ user }) => {
   const renewDay = formatDay(user.membershipRenewDate);
   const createdDay = formatDay(user.createdAt);
   const memberSinceDay = formatDay(user.membershipStartDate);
+  // Profile name from app-api, Cerebro's joined `name`, then the founders checkout.
+  const fullName =
+    user.fullName ||
+    [user.firstName, user.lastName].filter(Boolean).join(" ") ||
+    user.founderName ||
+    null;
 
   return (
     <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+      <DetailField label="Nombre" value={fullName} className="col-span-2" />
+
+      <DetailField label="País" value={countryName(user.country)} />
+
       <DetailField label="Usuario" value={user.username ? `@${user.username}` : null} />
 
       <DetailField
@@ -126,7 +137,7 @@ const IdentityBlock = ({ user }) => {
 
       <DetailField label="Plan">
         <span className="font-inter text-[11px] font-medium tracking-[-0.44px] text-[#19363F]">
-          {cerebroPlanLabel(user.plan)}
+          {user.planName ?? cerebroPlanLabel(user.plan)}
         </span>
         <NftChip balance={user.nftBalance} tokenIds={user.nftTokenIds} />
       </DetailField>
@@ -145,13 +156,13 @@ const IdentityBlock = ({ user }) => {
         hint={user.createdAt ? timeAgo(user.createdAt) : undefined}
       />
 
-      {/* Only `/users/{privyId}` carries these two — they live on the user record,
-          not on the `/users` list row — so they appear once the detail resolves and
-          are simply absent before that rather than flashing a dash. */}
+      {/* app-api's row carries these two; for anyone it doesn't have, only
+          `/users/{privyId}`'s user record does — so they appear once one of them
+          resolves and are simply absent before that rather than flashing a dash. */}
       {user.membershipPaymentType && (
         <DetailField
           label="Cobro"
-          value={user.membershipPaymentType}
+          value={PAYMENT_TYPES[user.membershipPaymentType] ?? user.membershipPaymentType}
           hint={user.membershipPaymentType === "manual" ? "Founder: mint único" : undefined}
         />
       )}

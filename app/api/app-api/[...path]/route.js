@@ -38,29 +38,41 @@ const ALLOWED_PATHS = new Set([
 ]);
 
 /**
- * The only `/admin/users` fields the browser gets. The row also carries `kycId`,
- * `kycStatus`, `solana`, `refCode` and the role; the CRM export needs none of them,
- * so they stop here rather than riding along to every admin's devtools.
+ * The only `/admin/users` fields the browser gets — what the users table, its drawer
+ * and the CRM export render. The row also carries `kycId`, `kycStatus`, `refCode`
+ * and the role; nothing here needs them, so they stop here rather than riding along
+ * to every admin's devtools.
  */
 const USER_FIELDS = [
   "_id",
   "privyId",
   "email",
+  "username",
   "country",
   "wallet",
   "signer",
+  "solana",
   "firstName",
   "lastName",
   "name",
   "membership",
   "membershipStatus",
+  "isTrial",
+  "membershipAccessMode",
   "membershipStartDate",
   "membershipRenewDate",
   "membershipLastRenewedAt",
   "membershipInterval",
   "membershipPaymentType",
+  "renewalDeadlineAt",
+  "subscriptionEndedAt",
+  "cancelRequestedAt",
   "cancelEffectiveDate",
+  "cancellationFinalizedAt",
+  "downgradeRequestedAt",
+  "downgradeTarget",
   "createdAt",
+  "updatedAt",
 ];
 
 const projectUsers = (body) => {

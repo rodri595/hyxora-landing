@@ -19,25 +19,24 @@ import Panel, { RefreshButton } from "../../shared/Panel";
 import QueryState from "../../shared/QueryState";
 import { firstNumber } from "../../shared/aggregate";
 import BulkEmailDrawer, { BULK_EMAIL_DRAWER_WIDTH, collectRecipients } from "./BulkEmailDrawer";
-import CrmExportDrawer, {
-  CRM_EXPORT_DRAWER_WIDTH,
-  countryName,
-  periodEnd,
-} from "./CrmExportDrawer";
+import CrmExportDrawer, { CRM_EXPORT_DRAWER_WIDTH } from "./CrmExportDrawer";
 import UserQueryPrompt from "./UserQueryPrompt";
 import {
   INTERVALS,
   PAYMENT_TYPES,
   RENEWAL_WINDOW_DAYS,
+  countryName,
   daysUntil,
+  findAppUser,
   indexAppUsers,
+  periodEnd,
   withAppFields,
 } from "./appUsers";
 import { DETAIL_DRAWER_WIDTH, GROWTH_DAYS, USER_PAGE_SIZE, USER_PAGE_SIZES } from "./constants";
 import UserDetailDrawer from "./detail/UserDetailDrawer";
 import { KycBadge, MembershipBadge, NftChip } from "./detail/parts";
 import { findFounderUser, indexFounderUsers, withFounderFields } from "./founders";
-import { matchesFilters } from "./userQuery";
+import { matchesFilters, matchesSearch } from "./userQuery";
 
 const DEFAULT_SORTING = [{ id: "tvl", desc: true }];
 const NO_FILTERS = {};
@@ -45,17 +44,19 @@ const NO_FILTERS = {};
 /**
  * Out of the box the table shows the CRM export's default columns — name, email,
  * phone, country, plan, membership and its dates — with the membership badge
- * standing in for «Lead scoring», which is derived from it. Everything else is one
+ * standing in for «Lead scoring», which is derived from it, plus «Última renovación»
+ * so the client can check each renewal against its date. Everything else is one
  * tick away in the column menu.
  */
 const DEFAULT_COLUMN_VISIBILITY = {
   privyId: false,
-  membershipRenewed: false,
   membershipInterval: false,
   membershipPayment: false,
   kyc: false,
   founders: false,
   safe: false,
+  signer: false,
+  solana: false,
   tvl: false,
   fees: false,
   cost: false,
@@ -301,6 +302,30 @@ const daysLabel = (days) => {
   return days > 0 ? `en ${span}` : `hace ${span}`;
 };
 
+/** A day with a second, smaller line under it — how far off it is, or what's odd about it. */
+const DayCell = ({ day, note, tone = "muted", title }) => (
+  <div className="flex flex-col gap-0.5" title={title}>
+    <span className="whitespace-nowrap tabular-nums text-[rgba(25,54,63,0.85)]">
+      {formatDay(day)}
+    </span>
+    <span
+      className={cn(
+        "whitespace-nowrap font-inter text-[10px] tabular-nums tracking-[-0.4px]",
+        tone === "bad"
+          ? "text-red-600"
+          : tone === "warning"
+            ? "text-amber-700"
+            : "text-[rgba(25,54,63,0.68)]"
+      )}
+    >
+      {note}
+    </span>
+  </div>
+);
+
+const MANUAL_OVERDUE_TITLE =
+  "Membresía manual: no se renueva sola. Pasada esta fecha la app ya la trata como caducada y le pide mejorar el plan, aunque el backend la siga marcando activa.";
+
 /**
  * Column ids are the API's `sort` vocabulary, so a header click maps straight to
  * the query param with no lookup table in between. The columns the endpoint cannot
@@ -370,8 +395,9 @@ const buildColumns = (onOpen, foundersStatus, appStatus) => [
     header: "Plan",
     cell: (info) => (
       <div className="flex items-center gap-1.5">
+        {/* app-api's live plan, Cerebro's as the fallback; sorting stays Cerebro's. */}
         <span className="whitespace-nowrap text-[rgba(25,54,63,0.85)]">
-          {cerebroPlanLabel(info.getValue())}
+          {info.row.original.planName ?? cerebroPlanLabel(info.getValue())}
         </span>
         <NftChip balance={info.row.original.nftBalance} tokenIds={info.row.original.nftTokenIds} />
       </div>
@@ -383,6 +409,30 @@ const buildColumns = (onOpen, foundersStatus, appStatus) => [
     header: "Membresía",
     enableSorting: false,
     cell: (info) => <MembershipBadge status={info.getValue()} />,
+  },
+  {
+    id: "trial",
+    header: "Prueba",
+    enableSorting: false,
+    meta: { label: "Prueba gratuita" },
+    // app-api's `isTrial` (#223). A trial is stored as manual + toCancel, so the badge
+    // beside it says «cancelará»; this column is what tells it from a client leaving,
+    // and the «Prueba gratuita» filter uses it to keep only paying members.
+    accessorFn: (row) => row.isTrial,
+    cell: (info) => {
+      const value = info.getValue();
+      if (value === true) {
+        return (
+          <span className="inline-flex items-center whitespace-nowrap rounded-[5px] border-[0.7px] border-blue-200 bg-blue-50 px-1.5 py-0.5 font-inter text-[10px] font-medium tracking-[-0.36px] text-[#2D68FF]">
+            Gratuita
+          </span>
+        );
+      }
+      if (value === false) {
+        return <span className="text-[rgba(25,54,63,0.68)]">No</span>;
+      }
+      return <AppCell value={null} row={info.row.original} status={appStatus} />;
+    },
   },
   {
     id: "membershipStart",
@@ -405,26 +455,50 @@ const buildColumns = (onOpen, foundersStatus, appStatus) => [
     // the same day the CRM export's «Final Membresía» carries.
     accessorFn: (row) => periodEnd(row),
     cell: (info) => {
+      const row = info.row.original;
+      // A founder holding the NFT has no end: its renew date is noise, so it isn't shown.
+      if (row.membershipStatus === "founder") {
+        return (
+          <span
+            className="whitespace-nowrap font-medium text-emerald-700"
+            title="Tiene el NFT founder: el plan no caduca mientras lo conserve."
+          >
+            permanente
+          </span>
+        );
+      }
       const end = info.getValue();
       const days = daysUntil(end);
       if (!end || days === null) {
-        return <AppCell value={null} row={info.row.original} status={appStatus} />;
+        return <AppCell value={null} row={row} status={appStatus} />;
       }
+      // A trial's end is its cancellation date: say it's the trial that ends.
+      if (row.isTrial === true) {
+        return (
+          <DayCell
+            day={end}
+            note={
+              days >= 0
+                ? `fin de la prueba ${daysLabel(days)}`
+                : `prueba terminó ${daysLabel(days)}`
+            }
+          />
+        );
+      }
+      if (days >= 0) return <DayCell day={end} note={daysLabel(days)} />;
 
+      // Passed. A manual membership has simply ended — the app already asks them to
+      // upgrade — while a paid one missed its charge; the words say which.
+      const manual = row.membershipPaymentType === "manual";
       return (
-        <div className="flex flex-col gap-0.5">
-          <span className="whitespace-nowrap tabular-nums text-[rgba(25,54,63,0.85)]">
-            {formatDay(end)}
-          </span>
-          <span
-            className={cn(
-              "whitespace-nowrap font-inter text-[10px] tabular-nums tracking-[-0.4px]",
-              days < 0 ? "text-red-600" : "text-[rgba(25,54,63,0.68)]"
-            )}
-          >
-            {daysLabel(days)}
-          </span>
-        </div>
+        <DayCell
+          day={end}
+          note={manual ? `caducó ${daysLabel(days)} · manual` : `vencida ${daysLabel(days)}`}
+          tone="bad"
+          title={
+            manual ? MANUAL_OVERDUE_TITLE : "La fecha pasó y el backend no ha registrado el cobro."
+          }
+        />
       );
     },
   },
@@ -433,13 +507,37 @@ const buildColumns = (onOpen, foundersStatus, appStatus) => [
     header: "Última renovación",
     enableSorting: false,
     accessorFn: (row) => row.membershipLastRenewedAt,
-    cell: (info) => (
-      <AppCell
-        value={info.getValue() && formatDay(info.getValue())}
-        row={info.row.original}
-        status={appStatus}
-      />
-    ),
+    cell: (info) => {
+      const row = info.row.original;
+      const last = info.getValue();
+      const days = daysUntil(last);
+
+      if (last && days !== null) {
+        // A "last" renewal dated ahead of today was seen on staging (2027-01-11):
+        // either test data or a period start rather than a payment. Flag, don't hide.
+        return days > 0 ? (
+          <DayCell
+            day={last}
+            note="fecha futura"
+            tone="warning"
+            title="Una última renovación con fecha futura: revisar con backend."
+          />
+        ) : (
+          <DayCell day={last} note={daysLabel(days)} />
+        );
+      }
+      if (row.appMatch) {
+        return (
+          <span
+            className="whitespace-nowrap text-[rgba(25,54,63,0.68)]"
+            title="La app solo registra la renovación desde el 10/11/2026: un cobro anterior no aparece aquí."
+          >
+            sin registro
+          </span>
+        );
+      }
+      return <AppCell value={null} row={row} status={appStatus} />;
+    },
   },
   {
     id: "membershipInterval",
@@ -507,6 +605,30 @@ const buildColumns = (onOpen, foundersStatus, appStatus) => [
     header: "Safe",
     enableSorting: false,
     cell: (info) => <IdCell value={info.getValue()} />,
+  },
+  {
+    // The EOA that signs for the Safe. Off by default — it is there to tick when a
+    // search by wallet needs to show which address matched.
+    id: "signer",
+    accessorKey: "signerAddress",
+    header: "Firmante (EOA)",
+    enableSorting: false,
+    meta: { label: "Firmante (EOA)" },
+    cell: (info) => <IdCell value={info.getValue()} />,
+  },
+  {
+    // From app-api's `solana`: Cerebro's /users never carries it.
+    id: "solana",
+    accessorKey: "solanaAddress",
+    header: "Wallet Solana",
+    enableSorting: false,
+    meta: { label: "Wallet Solana" },
+    cell: (info) =>
+      info.getValue() ? (
+        <IdCell value={info.getValue()} />
+      ) : (
+        <AppCell value={null} row={info.row.original} status={appStatus} />
+      ),
   },
   {
     id: "tvl",
@@ -614,8 +736,9 @@ const UsersTablePanel = () => {
   const [selected, setSelected] = useState(null);
   // The same drawer, holding the composer for the ticked rows instead of one user.
   const [mailing, setMailing] = useState(null);
-  // …or the CRM export, which reads every user rather than the rows on screen.
-  const [exporting, setExporting] = useState(false);
+  // …or the CRM export: `{ id, selectedIds }`, the ids being the ticked rows when it
+  // was opened from the selection bar, null when opened from the panel header.
+  const [exporting, setExporting] = useState(null);
 
   const drawerRef = useRef(null);
   const backdropRef = useRef(null);
@@ -636,11 +759,14 @@ const UsersTablePanel = () => {
   const appIndex = useMemo(() => indexAppUsers(app.data?.users), [app.data]);
   const appStatus = app.isError ? "error" : app.isPending ? "loading" : "ready";
 
-  const refined = Object.keys(filters).length > 0;
+  // A search is swept and matched here like a filter, never sent as `/users?search=`:
+  // that one is fuzzy and returns nearly everyone for a full email (see
+  // `matchesSearch`), and it can't see names, which only app-api carries.
+  const searching = search.trim().length > 0;
+  const refined = Object.keys(filters).length > 0 || searching;
   const serverQuery = {
     sort: sorting[0]?.id,
     dir: sorting[0]?.desc ? "desc" : "asc",
-    search: search || undefined,
     scope: scope === "inactive" ? "inactive" : undefined,
   };
 
@@ -707,7 +833,7 @@ const UsersTablePanel = () => {
 
   const handleOpen = useCallback((user) => {
     setMailing(null);
-    setExporting(false);
+    setExporting(null);
     setSelected(user);
     setIsOpen(true);
   }, []);
@@ -717,17 +843,20 @@ const UsersTablePanel = () => {
   const handleCompose = useCallback(
     (selectedRows) => {
       setSelected(null);
-      setExporting(false);
+      setExporting(null);
       setMailing({ id: Date.now(), ...collectRecipients(selectedRows, founderIndex) });
       setIsOpen(true);
     },
     [founderIndex]
   );
 
-  const handleExportCrm = useCallback(() => {
+  const handleExportCrm = useCallback((selectedRows) => {
     setSelected(null);
     setMailing(null);
-    setExporting(true);
+    setExporting({
+      id: Date.now(),
+      selectedIds: Array.isArray(selectedRows) ? selectedRows.map((row) => row.privyId) : null,
+    });
     setIsOpen(true);
   }, []);
 
@@ -757,7 +886,7 @@ const UsersTablePanel = () => {
           onComplete: () => {
             setSelected(null);
             setMailing(null);
-            setExporting(false);
+            setExporting(null);
           },
         });
         gsap.to(backdrop, { opacity: 0, duration: 0.22, overwrite: true });
@@ -776,14 +905,16 @@ const UsersTablePanel = () => {
     const users = (refined ? (sweep.data?.rows ?? []) : (paged.data?.users ?? [])).map((user) =>
       withAppFields(appIndex, withFounderFields(founderIndex, user))
     );
-    return refined ? users.filter((user) => matchesFilters(user, filters)) : users;
-  }, [refined, sweep.data, paged.data, filters, founderIndex, appIndex]);
+    return refined
+      ? users.filter((user) => matchesFilters(user, filters) && matchesSearch(user, search))
+      : users;
+  }, [refined, sweep.data, paged.data, filters, search, founderIndex, appIndex]);
 
   // Swept, every match is in hand and the count is just how many there are. Paged,
   // `totalUsers` is what the old page called this count, and a port may have kept it.
   // `unfiltered` stays about the /users query alone: prompt filters never reach it,
   // they switch the table to the sweep.
-  const unfiltered = !search && scope !== "inactive";
+  const unfiltered = scope !== "inactive";
   const total = refined
     ? rows.length
     : resolveTotal([data?.total, data?.totalUsers, unfiltered ? stats.data?.totalUsers : null], {
@@ -805,6 +936,13 @@ const UsersTablePanel = () => {
     () => findFounderUser(founderIndex, selected),
     [founderIndex, selected]
   );
+  // Same for app-api: the raw record feeds the drawer's «Ahora en la app» block, and
+  // re-joining the row fills name, country and dates if the list landed after the click.
+  const selectedApp = useMemo(() => findAppUser(appIndex, selected), [appIndex, selected]);
+  const selectedUser = useMemo(
+    () => (selected ? withAppFields(appIndex, selected) : null),
+    [appIndex, selected]
+  );
 
   return (
     <Panel
@@ -814,7 +952,7 @@ const UsersTablePanel = () => {
         <div className="flex items-center gap-2">
           <button
             type="button"
-            onClick={handleExportCrm}
+            onClick={() => handleExportCrm()}
             className="flex h-7.5 min-w-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-lg bg-[#19363F] px-2.5 font-inter text-[11px] font-medium tracking-[-0.44px] text-white transition-colors hover:bg-[#0f2228]"
           >
             <DownloadIcon />
@@ -856,29 +994,40 @@ const UsersTablePanel = () => {
           data={rows}
           columns={columns}
           filename="cerebro-usuarios"
-          searchPlaceholder="Busca por correo o usuario..."
+          searchPlaceholder="Busca por correo, nombre, teléfono o wallet..."
           emptyLabel={
-            refined
+            Object.keys(filters).length > 0
               ? "Nadie cumple todos los filtros. Quita alguno en la frase de arriba."
-              : "Ningún usuario coincide con la búsqueda."
+              : `Nadie coincide con «${search.trim()}».`
           }
           showRowCount={false}
           enableColumnToggle
           initialColumnVisibility={DEFAULT_COLUMN_VISIBILITY}
           selectionActions={(selectedRows) => (
-            <button
-              type="button"
-              onClick={() => handleCompose(selectedRows)}
-              className="flex h-7.5 items-center gap-1.5 whitespace-nowrap rounded-lg bg-[#19363F] px-2.5 font-inter text-[11px] font-medium tracking-[-0.44px] text-white transition-colors hover:bg-[#0f2228]"
-            >
-              <MailIcon />
-              Enviar email ({selectedRows.length})
-            </button>
+            <div className="flex items-center gap-1.5">
+              <button
+                type="button"
+                onClick={() => handleCompose(selectedRows)}
+                className="flex h-7.5 items-center gap-1.5 whitespace-nowrap rounded-lg bg-[#19363F] px-2.5 font-inter text-[11px] font-medium tracking-[-0.44px] text-white transition-colors hover:bg-[#0f2228]"
+              >
+                <MailIcon />
+                Enviar email ({selectedRows.length})
+              </button>
+              <button
+                type="button"
+                onClick={() => handleExportCrm(selectedRows)}
+                className="flex h-7.5 items-center gap-1.5 whitespace-nowrap rounded-lg border-[0.7px] border-[rgba(25,54,63,0.2)] bg-white px-2.5 font-inter text-[11px] font-medium tracking-[-0.44px] text-[#19363F] transition-colors hover:bg-[rgba(25,54,63,0.04)]"
+              >
+                <DownloadIcon />
+                Exportar para CRM ({selectedRows.length})
+              </button>
+            </div>
           )}
           getRowId={getRowId}
           enablePagination
-          // Swept, the rows are every match and DataTable pages them itself. Sort and
-          // search stay manual in both modes: the sweep already asked the server.
+          // Swept, the rows are every match and DataTable pages them itself. Sort stays
+          // manual in both modes — the sweep already asked the server — and so does the
+          // search box: it is matched in `rows` above, not by DataTable.
           manualPagination={!refined}
           manualSorting
           manualFiltering
@@ -897,11 +1046,13 @@ const UsersTablePanel = () => {
         />
 
         <PanelNote className="mt-2">
-          La búsqueda de /users mira correo y nombre de usuario; el dashboard original busca además
-          por wallet, signer y handle. Correo, membresía, KYC y Safe no ordenan porque el endpoint
-          no acepta esas columnas.{" "}
+          La búsqueda busca el texto exacto en correo, nombre, usuario, handle de X, teléfono, Privy
+          ID y las tres wallets (Safe, firmante y Solana); las dos últimas son columnas ocultas en
+          el menú de columnas. No usa la búsqueda de /users, que es aproximada y con un correo
+          completo devuelve casi a todo el mundo. Correo, membresía, KYC y Safe no ordenan porque el
+          endpoint no acepta esas columnas.{" "}
           {refined
-            ? "Con un filtro puesto, /users no sabe filtrar por él, así que la tabla lee todos los usuarios de la búsqueda y filtra aquí: el recuento es exacto y la exportación baja todos los que cumplen, no solo esta página. Si marcas filas, exporta solo esas."
+            ? "Con una búsqueda o un filtro puesto, /users no sabe hacerlo por sí mismo, así que la tabla lee todos los usuarios y filtra aquí: el recuento es exacto y la exportación baja todos los que cumplen, no solo esta página. Si marcas filas, exporta solo esas."
             : `La exportación baja la página que estás viendo, no ${
                 total === null ? "la lista entera" : `las ${total} filas`
               } — sube a 200 por página si necesitas menos tiradas. Si marcas filas, exporta solo esas, y la selección vive dentro de la página: al cambiar de página el navegador ya no tiene esas filas, así que marca y exporta página a página.`}{" "}
@@ -917,10 +1068,16 @@ const UsersTablePanel = () => {
           y se cruzan por Privy ID, correo o wallet: son el dato en vivo, así que el estado de
           membresía también sale de ahí cuando lo hay, y Cerebro solo cubre a quien la app no tiene.
           «Final membresía» es la próxima renovación, o el día que termina si va a cancelar. «Última
-          renovación» solo se registra desde el 10/11/2026. Una membresía activa cuya renovación cae
-          en los próximos {RENEWAL_WINDOW_DAYS} días sale «en renovación», y si la fecha ya pasó sin
-          que el backend registre el cobro, «no renovado»: el backend la sigue dando por activa, así
-          que lo deducimos de la fecha. Las dos tienen su propia opción en el filtro de membresía.
+          renovación» solo se registra desde el 10/11/2026, así que «sin registro» no significa que
+          no haya pagado nunca. Una membresía activa cuya renovación cae en los próximos{" "}
+          {RENEWAL_WINDOW_DAYS} días sale «en renovación», y si la fecha ya pasó sin que el backend
+          registre el cobro, «no renovado»: el backend la sigue dando por activa, así que lo
+          deducimos de la fecha. Las altas manuales no se renuevan solas: en los últimos{" "}
+          {RENEWAL_WINDOW_DAYS} días salen «caduca pronto», y pasada la fecha «caducada», porque la
+          app ya les pide mejorar el plan aunque el backend siga diciendo activa. Un founder que
+          conserva el NFT es «founder · permanente»: su plan no caduca y su fecha no se muestra; si
+          transfiere el NFT, vuelve a contar la fecha. Pulsa «¿Qué significa cada filtro?» para ver
+          cada estado explicado.
         </PanelNote>
       </QueryState>
 
@@ -955,8 +1112,15 @@ const UsersTablePanel = () => {
       >
         {exporting && (
           <CrmExportDrawer
+            key={exporting.id}
             founderIndex={founderIndex}
             foundersStatus={foundersStatus}
+            tableQuery={{
+              filters,
+              search: search || undefined,
+              scope: scope === "inactive" ? "inactive" : undefined,
+            }}
+            selectedIds={exporting.selectedIds}
             onClose={handleClose}
           />
         )}
@@ -975,10 +1139,13 @@ const UsersTablePanel = () => {
           // to one account and none of them should carry over to the next.
           <UserDetailDrawer
             key={selected.privyId}
-            user={selected}
+            user={selectedUser}
             founder={selectedFounder}
             foundersStatus={foundersStatus}
             foundersError={founders.error}
+            appUser={selectedApp}
+            appStatus={appStatus}
+            appError={app.error}
             onClose={handleClose}
           />
         )}

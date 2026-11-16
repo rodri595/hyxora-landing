@@ -11,9 +11,11 @@ import { cn } from "@/utils";
 import { formatDateTime, formatNumber, timeAgo, toDayString } from "@/utils/format";
 import QueryState from "../../../shared/QueryState";
 import { firstNumber } from "../../../shared/aggregate";
+import { PAYMENT_TYPES, planLabel } from "../appUsers";
 import { DetailField, EmptyBlock, Footnote, MembershipBadge, SectionHeader } from "./parts";
 
 const INTERVALS = { month: "mensual", year: "anual" };
+const ACCESS_MODES = { full: "completo" };
 
 const formatDay = (value) => {
   if (!value) return null;
@@ -145,6 +147,155 @@ const Timeline = ({ events }) => (
 );
 
 /**
+ * Every membership field app-api's `/admin/users` holds for this user, as it is right
+ * now. The lifecycle dates only render when set: on a normal member they are all
+ * null, and eight dashes would bury the four fields that matter.
+ *
+ * @param {Object} props
+ * @param {import("@/hooks/appApi/types").AppApiUser} props.app
+ */
+const LiveFields = ({ app, holdsFounderNft = false }) => {
+  // A founder with the NFT has a permanent plan; the backend still says `active` and
+  // still carries a renew date, which means nothing here.
+  const permanent = holdsFounderNft && app.membershipStatus === "active";
+  const renewIn = daysUntil(app.membershipRenewDate);
+  const memberDays = daysUntil(app.membershipStartDate);
+  const lifecycle = [
+    ["Cancelación pedida", app.cancelRequestedAt],
+    ["Cancelación efectiva", app.cancelEffectiveDate],
+    ["Cancelación finalizada", app.cancellationFinalizedAt],
+    ["Límite para renovar", app.renewalDeadlineAt],
+    ["Suscripción terminada", app.subscriptionEndedAt],
+  ].filter(([, value]) => value);
+
+  return (
+    <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+      <DetailField
+        label="Plan"
+        value={app.membership ? planLabel(app.membership.tier || app.membership.name) : null}
+      />
+      <DetailField label="Estado">
+        <MembershipBadge status={permanent ? "founder" : app.membershipStatus} />
+      </DetailField>
+      {/* A trial is stored as manual + toCancel, so «cancelará» above is the trial
+          running out, not a paying client leaving — this field says which. */}
+      <DetailField
+        label="Prueba gratuita"
+        value={app.isTrial === true ? "Sí" : app.isTrial === false ? "No" : null}
+        hint={app.isTrial === true ? "Termina en «Cancelación efectiva»" : undefined}
+      />
+      <DetailField
+        label="Cobro"
+        value={PAYMENT_TYPES[app.membershipPaymentType] ?? app.membershipPaymentType}
+      />
+      <DetailField
+        label="Periodicidad"
+        value={INTERVALS[app.membershipInterval] ?? app.membershipInterval}
+      />
+      <DetailField
+        label="Miembro desde"
+        value={formatDay(app.membershipStartDate)}
+        hint={
+          memberDays !== null && memberDays <= 0 ? `${formatNumber(-memberDays)} días` : undefined
+        }
+      />
+      <DetailField
+        label={
+          permanent
+            ? "Fin"
+            : app.membershipPaymentType === "manual"
+              ? "Fin (manual)"
+              : "Renovación / fin"
+        }
+        value={permanent ? "Permanente" : formatDay(app.membershipRenewDate)}
+        hint={
+          permanent ? (
+            "Mientras conserve el NFT founder"
+          ) : renewIn !== null && renewIn < 0 ? (
+            <span className="text-amber-700">
+              {app.membershipPaymentType === "manual" ? "caducó" : "vencida"}{" "}
+              {relativeDays(renewIn)}
+            </span>
+          ) : (
+            relativeDays(renewIn)
+          )
+        }
+      />
+      <DetailField
+        label="Última renovación"
+        value={formatDay(app.membershipLastRenewedAt)}
+        hint={app.membershipLastRenewedAt ? undefined : "Solo se registra desde el 10/11/2026"}
+      />
+      <DetailField
+        label="Acceso"
+        value={ACCESS_MODES[app.membershipAccessMode] ?? app.membershipAccessMode}
+      />
+      {lifecycle.map(([label, value]) => (
+        <DetailField
+          key={label}
+          label={label}
+          value={formatDay(value)}
+          hint={relativeDays(daysUntil(value))}
+        />
+      ))}
+      {app.downgradeRequestedAt && (
+        <DetailField
+          label="Bajada de plan pedida"
+          value={formatDay(app.downgradeRequestedAt)}
+          hint={app.downgradeTarget ? `a ${planLabel(app.downgradeTarget)}` : undefined}
+        />
+      )}
+    </div>
+  );
+};
+
+/**
+ * app-api's answer for this user, above Cerebro's. Its own loading and error states,
+ * because the two come from different services: a Cerebro outage must not hide the
+ * live membership, nor the reverse.
+ *
+ * @param {Object} props
+ * @param {{ user: import("@/hooks/appApi/types").AppApiUser | null, status: "loading" | "error" | "ready", error?: Error | null }} props.live
+ */
+const LiveBlock = ({ live }) => {
+  const { user: app, status, error, holdsFounderNft } = live;
+
+  return (
+    <section className="flex flex-col gap-3">
+      <SectionHeader
+        title="Ahora en la app"
+        subtitle="Lo que tiene el backend de la app en este momento. Lo de abajo es la copia de Cerebro y su historial, que puede ir hasta 2 horas por detrás."
+        aside={
+          app?.updatedAt && (
+            <span
+              className="font-inter text-[10px] tracking-[-0.4px] text-[rgba(25,54,63,0.68)]"
+              title={`Ficha actualizada ${formatDateTime(app.updatedAt)}`}
+            >
+              Actualizada {timeAgo(app.updatedAt)}
+            </span>
+          )
+        }
+      />
+      {app ? (
+        <LiveFields app={app} holdsFounderNft={holdsFounderNft} />
+      ) : status === "loading" ? (
+        <EmptyBlock>Cargando la lista de usuarios de la app…</EmptyBlock>
+      ) : status === "error" ? (
+        <p className="rounded-lg border-[0.7px] border-amber-200 bg-amber-50/60 px-2.5 py-2 font-inter text-[11px] leading-[1.5] tracking-[-0.4px] text-amber-700">
+          No se pudo leer /admin/users de la app{error?.message ? ` (${error.message})` : ""}. Lo de
+          abajo es la copia de Cerebro.
+        </p>
+      ) : (
+        <EmptyBlock>
+          Este usuario no aparece en la lista de la app: ni por Privy ID, ni por correo, ni por
+          wallet.
+        </EmptyBlock>
+      )}
+    </section>
+  );
+};
+
+/**
  * One user's membership: where it stands, and every transition that got it there.
  *
  * Rendered in two places, both of which only ask for it on demand: the drawer's
@@ -160,8 +311,22 @@ const Timeline = ({ events }) => (
  *
  * @param {Object} props
  * @param {import("@tanstack/react-query").UseQueryResult<import("@/hooks/cerebro/types").UserMembership>} props.query
+ * @param {{ user: Object | null, status: "loading" | "error" | "ready", error?: Error | null }} [props.live]
+ * app-api's record, shown first. The drawer passes it; the pipeline row doesn't.
  */
-const MembresiaTab = ({ query }) => {
+const MembresiaTab = ({ query, live }) => (
+  <>
+    {live && (
+      <div className="px-4 pt-4">
+        <LiveBlock live={live} />
+      </div>
+    )}
+    <CerebroMembership query={query} isCopy={Boolean(live)} />
+  </>
+);
+
+/** Cerebro's `/users/{privyId}/membership`: its copy of the state, and the history. */
+const CerebroMembership = ({ query, isCopy }) => {
   const { data, isLoading, error } = query;
   const user = data?.user ?? {};
   const events = Array.isArray(data?.events) ? data.events : [];
@@ -178,7 +343,7 @@ const MembresiaTab = ({ query }) => {
       <div className="flex flex-col gap-6 p-4">
         <section className="flex flex-col gap-3">
           <SectionHeader
-            title="Estado de la membresía"
+            title={isCopy ? "Copia en Cerebro" : "Estado de la membresía"}
             aside={
               user.detailsSyncedAt && (
                 <span

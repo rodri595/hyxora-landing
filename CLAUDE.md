@@ -147,14 +147,27 @@ guide to it, kept here unedited so it diffs cleanly against their next version.
 >   signer. Both tabs sit outside the drawer's Cerebro `QueryState`, so a
 >   `/users/{privyId}` outage doesn't hide a phone number, nor the reverse.
 >
->   «Exportar para CRM» (`usuarios/CrmExportDrawer`) also reads **app-api's
->   `/admin/users`** via `useGetAppUsers`, for the profile name, `country` and the
->   live membership block (start, last renewal, interval, payment type, cancel date)
->   that hyxora-app-backend #206 added *there* — not on Cerebro, whose `sync-users`
->   copy doesn't carry them. Joined in `usuarios/appUsers.js` by `privyId`, then
->   email, then Safe/signer. The proxy projects those rows down to the export's fields,
->   so `kycId`, `refCode` and the rest never reach the browser. When asking for a
->   `/users` field, say **Cerebro** or **app-api** — "`/admin/users`" is both.
+>   The table, its drawer and «Exportar para CRM» also read **app-api's
+>   `/admin/users`** via `useGetAppUsers` — one request for every account — for the
+>   profile name, `country`, the Solana wallet and the live membership block that
+>   hyxora-app-backend #206 added *there*. Joined in `usuarios/appUsers.js` by
+>   `privyId`, then email, then Safe/signer, and **app-api wins**: it is live, Cerebro's
+>   copy lags up to two hours and is only the fallback (plan and status included). The
+>   drawer re-applies `APP_OWNED_KEYS` after `readUserRecord`, whose detail record
+>   would otherwise put the stale copy back; «Membresía» leads with an «Ahora en la
+>   app» block on its own loading state. Two readings are made on top of the raw
+>   status in `appUsers.js`: a **manual** membership past its renew date is «caducada»
+>   (nothing moves a manual date, and the app already asks the user to upgrade, though
+>   the backend still says `active`) — **except a founder holding the NFT**
+>   (`nftBalance > 0`), whose plan is permanent: «founder · permanente», no end date.
+>   Only once the NFT is transferred does the date count again. app-api's **`isTrial`** (#223) is deliberately
+>   *not* a status: a trial is stored as manual + `toCancel`, and it gets its own
+>   «Prueba» column and filter («de pago» / «en prueba gratuita») so the client can
+>   drop free users in one click while the badge keeps what the backend says. The CRM
+>   export takes the same sentence: it can send everyone, the table's audience (its
+>   search, scope and filters over the full sweep) or the ticked rows. The proxy projects rows to the fields those
+>   three render, so `kycId`, `refCode` and the role never reach the browser. When
+>   asking for a `/users` field, say **Cerebro** or **app-api** — "`/admin/users`" is both.
 >
 > - **Planes** — the first four panels are the plan *schema* (pricing, fee
 >   matrix, whitelists). Cerebro serves no schema at all; its `/fees/*` report
@@ -325,7 +338,12 @@ table's state as «Muéstrame [todos los usuarios] con plan [Premium], ordenados
 [más dinero dentro]», every blue word a menu, plus suggested questions underneath.
 It looks like an AI prompt on purpose and is not one: nothing is typed or
 interpreted, and each word maps to one thing in `usuarios/userQuery.js`. Scope and
-order are `/users` params. The filters (plan, membresía, forma de pago, KYC, saldo, margen, NFT,
+order are `/users` params. **The search box is not** — never send `/users?search=`:
+Cerebro ported the old `userSearchFilter`, which ORs a `word_similarity > 0.3` fuzzy
+match onto the LIKE, and a full email like `ana.1@hotmail.com` clears 0.3 against
+every `…@gmail.com`, so typing a whole address returned nearly everyone. A search
+sweeps like a filter and `matchesSearch` matches exact text over email, names (app-api
+only), phone, Privy ID and all three wallets. The filters (plan, membresía, forma de pago, KYC, saldo, margen, NFT,
 registro) are not — `/users` has no such params — so any filter switches the table
 from one server page to `useGetUsersSweep`, the same full sweep the activation
 funnel uses, filtered client-side. Filtering the one page the browser holds would

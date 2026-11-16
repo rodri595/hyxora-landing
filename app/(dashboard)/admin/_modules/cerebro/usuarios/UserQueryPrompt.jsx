@@ -6,6 +6,7 @@ import { haptic } from "@/utils/haptics";
 import { useEffect, useState } from "react";
 import {
   FILTERS,
+  FILTER_GROUPS,
   SCOPE_OPTIONS,
   SORT_OPTIONS,
   SUGGESTIONS,
@@ -67,6 +68,16 @@ const Check = () => (
 const TOKEN =
   "inline-flex items-center gap-1 rounded-md px-1.5 py-px font-medium text-blue-700 bg-blue-50 ring-1 ring-inset ring-blue-200 transition-[background-color,color,scale] duration-150 hover:bg-blue-100 active:scale-[0.97] focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-blue-500";
 
+const CHIP_BASE =
+  "inline-flex min-w-0 items-center gap-1 rounded-lg border-[0.7px] px-2 py-1 font-inter text-[11px] font-medium tracking-[-0.44px] transition-[background-color,border-color,color,scale] duration-150 active:scale-[0.97] focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-blue-500";
+
+/** The trigger's look per variant: a word in the sentence, or a filter-bar chip. */
+const TRIGGERS = {
+  token: TOKEN,
+  chip: `${CHIP_BASE} border-[rgba(25,54,63,0.2)] bg-white text-[rgba(25,54,63,0.85)] hover:border-blue-200 hover:bg-blue-50 hover:text-blue-700`,
+  chipActive: `${CHIP_BASE} border-blue-300 bg-blue-50 text-blue-700 hover:bg-blue-100`,
+};
+
 /**
  * One clickable word in the sentence, with the options it can take.
  *
@@ -78,9 +89,10 @@ const TOKEN =
  * @param {Object} props
  * @param {string} props.label
  * @param {string} props.ariaLabel
- * @param {Array<{ heading?: string, options: Array<{ id: string, label: string, selected?: boolean, onSelect: () => void }> }>} props.sections
+ * @param {Array<{ heading?: string, options: Array<{ id: string, label: string, hint?: string, selected?: boolean, onSelect: () => void }> }>} props.sections
+ * An option's `hint` renders as a second, smaller line: what choosing it means.
  * @param {() => void} [props.onRemove] Adds a × and a «Quitar filtro» row.
- * @param {"token" | "add"} [props.variant]
+ * @param {"token" | "chip" | "chipActive"} [props.variant]
  */
 const TokenMenu = ({ label, ariaLabel, sections, onRemove, variant = "token" }) => {
   const [open, setOpen] = useState(false);
@@ -100,24 +112,27 @@ const TokenMenu = ({ label, ariaLabel, sections, onRemove, variant = "token" }) 
     setOpen(false);
   };
 
+  const isChip = variant === "chip" || variant === "chipActive";
+
   return (
-    <span className="relative inline-flex items-center align-baseline">
+    <span className="relative inline-flex min-w-0 items-center align-baseline">
       <button
         type="button"
         aria-label={ariaLabel}
         aria-expanded={open}
         onClick={() => setOpen((value) => !value)}
-        className={cn(
-          variant === "add"
-            ? "inline-flex items-center gap-1 rounded-md border border-dashed border-[rgba(25,54,63,0.3)] px-1.5 font-medium text-[rgba(25,54,63,0.75)] transition-[background-color,color,scale] duration-150 hover:bg-[rgba(25,54,63,0.04)] hover:text-[#19363F] active:scale-[0.97]"
-            : TOKEN,
-          onRemove && "rounded-r-none pr-1"
-        )}
+        className={cn(TRIGGERS[variant] ?? TOKEN, onRemove && "rounded-r-none pr-1")}
       >
-        <span key={label} className="transition-opacity duration-200 starting:opacity-0">
+        <span
+          key={label}
+          className={cn(
+            "transition-opacity duration-200 starting:opacity-0",
+            isChip && "min-w-0 max-w-[15rem] truncate"
+          )}
+        >
           {label}
         </span>
-        {variant === "token" && <Chevron />}
+        <Chevron />
       </button>
 
       {onRemove && (
@@ -128,7 +143,12 @@ const TokenMenu = ({ label, ariaLabel, sections, onRemove, variant = "token" }) 
             haptic("selection");
             onRemove();
           }}
-          className="inline-flex items-center self-stretch rounded-r-md bg-blue-50 px-1 text-blue-700 ring-1 ring-inset ring-blue-200 transition-colors hover:bg-blue-100"
+          className={cn(
+            "inline-flex items-center self-stretch bg-blue-50 text-blue-700 transition-colors hover:bg-blue-100",
+            isChip
+              ? "rounded-r-lg border-[0.7px] border-l-0 border-blue-300 px-1.5"
+              : "rounded-r-md px-1 ring-1 ring-inset ring-blue-200"
+          )}
         >
           <svg width="8" height="8" viewBox="0 0 10 10" fill="none" aria-hidden="true">
             <path
@@ -157,7 +177,7 @@ const TokenMenu = ({ label, ariaLabel, sections, onRemove, variant = "token" }) 
               otherwise take the wheel for the page. */}
           <div
             data-lenis-prevent
-            className="absolute left-0 top-[calc(100%+6px)] z-40 flex max-h-72 w-max min-w-44 max-w-[min(18rem,calc(100vw-2rem))] origin-top-left flex-col overflow-y-auto overscroll-contain rounded-[10px] border-[0.7px] border-[rgba(25,54,63,0.1)] bg-white p-1 shadow-[0px_6px_20px_0px_rgba(25,54,63,0.12)] transition-[opacity,scale] duration-150 ease-[cubic-bezier(0.23,1,0.32,1)] starting:scale-95 starting:opacity-0"
+            className="absolute left-0 top-[calc(100%+6px)] z-40 flex max-h-80 w-max min-w-44 max-w-[min(20rem,calc(100vw-2rem))] origin-top-left flex-col overflow-y-auto overscroll-contain rounded-[10px] border-[0.7px] border-[rgba(25,54,63,0.1)] bg-white p-1 shadow-[0px_6px_20px_0px_rgba(25,54,63,0.12)] transition-[opacity,scale] duration-150 ease-[cubic-bezier(0.23,1,0.32,1)] starting:scale-95 starting:opacity-0"
           >
             {sections.map((section, index) => (
               <div
@@ -178,13 +198,20 @@ const TokenMenu = ({ label, ariaLabel, sections, onRemove, variant = "token" }) 
                     aria-pressed={Boolean(option.selected)}
                     onClick={() => choose(option.onSelect)}
                     className={cn(
-                      "flex w-full items-center gap-2 rounded-[7px] px-2.5 py-1.5 text-left font-inter text-[12px] font-medium tracking-[-0.44px] text-[#19363F] transition-colors hover:bg-[rgba(25,54,63,0.05)]",
+                      "flex w-full items-start gap-2 rounded-[7px] px-2.5 py-1.5 text-left font-inter text-[12px] font-medium tracking-[-0.44px] text-[#19363F] transition-colors hover:bg-[rgba(25,54,63,0.05)]",
                       option.selected && "bg-blue-50 text-blue-700 hover:bg-blue-50"
                     )}
                   >
-                    <span className="min-w-0 truncate">{option.label}</span>
+                    <span className="flex min-w-0 flex-col gap-0.5">
+                      <span className="truncate">{option.label}</span>
+                      {option.hint && (
+                        <span className="whitespace-normal text-[10px] font-normal leading-[1.4] tracking-[-0.3px] text-[rgba(25,54,63,0.68)]">
+                          {option.hint}
+                        </span>
+                      )}
+                    </span>
                     {option.selected && (
-                      <span className="ml-auto shrink-0">
+                      <span className="ml-auto mt-0.5 shrink-0">
                         <Check />
                       </span>
                     )}
@@ -206,6 +233,119 @@ const TokenMenu = ({ label, ariaLabel, sections, onRemove, variant = "token" }) 
         </>
       )}
     </span>
+  );
+};
+
+/**
+ * One dropdown per filter, laid out by section, so a filter is one click away instead
+ * of a scroll through every option of every filter in a single menu. A chosen filter
+ * turns blue, shows its answer and gains a ×; the sentence above reads the same state.
+ *
+ * @param {Object} props
+ * @param {Record<string, string>} props.filters
+ * @param {(id: string, value: string | null) => void} props.onSet
+ */
+const FilterBar = ({ filters, onSet }) => (
+  <div className="flex flex-col gap-2">
+    {FILTER_GROUPS.map((group) => (
+      <div key={group.id} className="flex flex-wrap items-center gap-1.5">
+        <span className="w-[4.75rem] shrink-0 font-inter text-[10px] font-semibold uppercase tracking-[0.5px] text-[rgba(25,54,63,0.68)]">
+          {group.label}
+        </span>
+        {FILTERS.filter((filter) => filter.group === group.id).map((filter) => {
+          const value = filters[filter.id];
+          const chosen = value ? optionLabel(filter.id, value) : null;
+          return (
+            <TokenMenu
+              key={filter.id}
+              variant={value ? "chipActive" : "chip"}
+              label={chosen ? `${filter.label}: ${chosen}` : filter.label}
+              ariaLabel={chosen ? `${filter.label}: ${chosen}` : `Filtrar por ${filter.label}`}
+              onRemove={value ? () => onSet(filter.id, null) : undefined}
+              sections={[
+                {
+                  heading: filter.description,
+                  options: filter.options.map((option) => ({
+                    id: option.id,
+                    label: option.label,
+                    hint: option.hint,
+                    selected: option.id === value,
+                    onSelect: () => onSet(filter.id, option.id),
+                  })),
+                },
+              ]}
+            />
+          );
+        })}
+      </div>
+    ))}
+  </div>
+);
+
+/**
+ * «¿Qué significa cada filtro?» — every filter and every option, in words, by section.
+ * Folded by default: it is a reference you open once, not something to scroll past.
+ */
+const FilterGuide = () => {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <div className="flex flex-col gap-2">
+      <button
+        type="button"
+        aria-expanded={open}
+        onClick={() => setOpen((value) => !value)}
+        className="self-start rounded-md px-1 py-0.5 font-inter text-[11px] font-medium tracking-[-0.44px] text-[#2D68FF] transition-colors hover:bg-blue-50"
+      >
+        {open ? "Ocultar la guía de filtros" : "¿Qué significa cada filtro?"}
+      </button>
+
+      {open && (
+        <div className="grid gap-x-6 gap-y-5 rounded-lg bg-[rgba(25,54,63,0.03)] p-3 sm:grid-cols-2">
+          {FILTER_GROUPS.map((group) => (
+            <section key={group.id} className="flex min-w-0 flex-col gap-3">
+              <h4 className="font-inter text-[10px] font-semibold uppercase tracking-[0.5px] text-[rgba(25,54,63,0.68)]">
+                {group.label}
+              </h4>
+              {FILTERS.filter((filter) => filter.group === group.id).map((filter) => {
+                const explained = filter.options.filter((option) => option.hint);
+                const plain = filter.options.filter((option) => !option.hint);
+                return (
+                  <div key={filter.id} className="flex flex-col gap-1">
+                    <p className="font-inter text-[12px] font-semibold tracking-[-0.44px] text-[#19363F]">
+                      {filter.label}
+                    </p>
+                    <p className="font-inter text-[11px] leading-[1.45] tracking-[-0.3px] text-[rgba(25,54,63,0.75)]">
+                      {filter.description}
+                    </p>
+                    {explained.length > 0 && (
+                      <dl className="mt-0.5 grid grid-cols-[minmax(0,auto)_1fr] gap-x-3 gap-y-1">
+                        {explained.map((option) => (
+                          <div key={option.id} className="contents">
+                            <dt className="font-inter text-[11px] font-medium tracking-[-0.3px] text-blue-700">
+                              {option.label}
+                            </dt>
+                            <dd className="font-inter text-[11px] leading-[1.45] tracking-[-0.3px] text-[rgba(25,54,63,0.75)]">
+                              {option.hint}
+                            </dd>
+                          </div>
+                        ))}
+                      </dl>
+                    )}
+                    {plain.length > 0 && (
+                      <p className="font-inter text-[11px] tracking-[-0.3px] text-[rgba(25,54,63,0.68)]">
+                        {explained.length > 0 ? "También: " : "Opciones: "}
+                        {plain.map((option) => option.label).join(" · ")}
+                      </p>
+                    )}
+                  </div>
+                );
+              })}
+            </section>
+          ))}
+        </div>
+      )}
+    </div>
   );
 };
 
@@ -247,7 +387,6 @@ const UserQueryPrompt = ({
   result,
 }) => {
   const activeFilters = FILTERS.filter((filter) => filters[filter.id]);
-  const inactiveFilters = FILTERS.filter((filter) => !filters[filter.id]);
   const refined = activeFilters.length > 0;
 
   const setFilter = (id, value) => {
@@ -356,24 +495,6 @@ const UserQueryPrompt = ({
               ]}
             />
 
-            {inactiveFilters.length > 0 && (
-              <>
-                {" "}
-                <TokenMenu
-                  variant="add"
-                  label="+ filtro"
-                  ariaLabel="Añadir filtro"
-                  sections={inactiveFilters.map((filter) => ({
-                    heading: filter.label,
-                    options: filter.options.map((option) => ({
-                      id: option.id,
-                      label: option.label,
-                      onSelect: () => setFilter(filter.id, option.id),
-                    })),
-                  }))}
-                />
-              </>
-            )}
             <span
               aria-hidden="true"
               className="ml-1 inline-block h-[15px] w-[1.5px] translate-y-[3px] bg-[#2D68FF] animate-pulse motion-reduce:animate-none"
@@ -424,6 +545,11 @@ const UserQueryPrompt = ({
             </button>
           )}
         </div>
+      </div>
+
+      <div className="flex flex-col gap-2 rounded-xl border-[0.7px] border-[rgba(25,54,63,0.08)] px-3 py-2.5">
+        <FilterBar filters={filters} onSet={setFilter} />
+        <FilterGuide />
       </div>
 
       <div className="flex flex-wrap items-center gap-1.5">

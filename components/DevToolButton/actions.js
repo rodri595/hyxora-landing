@@ -3,6 +3,7 @@ import { useCheckSystemHealth } from "@/hooks/devtools/useCheckSystemHealth";
 import { useClearQueryCache } from "@/hooks/devtools/useClearQueryCache";
 import { useCopyPrivyToken } from "@/hooks/devtools/useCopyPrivyToken";
 import { useEnvironmentReport } from "@/hooks/devtools/useEnvironmentReport";
+import { useInspectAppUsers } from "@/hooks/devtools/useInspectAppUsers";
 import { usePingServices } from "@/hooks/devtools/usePingServices";
 import { PROBE_TARGETS, useRateLimitProbe } from "@/hooks/devtools/useRateLimitProbe";
 import { useRenewSession } from "@/hooks/devtools/useRenewSession";
@@ -152,6 +153,27 @@ export const DEV_ACTION_GROUPS = [
         path: "/system/health",
         note: "Un 200 confirma que este Privy ID está en la allowlist de admin.",
         useAction: useCheckSystemHealth,
+      },
+      {
+        id: "app-users",
+        label: "Usuarios de app-api",
+        detail: "Lo que lee el export CRM",
+        method: "GET",
+        path: (values) => `/api/app-api/admin/users?limit=${values.limit}&offset=0`,
+        note: "Pasa por nuestro proxy, así que llega recortado a los campos del export (sin KYC ni refCode). Mira la petición en la pestaña Red.",
+        runLabel: "Pedir usuarios",
+        hints: { 404: "El proxy no permite esta ruta — falta «admin/users» en ALLOWED_PATHS" },
+        controls: [
+          {
+            id: "limit",
+            type: "number",
+            label: "Usuarios",
+            min: 1,
+            max: 1000,
+            default: "20",
+          },
+        ],
+        useAction: useInspectAppUsers,
       },
     ],
   },

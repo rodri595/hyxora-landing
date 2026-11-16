@@ -89,7 +89,8 @@
  * @property {string} [firstName]
  * @property {string} [lastName]
  * @property {string | null} [name]    `firstName + lastName`; null without a profile.
- * @property {{ _id: string, name: string, tier?: string } | null} [membership]
+ * @property {{ _id: string, name: string, tier?: string } | null} [membership] `name` is
+ * "PREMIUM" / "BASIC" / "NFT Founder HYXORA"; `tier` is in the spec but never sent.
  * @property {string} [membershipStatus]
  * @property {string} [membershipStartDate]
  * @property {string} [membershipRenewDate] End of the current period.
@@ -97,7 +98,20 @@
  * @property {"month" | "year" | null} [membershipInterval]
  * @property {"stripe" | "onchain" | "manual"} [membershipPaymentType]
  * @property {string | null} [cancelEffectiveDate] Only set while `toCancel`.
+ * @property {string} [username]
+ * @property {string} [solana]         Base58 wallet — the one Cerebro's `/users` never sends.
+ * @property {string} [membershipAccessMode] "full" on every row seen so far.
+ * @property {boolean} [isTrial]       Free trial: `MembershipService.isTrial`'s fingerprint
+ * (manual + toCancel + start = cancel request = confirmation). hyxora-app-backend #223;
+ * absent before it merges.
+ * @property {string | null} [renewalDeadlineAt]
+ * @property {string | null} [subscriptionEndedAt]
+ * @property {string | null} [cancelRequestedAt]
+ * @property {string | null} [cancellationFinalizedAt]
+ * @property {string | null} [downgradeRequestedAt]
+ * @property {string | null} [downgradeTarget]
  * @property {string} [createdAt]
+ * @property {string} [updatedAt]
  */
 
 export {};

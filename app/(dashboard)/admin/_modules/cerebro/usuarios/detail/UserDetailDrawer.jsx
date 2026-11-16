@@ -13,6 +13,7 @@ import { formatUsd, shortenHash, timeAgo } from "@/utils/format";
 import { useEffect, useMemo, useState } from "react";
 import { RefreshButton } from "../../../shared/Panel";
 import QueryState from "../../../shared/QueryState";
+import { APP_OWNED_KEYS, holdsFounderNft } from "../appUsers";
 import { TX_PAGE_SIZE } from "../constants";
 import CarteraTab from "./CarteraTab";
 import FoundersTab from "./FoundersTab";
@@ -96,9 +97,22 @@ const displayName = (user) =>
  * @param {import("../founders").FounderMatch | null} props.founder
  * @param {"loading" | "error" | "ready"} props.foundersStatus
  * @param {Error | null} [props.foundersError]
+ * @param {import("@/hooks/appApi/types").AppApiUser | null} [props.appUser] This user's
+ * record in app-api's `/admin/users`, the live membership the «Membresía» tab leads with.
+ * @param {"loading" | "error" | "ready"} [props.appStatus]
+ * @param {Error | null} [props.appError]
  * @param {() => void} props.onClose
  */
-const UserDetailDrawer = ({ user, founder, foundersStatus, foundersError, onClose }) => {
+const UserDetailDrawer = ({
+  user,
+  founder,
+  foundersStatus,
+  foundersError,
+  appUser = null,
+  appStatus = "ready",
+  appError = null,
+  onClose,
+}) => {
   const [tab, setTab] = useState("resumen");
   // The composer mounts on first visit and then only hides, so a half-written email
   // survives a look at another tab — reading the account while writing to it is the
@@ -146,7 +160,23 @@ const UserDetailDrawer = ({ user, founder, foundersStatus, foundersError, onClos
   // port like every other response here, and a port arrives with the spellings its
   // query produced — a `solana_address` spread over a component reading
   // `solanaAddress` renders a dash that reads as "no Solana wallet".
-  const merged = useMemo(() => readUserRecord(user, data), [user, data]);
+  //
+  // Then app-api goes back on top. `readUserRecord` lets the detail record win, and
+  // that record is Cerebro's copy — up to two hours behind the live values the row
+  // already carries. The status always comes from the row, because that is where the
+  // «en renovación» / «no renovado» reading was made.
+  const merged = useMemo(() => {
+    const record = readUserRecord(user, data);
+    const live = user.appMatch
+      ? Object.fromEntries(APP_OWNED_KEYS.map((key) => [key, user[key]]))
+      : {};
+    return {
+      ...record,
+      ...live,
+      membershipStatus: user.membershipStatus ?? record.membershipStatus,
+      solanaAddress: record.solanaAddress ?? appUser?.solana ?? null,
+    };
+  }, [user, data, appUser]);
 
   const tvl = useMemo(() => readTvl(data?.portfolio?.tvl), [data]);
   const margin = useMemo(() => readMargin(data?.portfolio?.margin), [data]);
@@ -189,7 +219,7 @@ const UserDetailDrawer = ({ user, founder, foundersStatus, foundersError, onClos
 
           <div className="flex flex-wrap items-center gap-1.5">
             <span className="font-inter text-[10px] font-medium tracking-[-0.4px] text-[rgba(25,54,63,0.75)]">
-              {cerebroPlanLabel(merged.plan)}
+              {merged.planName ?? cerebroPlanLabel(merged.plan)}
             </span>
             <NftChip balance={merged.nftBalance} tokenIds={merged.nftTokenIds} />
             <KycBadge status={merged.kycStatus} />
@@ -266,7 +296,16 @@ const UserDetailDrawer = ({ user, founder, foundersStatus, foundersError, onClos
         ) : tab === "membresia" ? (
           // Outside the detail gate, like «Web founders»: a /users/{privyId} outage
           // must not hide a timeline that comes from another endpoint.
-          <MembresiaTab query={membership} />
+          <MembresiaTab
+            query={membership}
+            live={{
+              user: appUser,
+              status: appStatus,
+              error: appError,
+              // app-api doesn't know about the NFT; Cerebro's row does.
+              holdsFounderNft: holdsFounderNft(merged),
+            }}
+          />
         ) : (
           <QueryState isLoading={detail.isLoading} error={detail.error}>
             {tab === "resumen" && (

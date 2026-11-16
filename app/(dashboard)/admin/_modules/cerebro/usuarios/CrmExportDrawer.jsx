@@ -2,11 +2,7 @@
 
 import Checkbox from "@/components/Checkbox";
 import DataTable from "@/components/DataTable";
-import {
-  cerebroMembershipGroup,
-  cerebroMembershipKey,
-  cerebroMembershipLabel,
-} from "@/constants/cerebro";
+import { cerebroMembershipGroup, cerebroMembershipLabel } from "@/constants/cerebro";
 import { useGetAppUsers } from "@/hooks/appApi/useGetAppUsers";
 import { SWEEP_MAX_PAGES, useGetUsersSweep } from "@/hooks/cerebro/useGetUsersSweep";
 import { cn } from "@/utils";
@@ -15,8 +11,17 @@ import { useMemo, useState } from "react";
 import * as XLSX from "xlsx";
 import QueryState from "../../shared/QueryState";
 import { firstNumber } from "../../shared/aggregate";
-import { INTERVALS, PAYMENT_TYPES, daysUntil, indexAppUsers, withAppFields } from "./appUsers";
+import {
+  INTERVALS,
+  PAYMENT_TYPES,
+  countryName,
+  daysUntil,
+  indexAppUsers,
+  periodEnd,
+  withAppFields,
+} from "./appUsers";
 import { withFounderFields } from "./founders";
+import { matchesFilters, matchesSearch, optionLabel } from "./userQuery";
 
 /** Wide enough for the column list and a preview of five or six columns. */
 export const CRM_EXPORT_DRAWER_WIDTH = 640;
@@ -44,17 +49,6 @@ const toDate = (value) => {
   return date ? dateFormat.format(date) : null;
 };
 
-/**
- * When the paid period ends: the cancellation date for someone on their way out,
- * the renewal date for everyone else, nothing for an account with no membership.
- */
-export const periodEnd = (row) => {
-  const status = cerebroMembershipKey(row.membershipStatus);
-  if (status === "none") return null;
-  if (status === "toCancel" && row.cancelEffectiveDate) return row.cancelEffectiveDate;
-  return row.membershipRenewDate;
-};
-
 const capitalise = (text) => (text ? text[0].toUpperCase() + text.slice(1) : text);
 
 /**
@@ -66,19 +60,6 @@ const LEAD_SCORE = {
   pipeline: "Cliente",
   lapsed: "Cliente Perdido",
   none: "Lead frío",
-};
-
-const regionNames = new Intl.DisplayNames(["es"], { type: "region" });
-
-/** "ES" → "España". Anything that isn't a two-letter code goes out as it came. */
-export const countryName = (code) => {
-  if (!code) return null;
-  if (!/^[A-Z]{2}$/.test(code)) return code;
-  try {
-    return regionNames.of(code) ?? code;
-  } catch {
-    return code;
-  }
 };
 
 /**
@@ -117,9 +98,15 @@ const CRM_FIELDS = [
   {
     id: "leadScore",
     header: "Lead scoring",
-    hint: "Membresía activa, en renovación o pendiente de cancelar → Cliente · no renovada, cancelada o suspendida → Cliente Perdido · sin membresía → Lead frío",
+    hint: "En prueba gratuita → Lead caliente · membresía activa, en renovación o pendiente de cancelar → Cliente · no renovada, caducada, cancelada o suspendida → Cliente Perdido · sin membresía → Lead frío",
     on: true,
-    value: (row) => LEAD_SCORE[cerebroMembershipGroup(row.membershipStatus)] ?? null,
+    // A free trial is stored as manual + toCancel, which would read «Cliente»: trying
+    // the product without paying is a warm lead, not a client. Pending the client's
+    // confirmation, like the rest of this mapping.
+    value: (row) =>
+      row.isTrial === true
+        ? "Lead caliente"
+        : (LEAD_SCORE[cerebroMembershipGroup(row.membershipStatus)] ?? null),
   },
   {
     id: "email",
@@ -178,6 +165,14 @@ const CRM_FIELDS = [
     hint: "Activa, cancelará, suspendida, sin membresía…",
     on: false,
     value: (row) => capitalise(cerebroMembershipLabel(row.membershipStatus)),
+  },
+  {
+    id: "trial",
+    header: "Prueba gratuita",
+    hint: "Sí si está en la prueba gratuita; vacío si la app aún no lo dice",
+    source: "isTrial",
+    on: false,
+    value: (row) => (row.isTrial === true ? "Sí" : row.isTrial === false ? "No" : null),
   },
   {
     id: "renewed",
@@ -322,45 +317,101 @@ const StepNumber = ({ children }) => (
  * A preview of the first rows sits under the list, built from the real data with the
  * names as typed, so a mismatch is visible before the file exists.
  *
+ * It exports one of three audiences: everyone, the users the table's sentence is
+ * showing (its search, scope and filters, applied to the full sweep exactly as the
+ * table applies them), or the rows ticked in the table. It opens on the narrowest one
+ * that exists, because that is what the click that opened it was about.
+ *
  * @param {Object} props
  * @param {import("./founders").FounderIndex} props.founderIndex
  * @param {"loading" | "error" | "ready"} props.foundersStatus
+ * @param {{ filters: Record<string, string>, search?: string, scope?: "inactive" }} [props.tableQuery]
+ * @param {string[] | null} [props.selectedIds] Privy IDs of the ticked rows.
  * @param {() => void} props.onClose
  */
-const CrmExportDrawer = ({ founderIndex, foundersStatus, onClose }) => {
+const CrmExportDrawer = ({
+  founderIndex,
+  foundersStatus,
+  tableQuery = { filters: {} },
+  selectedIds = null,
+  onClose,
+}) => {
   const [config, setConfig] = useState(loadConfig);
-  const sweep = useGetUsersSweep({ sort: "created", dir: "desc" });
+  const tableRefined =
+    Object.keys(tableQuery.filters ?? {}).length > 0 ||
+    Boolean(tableQuery.search) ||
+    Boolean(tableQuery.scope);
+  const [who, setWho] = useState(selectedIds?.length ? "selected" : tableRefined ? "table" : "all");
+
+  // The table's scope is a /users param, so that audience sweeps with it; its search is
+  // matched here, as in the table, never sent as `/users?search=` (fuzzy, see
+  // `matchesSearch`).
+  const sweep = useGetUsersSweep(
+    who === "table"
+      ? { sort: "created", dir: "desc", scope: tableQuery.scope }
+      : { sort: "created", dir: "desc" }
+  );
   const app = useGetAppUsers();
 
-  const users = useMemo(() => {
+  const allUsers = useMemo(() => {
     const appIndex = indexAppUsers(app.data?.users);
     return (sweep.data?.rows ?? []).map((user) =>
       withAppFields(appIndex, withFounderFields(founderIndex, user))
     );
   }, [sweep.data, app.data, founderIndex]);
 
+  // Joined before filtering, as in the table: the filters read app-api's fields.
+  const users = useMemo(() => {
+    if (who === "selected") {
+      const ids = new Set(selectedIds ?? []);
+      return allUsers.filter((user) => ids.has(user.privyId));
+    }
+    if (who === "table") {
+      return allUsers.filter(
+        (user) => matchesFilters(user, tableQuery.filters) && matchesSearch(user, tableQuery.search)
+      );
+    }
+    return allUsers;
+  }, [who, allUsers, selectedIds, tableQuery.filters, tableQuery.search]);
+
+  const audiences = [
+    { id: "all", label: "Todos los usuarios" },
+    tableRefined && { id: "table", label: "Los de la tabla" },
+    selectedIds?.length && { id: "selected", label: `Los ${selectedIds.length} marcados` },
+  ].filter(Boolean);
+
+  const tableSummary = [
+    tableQuery.search && `«${tableQuery.search}»`,
+    tableQuery.scope === "inactive" && "inactivos",
+    ...Object.entries(tableQuery.filters ?? {}).map(([id, value]) => optionLabel(id, value)),
+  ]
+    .filter(Boolean)
+    .join(", ");
+
   const appMatched = users.filter((user) => user.appMatch).length;
 
+  // Read over everyone, not the audience: whether the server sends a field at all
+  // doesn't depend on which handful of users is being exported.
   const pending = useMemo(() => {
     const ids = new Set();
-    if (users.length === 0) return ids;
+    if (allUsers.length === 0) return ids;
     for (const field of CRM_FIELDS) {
-      if (field.source && !users.some((user) => user[field.source] != null)) ids.add(field.id);
+      if (field.source && !allUsers.some((user) => user[field.source] != null)) ids.add(field.id);
     }
     return ids;
-  }, [users]);
+  }, [allUsers]);
 
   const examples = useMemo(() => {
     const out = {};
     for (const field of CRM_FIELDS) {
-      const user = users.find((row) => {
+      const user = allUsers.find((row) => {
         const value = field.value(row);
         return value !== null && value !== undefined && value !== "";
       });
       if (user) out[field.id] = field.value(user);
     }
     return out;
-  }, [users]);
+  }, [allUsers]);
 
   const chosen = CRM_FIELDS.filter((field) => config.fields[field.id].on);
   const problems = headerProblems(chosen, config.fields);
@@ -396,7 +447,8 @@ const CrmExportDrawer = ({ founderIndex, foundersStatus, onClose }) => {
     .slice(0, PREVIEW_ROWS)
     .map((user) => Object.fromEntries(chosen.map((field) => [field.id, field.value(user)])));
 
-  const ready = users.length > 0 && foundersStatus !== "loading" && !app.isLoading;
+  const ready =
+    !sweep.isLoading && users.length > 0 && foundersStatus !== "loading" && !app.isLoading;
   const canDownload = ready && chosen.length > 0 && !hasProblems;
 
   const handleDownload = () => {
@@ -421,10 +473,35 @@ const CrmExportDrawer = ({ founderIndex, foundersStatus, onClose }) => {
           <p className="font-inter text-[11px] tabular-nums tracking-[-0.44px] text-[rgba(25,54,63,0.75)]">
             {sweep.isLoading
               ? "Leyendo todos los usuarios…"
-              : `${formatNumber(users.length)} usuarios · todos, no solo la página de la tabla${
-                  app.data ? ` · ${formatNumber(appMatched)} con ficha en la app` : ""
-                }`}
+              : `${formatNumber(users.length)} usuarios${
+                  who === "all" ? " · todos, no solo la página de la tabla" : ""
+                }${app.data ? ` · ${formatNumber(appMatched)} con ficha en la app` : ""}`}
           </p>
+          {audiences.length > 1 && (
+            <div className="mt-1.5 flex flex-wrap gap-1.5">
+              {audiences.map((option) => (
+                <button
+                  key={option.id}
+                  type="button"
+                  aria-pressed={who === option.id}
+                  onClick={() => setWho(option.id)}
+                  className={cn(
+                    "h-6.5 rounded-lg border-[0.7px] px-2 font-inter text-[11px] font-medium tracking-[-0.44px] transition-colors",
+                    who === option.id
+                      ? "border-[#19363F] bg-[#19363F] text-white"
+                      : "border-[rgba(25,54,63,0.2)] bg-white text-[rgba(25,54,63,0.85)] hover:border-[rgba(25,54,63,0.4)]"
+                  )}
+                >
+                  {option.label}
+                </button>
+              ))}
+            </div>
+          )}
+          {who === "table" && tableSummary && (
+            <p className="font-inter text-[10px] leading-[1.4] tracking-[-0.36px] text-[rgba(25,54,63,0.68)]">
+              Filtros de la tabla: {tableSummary}
+            </p>
+          )}
         </div>
 
         <button
@@ -638,7 +715,9 @@ const CrmExportDrawer = ({ founderIndex, foundersStatus, onClose }) => {
             ? "No se pudieron leer los usuarios"
             : ready
               ? `Descargar ${formatNumber(users.length)} usuarios · ${chosen.length} columnas`
-              : "Preparando…"}
+              : sweep.data && users.length === 0
+                ? "Nadie que exportar con esta selección"
+                : "Preparando…"}
         </button>
       </div>
     </div>

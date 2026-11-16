@@ -424,11 +424,23 @@ export const cerebroPlanLabel = (plan) =>
  */
 export const cerebroMembershipStatuses = {
   active: { label: "activa", tone: "good", group: "active" },
+  founder: {
+    label: "founder · permanente",
+    tone: "good",
+    group: "active",
+    hint: "Tiene el NFT founder: su plan no caduca mientras lo conserve",
+  },
   renewing: {
     label: "en renovación",
     tone: "warning",
     group: "active",
     hint: "Activa; la renovación cae en los próximos días",
+  },
+  expiring: {
+    label: "caduca pronto",
+    tone: "warning",
+    group: "active",
+    hint: "Membresía manual: no se renueva sola y su fecha de fin cae en los próximos días",
   },
   toCancel: { label: "cancelará", tone: "warning", group: "pipeline" },
   toDowngrade: { label: "bajará de plan", tone: "warning", group: "pipeline" },
@@ -438,6 +450,12 @@ export const cerebroMembershipStatuses = {
     tone: "bad",
     group: "lapsed",
     hint: "El backend la da por activa, pero la fecha de renovación ya pasó sin cobro",
+  },
+  expired: {
+    label: "caducada",
+    tone: "bad",
+    group: "lapsed",
+    hint: "Membresía manual con la fecha de fin pasada: la app ya le pide mejorar el plan, aunque el backend siga diciendo activa",
   },
   suspended: { label: "suspendida", tone: "bad", group: "lapsed" },
   cancelled: { label: "cancelada", tone: "bad", group: "lapsed" },
