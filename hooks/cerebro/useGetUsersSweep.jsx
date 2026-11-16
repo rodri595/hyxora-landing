@@ -25,6 +25,12 @@ const count = (value) => {
  * request as "the end" is what made the first version of the activation funnel read
  * one page and report a fifth of it without a word.
  *
+ * `total` is not a stop condition either. `/users` has been seen answering with a
+ * `total` equal to the page it came with (see `resolveTotal` in UsersTablePanel), and
+ * trusting it ended every sweep at the first 200 rows — the CRM export, the filtered
+ * table and the activation funnel all read 200 of ~545 accounts. One extra empty
+ * request is the price of never believing it.
+ *
  * @param {Object} [params]
  * @param {"created" | "tvl" | "cost" | "fees" | "net" | "plan"} [params.sort]
  * @param {"asc" | "desc"} [params.dir]
@@ -45,13 +51,18 @@ export const fetchAllUsers = async ({ sort = "tvl", dir = "desc", search, scope 
 
     const body = response?.data ?? {};
     const users = Array.isArray(body.users) ? body.users : [];
+    const before = byId.size;
     for (const user of users) byId.set(user?.privyId ?? `row-${byId.size}`, user);
 
     const reported = count(body.total);
     if (reported !== null) total = reported;
 
     if (users.length === 0) break;
-    if (total !== null && byId.size >= total) break;
+    // A page of nobody new means the server is repeating itself, not that it ended.
+    if (byId.size === before) {
+      truncated = true;
+      break;
+    }
 
     page += 1;
     if (page > SWEEP_MAX_PAGES) truncated = true;

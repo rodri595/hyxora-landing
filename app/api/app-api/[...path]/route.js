@@ -34,7 +34,48 @@ const ALLOWED_PATHS = new Set([
   "admin/tokens", // token whitelist
   "admin/vaults", // vault whitelist
   "admin/gas-limits", // per-chain gas ceilings (chain, maxGasGwei)
+  "admin/users", // names + live membership fields, for the CRM export (projected below)
 ]);
+
+/**
+ * The only `/admin/users` fields the browser gets. The row also carries `kycId`,
+ * `kycStatus`, `solana`, `refCode` and the role; the CRM export needs none of them,
+ * so they stop here rather than riding along to every admin's devtools.
+ */
+const USER_FIELDS = [
+  "_id",
+  "privyId",
+  "email",
+  "country",
+  "wallet",
+  "signer",
+  "firstName",
+  "lastName",
+  "name",
+  "membership",
+  "membershipStatus",
+  "membershipStartDate",
+  "membershipRenewDate",
+  "membershipLastRenewedAt",
+  "membershipInterval",
+  "membershipPaymentType",
+  "cancelEffectiveDate",
+  "createdAt",
+];
+
+const projectUsers = (body) => {
+  const parsed = JSON.parse(body);
+  const users = Array.isArray(parsed?.data?.users) ? parsed.data.users : [];
+  return {
+    ...parsed,
+    data: {
+      ...parsed.data,
+      users: users.map((user) =>
+        Object.fromEntries(USER_FIELDS.filter((key) => key in user).map((key) => [key, user[key]]))
+      ),
+    },
+  };
+};
 
 /**
  * app-api answers errors as `{ message }` (and on staging bundles a stack trace).
@@ -89,6 +130,14 @@ export async function GET(request, { params }) {
 
   const body = await upstream.text();
   if (!upstream.ok) return forwardError(body, upstream.status);
+
+  if (endpoint === "admin/users") {
+    try {
+      return Response.json(projectUsers(body));
+    } catch {
+      return Response.json({ error: "app-api devolvió una respuesta ilegible." }, { status: 502 });
+    }
+  }
 
   return new Response(body, {
     status: 200,

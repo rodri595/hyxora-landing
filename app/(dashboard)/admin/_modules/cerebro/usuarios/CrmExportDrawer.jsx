@@ -3,10 +3,11 @@
 import Checkbox from "@/components/Checkbox";
 import DataTable from "@/components/DataTable";
 import {
+  cerebroMembershipGroup,
   cerebroMembershipKey,
   cerebroMembershipLabel,
-  cerebroPlanLabel,
 } from "@/constants/cerebro";
+import { useGetAppUsers } from "@/hooks/appApi/useGetAppUsers";
 import { SWEEP_MAX_PAGES, useGetUsersSweep } from "@/hooks/cerebro/useGetUsersSweep";
 import { cn } from "@/utils";
 import { formatNumber, toDayString } from "@/utils/format";
@@ -14,12 +15,15 @@ import { useMemo, useState } from "react";
 import * as XLSX from "xlsx";
 import QueryState from "../../shared/QueryState";
 import { firstNumber } from "../../shared/aggregate";
+import { indexAppUsers, withAppFields } from "./appUsers";
 import { withFounderFields } from "./founders";
 
 /** Wide enough for the column list and a preview of five or six columns. */
 export const CRM_EXPORT_DRAWER_WIDTH = 640;
 
-const STORAGE_KEY = "hx-crm-export-v1";
+// v2: defaults renamed to the client's Clientify headers; a v1 save would bring
+// the old names back.
+const STORAGE_KEY = "hx-crm-export-v2";
 const PREVIEW_ROWS = 5;
 const DAY_MS = 24 * 60 * 60 * 1000;
 
@@ -63,23 +67,74 @@ const periodEnd = (row) => {
 const capitalise = (text) => (text ? text[0].toUpperCase() + text.slice(1) : text);
 
 /**
- * Every column the CRM file can carry. `header` is the default name, which the
- * person exporting can rename to whatever their CRM calls it. `source` marks a
- * field `/users` does not send yet: while no row carries it the column is offered
- * but flagged as arriving empty, and the flag goes away on its own once it lands.
+ * Clientify's «Lead scoring» values, picked from the membership group. Only three
+ * of its ten apply to what we know; the rest are sales stages the CRM owns.
+ */
+const LEAD_SCORE = {
+  active: "Cliente",
+  pipeline: "Cliente",
+  lapsed: "Cliente Perdido",
+  none: "Lead frío",
+};
+
+const PAYMENT_TYPES = { stripe: "Stripe", onchain: "On-chain", manual: "Manual" };
+
+const regionNames = new Intl.DisplayNames(["es"], { type: "region" });
+
+/** "ES" → "España". Anything that isn't a two-letter code goes out as it came. */
+const countryName = (code) => {
+  if (!code) return null;
+  if (!/^[A-Z]{2}$/.test(code)) return code;
+  try {
+    return regionNames.of(code) ?? code;
+  } catch {
+    return code;
+  }
+};
+
+/**
+ * Every column the CRM file can carry. `header` is the default name — the ones on
+ * by default are spelled exactly as the client's Clientify import lists them — and
+ * the person exporting can rename any of them. `source` marks a field that comes
+ * from app-api's `/admin/users`: if no row carries it the column is flagged as
+ * arriving empty, which is what a production backend without #206 looks like.
  */
 const CRM_FIELDS = [
   {
-    id: "name",
+    id: "firstName",
     header: "Nombre",
-    hint: "Nombre completo; de momento solo lo tiene quien compró en la web founders",
+    hint: "Del perfil de la app. Si no está separado, va aquí el nombre completo; si no tiene ninguno, el que puso al comprar en la web founders",
+    source: "firstName",
     on: true,
-    // `name` is the full name requested from Cerebro in docs/cerebro-users-membership-fields.md.
-    value: (row) => row.name || row.founderName,
+    // Without the split, the whole name goes here rather than nowhere.
+    value: (row) => row.firstName || (row.lastName ? null : row.fullName || row.founderName),
+  },
+  {
+    id: "lastName",
+    header: "Apellidos",
+    hint: "Del perfil de la app",
+    source: "lastName",
+    on: true,
+    value: (row) => row.lastName,
+  },
+  {
+    id: "country",
+    header: "País 1",
+    hint: "Del perfil de la app, con su nombre en español",
+    source: "country",
+    on: true,
+    value: (row) => countryName(row.country),
+  },
+  {
+    id: "leadScore",
+    header: "Lead scoring",
+    hint: "Membresía activa o pendiente de cancelar → Cliente · cancelada o suspendida → Cliente Perdido · sin membresía → Lead frío",
+    on: true,
+    value: (row) => LEAD_SCORE[cerebroMembershipGroup(row.membershipStatus)] ?? null,
   },
   {
     id: "email",
-    header: "Correo",
+    header: "Correo electrónico",
     hint: "Con esto el CRM reconoce a los contactos que ya tiene",
     on: true,
     value: (row) => row.email || row.founderEmail,
@@ -87,59 +142,76 @@ const CRM_FIELDS = [
   {
     id: "phone",
     header: "Teléfono",
-    hint: "De la web founders",
+    hint: "De la web founders: solo quien tiene cuenta allí",
     on: true,
     value: (row) => row.founderPhone,
   },
   {
-    id: "created",
-    header: "Fecha de creación",
-    hint: "Día en que se registró",
+    id: "countryList",
+    header: "País desplegable",
+    hint: "El mismo país, para el desplegable del CRM. Si el CRM lo pide como código (ES), usa «Código de país» en su lugar",
+    source: "country",
     on: true,
-    value: (row) => toDate(row.createdAt),
+    value: (row) => countryName(row.country),
   },
   {
     id: "plan",
-    header: "Plan",
+    header: "Membresía Tipo",
+    hint: "El plan que tiene ahora",
     on: true,
-    value: (row) => (row.plan ? cerebroPlanLabel(row.plan) : null),
-  },
-  {
-    id: "status",
-    header: "Membresía",
-    hint: "Activa, cancelará, suspendida, sin membresía…",
-    on: true,
-    value: (row) => capitalise(cerebroMembershipLabel(row.membershipStatus)),
+    value: (row) => row.planName,
   },
   {
     id: "since",
-    header: "Miembro desde",
-    hint: "Cuándo empezó su membresía",
+    header: "Inicio Membresía",
+    hint: "Cuándo empezó su membresía actual",
     source: "membershipStartDate",
     on: true,
     value: (row) => toDate(row.membershipStartDate),
   },
   {
-    id: "renewed",
-    header: "Última renovación",
-    hint: "Último cobro de la membresía",
-    source: "membershipLastRenewedAt",
-    on: true,
-    value: (row) => toDate(row.membershipLastRenewedAt),
-  },
-  {
     id: "until",
-    header: "Vence",
-    hint: "Próxima renovación, o fin si va a cancelar",
+    header: "Final Membresía",
+    hint: "Próxima renovación, o el día que termina si va a cancelar",
     on: true,
     value: (row) => toDate(periodEnd(row)),
   },
   {
+    id: "fullName",
+    header: "Nombre completo",
+    hint: "Nombre y apellidos juntos",
+    on: false,
+    value: (row) => row.fullName || row.founderName,
+  },
+  {
+    id: "status",
+    header: "Estado membresía",
+    hint: "Activa, cancelará, suspendida, sin membresía…",
+    on: false,
+    value: (row) => capitalise(cerebroMembershipLabel(row.membershipStatus)),
+  },
+  {
+    id: "renewed",
+    header: "Última renovación",
+    // No `source`: app-api sends the field, it is just null for everyone who hasn't
+    // paid since #206 — there is no Stripe backfill.
+    hint: "Último cobro. Solo se registra desde el 10/11/2026: quien no ha pagado desde entonces sale vacío",
+    on: false,
+    value: (row) => toDate(row.membershipLastRenewedAt),
+  },
+  {
     id: "daysLeft",
     header: "Días restantes",
-    hint: "Días hasta «Vence»; negativo si ya pasó",
-    on: true,
+    hint: "Días hasta «Final Membresía»; negativo si ya pasó. Cambia cada día",
+    on: false,
     value: (row) => daysUntil(periodEnd(row)),
+  },
+  {
+    id: "created",
+    header: "Fecha de registro",
+    hint: "Día en que se registró en la app",
+    on: false,
+    value: (row) => toDate(row.createdAt),
   },
   {
     id: "interval",
@@ -152,9 +224,10 @@ const CRM_FIELDS = [
   {
     id: "paymentType",
     header: "Forma de pago",
+    hint: "Stripe, on-chain o manual",
     source: "membershipPaymentType",
     on: false,
-    value: (row) => row.membershipPaymentType,
+    value: (row) => PAYMENT_TYPES[row.membershipPaymentType] ?? row.membershipPaymentType ?? null,
   },
   {
     id: "username",
@@ -176,6 +249,14 @@ const CRM_FIELDS = [
     hint: "Identificador interno del usuario",
     on: false,
     value: (row) => row.privyId,
+  },
+  {
+    id: "countryCode",
+    header: "Código de país",
+    hint: "El país como código (ES, MX…), por si el CRM lo pide así",
+    source: "country",
+    on: false,
+    value: (row) => row.country,
   },
 ];
 
@@ -245,7 +326,8 @@ const StepNumber = ({ children }) => (
  *
  * The table's own export downloads the raw API row — internal field names, English
  * status codes, one page at a time — which is fine for us and useless for an import.
- * This one sweeps every account (the same `/users` sweep the filters use), renders
+ * This one sweeps every account (the same `/users` sweep the filters use), lays
+ * app-api's `/admin/users` over it for names and live membership dates, renders
  * each field the way a person reads it, and lets whoever exports name each column
  * exactly as their CRM does, so the import's column matching pairs them on its own.
  * A preview of the first rows sits under the list, built from the real data with the
@@ -259,11 +341,16 @@ const StepNumber = ({ children }) => (
 const CrmExportDrawer = ({ founderIndex, foundersStatus, onClose }) => {
   const [config, setConfig] = useState(loadConfig);
   const sweep = useGetUsersSweep({ sort: "created", dir: "desc" });
+  const app = useGetAppUsers();
 
-  const users = useMemo(
-    () => (sweep.data?.rows ?? []).map((user) => withFounderFields(founderIndex, user)),
-    [sweep.data, founderIndex]
-  );
+  const users = useMemo(() => {
+    const appIndex = indexAppUsers(app.data?.users);
+    return (sweep.data?.rows ?? []).map((user) =>
+      withAppFields(appIndex, withFounderFields(founderIndex, user))
+    );
+  }, [sweep.data, app.data, founderIndex]);
+
+  const appMatched = users.filter((user) => user.appMatch).length;
 
   const pending = useMemo(() => {
     const ids = new Set();
@@ -320,7 +407,7 @@ const CrmExportDrawer = ({ founderIndex, foundersStatus, onClose }) => {
     .slice(0, PREVIEW_ROWS)
     .map((user) => Object.fromEntries(chosen.map((field) => [field.id, field.value(user)])));
 
-  const ready = users.length > 0 && foundersStatus !== "loading";
+  const ready = users.length > 0 && foundersStatus !== "loading" && !app.isLoading;
   const canDownload = ready && chosen.length > 0 && !hasProblems;
 
   const handleDownload = () => {
@@ -345,7 +432,9 @@ const CrmExportDrawer = ({ founderIndex, foundersStatus, onClose }) => {
           <p className="font-inter text-[11px] tabular-nums tracking-[-0.44px] text-[rgba(25,54,63,0.75)]">
             {sweep.isLoading
               ? "Leyendo todos los usuarios…"
-              : `${formatNumber(users.length)} usuarios · todos, no solo la página de la tabla`}
+              : `${formatNumber(users.length)} usuarios · todos, no solo la página de la tabla${
+                  app.data ? ` · ${formatNumber(appMatched)} con ficha en la app` : ""
+                }`}
           </p>
         </div>
 
@@ -462,13 +551,26 @@ const CrmExportDrawer = ({ founderIndex, foundersStatus, onClose }) => {
 
           {foundersStatus === "error" && (
             <p className="rounded-lg border-[0.7px] border-amber-200 bg-amber-50/60 px-2.5 py-2 font-inter text-[11px] leading-[1.5] tracking-[-0.4px] text-amber-700">
-              No se pudo leer la web founders: nombre y teléfono saldrán vacíos.
+              No se pudo leer la web founders: el teléfono saldrá vacío.
+            </p>
+          )}
+          {app.error && (
+            <p className="rounded-lg border-[0.7px] border-amber-200 bg-amber-50/60 px-2.5 py-2 font-inter text-[11px] leading-[1.5] tracking-[-0.4px] text-amber-700">
+              No se pudo leer la lista de usuarios de la app ({app.error.message}): nombre,
+              apellidos e inicio de membresía saldrán vacíos, y la membresía será la copia de
+              Cerebro, que puede ir hasta 2 horas por detrás.
+            </p>
+          )}
+          {app.data?.truncated && (
+            <p className="rounded-lg border-[0.7px] border-amber-200 bg-amber-50/60 px-2.5 py-2 font-inter text-[11px] leading-[1.5] tracking-[-0.4px] text-amber-700">
+              La lista de la app paró en {formatNumber(app.data.users.length)} usuarios: a quien
+              falte le saldrán vacíos el nombre y las fechas.
             </p>
           )}
           {sweep.data?.truncated && (
             <p className="rounded-lg border-[0.7px] border-amber-200 bg-amber-50/60 px-2.5 py-2 font-inter text-[11px] leading-[1.5] tracking-[-0.4px] text-amber-700">
-              La lectura paró en {SWEEP_MAX_PAGES} páginas con {formatNumber(users.length)}{" "}
-              usuarios: puede faltar gente en el archivo.
+              La lectura de usuarios se cortó con {formatNumber(users.length)} (tope de{" "}
+              {SWEEP_MAX_PAGES} páginas o una página repetida): puede faltar gente en el archivo.
             </p>
           )}
 
@@ -529,7 +631,12 @@ const CrmExportDrawer = ({ founderIndex, foundersStatus, onClose }) => {
         )}
         {foundersStatus === "loading" && (
           <p className="font-inter text-[11px] tracking-[-0.4px] text-[rgba(25,54,63,0.75)]">
-            Cargando nombres y teléfonos de la web founders…
+            Cargando teléfonos de la web founders…
+          </p>
+        )}
+        {app.isLoading && (
+          <p className="font-inter text-[11px] tracking-[-0.4px] text-[rgba(25,54,63,0.75)]">
+            Cargando nombres y membresías de la app…
           </p>
         )}
         <button

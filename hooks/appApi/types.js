@@ -70,4 +70,34 @@
  * @property {string[]} [tags]
  */
 
+/**
+ * A `/admin/users` row as the proxy forwards it (KYC, referral and role fields are
+ * dropped server-side). Verified 2026-11-13 against the staging spec, after
+ * hyxora-app-backend #206; `privyId` and `country` added 2026-11-16. Join to
+ * Cerebro by `privyId`, then email, then wallet.
+ *
+ * A fully cancelled membership is **wiped**, so every `membership*` key is absent —
+ * read a missing key as "no membership", not as unknown.
+ *
+ * @typedef {Object} AppApiUser
+ * @property {string} _id
+ * @property {string} [privyId]        The DID Cerebro keys on.
+ * @property {string} email
+ * @property {string | null} [country] ISO code, e.g. "ES". Null when the profile has none.
+ * @property {string} wallet           The user's Safe — Cerebro's `safeAddress`.
+ * @property {string} signer           The EOA behind it — Cerebro's `signerAddress`.
+ * @property {string} [firstName]
+ * @property {string} [lastName]
+ * @property {string | null} [name]    `firstName + lastName`; null without a profile.
+ * @property {{ _id: string, name: string, tier?: string } | null} [membership]
+ * @property {string} [membershipStatus]
+ * @property {string} [membershipStartDate]
+ * @property {string} [membershipRenewDate] End of the current period.
+ * @property {string | null} [membershipLastRenewedAt] Go-forward only from #206.
+ * @property {"month" | "year" | null} [membershipInterval]
+ * @property {"stripe" | "onchain" | "manual"} [membershipPaymentType]
+ * @property {string | null} [cancelEffectiveDate] Only set while `toCancel`.
+ * @property {string} [createdAt]
+ */
+
 export {};

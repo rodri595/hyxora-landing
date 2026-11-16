@@ -147,6 +147,15 @@ guide to it, kept here unedited so it diffs cleanly against their next version.
 >   signer. Both tabs sit outside the drawer's Cerebro `QueryState`, so a
 >   `/users/{privyId}` outage doesn't hide a phone number, nor the reverse.
 >
+>   «Exportar para CRM» (`usuarios/CrmExportDrawer`) also reads **app-api's
+>   `/admin/users`** via `useGetAppUsers`, for the profile name, `country` and the
+>   live membership block (start, last renewal, interval, payment type, cancel date)
+>   that hyxora-app-backend #206 added *there* — not on Cerebro, whose `sync-users`
+>   copy doesn't carry them. Joined in `usuarios/appUsers.js` by `privyId`, then
+>   email, then Safe/signer. The proxy projects those rows down to the export's fields,
+>   so `kycId`, `refCode` and the rest never reach the browser. When asking for a
+>   `/users` field, say **Cerebro** or **app-api** — "`/admin/users`" is both.
+>
 > - **Planes** — the first four panels are the plan *schema* (pricing, fee
 >   matrix, whitelists). Cerebro serves no schema at all; its `/fees/*` report
 >   revenue *collected*. They read app-api via `appApiClient`.
@@ -224,6 +233,8 @@ counts users:
 - **Page until a page comes back empty, not until one comes back short.** The API is
   free to cap `pageSize` below what you asked for, and treating a 50-row answer to a
   200-row request as the end of the list reads a fifth of the table in silence.
+  Don't stop on `total` either: `/users` can send a `total` equal to the page it came
+  with, and believing it capped every sweep at 200 of ~545 until 2026-11-13.
 
 What it does say out loud: `warnings` for a sweep that stopped short or a population
 that disagrees with `/users/stats`, and `notes` for the activity proxy — `/users`

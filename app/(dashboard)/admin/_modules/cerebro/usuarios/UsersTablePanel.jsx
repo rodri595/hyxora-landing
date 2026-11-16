@@ -691,8 +691,8 @@ const UsersTablePanel = () => {
 
       {refined && sweep.data?.truncated && (
         <p className="mb-2 rounded-lg border-[0.7px] border-amber-200 bg-amber-50/60 px-2.5 py-2 font-inter text-[11px] leading-[1.5] tracking-[-0.4px] text-amber-700">
-          La lectura paró en {SWEEP_MAX_PAGES} páginas con {sweep.data.rows.length} usuarios: el
-          filtro solo ve esos, así que puede faltar gente.
+          La lectura de usuarios se cortó con {sweep.data.rows.length} (tope de {SWEEP_MAX_PAGES}{" "}
+          páginas o una página repetida): el filtro solo ve esos, así que puede faltar gente.
         </p>
       )}
 

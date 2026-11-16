@@ -328,6 +328,15 @@
  * @property {CerebroPlan} plan
  * @property {string | null} membershipStatus
  * @property {IsoDate | null} membershipRenewDate Undocumented.
+ * @property {string | null} [name] Full profile name, joined — no first/last split.
+ * Undocumented, seen 2026-11-16.
+ * @property {string | null} [country] ISO code. Undocumented, seen 2026-11-16.
+ * @property {IsoDate | null} [membershipStartDate] Undocumented, seen 2026-11-16.
+ * @property {IsoDate | null} [membershipLastRenewedAt] Go-forward only, no backfill.
+ * Undocumented, seen 2026-11-16.
+ * @property {string | null} [membershipPaymentType] "stripe" | "onchain" | "manual".
+ * @property {"month" | "year" | null} [membershipInterval]
+ * @property {IsoDate | null} [cancelEffectiveDate] Set only while `toCancel`.
  * @property {string | null} kycStatus "NOT_AVAILABLE" for anyone who never started it.
  * @property {IsoDate} createdAt
  * @property {string | null} safeAddress First Safe only — the same CREATE2 address

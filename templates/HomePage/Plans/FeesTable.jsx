@@ -1,10 +1,6 @@
 "use client";
 
-import {
-  useReactTable,
-  getCoreRowModel,
-  flexRender,
-} from "@tanstack/react-table";
+import { useReactTable, getCoreRowModel, flexRender } from "@tanstack/react-table";
 import { cn } from "@/utils";
 
 const feeGroups = [
@@ -37,12 +33,7 @@ const feeGroups = [
     rows: [
       {
         concept: "De Hyxora a Wallet",
-        values: [
-          { fee: "0.5 %", note: "Mín $1.15" },
-          "$0.30",
-          "$0.10",
-          "$0.30",
-        ],
+        values: [{ fee: "0.5 %", note: "Mín $1.15" }, "$0.30", "$0.10", "$0.30"],
       },
       { concept: "De Hyxora a Hyxora", values: ["0", "0", "0", "0"] },
     ],
@@ -63,8 +54,14 @@ const feeGroups = [
   {
     category: "Hyxora Plus",
     rows: [
-      { concept: "Entrada ETF", values: [null, "2 %", "1 %", "2 %"] },
-      { concept: "Salida ETF", values: [null, "1 %", "1 %", "1 %"] },
+      {
+        concept: "Entrada ETF",
+        values: [null, { fee: "2 %", note: "Máx 1 €" }, { fee: "1 %", note: "Máx 0.5 €" }, "2 %"],
+      },
+      {
+        concept: "Salida ETF",
+        values: [null, { fee: "1 %", note: "Máx 1 €" }, { fee: "1 %", note: "Máx 0.5 €" }, "1 %"],
+      },
     ],
   },
   {
@@ -95,7 +92,7 @@ const data = feeGroups.flatMap((group) =>
     premium: row.values[1],
     founders: row.values[2],
     pymes: row.values[3],
-  })),
+  }))
 );
 
 const FeeValue = ({ value }) => {
@@ -144,7 +141,7 @@ const getPinnedProps = (column) => {
       "sticky z-10",
       column.getIsLastColumn("left")
         ? "border-r-[0.7px] border-[rgba(25,54,63,0.08)] shadow-[6px_0_12px_-10px_rgba(25,54,63,0.25)]"
-        : "border-r-[0.7px] border-[rgba(25,54,63,0.05)]",
+        : "border-r-[0.7px] border-[rgba(25,54,63,0.05)]"
     ),
     style: {
       left: column.getStart("left"),
@@ -181,9 +178,7 @@ const FeesTable = () => {
             attribute would swallow vertical wheel and touch too, freezing the page
             for as long as the pointer sits over the table. Lenis' allowNestedScroll
             takes the sideways gesture on its own. */}
-        <div
-          className="overflow-x-auto rounded-xl border-[0.7px] border-[rgba(25,54,63,0.08)] bg-white shadow-[0px_1px_4px_0px_rgba(25,54,63,0.04)] scrollbar-thin scrollbar-thumb-[rgba(25,54,63,0.2)] scrollbar-thumb-rounded-lg"
-        >
+        <div className="overflow-x-auto rounded-xl border-[0.7px] border-[rgba(25,54,63,0.08)] bg-white shadow-[0px_1px_4px_0px_rgba(25,54,63,0.04)] scrollbar-thin scrollbar-thumb-[rgba(25,54,63,0.2)] scrollbar-thumb-rounded-lg">
           <table className="w-full border-separate border-spacing-0">
             <caption className="sr-only">Tabla de comisiones por plan</caption>
             <thead>
@@ -199,15 +194,10 @@ const FeesTable = () => {
                         className={cn(
                           pinned.className,
                           "bg-[#F5F7F9] px-3 py-2 font-inter font-medium text-[11px] tracking-[-0.44px] text-[rgba(25,54,63,0.55)] whitespace-nowrap select-none border-b-[0.7px] border-[rgba(25,54,63,0.08)]",
-                          header.column.getIsPinned()
-                            ? "text-left"
-                            : "text-center",
+                          header.column.getIsPinned() ? "text-left" : "text-center"
                         )}
                       >
-                        {flexRender(
-                          header.column.columnDef.header,
-                          header.getContext(),
-                        )}
+                        {flexRender(header.column.columnDef.header, header.getContext())}
                       </th>
                     );
                   })}
@@ -216,8 +206,7 @@ const FeesTable = () => {
             </thead>
             <tbody>
               {table.getRowModel().rows.map((row) => {
-                const { isGroupStart, isGroupEnd, categoryRowSpan, emphasis } =
-                  row.original;
+                const { isGroupStart, isGroupEnd, categoryRowSpan, emphasis } = row.original;
                 const isLastRow = row.index === data.length - 1;
                 const zebra = row.index % 2 === 0 ? "bg-white" : "bg-[#FBFCFC]";
                 const borderClass = isLastRow
@@ -233,8 +222,7 @@ const FeesTable = () => {
 
                       if (cell.column.id === "category") {
                         if (!isGroupStart) return null;
-                        const groupEndsAtLastRow =
-                          row.index + categoryRowSpan === data.length;
+                        const groupEndsAtLastRow = row.index + categoryRowSpan === data.length;
                         return (
                           <th
                             key={cell.id}
@@ -244,14 +232,10 @@ const FeesTable = () => {
                             className={cn(
                               pinned.className,
                               "bg-[#F5F7F9] px-3 py-2.5 text-left align-middle font-inter font-semibold text-[11px] tracking-[-0.44px] text-[#19363F] whitespace-nowrap",
-                              !groupEndsAtLastRow &&
-                                "border-b-[0.7px] border-[rgba(25,54,63,0.08)]",
+                              !groupEndsAtLastRow && "border-b-[0.7px] border-[rgba(25,54,63,0.08)]"
                             )}
                           >
-                            {flexRender(
-                              cell.column.columnDef.cell,
-                              cell.getContext(),
-                            )}
+                            {flexRender(cell.column.columnDef.cell, cell.getContext())}
                           </th>
                         );
                       }
@@ -265,13 +249,10 @@ const FeesTable = () => {
                               pinned.className,
                               zebra,
                               borderClass,
-                              "px-3 py-2.5 align-middle font-inter text-[12px] tracking-[-0.48px] text-[rgba(25,54,63,0.7)] whitespace-nowrap",
+                              "px-3 py-2.5 align-middle font-inter text-[12px] tracking-[-0.48px] text-[rgba(25,54,63,0.7)] whitespace-nowrap"
                             )}
                           >
-                            {flexRender(
-                              cell.column.columnDef.cell,
-                              cell.getContext(),
-                            )}
+                            {flexRender(cell.column.columnDef.cell, cell.getContext())}
                           </td>
                         );
                       }
@@ -284,13 +265,10 @@ const FeesTable = () => {
                             zebra,
                             borderClass,
                             "px-3 py-2.5 text-center align-middle font-inter text-[12px] tracking-[-0.48px] text-[#19363F] whitespace-nowrap",
-                            emphasis && "font-semibold",
+                            emphasis && "font-semibold"
                           )}
                         >
-                          {flexRender(
-                            cell.column.columnDef.cell,
-                            cell.getContext(),
-                          )}
+                          {flexRender(cell.column.columnDef.cell, cell.getContext())}
                         </td>
                       );
                     })}

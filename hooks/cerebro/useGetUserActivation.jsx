@@ -138,7 +138,7 @@ export const useGetUserActivation = () => {
       const warnings = [];
       if (sweep.truncated) {
         warnings.push(
-          `El barrido paró en ${SWEEP_MAX_PAGES} páginas con ${swept} usuarios leídos, así que los tramos cuentan de menos.`
+          `El barrido de /users se cortó con ${swept} usuarios leídos (tope de ${SWEEP_MAX_PAGES} páginas o una página repetida), así que los tramos cuentan de menos.`
         );
       }
       if (statsTotal !== null && swept !== statsTotal) {

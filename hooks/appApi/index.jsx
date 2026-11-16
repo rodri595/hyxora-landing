@@ -6,3 +6,5 @@ export { useGetWhitelistedTokens } from "./useGetWhitelistedTokens";
 export { useGetWhitelistedVaults } from "./useGetWhitelistedVaults";
 
 export { useGetGasLimits } from "./useGetGasLimits";
+
+export { useGetAppUsers } from "./useGetAppUsers";
