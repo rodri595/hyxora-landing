@@ -1,9 +1,10 @@
-import Header from "@/components/Header";
+import ChatWidget from "@/components/ChatWidget";
 import Footer from "@/components/Footer";
+import FreeTrialButton from "@/components/FreeTrialButton";
+import Header from "@/components/Header";
+import PurchaseNFTModal from "@/components/PurchaseNFTModal";
 import UpButton from "@/components/UpButton";
 import WhatsAppButton from "@/components/WhatsAppButton";
-import ChatWidget from "@/components/ChatWidget";
-import PurchaseNFTModal from "@/components/PurchaseNFTModal";
 
 const Layout = ({
   className,
@@ -25,6 +26,7 @@ const Layout = ({
       <UpButton />
       <WhatsAppButton />
       <ChatWidget />
+      <FreeTrialButton />
       <PurchaseNFTModal />
     </div>
   );
